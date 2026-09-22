@@ -8,5 +8,18 @@ env/
 .env
 .pytest_cache/
 .DS_Store
-data/insightflow.db
-data/*.db-journal
+
+# databases
+backend/data/insightflow.db
+backend/data/*.db-journal
+
+# node / next
+node_modules/
+web/.next/
+web/out/
+web/next-env.d.ts
+web/.turbo/
+web/.eslintcache
+
+# logs
+*.log
