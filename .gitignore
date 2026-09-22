@@ -20,6 +20,7 @@ web/out/
 web/next-env.d.ts
 web/.turbo/
 web/.eslintcache
+web/tsconfig.tsbuildinfo
 
 # logs
 *.log
