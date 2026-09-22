@@ -1,21 +1,28 @@
 services:
-  app:
-    build: .
-    image: insightflow-ai:latest
-    ports:
-      - "8501:8501"
+  backend:
+    build: ./backend
+    image: insightflow-backend:latest
     environment:
-      # Defaults are offline. Uncomment to enable an LLM:
-      # - LLM_PROVIDER=openai
-      # - OPENAI_API_KEY=${OPENAI_API_KEY}
-      # - LLM_MODEL=gpt-4o-mini
-      # Or point at Postgres:
-      # - DATABASE_URL=postgresql+psycopg2://insightflow:insightflow@postgres:5432/insightflow
       LLM_PROVIDER: offline
-    volumes:
-      - ./data:/app/data
+      CORS_ORIGINS: http://localhost:3000
+      # For Postgres, uncomment the postgres service below and set:
+      # DATABASE_URL: postgresql+psycopg2://insightflow:insightflow@postgres:5432/insightflow
+    ports:
+      - "8000:8000"
 
-  # Optional Postgres backend — enable with `docker compose --profile pg up`
+  web:
+    build: ./web
+    image: insightflow-web:latest
+    environment:
+      # Server-side proxy target — inside the docker network the backend is 'backend'
+      BACKEND_ORIGIN: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+  # Optional Postgres backend. Enable with:
+  #     docker compose --profile pg up
   postgres:
     profiles: ["pg"]
     image: postgres:16-alpine

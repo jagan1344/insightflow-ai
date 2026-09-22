@@ -1,95 +1,150 @@
 # InsightFlow AI
 
-**A confidence-aware, explainable, agentic AI platform for conversational business intelligence.**
+**A confidence-aware, explainable, agentic AI platform for conversational business
+intelligence — with real-time auto-updating dashboards.**
 
-Ask a natural-language business question — *"Why did revenue decrease in July?"* —
-and InsightFlow will plan the query, generate SQL, validate it, execute it,
-analyse the result (including root-cause contributor analysis for "why"
-questions), assemble an **evidence chain**, score its own **confidence** on
-seven signals, and then apply a decision policy — **Answer / Warn / Clarify /
-Abstain** — instead of always answering. The core principle: *a fluent answer is
-not necessarily a correct one*.
+Ask a business question in natural language and the system plans the query, generates
+SQL, validates it against a KPI/business semantic layer, executes it read-only,
+analyses the result (with root-cause contributor analysis for "why" questions), builds
+an evidence chain, scores its own confidence across seven signals, and applies a
+decision policy — **Answer / Warn / Clarify / Abstain** — so it can refuse rather than
+fluently mislead. Meanwhile the Live Dashboard subscribes to a WebSocket and
+**animates its charts in place whenever the underlying data changes — no page refresh.**
 
-The whole system runs **fully offline with no API key** using SQLite plus a
-deterministic rule-based NL-to-SQL path. An LLM (OpenAI or any
-OpenAI-compatible endpoint like Ollama / vLLM / LM Studio) is optional and
-pluggable.
+Runs **fully offline with no API key** using SQLite + a deterministic rule-based
+NL→SQL path. An OpenAI-compatible LLM (hosted or local) and PostgreSQL are optional
+upgrades.
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                              Orchestrator                                │
-│   question → generate → validate → execute → analyse → evidence →        │
-│              confidence → decision → explain + recommend                 │
-└─────────────────────────────────────────────────────────────────────────┘
-      │            │            │           │           │           │
-      ▼            ▼            ▼           ▼           ▼           ▼
-   NL→SQL      SQL rules     Read-only    Root-cause  Evidence   7-signal
-   (rule|LLM)  + schema      SQLAlchemy   contribs    chain      confidence
-                             (row-cap)                            +policy
-
-   Knowledge:  Schema introspection + KPI/business definitions (semantic layer)
+Browser ── Next.js 14 (landing + app)
+   │  REST   /api/ask, /api/dashboard, /api/seed, /api/simulate
+   │  WS     /ws   ← pushes dashboard updates when data changes
+   ▼
+FastAPI backend
+   ├── insightflow/         confidence-aware agentic pipeline
+   ├── api/realtime.py      change watcher + WebSocket broadcaster + simulator
+   └── SQLAlchemy → SQLite (default) | PostgreSQL (DATABASE_URL)
 ```
 
-Key modules:
+### Monorepo layout
 
-| module | responsibility |
-| --- | --- |
-| `insightflow/nlsql/generator.py` | rule-based + optional LLM NL→SQL, out-of-scope detection |
-| `insightflow/knowledge/kpi.py`   | KPI registry (revenue, orders, units, AOV, margin, discount rate) + synonyms |
-| `insightflow/validation/`        | SQL syntax/safety and KPI business-rule checks |
-| `insightflow/execution/`         | SQLAlchemy read-only executor, row-capped |
-| `insightflow/analysis/`          | summary + diagnostic contributor analysis, chart-spec |
-| `insightflow/reliability/`       | evidence chain, 7-signal confidence, decision policy |
-| `insightflow/explain/`           | evidence-grounded explanation + recommendation |
-| `insightflow/orchestrator.py`    | ties it all together, returns `InsightResponse` |
-
-> The orchestrator is a dependency-free ~150-line module. You can swap it for
-> **LangGraph** later without touching any other component.
+```
+insightflow-ai/
+├── backend/
+│   ├── insightflow/                # the pipeline (config, llm, knowledge/, nlsql/,
+│   │                                #   validation/, execution/, analysis/, reliability/,
+│   │                                #   explain/, memory, orchestrator)
+│   ├── api/
+│   │   ├── main.py                 # FastAPI app + WebSocket
+│   │   ├── schemas.py              # pydantic models
+│   │   ├── routes_chat.py          # POST /api/ask
+│   │   ├── routes_dashboard.py     # /api/dashboard, /api/seed, /api/simulate
+│   │   └── realtime.py             # watcher + broadcaster + simulator
+│   ├── data/
+│   │   ├── schema.sql
+│   │   ├── seed.py                 # deterministic seed (July revenue dip)
+│   │   └── simulate_stream.py      # standalone live-data generator
+│   ├── tests/test_pipeline.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── .env.example
+├── web/                            # Next.js 14 (App Router) + TypeScript + Tailwind
+│   ├── app/                        # / (landing) + /app (chat + live dashboard)
+│   ├── components/
+│   │   ├── landing/                # Navbar Hero TrustStrip Features HowItWorks
+│   │   │                            #   DashboardPreview CTA Footer
+│   │   ├── chat/                   # ChatPanel Message DecisionBadge ConfidenceBars
+│   │   │                            #   EvidenceChain ChartInline
+│   │   ├── dashboard/              # Dashboard KpiCard RevenueTrend RegionBar
+│   │   │                            #   CategoryDonut MarginBar LiveIndicator
+│   │   └── ui/                     # Button Card Badge Tabs Skeleton Logo
+│   ├── lib/                        # api.ts, useDashboardSocket.ts, types.ts, format.ts
+│   ├── package.json, tailwind.config.ts, tsconfig.json, next.config.js
+│   └── Dockerfile
+├── docker-compose.yml              # backend (8000) + web (3000) [+ optional postgres]
+└── README.md
+```
 
 ---
 
-## Quick start
+## Quick start (local dev)
+
+Two terminals — no API keys, no third-party services.
 
 ```bash
-# 1. venv + install
-python3 -m venv .venv
-source .venv/bin/activate
+# 1) Backend
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# 2. seed the demo database (SQLite, deterministic, ~9 months of orders)
 python data/seed.py
+uvicorn api.main:app --reload --port 8000
 
-# 3. run the CLI demo — offline, no API keys
-python run_demo.py
-
-# 4. launch the Streamlit chat UI
-streamlit run app.py
+# 2) Frontend (new terminal)
+cd web
+npm install
+npm run dev
 ```
 
-Then open http://localhost:8501.
+Open [http://localhost:3000](http://localhost:3000) for the landing page and
+[http://localhost:3000/app](http://localhost:3000/app) for the chat + dashboard.
+
+### Prove real-time is working
+
+- In the app, click **"Simulate live data"**. The KPI cards, revenue trend, region
+  bar, category donut and margin chart update every few seconds while you watch — the
+  **Live** pill pulses next to the buttons.
+- Or, in a third terminal, run the standalone streamer:
+
+```bash
+cd backend && source .venv/bin/activate
+python data/simulate_stream.py --rate 2 --batch 3
+```
+
+The dashboard, which is subscribed to `/ws`, animates in place with no reload.
+
+### Run the tests
+
+```bash
+cd backend && source .venv/bin/activate
+pytest -q
+```
+
+The 8 tests cover: total revenue happy-path, July diagnostic root-cause,
+out-of-scope clarify, SQL validator rejects mutations, gross-margin ratio bounds,
+`/api/dashboard` payload shape, the `POST /api/ask` HTTP surface, and the realtime
+watcher broadcasting a `dashboard_update` after an INSERT.
 
 ---
 
-## Try these questions
+## Docker
 
-- `What is the total revenue?`
-- `Show revenue by region`
-- `What is the revenue by month?`
-- `Why did revenue decrease in July?`   ← diagnostic; expect Furniture / East as root cause
-- `What is the gross margin by category?`
-- `Top products by revenue`
-- `What is the average order value in August?`
-- `What is the meaning of life?`        ← should **clarify**, not answer
+```bash
+docker compose build
+docker compose up
+```
+
+Backend on `http://localhost:8000`, web on `http://localhost:3000`. The web
+container proxies `/api/*` and `/ws` to the backend inside the Docker network. To
+enable the optional Postgres service:
+
+```bash
+docker compose --profile pg up
+```
+
+Then set the backend's `DATABASE_URL` env var
+(`postgresql+psycopg2://insightflow:insightflow@postgres:5432/insightflow`) — for
+production also use a **read-only DB role** as defence-in-depth alongside the
+built-in SQL validator.
 
 ---
 
 ## Enabling an LLM (optional)
 
-Copy `.env.example` to `.env` and set one of:
+Copy `backend/.env.example` to `backend/.env` and set one of:
 
 ```env
 # Hosted OpenAI
@@ -103,70 +158,47 @@ LLM_BASE_URL=http://localhost:11434/v1
 LLM_MODEL=llama3
 ```
 
-The LLM is used for narration and (optionally) NL→SQL. **The rule-based path
-and validators still run** — anything the LLM produces is validated the same
-way. If the LLM is unavailable, InsightFlow silently degrades to offline mode.
+The LLM is used for narration and, optionally, NL→SQL. **All output still passes
+through the same validators.** If the LLM is unavailable, InsightFlow silently
+degrades to offline mode.
 
 ---
 
-## Using PostgreSQL
+## How the real-time mechanism works
 
-Point `DATABASE_URL` at your database:
+`api/realtime.py` runs a lightweight `asyncio` task inside FastAPI that polls a
+cheap **data signature** on `orders` every ~2 seconds:
 
-```env
-DATABASE_URL=postgresql+psycopg2://readonly_user:pass@localhost:5432/insightflow
+```sql
+SELECT COUNT(*), COALESCE(MAX(order_id),0), ROUND(COALESCE(SUM(revenue),0), 2) FROM orders
 ```
 
-For production, run InsightFlow with a **read-only DB role**. The SQL
-validator already forbids all mutating and DDL statements, but a read-only
-role is defense-in-depth.
+When the signature changes it bumps a version counter, recomputes the dashboard
+payload, and broadcasts `{ "type": "dashboard_update", "version": N, "data": {...} }`
+to every WebSocket client. The frontend's `useDashboardSocket()` hook connects to
+`/ws`, receives the initial snapshot on connect, then patches state on each update.
+Recharts' `isAnimationActive` transitions each chart smoothly to the new values.
 
----
-
-## Running tests
-
-```bash
-pytest -q
-```
-
-The tests verify:
-
-1. Total-revenue question returns `ANSWER` with confidence ≥ 0.7.
-2. "Why did revenue decrease in July?" identifies Furniture or East as the
-   biggest negative contributor.
-3. "What is the meaning of life?" returns `CLARIFY` (not `ANSWER`).
-4. The SQL validator rejects `DROP TABLE`, `UPDATE`, and other non-SELECT
-   statements.
-5. `gross_margin` values fall within `[0,1]` and pass KPI validation.
-
----
-
-## Docker
-
-```bash
-docker compose build
-docker compose up
-```
-
-The image seeds the demo database at build time and serves the Streamlit UI
-on port 8501. The `postgres` service is behind the `pg` profile —
-`docker compose --profile pg up` starts it too.
+Polling works portably for SQLite and PostgreSQL. For sub-second push in
+production, upgrade to **PostgreSQL `LISTEN/NOTIFY`** via an `AFTER INSERT` trigger
+on `orders`, or **SQLite update hooks**, and broadcast on the notification rather
+than the poll.
 
 ---
 
 ## Design notes
 
-- **Semantic layer first.** Every KPI is defined once in `insightflow/knowledge/kpi.py`
-  with its SQL expression, unit, and business rules. Synonyms
-  ("sales", "turnover", "aov", …) resolve to canonical KPIs. This is what
-  makes answers business-correct rather than just SQL-correct.
+- **Semantic layer first.** Every KPI (revenue, orders, units, AOV, margin,
+  discount rate) is defined once in `insightflow/knowledge/kpi.py` with its SQL
+  expression, unit, and business rules. Synonyms map "sales", "aov",
+  "profitability" etc. to canonical KPIs. This is what makes answers
+  business-correct rather than only SQL-correct.
 - **Confidence is a vector, not a slogan.** Seven signals (`sql_validity`,
   `schema_match`, `kpi_match`, `context_consistency`, `data_completeness`,
-  `evidence_strength`, `result_consistency`) are combined by weight — and
-  out-of-scope questions are hard-capped at 0.30.
-- **Decision policy, not just an answer.** Above 0.70 → **Answer**; between
-  0.40 and 0.70 → **Warn** (or **Clarify** if ambiguous); below → **Abstain**.
-  Execution failures always abstain.
-- **Every answer is evidence-grounded.** The evidence chain
-  (`question → SQL → KPI → filters → rows`) is surfaced in the UI so you can
-  audit any claim.
+  `evidence_strength`, `result_consistency`) are weighted and summed; out-of-scope
+  questions are hard-capped at 0.30 so a fluent answer to "what is the meaning of
+  life?" is impossible.
+- **Decision policy, not just an answer.** Above 0.70 → **Answer**; between 0.40
+  and 0.70 → **Warn** (or **Clarify** if ambiguous); below → **Abstain**.
+- **Every answer is auditable.** The evidence chain (question → SQL → KPI
+  definition → filters → sample rows) is surfaced in the UI.
