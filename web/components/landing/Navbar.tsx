@@ -13,6 +13,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-6 text-sm text-ink-muted">
           <a href="#features" className="hover:text-ink">Features</a>
           <a href="#how" className="hover:text-ink">How it works</a>
+          <Link href="/research" className="hover:text-ink">Research</Link>
           <a
             href="https://github.com/jagan1344/insightflow-ai"
             target="_blank"
