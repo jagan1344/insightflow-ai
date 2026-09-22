@@ -1,0 +1,171 @@
+{
+  "configs": {
+    "A_sql_only": {
+      "sql_validity": 0.6,
+      "schema_match": 0.4,
+      "kpi_match": 0.0,
+      "context_consistency": 0.0,
+      "data_completeness": 0.0,
+      "evidence_strength": 0.0,
+      "result_consistency": 0.0
+    },
+    "B_sql_kpi": {
+      "sql_validity": 0.3,
+      "schema_match": 0.2,
+      "kpi_match": 0.3,
+      "context_consistency": 0.2,
+      "data_completeness": 0.0,
+      "evidence_strength": 0.0,
+      "result_consistency": 0.0
+    },
+    "C_full": {
+      "sql_validity": 0.2,
+      "schema_match": 0.15,
+      "kpi_match": 0.2,
+      "context_consistency": 0.15,
+      "data_completeness": 0.12,
+      "evidence_strength": 0.1,
+      "result_consistency": 0.08
+    }
+  },
+  "results": {
+    "A_sql_only": {
+      "text_to_sql": {
+        "n": 17,
+        "execution_accuracy": 0.9411764705882353,
+        "exact_match": 0.4117647058823529,
+        "sql_validity_rate": 1.0,
+        "schema_matching_accuracy": 1.0
+      },
+      "business": {
+        "n": 17,
+        "answer_correctness": 0.9411764705882353,
+        "kpi_matching_accuracy": 1.0,
+        "evidence_support_rate": 0.8176470588235292,
+        "result_consistency": 1.0
+      },
+      "reliability": {
+        "avg_confidence": 0.6666666666666666,
+        "avg_confidence_correct": 1.0,
+        "avg_confidence_incorrect": 1.0,
+        "high_confidence_error_rate": 0.058823529411764705,
+        "n_high_confidence": 17
+      },
+      "decision": {
+        "distribution": {
+          "ANSWER": 18,
+          "WARN": 0,
+          "CLARIFY": 9,
+          "ABSTAIN": 0
+        },
+        "distribution_rate": {
+          "ANSWER": 0.6666666666666666,
+          "WARN": 0.0,
+          "CLARIFY": 0.3333333333333333,
+          "ABSTAIN": 0.0
+        },
+        "decision_correctness": 0.9629629629629629,
+        "answer_precision": 0.9411764705882353,
+        "unsafe_answer_count": 1,
+        "unsafe_answer_rate": 0.037037037037037035,
+        "n_answered_with_truth": 17
+      },
+      "calibration": {
+        "ece": 0.05882352941176472,
+        "brier": 0.058823529411764705
+      }
+    },
+    "B_sql_kpi": {
+      "text_to_sql": {
+        "n": 17,
+        "execution_accuracy": 0.9411764705882353,
+        "exact_match": 0.4117647058823529,
+        "sql_validity_rate": 1.0,
+        "schema_matching_accuracy": 1.0
+      },
+      "business": {
+        "n": 17,
+        "answer_correctness": 0.9411764705882353,
+        "kpi_matching_accuracy": 1.0,
+        "evidence_support_rate": 0.8176470588235292,
+        "result_consistency": 1.0
+      },
+      "reliability": {
+        "avg_confidence": 0.6733333333333332,
+        "avg_confidence_correct": 1.0,
+        "avg_confidence_incorrect": 1.0,
+        "high_confidence_error_rate": 0.058823529411764705,
+        "n_high_confidence": 17
+      },
+      "decision": {
+        "distribution": {
+          "ANSWER": 18,
+          "WARN": 0,
+          "CLARIFY": 9,
+          "ABSTAIN": 0
+        },
+        "distribution_rate": {
+          "ANSWER": 0.6666666666666666,
+          "WARN": 0.0,
+          "CLARIFY": 0.3333333333333333,
+          "ABSTAIN": 0.0
+        },
+        "decision_correctness": 0.9629629629629629,
+        "answer_precision": 0.9411764705882353,
+        "unsafe_answer_count": 1,
+        "unsafe_answer_rate": 0.037037037037037035,
+        "n_answered_with_truth": 17
+      },
+      "calibration": {
+        "ece": 0.05882352941176472,
+        "brier": 0.058823529411764705
+      }
+    },
+    "C_full": {
+      "text_to_sql": {
+        "n": 17,
+        "execution_accuracy": 0.9411764705882353,
+        "exact_match": 0.4117647058823529,
+        "sql_validity_rate": 1.0,
+        "schema_matching_accuracy": 1.0
+      },
+      "business": {
+        "n": 17,
+        "answer_correctness": 0.9411764705882353,
+        "kpi_matching_accuracy": 1.0,
+        "evidence_support_rate": 0.8176470588235292,
+        "result_consistency": 1.0
+      },
+      "reliability": {
+        "avg_confidence": 0.667074074074074,
+        "avg_confidence_correct": 0.9825000000000002,
+        "avg_confidence_incorrect": 0.97,
+        "high_confidence_error_rate": 0.058823529411764705,
+        "n_high_confidence": 17
+      },
+      "decision": {
+        "distribution": {
+          "ANSWER": 18,
+          "WARN": 0,
+          "CLARIFY": 9,
+          "ABSTAIN": 0
+        },
+        "distribution_rate": {
+          "ANSWER": 0.6666666666666666,
+          "WARN": 0.0,
+          "CLARIFY": 0.3333333333333333,
+          "ABSTAIN": 0.0
+        },
+        "decision_correctness": 0.9629629629629629,
+        "answer_precision": 0.9411764705882353,
+        "unsafe_answer_count": 1,
+        "unsafe_answer_rate": 0.037037037037037035,
+        "n_answered_with_truth": 17
+      },
+      "calibration": {
+        "ece": 0.0405882352941177,
+        "brier": 0.05582941176470588
+      }
+    }
+  }
+}
