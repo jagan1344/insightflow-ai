@@ -90,7 +90,7 @@ class Orchestrator:
             and gen.month is None
         )
 
-        # 3. handle out-of-scope up-front
+        # 3. handle out-of-scope / vague up-front
         if gen.out_of_scope:
             empty_result = QueryResult()
             sqlval = ValidationResult(ok=False, score=0.0, issues=["out of scope"])
@@ -102,20 +102,26 @@ class Orchestrator:
                                     ambiguous=False, out_of_scope=True,
                                     query_intent=gen.query_intent, sql="")
             evidence = build_evidence(question, "", None, {}, empty_result)
-            analysis = Analysis(
-                summary=("This question does not appear to be about the "
-                         "available business data.")
-            )
-            decision = Decision(CLARIFY, "out of scope for the loaded dataset")
+            is_vague = gen.query_intent is not None and gen.query_intent.vague
+            summary = ("This question is too open-ended to answer from the "
+                       "data alone.") if is_vague else (
+                       "This question does not appear to be about the "
+                       "available business data.")
+            analysis = Analysis(summary=summary)
+            reason = ("vague/open-ended — no specific KPI or dimension named"
+                      if is_vague else "out of scope for the loaded dataset")
+            decision = Decision(CLARIFY, reason)
             resp = InsightResponse(
                 question=question, sql="", intent="unknown",
                 decision=decision, confidence=conf, analysis=analysis,
                 evidence=evidence, result=empty_result,
                 explanation=(
-                    "I can help with the sales dataset. Try asking about "
-                    "revenue, order count, units sold, average order value, "
-                    "gross margin or discount rate — optionally broken down "
-                    "by region, category, product, segment or month."
+                    "I can help with the loaded dataset. Try asking about a "
+                    "specific KPI (e.g. revenue, orders, gross margin, "
+                    "profit, discount rate) — optionally broken down by "
+                    "region, category, sub-category, product, segment or "
+                    "month. For example: 'revenue by region', 'gross margin "
+                    "by category', or 'top products by revenue'."
                 ),
                 recommendation=None,
                 chart={"kind": "none"},

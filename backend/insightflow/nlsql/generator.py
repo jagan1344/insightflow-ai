@@ -142,10 +142,47 @@ DIM_NOUNS: list[tuple[str, str]] = [
     ("over months",            "month"),
     ("over time",              "month"),
     ("months",                 "month"),
+    # dims some datasets have but the demo does not — surfaced as
+    # unavailable in the schema check below so a "by state" question
+    # CLARIFIES on demo rather than confidently returning a global total.
+    ("by state",               "state"),
+    ("states",                 "state"),
+    ("by city",                "city"),
+    ("cities",                 "city"),
+    ("by country",             "country"),
+    ("countries",              "country"),
 ]
 
 CORRELATION_TRIGGERS = ("killing", "hurting", "driving", "relationship",
                         "correlat", "impact", "affect")
+
+# Question shapes that are inherently too vague to answer confidently — they
+# ask for judgement, recommendation, or narrative rather than a scalar/table.
+# When one of these fires AND no concrete KPI+dimension was extracted, the
+# generator emits no SQL and the orchestrator CLARIFYs.
+VAGUE_TRIGGERS = (
+    "how is my business",
+    "how are we doing",
+    "how's business",
+    "how's it going",
+    "tell me about the data",
+    "tell me about the business",
+    "what should i do",
+    "what do you think",
+    "give me insights",
+    "give me a summary",
+    "give me the numbers",
+    "give me an overview",
+    "what's happening",
+    "anything interesting",
+    "any thoughts",
+    "the performance",
+    "the situation",
+    "the numbers",
+    "the state of",
+    "overall picture",
+    "big picture",
+)
 
 
 @dataclass
@@ -166,10 +203,18 @@ class QueryIntent:
     explicit_factors: List[str] = field(default_factory=list) # raw tokens from "(Analyze using: …)"
     required_columns: List[str] = field(default_factory=list) # union label used in coverage calc
     unavailable: List[str] = field(default_factory=list)      # asked-for but not in schema
+    vague: bool = False                                       # matched a VAGUE_TRIGGER
 
     @property
     def is_bare_aggregate(self) -> bool:
         return not self.dimensions and not self.filters and not self.explicit_factors
+
+    @property
+    def is_empty(self) -> bool:
+        """True if extraction found no metric, no dimension, no factor —
+        i.e. we didn't recognise anything specific in the question."""
+        return not (self.metrics or self.dimensions or self.explicit_factors
+                    or self.filters)
 
 
 @dataclass
@@ -273,6 +318,12 @@ def _dim_available(dim: str, schema: Schema) -> bool:
         return "customers" in tables and "customer_name" in tables.get("customers", [])
     if dim == "month":
         return "orders" in tables and "order_date" in tables.get("orders", [])
+    # Any other dim (state / city / country / arbitrary "by X" tokens) is
+    # only available if a column of that exact name exists somewhere in
+    # the schema. Otherwise it must be flagged unavailable.
+    for cols in tables.values():
+        if dim in cols:
+            return True
     return False
 
 
@@ -389,6 +440,24 @@ def _extract_intent(question: str, schema: Schema) -> QueryIntent:
         if dim not in intent.dimensions:
             intent.dimensions.append(dim)
 
+    # 2b. Catch-all "by <noun>" — protects against every dimension we
+    # forgot to enumerate. If none of the known dim_spans covers the
+    # match, treat the noun as a requested dimension. It'll be flagged
+    # unavailable when the schema check runs.
+    for m in re.finditer(r"\bby\s+([a-z_][a-z_]{2,20})\b", ql):
+        idx, end = m.start(), m.end()
+        if any(s <= idx < e or s < end <= e for s, e in dim_spans):
+            continue
+        noun = m.group(1)
+        # skip common English stopwords that follow "by" but aren't a
+        # dimension noun ("by looking", "by doing", "by using")
+        if noun in {"looking", "doing", "using", "the", "a", "an", "my",
+                    "our", "that", "which", "what", "some", "many"}:
+            continue
+        if noun not in intent.dimensions:
+            intent.dimensions.append(noun)
+        dim_spans.append((idx, end))
+
     # 3. Explicit factors (from "(Analyze using: …)" or "using X, Y")
     intent.explicit_factors = _parse_explicit_factors(question)
     for tok in intent.explicit_factors:
@@ -434,6 +503,24 @@ def _extract_intent(question: str, schema: Schema) -> QueryIntent:
     for d in intent.dimensions:
         if not _dim_available(d, schema):
             intent.unavailable.append(f"dim:{d}")
+
+    # 8. Vague-form detection — questions asking for judgement / narrative
+    #    rather than a specific value. Matched only after the concrete
+    #    metric/dim extraction so "what is the total revenue" (specific)
+    #    is never flagged even if it contained the word "the numbers".
+    if intent.is_empty:
+        stripped = ql.strip()
+        for trigger in VAGUE_TRIGGERS:
+            if trigger in ql:
+                intent.vague = True
+                break
+        # Also flag if the question is very short and lacks any KPI/dim word
+        # ("summary?", "insights?", "?", etc.)
+        alpha = re.sub(r"[^a-z ]", " ", stripped)
+        tokens = [t for t in alpha.split() if len(t) > 1]
+        if not intent.vague and len(tokens) <= 3 and \
+                not any(t in DOMAIN_TERMS for t in tokens):
+            intent.vague = True
     return intent
 
 
@@ -570,6 +657,17 @@ def _rule_generate(question: str) -> GenSQL:
         return GenSQL(
             sql="", intent="unknown", kpi=None, dimension=None, month=None,
             diagnostic=False, notes=["question is out of scope"],
+            source="rule", out_of_scope=True, query_intent=intent,
+        )
+
+    # Vague / judgement questions with no concrete metric or dimension get
+    # routed to CLARIFY. This stops "give me insights" from confidently
+    # defaulting to SUM(revenue).
+    if intent.vague and intent.is_empty and kpi is None and dim is None:
+        return GenSQL(
+            sql="", intent="unknown", kpi=None, dimension=None, month=None,
+            diagnostic=False,
+            notes=["vague question: no specific KPI or dimension named"],
             source="rule", out_of_scope=True, query_intent=intent,
         )
 
