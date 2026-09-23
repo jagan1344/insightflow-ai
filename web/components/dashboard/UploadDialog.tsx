@@ -68,9 +68,12 @@ export function UploadDialog({ open, onClose, onSuccess }: Props) {
           <div>
             <h2 className="text-lg font-semibold">Upload your dataset</h2>
             <p className="mt-1 text-sm text-ink-muted">
-              CSV with columns like <code>order_date, region, category, product,
-              customer, segment, quantity, revenue, cost, discount</code>. Only
-              <code className="mx-1">revenue</code>is required.
+              CSV, XLSX or XLS. Columns like{" "}
+              <code>order_date, region, category, product, customer, segment,
+              quantity, revenue, cost, discount</code>. Only
+              <code className="mx-1">revenue</code>is required. Sample Superstore
+              works: <code>Sales</code>→revenue, <code>Order Date</code>→order_date,
+              etc.
             </p>
           </div>
         </div>
@@ -85,7 +88,7 @@ export function UploadDialog({ open, onClose, onSuccess }: Props) {
               <input
                 ref={inputRef}
                 type="file"
-                accept=".csv,text/csv"
+                accept=".csv,.txt,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                 className="sr-only"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
@@ -99,8 +102,8 @@ export function UploadDialog({ open, onClose, onSuccess }: Props) {
               ) : (
                 <>
                   <Upload size={22} className="text-ink-muted" />
-                  <span className="text-sm">Click to choose a .csv file</span>
-                  <span className="text-xs text-ink-faint">Up to 5 MB · 50k rows</span>
+                  <span className="text-sm">Click to choose a CSV or Excel file</span>
+                  <span className="text-xs text-ink-faint">.csv / .xlsx / .xls · up to 5 MB · 50k rows</span>
                 </>
               )}
             </label>

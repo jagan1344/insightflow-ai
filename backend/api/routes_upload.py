@@ -1,20 +1,21 @@
-"""Upload endpoint: replace / append the demo `orders` table from a CSV.
+"""Upload endpoint: replace / append the demo `orders` table from a
+CSV or Excel (.xlsx / .xls) file.
 
 Design goals
 ------------
 - Keep the shipped KPI semantic layer intact — the columns InsightFlow's
   KPIs read (`revenue`, `cost`, `discount`, `quantity`, `order_date`,
   `region_id`, `product_id`, `customer_id`) are what we insert into.
-- Let a user upload a CSV with human-readable dimension columns
+- Let a user upload a file with human-readable dimension columns
   (`region`, `category`, `product`, `customer`, `segment`) and upsert
   them into the dim tables so the dashboard breakdowns still work.
-- Never let a CSV be a SQL-injection vector: values are always bound
-  parameters; the CSV is never concatenated into SQL text.
+- Never let user data be a SQL-injection vector: values are always bound
+  parameters; input text is never concatenated into SQL.
 - After a successful upload trigger a `mark_changed()` so every open
   dashboard sees the new data over WebSocket without a refresh.
 
-Accepted CSV columns (case-insensitive; header row required)
------------------------------------------------------------
+Accepted columns (case-insensitive; header row required)
+--------------------------------------------------------
 Required:
     revenue      float
 Optional (with defaults):
@@ -25,10 +26,13 @@ Optional (with defaults):
 Dimension names (strings — upserted into dim tables):
     region, category, product, customer, segment
 Aliases accepted:
-    date              → order_date
-    product_name      → product
-    customer_name     → customer
-    sales, amount     → revenue
+    date, order date               → order_date
+    product name                   → product
+    customer name                  → customer
+    sales, amount, gross revenue   → revenue
+    qty, units                     → quantity
+    profit                         → treated as `revenue - cost` to derive cost
+    sub-category                   → category (when both present, category wins)
 
 Limits
 ------
@@ -36,6 +40,13 @@ Limits
 - 50,000 row cap.
 - Row is skipped (and its 1-based index recorded) if revenue is missing
   or unparseable.
+
+Supported file types
+--------------------
+- .csv, .txt          (comma-separated)
+- .xlsx               (Excel 2007+, via openpyxl)
+- .xls                (Excel 97-2003, via xlrd 1.2)
+Only the first worksheet is read.
 """
 from __future__ import annotations
 
@@ -74,6 +85,9 @@ ALIAS = {
     "regionname": "region",
     "qty": "quantity",
     "units": "quantity",
+    "sub_category": "sub_category",   # kept separate so category still wins
+    "subcategory":  "sub_category",
+    "profit": "profit",               # used to derive cost when cost is absent
 }
 
 DIM_COLS = ("region", "category", "product", "customer", "segment")
@@ -93,8 +107,98 @@ class UploadResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 def _norm_header(h: str) -> str:
-    key = h.strip().lower().replace(" ", "_")
+    key = (h or "").strip().lower().replace(" ", "_").replace("-", "_")
     return ALIAS.get(key, key)
+
+
+# ---------------------------------------------------------------------------
+# Excel decoding — turn a workbook into CSV text so the same parser runs.
+# ---------------------------------------------------------------------------
+
+def _cell_to_string(v) -> str:
+    if v is None:
+        return ""
+    # datetime → ISO date
+    if hasattr(v, "strftime"):
+        try:
+            return v.strftime("%Y-%m-%d")
+        except Exception:
+            pass
+    # openpyxl returns ints and floats for numeric cells
+    if isinstance(v, float):
+        # trim trailing .0 for integers stored as floats
+        if v.is_integer():
+            return str(int(v))
+        return repr(v)
+    return str(v)
+
+
+def _xlsx_to_csv(body: bytes) -> str:
+    from openpyxl import load_workbook  # type: ignore
+    wb = load_workbook(io.BytesIO(body), data_only=True, read_only=True)
+    ws = wb.active
+    out = io.StringIO()
+    w = csv.writer(out)
+    for row in ws.iter_rows(values_only=True):
+        w.writerow([_cell_to_string(v) for v in row])
+    wb.close()
+    return out.getvalue()
+
+
+def _xls_to_csv(body: bytes) -> str:
+    import xlrd  # type: ignore  (xlrd 1.2 supports .xls)
+    from datetime import datetime as _dt
+    wb = xlrd.open_workbook(file_contents=body)
+    ws = wb.sheet_by_index(0)
+    out = io.StringIO()
+    w = csv.writer(out)
+    for i in range(ws.nrows):
+        row_out = []
+        for j in range(ws.ncols):
+            cell = ws.cell(i, j)
+            v = cell.value
+            # xlrd cell types: 0=EMPTY 1=TEXT 2=NUMBER 3=DATE 4=BOOL 5=ERROR
+            if cell.ctype == 3:  # DATE
+                try:
+                    dt = xlrd.xldate.xldate_as_datetime(v, wb.datemode)
+                    row_out.append(dt.strftime("%Y-%m-%d"))
+                    continue
+                except Exception:
+                    pass
+            if isinstance(v, float) and v.is_integer():
+                row_out.append(str(int(v)))
+            else:
+                row_out.append("" if v is None else str(v))
+        w.writerow(row_out)
+    return out.getvalue()
+
+
+def _decode_upload_to_csv_text(body: bytes, filename: str) -> str:
+    """Return CSV text for any accepted upload; raise HTTPException on bad ext."""
+    lower = (filename or "").lower()
+    if lower.endswith((".csv", ".txt")):
+        try:
+            return body.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            try:
+                return body.decode("latin-1")
+            except Exception:
+                raise HTTPException(status_code=400,
+                                    detail="File is not UTF-8 or Latin-1 text")
+    if lower.endswith(".xlsx"):
+        try:
+            return _xlsx_to_csv(body)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not read .xlsx: {e}")
+    if lower.endswith(".xls"):
+        try:
+            return _xls_to_csv(body)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not read .xls: {e}")
+    raise HTTPException(
+        status_code=400,
+        detail="Please upload a .csv, .txt, .xlsx or .xls file",
+    )
 
 
 def _parse_date(v: str) -> Optional[str]:
@@ -179,8 +283,8 @@ async def upload_orders(
     mode: str = Query("replace", pattern="^(replace|append)$",
                       description="`replace` clears orders first; `append` keeps existing rows."),
 ):
-    if not file.filename or not file.filename.lower().endswith((".csv", ".txt")):
-        raise HTTPException(status_code=400, detail="Please upload a .csv file")
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No filename")
 
     body = await file.read()
     if len(body) > MAX_FILE_BYTES:
@@ -188,13 +292,7 @@ async def upload_orders(
     if not body:
         raise HTTPException(status_code=400, detail="Empty file")
 
-    try:
-        text_body = body.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        try:
-            text_body = body.decode("latin-1")
-        except Exception:
-            raise HTTPException(status_code=400, detail="File is not UTF-8 or Latin-1 text")
+    text_body = _decode_upload_to_csv_text(body, file.filename)
 
     reader = csv.reader(io.StringIO(text_body))
     try:
@@ -239,6 +337,12 @@ async def upload_orders(
         if qty is None:
             qty = 1
         cost = _parse_float(cell("cost"))
+        # `profit` fallback: if cost is absent but profit is provided, derive
+        # cost = revenue - profit (common shape in Sample Superstore).
+        if cost is None:
+            prof = _parse_float(cell("profit"))
+            if prof is not None:
+                cost = max(0.0, rev - prof)
         if cost is None:
             cost = 0.0
         disc = _parse_float(cell("discount"))
@@ -255,6 +359,12 @@ async def upload_orders(
             if v:
                 item[c] = v
                 seen_dims[c].add(v)
+        # Fallback: use `sub_category` if `category` is not present in the row
+        if "category" not in item:
+            v = (cell("sub_category") or "").strip()
+            if v:
+                item["category"] = v
+                seen_dims["category"].add(v)
         parsed_rows.append(item)
 
     if not parsed_rows:
