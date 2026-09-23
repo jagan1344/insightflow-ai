@@ -171,6 +171,54 @@ def test_upload_orders_csv_replaces_table():
                 files={"file": ("bad.csv", "foo,bar\n1,2\n", "text/csv")},
             )
             assert r.status_code == 400
+
+            # .xlsx round-trip: build an in-memory workbook with Superstore-style
+            # headers (Sales, Order Date, Customer Name, Product Name, Region,
+            # Sub-Category, Segment, Quantity, Profit, Discount) and upload it.
+            import io
+            from openpyxl import Workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.append(["Order Date", "Region", "Sub-Category", "Product Name",
+                       "Customer Name", "Segment", "Quantity", "Sales",
+                       "Profit", "Discount"])
+            ws.append(["2026-04-01", "West", "Chairs", "Office Chair",
+                       "Alice Kim", "Consumer", 2, 300.0, 60.0, 0.0])
+            ws.append(["2026-04-02", "East", "Binders", "Ring Binder",
+                       "Bob Lee", "SMB", 5, 45.0, 15.0, 0.1])
+            buf = io.BytesIO()
+            wb.save(buf)
+            buf.seek(0)
+            r = client.post(
+                "/api/upload/orders?mode=replace",
+                files={"file": ("superstore.xlsx", buf.read(),
+                                "application/vnd.openxmlformats-officedocument"
+                                ".spreadsheetml.sheet")},
+            )
+            assert r.status_code == 200, r.text
+            body = r.json()
+            assert body["ok"] is True
+            assert body["rows_inserted"] == 2
+
+            # cost should have been derived from profit (300 - 60 = 240,
+            # 45 - 15 = 30). Verify from the DB.
+            costs = [row[0] for row in run_sql(
+                "SELECT cost FROM orders ORDER BY revenue DESC").rows]
+            assert costs == [240.0, 30.0], costs
+
+            # Sub-Category should have filled the category column
+            cats = [row[0] for row in run_sql(
+                "SELECT DISTINCT category FROM products "
+                "WHERE product_name IN ('Office Chair','Ring Binder')").rows]
+            assert set(cats) == {"Chairs", "Binders"}, cats
+
+            # Wrong file extension rejected
+            r = client.post(
+                "/api/upload/orders",
+                files={"file": ("notes.docx", b"garbage",
+                                "application/octet-stream")},
+            )
+            assert r.status_code == 400
     finally:
         # Restore demo dataset for other tests
         import runpy
