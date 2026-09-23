@@ -32,13 +32,16 @@ def _envi(name: str, default: int) -> int:
 
 
 DEFAULT_WEIGHTS: Dict[str, float] = {
-    "sql_validity":        0.20,
-    "schema_match":        0.15,
-    "kpi_match":           0.20,
-    "context_consistency": 0.15,
-    "data_completeness":   0.12,
-    "evidence_strength":   0.10,
-    "result_consistency":  0.08,
+    # (Reweighted 2026-09-23 to make room for `intent_coverage` at 0.18
+    # without any signal losing more than ~0.05. Sum remains 1.00.)
+    "sql_validity":        0.15,
+    "schema_match":        0.12,
+    "kpi_match":           0.17,
+    "context_consistency": 0.13,
+    "data_completeness":   0.08,
+    "evidence_strength":   0.07,
+    "result_consistency":  0.10,
+    "intent_coverage":     0.18,
 }
 
 

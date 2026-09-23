@@ -90,7 +90,7 @@ ALIAS = {
     "profit": "profit",               # used to derive cost when cost is absent
 }
 
-DIM_COLS = ("region", "category", "product", "customer", "segment")
+DIM_COLS = ("region", "category", "sub_category", "product", "customer", "segment")
 
 
 class UploadResponse(BaseModel):
@@ -359,12 +359,13 @@ async def upload_orders(
             if v:
                 item[c] = v
                 seen_dims[c].add(v)
-        # Fallback: use `sub_category` if `category` is not present in the row
-        if "category" not in item:
-            v = (cell("sub_category") or "").strip()
-            if v:
-                item["category"] = v
-                seen_dims["category"].add(v)
+        # Backwards-compat fallback: if the CSV has ONLY sub_category
+        # (no category), keep the old behaviour and use it for category.
+        # When BOTH are provided (Superstore), keep them distinct so the
+        # sub_category dimension works in the analytical questions.
+        if "category" not in item and "sub_category" in item:
+            item["category"] = item["sub_category"]
+            seen_dims["category"].add(item["sub_category"])
         parsed_rows.append(item)
 
     if not parsed_rows:
@@ -372,8 +373,19 @@ async def upload_orders(
 
     engine = get_engine()
     dims_inserted: dict[str, int] = {}
+    has_sub_category = bool(seen_dims["sub_category"])
 
     with engine.begin() as conn:
+        # If this upload includes sub_category, ensure the products table
+        # has a sub_category column. SQLite has no `ADD COLUMN IF NOT
+        # EXISTS`, so we check pragma table_info first.
+        if has_sub_category:
+            existing_cols = {r[1] for r in conn.execute(
+                text("PRAGMA table_info(products)")).fetchall()}
+            if "sub_category" not in existing_cols:
+                conn.execute(text(
+                    "ALTER TABLE products ADD COLUMN sub_category TEXT"))
+
         # Upsert dim rows
         region_cache: dict[str, int] = {}
         product_cache: dict[str, int] = {}   # keyed by product NAME
@@ -383,32 +395,55 @@ async def upload_orders(
             conn, "regions", "region_id", "region_name",
             seen_dims["region"], region_cache,
         )
-        # For products we need a category. If a row provides a category,
-        # ensure the (product, category) pair exists; if not, default
-        # category to "Uploaded".
-        # We look up products by name, but store their category.
-        # First, collect (name -> category) pairs from parsed rows.
-        product_categories: dict[str, str] = {}
+        # For products, collect (name → category, sub_category).
+        product_attrs: dict[str, dict[str, str]] = {}
         for item in parsed_rows:
             if "product" in item:
-                product_categories[item["product"]] = item.get("category", "Uploaded")
-        # Load existing product->id map
-        for pid, pname in conn.execute(text("SELECT product_id, product_name FROM products")).fetchall():
+                pname = item["product"]
+                product_attrs.setdefault(pname, {})
+                product_attrs[pname]["category"] = item.get("category", "Uploaded")
+                if "sub_category" in item:
+                    product_attrs[pname]["sub_category"] = item["sub_category"]
+        # Load existing product→id map
+        for pid, pname in conn.execute(text(
+                "SELECT product_id, product_name FROM products")).fetchall():
             product_cache[pname] = pid
-        new_product_names = set(product_categories.keys()) - set(product_cache.keys())
+        new_product_names = set(product_attrs.keys()) - set(product_cache.keys())
         new_products = 0
         if new_product_names:
-            max_pid = conn.execute(text("SELECT COALESCE(MAX(product_id),0) FROM products")).scalar()
+            max_pid = conn.execute(text(
+                "SELECT COALESCE(MAX(product_id),0) FROM products")).scalar()
             for name in sorted(new_product_names):
                 max_pid = int(max_pid) + 1
-                conn.execute(text(
-                    "INSERT INTO products(product_id, product_name, category) "
-                    "VALUES (:pid, :pname, :cat)"
-                ), {"pid": max_pid, "pname": name,
-                    "cat": product_categories.get(name, "Uploaded")})
+                attrs = product_attrs[name]
+                if has_sub_category:
+                    conn.execute(text(
+                        "INSERT INTO products(product_id, product_name, "
+                        "category, sub_category) VALUES "
+                        "(:pid, :pname, :cat, :subcat)"
+                    ), {"pid": max_pid, "pname": name,
+                        "cat": attrs.get("category", "Uploaded"),
+                        "subcat": attrs.get("sub_category")})
+                else:
+                    conn.execute(text(
+                        "INSERT INTO products(product_id, product_name, category) "
+                        "VALUES (:pid, :pname, :cat)"
+                    ), {"pid": max_pid, "pname": name,
+                        "cat": attrs.get("category", "Uploaded")})
                 product_cache[name] = max_pid
                 new_products += 1
         dims_inserted["products"] = new_products
+
+        # Backfill sub_category on existing products where possible
+        if has_sub_category:
+            for pname, attrs in product_attrs.items():
+                if "sub_category" in attrs and pname in product_cache:
+                    conn.execute(text(
+                        "UPDATE products SET sub_category = :subcat "
+                        "WHERE product_id = :pid AND "
+                        "(sub_category IS NULL OR sub_category = '')"
+                    ), {"subcat": attrs["sub_category"],
+                        "pid": product_cache[pname]})
 
         # customers — need region_id and segment. Default region_id = 1
         # if no region is provided; default segment = "Uploaded".
