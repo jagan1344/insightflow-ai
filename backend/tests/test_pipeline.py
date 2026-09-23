@@ -118,14 +118,19 @@ def test_ask_endpoint_via_fastapi():
         assert body["sql"].strip().lower().startswith("select")
 
 
-def test_upload_orders_csv_replaces_table():
-    """POST /api/upload/orders replaces the orders table from a CSV and
-    triggers the change signature so a dashboard broadcast will fire."""
+def test_upload_orders_csv_creates_new_active_dataset():
+    """POST /api/upload/orders now stores each upload as its OWN table
+    (dataset_<slug>) and registers it as the active dataset. The demo
+    orders table is left untouched. This is the fixed-behaviour test —
+    the previous version verified the buggy 'shoehorn into orders' path.
+    """
     from fastapi.testclient import TestClient
     from api.main import app
-    from insightflow.execution.executor import get_engine, reset_engine, run_sql
+    from insightflow.execution.executor import reset_engine, run_sql
     from insightflow.knowledge.schema_agent import refresh_schema
-    from sqlalchemy import text
+    from insightflow.knowledge.dataset_registry import (
+        set_active, DEMO_ID, get_active_dataset,
+    )
 
     csv_body = (
         "order_date,region,category,product,customer,segment,"
@@ -134,85 +139,74 @@ def test_upload_orders_csv_replaces_table():
         "2026-03-11,South,Furniture,Chair,Zeta,SMB,1,450,290,0\n"
     )
 
-    # snapshot original count so we can restore
-    orig = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
-    assert orig > 0
+    orig_orders = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
+    assert orig_orders > 0
     try:
         with TestClient(app) as client:
             r = client.post(
-                "/api/upload/orders?mode=replace",
-                files={"file": ("upload.csv", csv_body, "text/csv")},
+                "/api/upload/orders?mode=replace&dataset_name=upload_a",
+                files={"file": ("upload_a.csv", csv_body, "text/csv")},
             )
             assert r.status_code == 200, r.text
             body = r.json()
             assert body["ok"] is True
             assert body["rows_inserted"] == 2
-            assert body["mode"] == "replace"
+            assert body["dataset_name"] == "upload_a"
+            assert body["table_name"].startswith("dataset_")
+            assert body["is_active"] is True
 
-            # 2 rows must be in the DB now
+            # Demo table left untouched
             n = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
-            assert n == 2
+            assert n == orig_orders
 
-            # Dims upserted
-            assert body["dims_upserted"]["customers"] >= 1
+            # Uploaded rows landed in the new table
+            table = body["table_name"]
+            up_n = run_sql(f'SELECT COUNT(*) FROM "{table}"').rows[0][0]
+            assert up_n == 2
 
-            # append mode adds rows without deleting
+            # Active dataset is the new one
+            active = get_active_dataset()
+            assert active.kind == "uploaded"
+            assert active.table == table
+
+            # Second upload creates a SECOND dataset and switches to it
+            csv_body_b = (
+                "date,department,orders,amount,profit\n"
+                "2026-06-01,North,10,1000,200\n"
+                "2026-07-01,North,8,800,100\n"
+            )
             r = client.post(
-                "/api/upload/orders?mode=append",
-                files={"file": ("upload.csv", csv_body, "text/csv")},
+                "/api/upload/orders?mode=replace&dataset_name=upload_b",
+                files={"file": ("upload_b.csv", csv_body_b, "text/csv")},
             )
             assert r.status_code == 200
-            n2 = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
-            assert n2 == 4
+            b2 = r.json()
+            assert b2["dataset_name"] == "upload_b"
+            assert b2["table_name"] != body["table_name"]
+            active = get_active_dataset()
+            assert active.name == "upload_b"
 
-            # Invalid CSV (no revenue column) is rejected 400
+            # Datasets endpoint lists both plus demo
+            r = client.get("/api/datasets")
+            assert r.status_code == 200
+            names = [d["name"] for d in r.json()]
+            assert "upload_a" in names
+            assert "upload_b" in names
+            assert "Demo sales" in names
+
+            # Reactivate demo via the API
+            r = client.post("/api/datasets/activate/demo")
+            assert r.status_code == 200
+            assert get_active_dataset().kind == "demo"
+
+            # Bad CSV rejected
             r = client.post(
                 "/api/upload/orders",
-                files={"file": ("bad.csv", "foo,bar\n1,2\n", "text/csv")},
+                files={"file": ("bad.csv", "\n", "text/csv")},
             )
             assert r.status_code == 400
 
-            # .xlsx round-trip: build an in-memory workbook with Superstore-style
-            # headers (Sales, Order Date, Customer Name, Product Name, Region,
-            # Sub-Category, Segment, Quantity, Profit, Discount) and upload it.
-            import io
-            from openpyxl import Workbook
-            wb = Workbook()
-            ws = wb.active
-            ws.append(["Order Date", "Region", "Sub-Category", "Product Name",
-                       "Customer Name", "Segment", "Quantity", "Sales",
-                       "Profit", "Discount"])
-            ws.append(["2026-04-01", "West", "Chairs", "Office Chair",
-                       "Alice Kim", "Consumer", 2, 300.0, 60.0, 0.0])
-            ws.append(["2026-04-02", "East", "Binders", "Ring Binder",
-                       "Bob Lee", "SMB", 5, 45.0, 15.0, 0.1])
-            buf = io.BytesIO()
-            wb.save(buf)
-            buf.seek(0)
-            r = client.post(
-                "/api/upload/orders?mode=replace",
-                files={"file": ("superstore.xlsx", buf.read(),
-                                "application/vnd.openxmlformats-officedocument"
-                                ".spreadsheetml.sheet")},
-            )
-            assert r.status_code == 200, r.text
-            body = r.json()
-            assert body["ok"] is True
-            assert body["rows_inserted"] == 2
-
-            # cost should have been derived from profit (300 - 60 = 240,
-            # 45 - 15 = 30). Verify from the DB.
-            costs = [row[0] for row in run_sql(
-                "SELECT cost FROM orders ORDER BY revenue DESC").rows]
-            assert costs == [240.0, 30.0], costs
-
-            # Sub-Category should have filled the category column
-            cats = [row[0] for row in run_sql(
-                "SELECT DISTINCT category FROM products "
-                "WHERE product_name IN ('Office Chair','Ring Binder')").rows]
-            assert set(cats) == {"Chairs", "Binders"}, cats
-
-            # Wrong file extension rejected
+            # Wrong extension rejected
             r = client.post(
                 "/api/upload/orders",
                 files={"file": ("notes.docx", b"garbage",
@@ -220,12 +214,13 @@ def test_upload_orders_csv_replaces_table():
             )
             assert r.status_code == 400
     finally:
-        # Restore demo dataset for other tests
+        # Restore demo as active for downstream tests
         import runpy
         from pathlib import Path
         runpy.run_path(str(Path(__file__).resolve().parent.parent / "data" / "seed.py"),
                        run_name="__main__")
         reset_engine(); refresh_schema()
+        set_active(DEMO_ID)
 
 
 def test_realtime_watcher_broadcasts_on_change():

@@ -163,16 +163,8 @@ export function UploadDialog({ open, onClose, onSuccess }: Props) {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <Kv label="Rows inserted" value={String(result.rows_inserted)} />
               <Kv label="Rows skipped" value={String(result.rows_skipped)} />
-              <Kv label="Mode" value={result.mode} />
-              <Kv
-                label="Dims upserted"
-                value={
-                  Object.entries(result.dims_upserted)
-                    .filter(([, v]) => v > 0)
-                    .map(([k, v]) => `${k}:${v}`)
-                    .join(", ") || "—"
-                }
-              />
+              <Kv label="Dataset" value={result.dataset_name} />
+              <Kv label="Table" value={result.table_name} />
             </div>
 
             {result.rows_skipped > 0 && (
@@ -183,8 +175,14 @@ export function UploadDialog({ open, onClose, onSuccess }: Props) {
             )}
 
             <div className="mt-1 text-xs text-ink-muted">
-              Recognised columns:{" "}
-              {result.columns_recognized.join(", ") || "(none)"}
+              Columns:{" "}
+              {result.columns.map((c) => `${c.name} (${c.role})`).join(", ") || "(none)"}
+            </div>
+
+            <div className="mt-1 text-xs text-brand-glow">
+              {result.is_active
+                ? "This dataset is now active — subsequent queries use it."
+                : "Uploaded (not active). Switch datasets from the picker."}
             </div>
 
             <div className="mt-3 flex justify-end gap-2">

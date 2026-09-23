@@ -11,6 +11,7 @@ import { ChatPanel } from "@/components/chat/ChatPanel";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { LiveIndicator } from "@/components/dashboard/LiveIndicator";
 import { UploadDialog } from "@/components/dashboard/UploadDialog";
+import { DatasetPicker } from "@/components/dashboard/DatasetPicker";
 
 import { reseed, startSimulate, stopSimulate } from "@/lib/api";
 import { useDashboardSocket } from "@/lib/useDashboardSocket";
@@ -19,6 +20,7 @@ export default function AppPage() {
   const [tab, setTab] = useState<"chat" | "dashboard">("dashboard");
   const [simulating, setSimulating] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [datasetVersion, setDatasetVersion] = useState(0);
   const { data, live, lastUpdateAt, version } = useDashboardSocket();
 
   useEffect(() => {
@@ -58,6 +60,7 @@ export default function AppPage() {
           />
 
           <div className="flex items-center gap-2">
+            <DatasetPicker refreshKey={datasetVersion} />
             <LiveIndicator live={live} updatedAt={lastUpdateAt} />
             <Button
               variant={simulating ? "outline" : "primary"}
@@ -70,7 +73,10 @@ export default function AppPage() {
             <Button variant="outline" size="sm" onClick={() => setUploadOpen(true)}>
               <Upload size={14} /> Upload data
             </Button>
-            <Button variant="ghost" size="sm" onClick={onReseed}>
+            <Button variant="ghost" size="sm" onClick={() => {
+              onReseed();
+              setDatasetVersion((v) => v + 1);
+            }}>
               <RefreshCw size={14} /> Reseed
             </Button>
           </div>
@@ -79,7 +85,10 @@ export default function AppPage() {
 
       <UploadDialog
         open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
+        onClose={() => {
+          setUploadOpen(false);
+          setDatasetVersion((v) => v + 1);
+        }}
       />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-6">

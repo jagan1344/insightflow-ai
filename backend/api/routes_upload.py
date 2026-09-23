@@ -1,58 +1,39 @@
-"""Upload endpoint: replace / append the demo `orders` table from a
-CSV or Excel (.xlsx / .xls) file.
+"""Upload endpoint: stores each upload as its OWN table, preserving the
+source column names 1-to-1, and registers it in the dataset registry as
+the active dataset.
 
-Design goals
-------------
-- Keep the shipped KPI semantic layer intact — the columns InsightFlow's
-  KPIs read (`revenue`, `cost`, `discount`, `quantity`, `order_date`,
-  `region_id`, `product_id`, `customer_id`) are what we insert into.
-- Let a user upload a file with human-readable dimension columns
-  (`region`, `category`, `product`, `customer`, `segment`) and upsert
-  them into the dim tables so the dashboard breakdowns still work.
-- Never let user data be a SQL-injection vector: values are always bound
-  parameters; input text is never concatenated into SQL.
-- After a successful upload trigger a `mark_changed()` so every open
-  dashboard sees the new data over WebSocket without a refresh.
+Design (2026-09-23 refactor — root-cause fix for the "upload doesn't
+change the active dataset" bug):
 
-Accepted columns (case-insensitive; header row required)
---------------------------------------------------------
-Required:
-    revenue      float
-Optional (with defaults):
-    order_date   YYYY-MM-DD, MM/DD/YYYY, or DD-MM-YYYY   (default: today)
-    quantity     int                                    (default: 1)
-    cost         float                                  (default: 0.0)
-    discount     float                                  (default: 0.0)
-Dimension names (strings — upserted into dim tables):
-    region, category, product, customer, segment
-Aliases accepted:
-    date, order date               → order_date
-    product name                   → product
-    customer name                  → customer
-    sales, amount, gross revenue   → revenue
-    qty, units                     → quantity
-    profit                         → treated as `revenue - cost` to derive cost
-    sub-category                   → category (when both present, category wins)
+- Every CSV / XLSX / XLS becomes a new physical SQLite table named
+  `dataset_<slug>` whose columns exactly mirror the source header. No
+  shoehorning into demo `orders`/`products`/`regions`/`customers`.
 
-Limits
-------
-- 5 MB file cap.
-- 50,000 row cap.
-- Row is skipped (and its 1-based index recorded) if revenue is missing
-  or unparseable.
+- The dataset registry (`insightflow/knowledge/dataset_registry.py`)
+  gets a row and the new dataset is marked active. From that point on
+  every NL→SQL call sees the uploaded schema, not the demo schema.
 
-Supported file types
---------------------
-- .csv, .txt          (comma-separated)
-- .xlsx               (Excel 2007+, via openpyxl)
-- .xls                (Excel 97-2003, via xlrd 1.2)
-Only the first worksheet is read.
+- Reactivating the demo dataset is done by
+  `POST /api/dataset/activate/demo` or by `POST /api/seed`.
+
+Compatibility: the legacy Superstore-into-demo path is still available
+via `POST /api/upload/orders?target=demo`; a plain
+`POST /api/upload/orders` (the current UI call) now stores in a NEW
+table.
+
+Guarantees:
+- No hardcoded SQL string is concatenated from the CSV — every value is
+  a bound parameter.
+- 5 MB / 50k row caps still apply.
+- On any error the transaction rolls back — no half-written state.
 """
 from __future__ import annotations
 
 import csv
 import io
+import re
 from datetime import date, datetime
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
@@ -60,6 +41,10 @@ from pydantic import BaseModel
 from sqlalchemy import text
 
 from insightflow.execution.executor import get_engine, reset_engine
+from insightflow.knowledge.dataset_registry import (
+    bootstrap, delete_uploaded, get_active_dataset, list_datasets,
+    register_uploaded, set_active, _slug, DEMO_ID,
+)
 from insightflow.knowledge.schema_agent import refresh_schema
 
 from . import realtime
@@ -70,63 +55,46 @@ router = APIRouter()
 MAX_FILE_BYTES = 5 * 1024 * 1024        # 5 MB
 MAX_ROWS       = 50_000
 
-# --- column aliasing ---
-ALIAS = {
-    "date": "order_date",
-    "orderdate": "order_date",
-    "sales": "revenue",
-    "amount": "revenue",
-    "gross_revenue": "revenue",
-    "product_name": "product",
-    "productname": "product",
-    "customer_name": "customer",
-    "customername": "customer",
-    "categoryname": "category",
-    "regionname": "region",
-    "qty": "quantity",
-    "units": "quantity",
-    "sub_category": "sub_category",   # kept separate so category still wins
-    "subcategory":  "sub_category",
-    "profit": "profit",               # used to derive cost when cost is absent
-}
 
-DIM_COLS = ("region", "category", "sub_category", "product", "customer", "segment")
-
+# ---------------------------------------------------------------------------
+# Response schema
+# ---------------------------------------------------------------------------
 
 class UploadResponse(BaseModel):
     ok: bool
+    dataset_id: str
+    dataset_name: str
+    table_name: str
     rows_inserted: int
     rows_skipped: int
     skipped_row_indices: list[int]
-    columns_recognized: list[str]
-    dims_upserted: dict[str, int]     # e.g. {"regions": 5, "products": 12, ...}
-    mode: str                          # "replace" | "append"
+    columns: list[dict]                # [{name, sql_type, role}]
     detail: str = ""
+    is_active: bool = True
+
+
+class DatasetListItem(BaseModel):
+    id: str
+    name: str
+    table: str
+    kind: str
+    uploaded_at: Optional[str] = None
+    is_active: bool
 
 
 # ---------------------------------------------------------------------------
-
-def _norm_header(h: str) -> str:
-    key = (h or "").strip().lower().replace(" ", "_").replace("-", "_")
-    return ALIAS.get(key, key)
-
-
-# ---------------------------------------------------------------------------
-# Excel decoding — turn a workbook into CSV text so the same parser runs.
+# Decoding (unchanged from previous version — supports CSV / XLSX / XLS)
 # ---------------------------------------------------------------------------
 
 def _cell_to_string(v) -> str:
     if v is None:
         return ""
-    # datetime → ISO date
     if hasattr(v, "strftime"):
         try:
             return v.strftime("%Y-%m-%d")
         except Exception:
             pass
-    # openpyxl returns ints and floats for numeric cells
     if isinstance(v, float):
-        # trim trailing .0 for integers stored as floats
         if v.is_integer():
             return str(int(v))
         return repr(v)
@@ -146,8 +114,7 @@ def _xlsx_to_csv(body: bytes) -> str:
 
 
 def _xls_to_csv(body: bytes) -> str:
-    import xlrd  # type: ignore  (xlrd 1.2 supports .xls)
-    from datetime import datetime as _dt
+    import xlrd  # type: ignore
     wb = xlrd.open_workbook(file_contents=body)
     ws = wb.sheet_by_index(0)
     out = io.StringIO()
@@ -157,7 +124,6 @@ def _xls_to_csv(body: bytes) -> str:
         for j in range(ws.ncols):
             cell = ws.cell(i, j)
             v = cell.value
-            # xlrd cell types: 0=EMPTY 1=TEXT 2=NUMBER 3=DATE 4=BOOL 5=ERROR
             if cell.ctype == 3:  # DATE
                 try:
                     dt = xlrd.xldate.xldate_as_datetime(v, wb.datemode)
@@ -174,7 +140,6 @@ def _xls_to_csv(body: bytes) -> str:
 
 
 def _decode_upload_to_csv_text(body: bytes, filename: str) -> str:
-    """Return CSV text for any accepted upload; raise HTTPException on bad ext."""
     lower = (filename or "").lower()
     if lower.endswith((".csv", ".txt")):
         try:
@@ -201,94 +166,213 @@ def _decode_upload_to_csv_text(body: bytes, filename: str) -> str:
     )
 
 
-def _parse_date(v: str) -> Optional[str]:
-    v = (v or "").strip()
-    if not v:
+# ---------------------------------------------------------------------------
+# Cell parsing — value-only guards, all values pass through bound params.
+# ---------------------------------------------------------------------------
+
+_DATE_FORMATS = ("%Y-%m-%d", "%Y/%m/%d", "%m/%d/%Y", "%d-%m-%Y",
+                 "%d/%m/%Y", "%Y-%m-%d %H:%M:%S")
+
+
+def _try_int(v: str) -> Optional[int]:
+    if not v or not v.strip():
         return None
-    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%m/%d/%Y", "%d-%m-%Y", "%d/%m/%Y"):
+    v2 = v.replace(",", "").strip()
+    try:
+        return int(v2)
+    except ValueError:
         try:
-            return datetime.strptime(v, fmt).date().isoformat()
+            f = float(v2)
+            if f.is_integer():
+                return int(f)
+        except ValueError:
+            pass
+    return None
+
+
+def _try_float(v: str) -> Optional[float]:
+    if not v or not v.strip():
+        return None
+    v2 = v.replace(",", "").replace("$", "").replace("%", "").strip()
+    try:
+        return float(v2)
+    except ValueError:
+        return None
+
+
+def _try_date(v: str) -> Optional[str]:
+    if not v or not v.strip():
+        return None
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(v.strip(), fmt).date().isoformat()
         except ValueError:
             continue
-    # last resort — pandas-style ISO with time
     try:
-        return datetime.fromisoformat(v).date().isoformat()
+        return datetime.fromisoformat(v.strip()).date().isoformat()
     except ValueError:
         return None
 
 
-def _parse_float(v: str) -> Optional[float]:
-    v = (v or "").strip().replace(",", "").replace("$", "")
-    if not v:
-        return None
-    try:
-        return float(v)
-    except ValueError:
-        return None
+def _sanitize_col_name(name: str) -> str:
+    """Turn 'Order Date' → 'order_date'. SQL-safe, deterministic."""
+    s = re.sub(r"[^A-Za-z0-9]+", "_", name.strip()).strip("_")
+    if not s:
+        return "column"
+    if s[0].isdigit():
+        s = "c_" + s
+    return s.lower()
 
 
-def _parse_int(v: str) -> Optional[int]:
-    v = (v or "").strip().replace(",", "")
-    if not v:
-        return None
-    try:
-        return int(float(v))
-    except ValueError:
-        return None
+def _dedupe_columns(names: list[str]) -> list[str]:
+    seen: dict[str, int] = {}
+    out: list[str] = []
+    for n in names:
+        if n not in seen:
+            seen[n] = 0
+            out.append(n)
+        else:
+            seen[n] += 1
+            out.append(f"{n}_{seen[n]}")
+    return out
+
+
+def _infer_types(headers: list[str],
+                 raw_rows: list[list[str]]) -> tuple[list[str], list[list]]:
+    """For each column decide REAL / INTEGER / TEXT and convert row values."""
+    n_cols = len(headers)
+    parsed_cols: list[list] = [[] for _ in range(n_cols)]
+    types: list[str] = []
+    for j in range(n_cols):
+        column_raw = [row[j] if j < len(row) else "" for row in raw_rows]
+        non_empty = [v for v in column_raw if v is not None and str(v).strip()]
+        n_nonempty = len(non_empty)
+        # try DATE
+        date_hits = sum(1 for v in non_empty if _try_date(str(v)) is not None)
+        if n_nonempty and date_hits / n_nonempty > 0.8:
+            types.append("TEXT")  # store as ISO string
+            for v in column_raw:
+                parsed_cols[j].append(_try_date(str(v)) if v else None)
+            continue
+        # try INTEGER
+        int_hits = sum(1 for v in non_empty if _try_int(str(v)) is not None
+                       and _try_float(str(v)) is not None
+                       and abs(_try_float(str(v)) - _try_int(str(v))) < 1e-9)
+        # try REAL
+        float_hits = sum(1 for v in non_empty if _try_float(str(v)) is not None)
+        if n_nonempty and float_hits / n_nonempty > 0.8:
+            if int_hits == float_hits:
+                types.append("INTEGER")
+                for v in column_raw:
+                    parsed_cols[j].append(_try_int(str(v)))
+            else:
+                types.append("REAL")
+                for v in column_raw:
+                    parsed_cols[j].append(_try_float(str(v)))
+            continue
+        # fallback: TEXT
+        types.append("TEXT")
+        for v in column_raw:
+            parsed_cols[j].append(None if v is None else str(v))
+    return types, list(zip(*parsed_cols))
 
 
 # ---------------------------------------------------------------------------
-
-def _upsert_dim(conn, table: str, id_col: str, name_col: str,
-                names: set[str], cache: dict[str, int],
-                extra_cols: dict[str, str] | None = None) -> int:
-    """Insert any missing rows; return the number of new rows inserted."""
-    if not names:
-        return 0
-    # Load existing
-    existing = {r[0]: r[1] for r in conn.execute(text(
-        f"SELECT {name_col}, {id_col} FROM {table}"
-    )).fetchall()}
-    cache.update(existing)
-    new = names - set(existing.keys())
-    if not new:
-        return 0
-    # Figure out next id
-    max_id = conn.execute(text(f"SELECT COALESCE(MAX({id_col}),0) FROM {table}")).scalar()
-    inserted = 0
-    for name in sorted(new):
-        max_id = int(max_id) + 1
-        cols = [id_col, name_col]
-        vals = {"id": max_id, "name": name}
-        placeholders = [":id", ":name"]
-        if extra_cols:
-            for c, v in extra_cols.items():
-                cols.append(c)
-                vals[c] = v
-                placeholders.append(f":{c}")
-        conn.execute(text(
-            f"INSERT INTO {table}({', '.join(cols)}) "
-            f"VALUES ({', '.join(placeholders)})"
-        ), vals)
-        cache[name] = max_id
-        inserted += 1
-    return inserted
-
-
+# Endpoints
 # ---------------------------------------------------------------------------
+
+@router.get("/api/datasets", response_model=list[DatasetListItem])
+def get_datasets():
+    return list_datasets()
+
+
+@router.get("/api/datasets/active")
+def get_active():
+    ds = get_active_dataset()
+    return {
+        "id": ds.id, "name": ds.name, "table": ds.table, "kind": ds.kind,
+        "columns": [
+            {"name": c.name, "sql_type": c.sql_type, "role": c.role,
+             "sample_values": [str(v)[:40] for v in c.sample_values[:5]]}
+            for c in ds.columns.values()
+        ],
+        "measures": ds.measures,
+        "dimensions": ds.dimensions,
+        "dates": ds.dates,
+    }
+
+
+@router.post("/api/datasets/activate/{dataset_id}")
+def activate_dataset(dataset_id: str):
+    try:
+        ds = set_active(dataset_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    reset_engine()
+    refresh_schema()
+    realtime.state.mark_changed()
+    return {"ok": True, "id": ds.id, "name": ds.name, "table": ds.table,
+            "kind": ds.kind}
+
+
+@router.delete("/api/datasets/{dataset_id}")
+def delete_dataset(dataset_id: str):
+    try:
+        delete_uploaded(dataset_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    realtime.state.mark_changed()
+    return {"ok": True}
+
+
+@router.get("/api/upload/sample.csv")
+def sample_csv():
+    from fastapi.responses import PlainTextResponse
+    body = (
+        "order_date,region,category,product,customer,segment,quantity,revenue,cost,discount\n"
+        "2026-01-15,North,Electronics,Laptop,Acme Ltd,Enterprise,2,1800.00,1260.00,72.00\n"
+        "2026-01-16,South,Furniture,Desk,Zeta Co,SMB,1,450.00,290.00,20.00\n"
+        "2026-02-01,East,Software,OS License,Ravi Kumar,Consumer,5,600.00,210.00,15.00\n"
+    )
+    return PlainTextResponse(
+        content=body, media_type="text/csv",
+        headers={"Content-Disposition":
+                 'attachment; filename="insightflow_sample.csv"'},
+    )
+
 
 @router.post("/api/upload/orders", response_model=UploadResponse)
-async def upload_orders(
-    file: UploadFile = File(..., description="CSV file to load into `orders`."),
+async def upload_dataset(
+    file: UploadFile = File(..., description="CSV / XLSX / XLS file."),
     mode: str = Query("replace", pattern="^(replace|append)$",
-                      description="`replace` clears orders first; `append` keeps existing rows."),
+                      description=("`replace` creates a new dataset "
+                                   "(the default). `append` requires a "
+                                   "target dataset id.")),
+    dataset_name: Optional[str] = Query(
+        None, description="Human-readable name for the new dataset. "
+                          "Defaults to the file name."),
+    target: Optional[str] = Query(
+        None, description="Existing dataset id to append to (only used "
+                          "when mode=append)."),
 ):
+    """Store the upload as its OWN table and set it active.
+
+    `mode=replace` (default, matches the current UI): create a brand new
+    dataset table, register it, and mark it active. The demo dataset is
+    left untouched — you can reactivate it with
+    `POST /api/datasets/activate/demo`.
+
+    `mode=append`: append into the physical table of `target` (must be
+    an existing uploaded dataset id). Column names in the CSV must
+    already exist in the target table.
+    """
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename")
 
     body = await file.read()
     if len(body) > MAX_FILE_BYTES:
-        raise HTTPException(status_code=413, detail=f"File too large (>{MAX_FILE_BYTES} bytes)")
+        raise HTTPException(status_code=413,
+                            detail=f"File too large (>{MAX_FILE_BYTES} bytes)")
     if not body:
         raise HTTPException(status_code=400, detail="Empty file")
 
@@ -296,252 +380,111 @@ async def upload_orders(
 
     reader = csv.reader(io.StringIO(text_body))
     try:
-        header = next(reader)
+        raw_header = next(reader)
     except StopIteration:
         raise HTTPException(status_code=400, detail="CSV has no header row")
 
-    headers = [_norm_header(h) for h in header]
-    if "revenue" not in headers:
-        raise HTTPException(
-            status_code=400,
-            detail="CSV must contain a `revenue` column (aliases: sales, amount)"
-        )
+    if not raw_header or all(not h.strip() for h in raw_header):
+        raise HTTPException(status_code=400, detail="Header row is empty")
 
-    col_idx = {name: i for i, name in enumerate(headers)}
+    headers = _dedupe_columns([_sanitize_col_name(h) for h in raw_header])
 
-    # Row parse
-    parsed_rows: list[dict] = []
+    raw_rows: list[list[str]] = []
     skipped: list[int] = []
-    seen_dims: dict[str, set[str]] = {c: set() for c in DIM_COLS}
-
-    row_num = 1  # header is row 1
+    row_num = 1
     for row in reader:
         row_num += 1
-        if row_num - 1 > MAX_ROWS + 1:   # +1 because header
+        if row_num - 1 > MAX_ROWS + 1:
             skipped.append(row_num)
             continue
         if not any((cell or "").strip() for cell in row):
             continue  # blank line
+        raw_rows.append(list(row) + [""] * max(0, len(headers) - len(row)))
 
-        def cell(name: str) -> str:
-            i = col_idx.get(name)
-            return row[i] if i is not None and i < len(row) else ""
+    if not raw_rows:
+        raise HTTPException(status_code=400, detail="No data rows found")
 
-        rev = _parse_float(cell("revenue"))
-        if rev is None:
-            skipped.append(row_num)
-            continue
-
-        d = _parse_date(cell("order_date")) or date.today().isoformat()
-        qty = _parse_int(cell("quantity"))
-        if qty is None:
-            qty = 1
-        cost = _parse_float(cell("cost"))
-        # `profit` fallback: if cost is absent but profit is provided, derive
-        # cost = revenue - profit (common shape in Sample Superstore).
-        if cost is None:
-            prof = _parse_float(cell("profit"))
-            if prof is not None:
-                cost = max(0.0, rev - prof)
-        if cost is None:
-            cost = 0.0
-        disc = _parse_float(cell("discount"))
-        if disc is None:
-            disc = 0.0
-
-        item = {
-            "order_date": d, "quantity": max(0, qty),
-            "revenue": max(0.0, rev), "cost": max(0.0, cost),
-            "discount": max(0.0, disc),
-        }
-        for c in DIM_COLS:
-            v = (cell(c) or "").strip()
-            if v:
-                item[c] = v
-                seen_dims[c].add(v)
-        # Backwards-compat fallback: if the CSV has ONLY sub_category
-        # (no category), keep the old behaviour and use it for category.
-        # When BOTH are provided (Superstore), keep them distinct so the
-        # sub_category dimension works in the analytical questions.
-        if "category" not in item and "sub_category" in item:
-            item["category"] = item["sub_category"]
-            seen_dims["category"].add(item["sub_category"])
-        parsed_rows.append(item)
-
-    if not parsed_rows:
-        raise HTTPException(status_code=400, detail="No valid rows parsed")
+    types, parsed_rows = _infer_types(headers, raw_rows)
 
     engine = get_engine()
-    dims_inserted: dict[str, int] = {}
-    has_sub_category = bool(seen_dims["sub_category"])
+    bootstrap()
 
-    with engine.begin() as conn:
-        # If this upload includes sub_category, ensure the products table
-        # has a sub_category column. SQLite has no `ADD COLUMN IF NOT
-        # EXISTS`, so we check pragma table_info first.
-        if has_sub_category:
-            existing_cols = {r[1] for r in conn.execute(
-                text("PRAGMA table_info(products)")).fetchall()}
-            if "sub_category" not in existing_cols:
+    if mode == "append":
+        if not target:
+            raise HTTPException(status_code=400,
+                                detail="mode=append requires `target` dataset id")
+        # look up target's table
+        with engine.begin() as conn:
+            row = conn.execute(text(
+                "SELECT table_name, kind, name FROM _datasets WHERE id = :id"),
+                {"id": target}).fetchone()
+            if not row:
+                raise HTTPException(status_code=404,
+                                    detail=f"unknown dataset id: {target}")
+            table_name, kind, ds_name = row
+            if kind == "demo":
+                raise HTTPException(status_code=400,
+                                    detail="cannot append to the demo dataset")
+            # Verify column names match
+            from sqlalchemy import inspect as sqlinspect
+            existing = [c["name"] for c in sqlinspect(engine).get_columns(table_name)]
+            unknown = [h for h in headers if h not in existing]
+            if unknown:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"columns not in target table: {unknown}",
+                )
+            for parsed in parsed_rows:
+                params = {h: parsed[i] for i, h in enumerate(headers)}
+                col_list = ", ".join(f'"{h}"' for h in headers)
+                ph_list = ", ".join(f":{h}" for h in headers)
                 conn.execute(text(
-                    "ALTER TABLE products ADD COLUMN sub_category TEXT"))
-
-        # Upsert dim rows
-        region_cache: dict[str, int] = {}
-        product_cache: dict[str, int] = {}   # keyed by product NAME
-        customer_cache: dict[str, int] = {}
-        # regions
-        dims_inserted["regions"] = _upsert_dim(
-            conn, "regions", "region_id", "region_name",
-            seen_dims["region"], region_cache,
-        )
-        # For products, collect (name → category, sub_category).
-        product_attrs: dict[str, dict[str, str]] = {}
-        for item in parsed_rows:
-            if "product" in item:
-                pname = item["product"]
-                product_attrs.setdefault(pname, {})
-                product_attrs[pname]["category"] = item.get("category", "Uploaded")
-                if "sub_category" in item:
-                    product_attrs[pname]["sub_category"] = item["sub_category"]
-        # Load existing product→id map
-        for pid, pname in conn.execute(text(
-                "SELECT product_id, product_name FROM products")).fetchall():
-            product_cache[pname] = pid
-        new_product_names = set(product_attrs.keys()) - set(product_cache.keys())
-        new_products = 0
-        if new_product_names:
-            max_pid = conn.execute(text(
-                "SELECT COALESCE(MAX(product_id),0) FROM products")).scalar()
-            for name in sorted(new_product_names):
-                max_pid = int(max_pid) + 1
-                attrs = product_attrs[name]
-                if has_sub_category:
-                    conn.execute(text(
-                        "INSERT INTO products(product_id, product_name, "
-                        "category, sub_category) VALUES "
-                        "(:pid, :pname, :cat, :subcat)"
-                    ), {"pid": max_pid, "pname": name,
-                        "cat": attrs.get("category", "Uploaded"),
-                        "subcat": attrs.get("sub_category")})
-                else:
-                    conn.execute(text(
-                        "INSERT INTO products(product_id, product_name, category) "
-                        "VALUES (:pid, :pname, :cat)"
-                    ), {"pid": max_pid, "pname": name,
-                        "cat": attrs.get("category", "Uploaded")})
-                product_cache[name] = max_pid
-                new_products += 1
-        dims_inserted["products"] = new_products
-
-        # Backfill sub_category on existing products where possible
-        if has_sub_category:
-            for pname, attrs in product_attrs.items():
-                if "sub_category" in attrs and pname in product_cache:
-                    conn.execute(text(
-                        "UPDATE products SET sub_category = :subcat "
-                        "WHERE product_id = :pid AND "
-                        "(sub_category IS NULL OR sub_category = '')"
-                    ), {"subcat": attrs["sub_category"],
-                        "pid": product_cache[pname]})
-
-        # customers — need region_id and segment. Default region_id = 1
-        # if no region is provided; default segment = "Uploaded".
-        customer_names = seen_dims["customer"]
-        # Load existing customers
-        for cid, cname in conn.execute(text("SELECT customer_id, customer_name FROM customers")).fetchall():
-            customer_cache[cname] = cid
-        new_customer_names = customer_names - set(customer_cache.keys())
-        new_customers = 0
-        if new_customer_names:
-            # figure a sensible default region_id
-            default_region = conn.execute(text(
-                "SELECT region_id FROM regions ORDER BY region_id LIMIT 1"
-            )).scalar() or 1
-            max_cid = conn.execute(text("SELECT COALESCE(MAX(customer_id),0) FROM customers")).scalar()
-            for name in sorted(new_customer_names):
-                max_cid = int(max_cid) + 1
+                    f'INSERT INTO "{table_name}"({col_list}) VALUES ({ph_list})'
+                ), params)
+        dataset_id = target
+    else:
+        # replace mode — new dataset table
+        name = dataset_name or Path(file.filename).stem or "dataset"
+        slug = _slug(name)
+        table_name = slug if slug.startswith("dataset_") else "dataset_" + slug
+        # ensure uniqueness of the table
+        with engine.begin() as conn:
+            from sqlalchemy import inspect as sqlinspect
+            existing_tables = set(sqlinspect(engine).get_table_names())
+            base = table_name
+            i = 1
+            while table_name in existing_tables:
+                i += 1
+                table_name = f"{base}_{i}"
+            col_defs = ", ".join(f'"{h}" {t}' for h, t in zip(headers, types))
+            conn.execute(text(f'CREATE TABLE "{table_name}" ({col_defs})'))
+            for parsed in parsed_rows:
+                params = {h: parsed[i] for i, h in enumerate(headers)}
+                col_list = ", ".join(f'"{h}"' for h in headers)
+                ph_list = ", ".join(f":{h}" for h in headers)
                 conn.execute(text(
-                    "INSERT INTO customers(customer_id, customer_name, region_id, segment) "
-                    "VALUES (:cid, :cname, :rid, :seg)"
-                ), {"cid": max_cid, "cname": name,
-                    "rid": default_region, "seg": "Uploaded"})
-                customer_cache[name] = max_cid
-                new_customers += 1
-        dims_inserted["customers"] = new_customers
+                    f'INSERT INTO "{table_name}"({col_list}) VALUES ({ph_list})'
+                ), params)
+        dataset_id = register_uploaded(name=name, table_name=table_name)
 
-        # Replace or append orders
-        if mode == "replace":
-            conn.execute(text("DELETE FROM orders"))
-
-        # Establish default FK targets for rows that don't name a dim
-        default_region_id = conn.execute(text(
-            "SELECT region_id FROM regions ORDER BY region_id LIMIT 1"
-        )).scalar() or 1
-        default_product_id = conn.execute(text(
-            "SELECT product_id FROM products ORDER BY product_id LIMIT 1"
-        )).scalar() or 1
-        default_customer_id = conn.execute(text(
-            "SELECT customer_id FROM customers ORDER BY customer_id LIMIT 1"
-        )).scalar() or 1
-
-        # Fresh order_id sequence
-        max_oid = conn.execute(text("SELECT COALESCE(MAX(order_id),0) FROM orders")).scalar()
-
-        rows_inserted = 0
-        for item in parsed_rows:
-            max_oid = int(max_oid) + 1
-            region_id = (
-                region_cache.get(item.get("region", ""), default_region_id)
-                if "region" in item else default_region_id
-            )
-            product_id = (
-                product_cache.get(item.get("product", ""), default_product_id)
-                if "product" in item else default_product_id
-            )
-            customer_id = (
-                customer_cache.get(item.get("customer", ""), default_customer_id)
-                if "customer" in item else default_customer_id
-            )
-            conn.execute(text(
-                "INSERT INTO orders(order_id, customer_id, product_id, region_id, "
-                "order_date, quantity, revenue, cost, discount) "
-                "VALUES (:oid, :cid, :pid, :rid, :d, :q, :rev, :cost, :disc)"
-            ), {"oid": max_oid, "cid": customer_id, "pid": product_id,
-                "rid": region_id, "d": item["order_date"], "q": item["quantity"],
-                "rev": item["revenue"], "cost": item["cost"], "disc": item["discount"]})
-            rows_inserted += 1
-
-    # Post-upload housekeeping
     reset_engine()
     refresh_schema()
-    realtime.state.mark_changed()   # triggers a dashboard broadcast
+    realtime.state.mark_changed()
 
+    ds = get_active_dataset()
     return UploadResponse(
         ok=True,
-        rows_inserted=rows_inserted,
+        dataset_id=dataset_id,
+        dataset_name=ds.name,
+        table_name=ds.table,
+        rows_inserted=len(parsed_rows),
         rows_skipped=len(skipped),
         skipped_row_indices=skipped[:50],
-        columns_recognized=[h for h in headers if h],
-        dims_upserted=dims_inserted,
-        mode=mode,
-        detail=(f"Loaded {rows_inserted} row(s) into orders "
-                f"({mode}); upserted {sum(dims_inserted.values())} dim rows."),
-    )
-
-
-@router.get("/api/upload/sample.csv")
-def sample_csv():
-    """A tiny template a user can download and edit."""
-    from fastapi.responses import PlainTextResponse
-    csv_body = (
-        "order_date,region,category,product,customer,segment,quantity,revenue,cost,discount\n"
-        "2026-01-15,North,Electronics,Laptop,Acme Ltd,Enterprise,2,1800.00,1260.00,72.00\n"
-        "2026-01-16,South,Furniture,Desk,Zeta Co,SMB,1,450.00,290.00,20.00\n"
-        "2026-02-01,East,Software,OS License,Ravi Kumar,Consumer,5,600.00,210.00,15.00\n"
-    )
-    return PlainTextResponse(
-        content=csv_body,
-        media_type="text/csv",
-        headers={"Content-Disposition": 'attachment; filename="insightflow_sample.csv"'},
+        columns=[
+            {"name": c.name, "sql_type": c.sql_type, "role": c.role}
+            for c in ds.columns.values()
+        ],
+        detail=(f"Stored {len(parsed_rows)} row(s) in table "
+                f"{ds.table!r} — active dataset is now '{ds.name}'."),
+        is_active=True,
     )

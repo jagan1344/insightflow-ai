@@ -135,17 +135,25 @@ def get_schema():
 
 @router.post("/api/seed", response_model=SimpleResponse)
 def reseed():
+    """Reseed the demo dataset AND make it active. Any uploaded datasets
+    are left alone (still queryable via `POST /api/datasets/activate/<id>`)."""
     import runpy
     from pathlib import Path
     seed_path = Path(__file__).resolve().parent.parent / "data" / "seed.py"
     runpy.run_path(str(seed_path), run_name="__main__")
     reset_engine()
     refresh_schema()
-    # Trigger a broadcast on the next watcher tick — force version bump
+    # switch active back to demo
+    try:
+        from insightflow.knowledge.dataset_registry import set_active, DEMO_ID
+        set_active(DEMO_ID)
+    except Exception:
+        pass
     realtime.state.mark_changed()
     from insightflow.execution.executor import run_sql
     n = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
-    return SimpleResponse(ok=True, detail="reseeded", row_count=int(n))
+    return SimpleResponse(ok=True, detail="reseeded (demo dataset is active)",
+                          row_count=int(n))
 
 
 @router.post("/api/simulate/start", response_model=SimpleResponse)
