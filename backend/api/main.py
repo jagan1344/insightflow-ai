@@ -12,6 +12,7 @@ from . import realtime
 from .routes_chat import router as chat_router
 from .routes_dashboard import router as dashboard_router
 from .routes_research import router as research_router
+from .routes_upload import router as upload_router
 
 
 @asynccontextmanager
@@ -48,6 +49,7 @@ app.add_middleware(
 app.include_router(chat_router)
 app.include_router(dashboard_router)
 app.include_router(research_router)
+app.include_router(upload_router)
 
 
 @app.get("/api/health")
