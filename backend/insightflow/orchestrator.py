@@ -44,6 +44,40 @@ class Orchestrator:
         self.memory = memory or Memory()
 
     # ------------------------------------------------------------------
+    def _clarify_message(self, intent) -> str:
+        """Produce a concrete CLARIFY message that names what's missing
+        from the current dataset, or what breakdown the SQL didn't cover.
+        Never a vague apology."""
+        if intent is None:
+            return ("I'm not confident enough to answer this. Could you "
+                    "specify a KPI (e.g. revenue, margin) and a dimension "
+                    "or time window?")
+        if intent.unavailable:
+            gaps = ", ".join(g.split(":", 1)[-1] for g in intent.unavailable)
+            return (f"I can't answer this on the current dataset — it's missing: "
+                    f"{gaps}. Load a dataset that includes those columns, or "
+                    f"ask about the fields that are available.")
+        if intent.dimensions and intent.filters and any(
+                f.get("kind") == "metric_lt_zero" for f in intent.filters):
+            m = next((f["metric"] for f in intent.filters
+                      if f.get("kind") == "metric_lt_zero"), "profit")
+            dim = intent.dimensions[0]
+            return (f"I can break {m} down by {dim.replace('_', ' ')} and flag the "
+                    f"loss-making ones — want {m} by {dim.replace('_', ' ')}, "
+                    f"filtered to negatives?")
+        if intent.analysis_type == "correlation" and intent.dimensions:
+            metrics = " and ".join(intent.metrics) or "the requested metrics"
+            dim = intent.dimensions[0]
+            return (f"I can show {metrics} together per {dim.replace('_', ' ')} "
+                    f"so you can see the relationship. Want that breakdown?")
+        if intent.dimensions:
+            return (f"I have an overall figure, but the question asks for a "
+                    f"breakdown by {', '.join(d.replace('_', ' ') for d in intent.dimensions)}. "
+                    f"Want that breakdown?")
+        return ("I'm not confident enough to answer this. Could you specify "
+                "a KPI and a dimension or time window?")
+
+    # ------------------------------------------------------------------
     def ask(self, question: str) -> InsightResponse:
         # 1. generate SQL
         gen: GenSQL = generate_sql(question, llm=self.llm)
@@ -65,7 +99,8 @@ class Orchestrator:
                 issues=["question is out of the BI domain"],
             )
             conf = score_confidence(sqlval, kpival, empty_result,
-                                    ambiguous=False, out_of_scope=True)
+                                    ambiguous=False, out_of_scope=True,
+                                    query_intent=gen.query_intent, sql="")
             evidence = build_evidence(question, "", None, {}, empty_result)
             analysis = Analysis(
                 summary=("This question does not appear to be about the "
@@ -112,23 +147,23 @@ class Orchestrator:
             filters["breakdown"] = gen.dimension
         evidence = build_evidence(question, gen.sql, gen.kpi, filters, result)
 
-        # 9. confidence
+        # 9. confidence — intent-coverage aware
         confidence = score_confidence(
             sqlval, kpival, result,
             ambiguous=ambiguous, out_of_scope=False,
+            query_intent=gen.query_intent, sql=gen.sql,
         )
 
-        # 10. decision
-        decision = decide(confidence, sql_ok=sqlval.ok, exec_ok=result.ok, ambiguous=ambiguous)
+        # 10. decision — routes to CLARIFY on low intent-coverage
+        decision = decide(confidence, sql_ok=sqlval.ok, exec_ok=result.ok,
+                          ambiguous=ambiguous, query_intent=gen.query_intent)
 
         # 11. explain + recommend only when we answer
         if decision.action in (ANSWER, WARN):
             explanation = explain(evidence, analysis, llm=self.llm)
             recommendation = recommend(analysis) if gen.diagnostic else None
         elif decision.action == CLARIFY:
-            explanation = ("I'm not confident enough to answer this. "
-                           "Could you specify a KPI (e.g. revenue, margin) "
-                           "and a dimension or time window?")
+            explanation = self._clarify_message(gen.query_intent)
             recommendation = None
         else:  # ABSTAIN
             explanation = ("I'm abstaining because the query did not pass "

@@ -101,10 +101,10 @@ Every value below is **[Measured]** from `metrics.json` (n=27 total,
 
 | Metric | Value | Notes |
 |---|---:|---|
-| Execution Accuracy (EX) | **94.1 %** (16/17) | BIRD-style set equality |
-| Exact Match             | **41.2 %** (7/17)  | canonicalised whitespace / case |
-| SQL Validity Rate       | **100 %**          | signal averaged over graded items |
-| Schema-Matching Accuracy| **100 %**          | all tables/columns exist |
+| Execution Accuracy (EX) | **100.0 %** (17/17) | BIRD-style set equality |
+| Exact Match             | **41.2 %** (7/17)   | canonicalised whitespace / case |
+| SQL Validity Rate       | **100 %**           | signal averaged over graded items |
+| Schema-Matching Accuracy| **100 %**           | all tables/columns exist |
 
 Base-paper context: BIRD test EX peaks at **55.90 %** [Base-Paper]
 (DIN-SQL+GPT-4); human is **92.96 %**. These are not comparable to the
@@ -115,41 +115,42 @@ scale of what BIRD asks vs what the reliability benchmark asks.
 
 | Metric | Value |
 |---|---:|
-| Answer correctness      | **94.1 %** |
-| KPI matching            | **100 %**  |
-| Evidence support        | **81.8 %** |
-| Result consistency      | **100 %**  |
+| Answer correctness      | **100.0 %** |
+| KPI matching            | **100 %**   |
+| Evidence support        | **81.8 %**  |
+| Result consistency      | **100 %**   |
 
 ### 7.3 Reliability
 
 | Metric | Value |
 |---|---:|
-| Average confidence overall            | **0.667** |
-| Average confidence on correct items   | **0.983** |
-| Average confidence on incorrect items | **0.970** |
-| High-confidence error rate            | **5.9 %** (1/17) |
-| ECE (expected calibration error)      | **0.041** |
-| Brier score                           | **0.056** |
+| Average confidence overall            | **0.638** |
+| Average confidence on correct items   | **0.987** |
+| Average confidence on incorrect items | *n/a*  (no incorrect items) |
+| High-confidence error rate            | **0.0 %** (0/17) |
+| ECE (expected calibration error)      | **0.013** |
+| Brier score                           | **0.0003** |
 
-The mean-confidence gap between correct and incorrect is small
-(0.983 vs 0.970). The single incorrect item is D02 — see error
-analysis below — and the system reports high confidence on it. This is
-the finding the ablation is set up to interrogate.
+Every graded item now answers correctly; the previous single high-confidence
+error (D02 — "Why did revenue drop in July compared to June?") is caught
+by both the `in July` month-detection fix and the intent-coverage guard.
 
 ### 7.4 Decision policy
 
 | Metric | Value |
 |---|---:|
-| Decision correctness     | **96.3 %** (26/27) |
-| Answer precision         | **94.1 %** (16/17 answered items correct) |
-| Unsafe-answer rate       | **3.7 %** (1/27) |
-| Distribution: ANSWER     | 18 |
+| Decision correctness     | **100.0 %** (27/27) |
+| Answer precision         | **100.0 %** (17/17 answered items correct) |
+| Unsafe-answer rate       | **0.0 %** (0/27) |
+| Distribution: ANSWER     | 17 |
 | Distribution: WARN       | 0  |
-| Distribution: CLARIFY    | 9  |
+| Distribution: CLARIFY    | 10 |
 | Distribution: ABSTAIN    | 0  |
 
-The one decision mismatch (B02 — "Tell me about the data.") is
-documented in the error analysis.
+The previously-mismatched B02 ("Tell me about the data.") is now
+correctly routed to CLARIFY: the token "data" is no longer treated as an
+in-domain marker by the whitelist, so the question doesn't smuggle
+itself into revenue defaults.
 
 ## 8. Confidence analysis
 
@@ -157,25 +158,25 @@ Bin-wise calibration:
 
 | Bin | n | correct | accuracy | avg_confidence |
 |---|---:|---:|---:|---:|
-| 0.00–0.40 | 0 | 0 | —  | — |
-| 0.40–0.70 | 0 | 0 | —  | — |
-| 0.70–1.01 | 17 | 16 | **94.1 %** | 0.982 |
+| 0.00–0.40 | 0  | 0  | —          | — |
+| 0.40–0.70 | 0  | 0  | —          | — |
+| 0.70–1.01 | 17 | 17 | **100 %**  | 0.987 |
 
-Interpretation. On this benchmark the seven-signal aggregate almost
-always lands in the top bin — the questions the system is asked to
-grade either succeed cleanly (KPI known, schema matches, SQL
-executes) or are routed to CLARIFY before they're graded at all
-(out-of-scope, ambiguous). This is by design of the decision policy,
-but it also means the bins below 0.70 are empty. The single incorrect
-answer sits in the top bin and drags the top-bin accuracy from 100 %
-to 94.1 %; this is where **ECE = 0.041** and **Brier = 0.056** come
-from. In particular, ECE ≈ (17/17) · |0.982 − 0.941| ≈ 0.041.
+Interpretation. Every graded item lands in the top bin and is correct.
+The only source of ECE now is that the eight-signal weighted average
+sits at ≈ 0.987 rather than exactly 1.0 (evidence_strength drops to
+0.7 for single-row aggregate results), leaving **ECE = 0.013** and
+**Brier = 0.0003**. Confidence is now honestly correlated with
+correctness on this benchmark: mean confidence on correct answers is
+0.987, and there is no incorrect answer to compare against.
 
-Reading: on this benchmark, confidence *is* correlated with
-correctness (the correct-vs-incorrect means differ by ≈ 0.01 and
-the top-bin accuracy is high), but the seven-signal aggregate is
-*over-confident by ≈ 4 percentage points* on the answered slice. This
-is the calibration surface the ablation moves.
+This is a stronger claim than the previous run made and needs to be
+read narrowly: it is the calibration state *on the InsightFlow
+Reliability Benchmark*, not a general BI-safety guarantee. The
+benchmark is small (n=17 graded items) and specifically tests the
+class of failures the intent-coverage guard was designed to catch. A
+broader benchmark would still be expected to surface high-confidence
+errors that this one does not.
 
 ## 9. Decision analysis
 
@@ -211,61 +212,78 @@ is the required behaviour for the diagnostic category.
 
 ## 10. Ablation study
 
-Three configurations of the seven-signal aggregate, everything else
-identical. All values [Measured] on n=27.
+Three configurations of the reliability aggregate, everything else
+identical. All values [Measured] on n=27 after the 2026-09-23 fixes.
 
 | Metric | A — SQL-only | B — SQL+KPI | C — Full |
 |---|---:|---:|---:|
-| EX                       | 0.9412 | 0.9412 | 0.9412 |
-| Business correctness     | 0.9412 | 0.9412 | 0.9412 |
+| EX                       | 1.0000 | 1.0000 | 1.0000 |
+| Business correctness     | 1.0000 | 1.0000 | 1.0000 |
 | Evidence support         | 0.8176 | 0.8176 | 0.8176 |
-| Decision correctness     | 0.9630 | 0.9630 | 0.9630 |
-| Unsafe-answer rate       | 0.0370 | 0.0370 | 0.0370 |
-| Avg confidence           | 0.667  | 0.673  | 0.667  |
-| **ECE (↓)**              | 0.0588 | 0.0588 | **0.0406** |
-| **Brier (↓)**            | 0.0588 | 0.0588 | **0.0558** |
+| Decision correctness     | 1.0000 | 1.0000 | 1.0000 |
+| Unsafe-answer rate       | 0.0000 | 0.0000 | 0.0000 |
+| Avg confidence           | 0.667  | 0.673  | 0.638  |
+| **ECE (↓)**              | 0.0000 | 0.0000 | 0.0128 |
+| **Brier (↓)**            | 0.0000 | 0.0000 | 0.0003 |
 
-**What earns its place.** Adding the extra signals does **not**
-change EX, business correctness, or the decision distribution on this
-benchmark — the SQL-generation stage and the CLARIFY-vs-ANSWER
-routing are the same in all three configurations. What the extra
-signals do improve is **calibration**: ECE drops by ≈ 30 % and Brier
-falls slightly. That is the honest, defensible answer to "does the
-reliability layer earn its place?"
+**What the intent-coverage fix earned.** The generator now produces
+SQL that actually covers each question's dimension / filter / factor
+requirements (Section 7.1 EX = 100 %), and the coverage hard cap
+guarantees a mismatched SQL cannot score above `coverage + 0.05`. The
+class of failure that previously produced a 0.97-confidence bare
+aggregate on a "which sub-categories are draining cash" question is
+now impossible: either the SQL covers the intent and confidence stays
+high, or coverage forces the score down and the decision routes to
+CLARIFY.
 
-**What does NOT earn its place** on this benchmark. Nothing in this
-ablation shows the seven-signal aggregate makes the system safer than
-SQL-only — the one unsafe answer (D02) fires in every configuration
-because the underlying SQL generator picked the wrong month. Fixing
-that is a generator improvement, not a confidence improvement.
+**What the ablation now shows honestly.** With every item answered
+correctly, the three configurations look identical on accuracy /
+decision / safety. A and B report ECE = 0 and Brier = 0 because they
+weight the aggregate such that confidence collapses to 1.0 on every
+correct answer; C is fractionally worse-calibrated because
+`evidence_strength = 0.7` for single-row aggregate results pulls its
+score off 1.0. The *previous* ablation (before the fix) showed the
+full-signal aggregate improving ECE from 0.059 to 0.041 by catching
+the single wrong answer's over-confidence; that failure mode no longer
+exists on this benchmark, so C's edge over A/B disappears. This is a
+legitimate honest finding: on a benchmark where every question is
+answered correctly, richer confidence signals cannot demonstrate
+additional value — they'd need harder questions to matter. See §14
+Limitations.
 
 ## 11. Error analysis
 
-Two failures, both real, both preserved as ground truth on the
-benchmark so they can be tracked.
+The two failures documented in the previous run of this report are
+now fixed. Both fixes are surgical and testable:
 
-- **D02** — "Why did revenue drop in July compared to June?" The
-  rule-based month detector picks the first month matched by a
-  word-boundary regex over synonyms (June → 6) and produces
-  `WHERE order_date >= '2026-06-01' …` instead of July's window. The
-  SQL is valid, all KPIs match, all seven signals are high → confidence
-  **0.97** → ANSWER. The reported revenue (454 994) is *June*, not
-  July, so the answer is confidently wrong. This is **the** unsafe
-  answer on the benchmark. Fix would be in `nlsql/generator.py`'s
-  `_detect_month` (pick the *last* month, or handle "compared to"
-  explicitly).
+- **D02** — "Why did revenue drop in July compared to June?" was
+  previously a high-confidence wrong answer because
+  `_detect_month` returned the first month matched by a word-boundary
+  regex (June, matched before July in dictionary order). The fixed
+  `_detect_month` first looks for the pattern `in <month>` — a
+  reliable "target month" cue in English — and only falls back to the
+  earliest-in-sentence match when no `in <month>` appears. Regression
+  guard in `tests/test_intent_coverage.py`.
 
-- **B02** — "Tell me about the data." The token "data" is in the
-  in-domain whitelist (`DOMAIN_TERMS`), so the generator treats the
-  question as in-scope, defaults to Total Revenue, and returns an
-  ANSWER at confidence 0.97 rather than CLARIFY. Fix would remove
-  "data" from `DOMAIN_TERMS` and require at least one KPI *or*
-  dimension token to consider the question in-scope.
+- **B02** — "Tell me about the data." was previously mis-routed to
+  ANSWER because the token "data" was in the `DOMAIN_TERMS`
+  whitelist, making the question look in-scope. "data" has been
+  removed from the whitelist; the question now hits the out-of-scope
+  branch and CLARIFIES at confidence 0.04.
 
-These two failures are the reason the report emphasises calibration
-over accuracy: the extra reliability signals catch neither, and a
-research claim of "safer decisions" would be wrong to make until the
-generator is hardened.
+Neither fix relies on the reliability signals — they are generator
+fixes. The reliability layer's contribution here is the intent-coverage
+signal + hard cap, which guarantees that even if a future generator bug
+emits mismatched SQL for a specific-breakdown question, the score
+cannot exceed `coverage + 0.05` and the decision policy will CLARIFY
+instead of confidently answering a different question.
+
+The two Superstore-style questions from the bug report also verify
+this end-to-end (`tests/test_intent_coverage.py::test_draining_cash_by_sub_category_after_upload`
+and `test_discount_margin_region_after_upload`) — after uploading a
+Superstore-shaped dataset the generator emits a real `GROUP BY
+sub_category HAVING SUM(revenue-cost) < 0` query, and coverage lands
+at 1.0 rather than the previous ≈ 0.25.
 
 ## 12. Base-paper comparison
 

@@ -54,6 +54,17 @@ KPIS: Dict[str, KPI] = {
         unit="ratio",
         ratio_0_1=True,
     ),
+    # Profit is a signed currency KPI (can be negative — e.g. loss-making
+    # sub-categories). Non-negative rule is disabled so `HAVING profit < 0`
+    # queries don't trip the KPI validator.
+    "profit": KPI(
+        key="profit",
+        name="Profit",
+        sql_expr="SUM(revenue-cost)",
+        description="Total profit (revenue - cost). Can be negative.",
+        unit="currency",
+        non_negative=False,
+    ),
     "discount_rate": KPI(
         key="discount_rate",
         name="Discount Rate",
@@ -86,11 +97,20 @@ SYNONYMS: Dict[str, str] = {
     "average order value": "avg_order_value",
     "avg order value": "avg_order_value",
     "aov": "avg_order_value",
-    # margin
+    # margin — "profit margin" resolves to gross_margin, plain "profit" to profit
     "gross margin": "gross_margin",
-    "margin": "gross_margin",
     "profit margin": "gross_margin",
+    "profit margins": "gross_margin",
+    "margins": "gross_margin",
+    "margin": "gross_margin",
     "profitability": "gross_margin",
+    # profit (signed) — cash flow / loss-making phrases
+    "profit": "profit",
+    "losing money": "profit",
+    "draining cash": "profit",
+    "loss making": "profit",
+    "loss-making": "profit",
+    "unprofitable": "profit",
     # discount
     "discount rate": "discount_rate",
     "discounting": "discount_rate",
