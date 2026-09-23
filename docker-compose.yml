@@ -1,0 +1,34 @@
+services:
+  backend:
+    build: ./backend
+    image: insightflow-backend:latest
+    environment:
+      LLM_PROVIDER: offline
+      CORS_ORIGINS: http://localhost:3000
+      # For Postgres, uncomment the postgres service below and set:
+      # DATABASE_URL: postgresql+psycopg2://insightflow:insightflow@postgres:5432/insightflow
+    ports:
+      - "8000:8000"
+
+  web:
+    build: ./web
+    image: insightflow-web:latest
+    environment:
+      # Server-side proxy target — inside the docker network the backend is 'backend'
+      BACKEND_ORIGIN: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+  # Optional Postgres backend. Enable with:
+  #     docker compose --profile pg up
+  postgres:
+    profiles: ["pg"]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: insightflow
+      POSTGRES_PASSWORD: insightflow
+      POSTGRES_DB: insightflow
+    ports:
+      - "5432:5432"

@@ -1,0 +1,26 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+.env
+.pytest_cache/
+.DS_Store
+
+# databases
+backend/data/insightflow.db
+backend/data/*.db-journal
+
+# node / next
+node_modules/
+web/.next/
+web/out/
+web/next-env.d.ts
+web/.turbo/
+web/.eslintcache
+web/tsconfig.tsbuildinfo
+
+# logs
+*.log
