@@ -41,16 +41,38 @@ export interface UploadResult {
   detail: string;
 }
 
+/**
+ * Best backend origin for browser-issued requests.
+ *
+ * By default the Next.js dev server proxies `/api/*` to the backend via
+ * `next.config.js` rewrites. That proxy tends to time out on multipart
+ * uploads (~3 MB Excel files → ECONNRESET) before the backend finishes
+ * decoding + inserting rows. So for LARGE requests (uploads) we skip
+ * the proxy and go directly to the backend — CORS is already allowed
+ * for the dev origin.
+ *
+ * You can override via `NEXT_PUBLIC_BACKEND_URL` (e.g. in production).
+ */
+function backendOrigin(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  if (typeof window === "undefined") return "";
+  // Dev: same host, port 8000.
+  const { protocol, hostname } = window.location;
+  return `${protocol}//${hostname}:8000`;
+}
+
 export async function uploadOrdersCsv(
   file: File,
   mode: "replace" | "append" = "replace",
+  datasetName?: string,
 ): Promise<UploadResult> {
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch(`/api/upload/orders?mode=${mode}`, {
-    method: "POST",
-    body: fd,
-  });
+  const qs = new URLSearchParams({ mode });
+  if (datasetName) qs.set("dataset_name", datasetName);
+  const url = `${backendOrigin()}/api/upload/orders?${qs.toString()}`;
+  const res = await fetch(url, { method: "POST", body: fd });
   if (!res.ok) {
     let msg = `upload failed: ${res.status}`;
     try {
