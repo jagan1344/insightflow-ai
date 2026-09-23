@@ -24,9 +24,19 @@ class ValidationResult:
 
 
 def _find_referenced_tables(sql: str) -> Set[str]:
-    """Best-effort table detection from FROM and JOIN clauses."""
+    """Best-effort table detection from FROM and JOIN clauses.
+    Supports quoted identifiers ("table_name", [table_name], `table_name`)
+    and plain ones."""
     tables: Set[str] = set()
-    for m in re.finditer(r"\b(?:from|join)\s+([A-Za-z_][A-Za-z0-9_]*)", sql, flags=re.I):
+    # Plain identifier
+    for m in re.finditer(r"\b(?:from|join)\s+([A-Za-z_][A-Za-z0-9_]*)",
+                         sql, flags=re.I):
+        tables.add(m.group(1).lower())
+    # Double-quoted
+    for m in re.finditer(r'\b(?:from|join)\s+"([^"]+)"', sql, flags=re.I):
+        tables.add(m.group(1).lower())
+    # Backtick
+    for m in re.finditer(r"\b(?:from|join)\s+`([^`]+)`", sql, flags=re.I):
         tables.add(m.group(1).lower())
     return tables
 

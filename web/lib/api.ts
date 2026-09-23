@@ -30,12 +30,14 @@ export async function reseed(): Promise<void> {
 
 export interface UploadResult {
   ok: boolean;
+  dataset_id: string;
+  dataset_name: string;
+  table_name: string;
   rows_inserted: number;
   rows_skipped: number;
   skipped_row_indices: number[];
-  columns_recognized: string[];
-  dims_upserted: Record<string, number>;
-  mode: "replace" | "append";
+  columns: { name: string; sql_type: string; role: string }[];
+  is_active: boolean;
   detail: string;
 }
 
@@ -61,4 +63,50 @@ export async function uploadOrdersCsv(
 }
 
 export const SAMPLE_CSV_URL = "/api/upload/sample.csv";
+
+// --------- dataset registry ---------
+
+export interface DatasetSummary {
+  id: string;
+  name: string;
+  table: string;
+  kind: "demo" | "uploaded";
+  uploaded_at: string | null;
+  is_active: boolean;
+}
+
+export interface ActiveDataset {
+  id: string;
+  name: string;
+  table: string;
+  kind: "demo" | "uploaded";
+  columns: {
+    name: string;
+    sql_type: string;
+    role: string;
+    sample_values: string[];
+  }[];
+  measures: string[];
+  dimensions: string[];
+  dates: string[];
+}
+
+export async function fetchActiveDataset(): Promise<ActiveDataset> {
+  const res = await fetch("/api/datasets/active", { cache: "no-store" });
+  if (!res.ok) throw new Error(`fetch active dataset failed: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchDatasets(): Promise<DatasetSummary[]> {
+  const res = await fetch("/api/datasets", { cache: "no-store" });
+  if (!res.ok) throw new Error(`fetch datasets failed: ${res.status}`);
+  return res.json();
+}
+
+export async function activateDataset(id: string): Promise<void> {
+  const res = await fetch(`/api/datasets/activate/${encodeURIComponent(id)}`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(`activate dataset failed: ${res.status}`);
+}
 

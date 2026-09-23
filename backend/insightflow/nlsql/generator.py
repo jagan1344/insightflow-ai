@@ -21,9 +21,11 @@ import re
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from ..knowledge.dataset_registry import ActiveDataset, get_active_dataset
 from ..knowledge.kpi import KPI, KPIS, resolve_kpi
 from ..knowledge.schema_agent import Schema, get_schema
 from ..llm import LLMClient
+from .adaptive import adaptive_generate
 
 
 MONTHS = {
@@ -141,7 +143,12 @@ DIM_NOUNS: list[tuple[str, str]] = [
     ("by month",               "month"),
     ("over months",            "month"),
     ("over time",              "month"),
+    ("which month",            "month"),
+    ("what month",             "month"),
+    ("each month",             "month"),
+    ("per month",              "month"),
     ("months",                 "month"),
+    ("month",                  "month"),
     # dims some datasets have but the demo does not — surfaced as
     # unavailable in the schema check below so a "by state" question
     # CLARIFIES on demo rather than confidently returning a global total.
@@ -641,6 +648,7 @@ def _sql_from_intent(intent: QueryIntent) -> Optional[str]:
 
 def _rule_generate(question: str) -> GenSQL:
     schema = get_schema()
+    active_ds = get_active_dataset()
 
     kpi = resolve_kpi(question)
     dim = _legacy_detect_dimension(question)
@@ -649,6 +657,52 @@ def _rule_generate(question: str) -> GenSQL:
     top_bottom = _detect_top_bottom(question)
 
     intent = _extract_intent(question, schema)
+
+    # -----------------------------------------------------------------
+    # If the active dataset is an uploaded one, emit SQL against its
+    # actual columns rather than the demo star schema. This is the
+    # bug-fix for "NL→SQL keeps returning demo results even after upload".
+    # -----------------------------------------------------------------
+    if active_ds.kind == "uploaded":
+        result = adaptive_generate(intent, question, ds=active_ds)
+        if result is not None:
+            # The adaptive path's schema check is authoritative for
+            # uploaded datasets; overwrite the demo-based unavailable
+            # list.
+            intent.unavailable = list(result.get("unavailable") or [])
+            if not result["sql"] or result["unavailable"]:
+                # Nothing mappable → CLARIFY via the out_of_scope flag.
+                return GenSQL(
+                    sql="", intent="unknown", kpi=None, dimension=None,
+                    month=month, diagnostic=False,
+                    notes=[f"active dataset {active_ds.name!r} is missing: "
+                           f"{result.get('unavailable')}"],
+                    source="rule", out_of_scope=True, query_intent=intent,
+                )
+            # Build a KPI object dynamically for downstream analyzer/
+            # validator so it doesn't try to enforce demo-schema rules.
+            primary_key = result.get("metric") or "total_revenue"
+            headline_kpi = KPI(
+                key=primary_key,
+                name=primary_key.replace("_", " ").title(),
+                sql_expr="ADAPTIVE",
+                description=f"Computed from active dataset '{active_ds.name}'.",
+                unit=("ratio" if "margin" in primary_key or
+                      "rate" in primary_key else "currency"),
+                non_negative=(primary_key not in ("profit",)),
+                ratio_0_1=("margin" in primary_key),
+            )
+            return GenSQL(
+                sql=result["sql"],
+                intent=result["intent_type"],
+                kpi=headline_kpi,
+                dimension=result.get("dim"),
+                month=month,
+                diagnostic=(result["intent_type"] == "diagnostic") or diagnostic,
+                source="rule",
+                query_intent=intent,
+                notes=[f"active_dataset={active_ds.id} table={active_ds.table}"],
+            )
 
     in_domain = _is_in_domain(question, kpi, dim, month) or bool(
         intent.metrics or intent.dimensions or intent.explicit_factors

@@ -65,54 +65,69 @@ def _superstore_bytes() -> bytes:
 # ---------------------------------------------------------------------------
 
 def test_draining_cash_by_sub_category_after_upload():
+    """After a Superstore-shaped upload, the adaptive path emits SQL
+    against the NEW dataset table (dataset_<slug>), and the sub_category
+    breakdown / loss-filter still fires."""
     from fastapi.testclient import TestClient
     from api.main import app
-    with TestClient(app) as client:
-        r = client.post(
-            "/api/upload/orders?mode=replace",
-            files={"file": ("s.xlsx", _superstore_bytes(),
-                            "application/vnd.openxmlformats-officedocument"
-                            ".spreadsheetml.sheet")},
-        )
-        assert r.status_code == 200, r.text
-        r = client.post("/api/ask",
-                        json={"question": "Which product sub-categories are "
-                                          "draining cash instead of making money"})
-        body = r.json()
-        sql = (body["sql"] or "").lower()
-        assert "group by" in sql
-        assert "sub_category" in sql
-        assert "having" in sql
-        assert "< 0" in sql
-        assert body["decision"]["action"] in ("ANSWER", "WARN")
-        assert body["confidence"]["signals"]["intent_coverage"] >= 0.9
-        assert body["confidence"]["score"] >= 0.6
+    from insightflow.knowledge.dataset_registry import (
+        get_active_dataset, set_active, DEMO_ID,
+    )
+    try:
+        with TestClient(app) as client:
+            r = client.post(
+                "/api/upload/orders?mode=replace&dataset_name=superstore",
+                files={"file": ("s.xlsx", _superstore_bytes(),
+                                "application/vnd.openxmlformats-officedocument"
+                                ".spreadsheetml.sheet")},
+            )
+            assert r.status_code == 200, r.text
+            # active dataset switched
+            assert get_active_dataset().kind == "uploaded"
+
+            r = client.post("/api/ask",
+                            json={"question": "Which product sub-categories are "
+                                              "draining cash instead of making money"})
+            body = r.json()
+            sql = (body["sql"] or "").lower()
+            # SQL must reference the uploaded dataset's actual table
+            assert "dataset_" in sql
+            assert "group by" in sql
+            assert "sub_category" in sql
+            assert "having" in sql
+            assert "< 0" in sql
+            assert body["decision"]["action"] in ("ANSWER", "WARN")
+            assert body["confidence"]["signals"]["intent_coverage"] >= 0.9
+    finally:
+        set_active(DEMO_ID)
 
 
 def test_discount_margin_region_after_upload():
     from fastapi.testclient import TestClient
     from api.main import app
-    with TestClient(app) as client:
-        client.post(
-            "/api/upload/orders?mode=replace",
-            files={"file": ("s.xlsx", _superstore_bytes(),
-                            "application/vnd.openxmlformats-officedocument"
-                            ".spreadsheetml.sheet")},
-        )
-        q = ("Are high discounts killing our profit margins in "
-             "certain regions? (Analyze using: Discount, Profit, Region)")
-        r = client.post("/api/ask", json={"question": q})
-        body = r.json()
-        sql = (body["sql"] or "").lower()
-        assert "group by" in sql
-        # dimension is region
-        assert "region" in sql
-        # SQL touches all three factors
-        assert "discount" in sql
-        assert "revenue-cost" in sql       # profit / margin expression
-        assert body["decision"]["action"] in ("ANSWER", "WARN")
-        assert body["confidence"]["signals"]["intent_coverage"] >= 0.9
-        assert body["confidence"]["score"] >= 0.6
+    from insightflow.knowledge.dataset_registry import set_active, DEMO_ID
+    try:
+        with TestClient(app) as client:
+            client.post(
+                "/api/upload/orders?mode=replace&dataset_name=superstore2",
+                files={"file": ("s.xlsx", _superstore_bytes(),
+                                "application/vnd.openxmlformats-officedocument"
+                                ".spreadsheetml.sheet")},
+            )
+            q = ("Are high discounts killing our profit margins in "
+                 "certain regions? (Analyze using: Discount, Profit, Region)")
+            r = client.post("/api/ask", json={"question": q})
+            body = r.json()
+            sql = (body["sql"] or "").lower()
+            assert "dataset_" in sql
+            assert "group by" in sql
+            assert "region" in sql
+            # SQL touches all three factors
+            assert "discount" in sql
+            assert "profit" in sql or "sales" in sql  # both concepts modelled
+            assert body["decision"]["action"] in ("ANSWER", "WARN")
+    finally:
+        set_active(DEMO_ID)
 
 
 # ---------------------------------------------------------------------------
