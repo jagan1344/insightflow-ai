@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, MessageSquare, PlayCircle, RefreshCw, Square } from "lucide-react";
+import { LayoutDashboard, MessageSquare, PlayCircle, RefreshCw, Square, Upload } from "lucide-react";
 
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { LiveIndicator } from "@/components/dashboard/LiveIndicator";
+import { UploadDialog } from "@/components/dashboard/UploadDialog";
 
 import { reseed, startSimulate, stopSimulate } from "@/lib/api";
 import { useDashboardSocket } from "@/lib/useDashboardSocket";
@@ -17,6 +18,7 @@ import { useDashboardSocket } from "@/lib/useDashboardSocket";
 export default function AppPage() {
   const [tab, setTab] = useState<"chat" | "dashboard">("dashboard");
   const [simulating, setSimulating] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const { data, live, lastUpdateAt, version } = useDashboardSocket();
 
   useEffect(() => {
@@ -65,12 +67,20 @@ export default function AppPage() {
               {simulating ? <Square size={14} /> : <PlayCircle size={14} />}
               {simulating ? "Stop simulate" : "Simulate live data"}
             </Button>
+            <Button variant="outline" size="sm" onClick={() => setUploadOpen(true)}>
+              <Upload size={14} /> Upload data
+            </Button>
             <Button variant="ghost" size="sm" onClick={onReseed}>
               <RefreshCw size={14} /> Reseed
             </Button>
           </div>
         </div>
       </header>
+
+      <UploadDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+      />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-6">
         {tab === "dashboard" ? (

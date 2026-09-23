@@ -118,6 +118,68 @@ def test_ask_endpoint_via_fastapi():
         assert body["sql"].strip().lower().startswith("select")
 
 
+def test_upload_orders_csv_replaces_table():
+    """POST /api/upload/orders replaces the orders table from a CSV and
+    triggers the change signature so a dashboard broadcast will fire."""
+    from fastapi.testclient import TestClient
+    from api.main import app
+    from insightflow.execution.executor import get_engine, reset_engine, run_sql
+    from insightflow.knowledge.schema_agent import refresh_schema
+    from sqlalchemy import text
+
+    csv_body = (
+        "order_date,region,category,product,customer,segment,"
+        "quantity,revenue,cost,discount\n"
+        "2026-03-10,North,Electronics,Widget,Acme,Enterprise,2,1200,800,25\n"
+        "2026-03-11,South,Furniture,Chair,Zeta,SMB,1,450,290,0\n"
+    )
+
+    # snapshot original count so we can restore
+    orig = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
+    assert orig > 0
+    try:
+        with TestClient(app) as client:
+            r = client.post(
+                "/api/upload/orders?mode=replace",
+                files={"file": ("upload.csv", csv_body, "text/csv")},
+            )
+            assert r.status_code == 200, r.text
+            body = r.json()
+            assert body["ok"] is True
+            assert body["rows_inserted"] == 2
+            assert body["mode"] == "replace"
+
+            # 2 rows must be in the DB now
+            n = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
+            assert n == 2
+
+            # Dims upserted
+            assert body["dims_upserted"]["customers"] >= 1
+
+            # append mode adds rows without deleting
+            r = client.post(
+                "/api/upload/orders?mode=append",
+                files={"file": ("upload.csv", csv_body, "text/csv")},
+            )
+            assert r.status_code == 200
+            n2 = run_sql("SELECT COUNT(*) FROM orders").rows[0][0]
+            assert n2 == 4
+
+            # Invalid CSV (no revenue column) is rejected 400
+            r = client.post(
+                "/api/upload/orders",
+                files={"file": ("bad.csv", "foo,bar\n1,2\n", "text/csv")},
+            )
+            assert r.status_code == 400
+    finally:
+        # Restore demo dataset for other tests
+        import runpy
+        from pathlib import Path
+        runpy.run_path(str(Path(__file__).resolve().parent.parent / "data" / "seed.py"),
+                       run_name="__main__")
+        reset_engine(); refresh_schema()
+
+
 def test_realtime_watcher_broadcasts_on_change():
     """A change to orders triggers a dashboard_update via the watcher."""
     import asyncio
