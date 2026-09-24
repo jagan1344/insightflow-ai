@@ -48,6 +48,9 @@ class AskResponse(BaseModel):
     result_rows: List[List[Any]] = []
     evidence: EvidenceModel
     notes: List[str] = []
+    failure_category: str = "NONE"
+    diagnostics: Optional[Dict[str, Any]] = None
+    plan_trace: Optional[Dict[str, Any]] = None
 
 
 # -------- dashboard --------

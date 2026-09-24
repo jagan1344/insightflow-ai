@@ -34,7 +34,7 @@ from ..knowledge.dataset_registry import ActiveDataset
 from ..knowledge.kpi_catalog import KPICatalog, KPIDefinition, build_catalog
 from .plan import (
     AnalyticalPlan, ComparisonSpec, ContributionSpec, DimRef, FilterExpr,
-    Grain, IntentKind, MeasureRef,
+    Grain, IntentKind, MeasureRef, RelativeStatSpec,
 )
 
 
@@ -55,10 +55,13 @@ _QUARTERS = {"q1": (1, 3), "q2": (4, 6), "q3": (7, 9), "q4": (10, 12)}
 
 _TIME_UNIT_WORDS = {
     "day": "day", "daily": "day",
-    "week": "week", "weekly": "week",
+    "week": "week", "weekly": "week", "week-over-week": "week", "wow": "week",
     "month": "month", "monthly": "month",
+    "month-over-month": "month", "mom": "month",
     "quarter": "quarter", "quarterly": "quarter",
+    "quarter-over-quarter": "quarter", "qoq": "quarter",
     "year": "year", "yearly": "year", "annual": "year",
+    "year-over-year": "year", "yoy": "year",
     "over time": "month", "trend": "month",
 }
 
@@ -542,6 +545,120 @@ def _detect_intent_kind(
 # Assembling the plan
 # =============================================================================
 
+def _find_entity_column(ds: ActiveDataset,
+                         catalog: KPICatalog,
+                         bound_dims: List[Tuple[str, str]],
+                         question: str) -> Optional[str]:
+    """Pick the "entity" the relative-to-stat filter is talking about.
+
+    Priority: explicitly-mentioned dim / id column in the question →
+    first bound dim → first id column → first dimension.
+    """
+    ql = question.lower()
+    for cname, info in ds.columns.items():
+        if info.role in ("id", "dimension"):
+            token = cname.lower().replace("_", " ")
+            if re.search(rf"\b{re.escape(token)}s?\b", ql):
+                return cname
+    if bound_dims:
+        return bound_dims[0][1]
+    for cname in catalog.id_columns:
+        return cname
+    for cname in catalog.dimensions:
+        return cname
+    return None
+
+
+_STAT_WORDS = {
+    "average": "avg", "avg": "avg", "mean": "avg",
+    "median": "median",
+}
+_OP_WORDS_GT = ("above", "greater than", "more than", "higher than",
+                 "exceed", "exceeding", "over")
+_OP_WORDS_LT = ("below", "less than", "lower than", "under",
+                 "beneath", "smaller than")
+
+
+def _detect_relative_to_stat(question: str, ds: ActiveDataset,
+                              catalog: KPICatalog,
+                              bound_dims: List[Tuple[str, str]]
+                              ) -> Optional[RelativeStatSpec]:
+    """Look for '<measure> above/below the average/median' patterns and
+    build a RelativeStatSpec. Supports one AND'd second clause."""
+    ql = " " + question.lower() + " "
+    if not any(w in ql for w in _OP_WORDS_GT + _OP_WORDS_LT):
+        return None
+
+    def find_clause(text: str):
+        """Return (kpi_id, stat, op) or None for one clause."""
+        # find stat word
+        stat = None
+        stat_pos = -1
+        for word, code in _STAT_WORDS.items():
+            m = re.search(rf"\b{word}\b", text)
+            if m and (stat_pos == -1 or m.start() < stat_pos):
+                stat = code; stat_pos = m.start()
+        if stat is None:
+            return None
+        # find operator
+        op = None
+        op_pos = -1
+        for w in _OP_WORDS_GT:
+            m = re.search(rf"\b{re.escape(w)}\b", text)
+            if m and (op_pos == -1 or m.start() < op_pos):
+                op = "gt"; op_pos = m.start()
+        for w in _OP_WORDS_LT:
+            m = re.search(rf"\b{re.escape(w)}\b", text)
+            if m and (op_pos == -1 or m.start() < op_pos):
+                op = "lt"; op_pos = m.start()
+        if op is None:
+            return None
+        # find KPI mentioned in this clause (or fall back to nearest KPI
+        # before the op word).
+        kpi_hits = []
+        for kpi in catalog.kpis.values():
+            for alias in kpi.aliases:
+                a = alias.lower()
+                if len(a) < 3:
+                    continue
+                for m in re.finditer(
+                        rf"(?<![a-z0-9_]){re.escape(a)}(?![a-z0-9_])", text):
+                    kpi_hits.append((m.start(), len(a), kpi))
+        # Prefer the KPI that appears BEFORE the op (so "revenue above
+        # avg" binds to revenue, not to whatever comes after)
+        kpi_hits = [h for h in kpi_hits if h[0] < op_pos] + kpi_hits
+        # Longest alias first among those before op
+        before = sorted([h for h in kpi_hits if h[0] < op_pos],
+                        key=lambda h: (-h[1], h[0]))
+        after = sorted([h for h in kpi_hits if h[0] >= op_pos],
+                       key=lambda h: (-h[1], h[0]))
+        picked = before[0] if before else (after[0] if after else None)
+        if picked is None:
+            return None
+        return (picked[2].kpi_id, stat, op)
+
+    # Split into "clause1 AND clause2" if AND / but is present
+    parts = re.split(r"\b(?:and|but)\b", ql)
+    clause1 = find_clause(parts[0])
+    if clause1 is None and len(parts) > 1:
+        clause1 = find_clause(parts[1])
+    if clause1 is None:
+        return None
+    clause2 = find_clause(parts[1]) if len(parts) > 1 else None
+
+    kpi_id, stat, op = clause1
+    entity = _find_entity_column(ds, catalog, bound_dims, question)
+    if entity is None:
+        return None
+    spec = RelativeStatSpec(measure_kpi_id=kpi_id,
+                             entity_column=entity, stat=stat, op=op)
+    if clause2 is not None and clause2[0] != kpi_id:
+        spec.and_measure_kpi_id = clause2[0]
+        spec.and_stat = clause2[1]
+        spec.and_op = clause2[2]
+    return spec
+
+
 def _mref(kpi: KPIDefinition) -> MeasureRef:
     return MeasureRef(
         kpi_id=kpi.kpi_id,
@@ -596,6 +713,13 @@ class Planner:
         # direct KPI on the aggregate: promote it.
         if metric_filters and bound_dims and kind == IntentKind.DIRECT_KPI:
             kind = IntentKind.BREAKDOWN
+
+        # "customers with revenue above average" / "products with profit
+        # below the median" / "customers with revenue above average AND
+        # profit below average" — a relative-to-stat filter on entities.
+        rel_spec = _detect_relative_to_stat(question, ds, catalog, bound_dims)
+        if rel_spec is not None:
+            kind = IntentKind.RELATIVE_TO_STAT
 
         # Diagnostic questions — "why did X drop/decline in <month>" —
         # implicitly compare that month against the previous one. When
@@ -768,6 +892,23 @@ class Planner:
             # that id's count. Otherwise treat as direct KPI.
             pass
 
+        elif kind == IntentKind.RELATIVE_TO_STAT and rel_spec is not None:
+            # measures come from the spec so the SELECT list matches
+            k1 = catalog.get(rel_spec.measure_kpi_id)
+            measures = [_mref(k1)] if k1 else []
+            if rel_spec.and_measure_kpi_id:
+                k2 = catalog.get(rel_spec.and_measure_kpi_id)
+                if k2:
+                    measures.append(_mref(k2))
+            # dim is the entity we group by
+            entity_info = ds.columns.get(rel_spec.entity_column)
+            if entity_info is not None:
+                dims = [DimRef(column=rel_spec.entity_column,
+                                display_name=rel_spec.entity_column
+                                             .replace("_", " ").title())]
+            filters = [f for f in filters if f.kind != "metric_lt"]
+            order_by = "measure_desc"
+
         # ---------- default order_by for breakdown ----------
         if kind == IntentKind.BREAKDOWN and not order_by:
             order_by = "measure_desc"
@@ -783,6 +924,8 @@ class Planner:
             grain=grain,
             comparison=comparison,
             contribution=contribution,
+            relative_stat=(rel_spec if kind == IntentKind.RELATIVE_TO_STAT
+                            else None),
             top_n=top_n,
             share_of_total=share,
             order_by=order_by,

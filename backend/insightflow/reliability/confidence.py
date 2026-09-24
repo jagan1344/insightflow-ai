@@ -112,6 +112,8 @@ def score_confidence(sqlval: ValidationResult,
                      sql: str = "",
                      plan: Optional[AnalyticalPlan] = None,
                      plan_report: Optional[ValidationReport] = None,
+                     fidelity_score: Optional[float] = None,
+                     result_score: Optional[float] = None,
                      ) -> Confidence:
     coverage = compute_intent_coverage(query_intent, sql)
     partially_covered = query_intent is not None and coverage < 0.99 and (
@@ -120,6 +122,12 @@ def score_confidence(sqlval: ValidationResult,
     )
 
     fidelity = _plan_fidelity(plan, plan_report, sql)
+    # Combine formula-fidelity with the structural fidelity score, when
+    # available, so a valid formula in a wrong-shape SQL is caught.
+    if fidelity_score is not None:
+        fidelity = min(fidelity, fidelity_score)
+    # A failing result validator cuts confidence proportionally.
+    result_signal_scale = result_score if result_score is not None else 1.0
 
     ctx = 1.0
     if ambiguous:
@@ -142,7 +150,7 @@ def score_confidence(sqlval: ValidationResult,
         "context_consistency": ctx,
         "data_completeness":   _data_completeness(result),
         "evidence_strength":   _evidence_strength(result),
-        "result_consistency":  result_consistency,
+        "result_consistency":  result_consistency * result_signal_scale,
         "intent_coverage":     max(0.0, min(1.0, coverage)),
         "plan_fidelity":       max(0.0, min(1.0, fidelity)),
     }

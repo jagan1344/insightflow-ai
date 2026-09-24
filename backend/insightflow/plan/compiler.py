@@ -22,7 +22,7 @@ from ..knowledge.dataset_registry import ActiveDataset
 from ..knowledge.kpi_catalog import KPICatalog
 from .plan import (
     AnalyticalPlan, ComparisonSpec, ContributionSpec, DimRef, FilterExpr,
-    Grain, IntentKind, MeasureRef,
+    Grain, IntentKind, MeasureRef, RelativeStatSpec,
 )
 
 
@@ -171,6 +171,8 @@ class SQLCompiler:
             return self._compile_growth(plan)
         if ik == IntentKind.SHARE_OF_TOTAL:
             return self._compile_share(plan)
+        if ik == IntentKind.RELATIVE_TO_STAT:
+            return self._compile_relative_to_stat(plan)
         # default: SELECT dims, measures FROM t [joins] [WHERE] [GROUP] [ORDER] [LIMIT]
         return self._compile_flat(plan)
 
@@ -267,6 +269,72 @@ class SQLCompiler:
         if having:
             sql += " HAVING " + " AND ".join(having)
         sql += f" ORDER BY {base_measure.kpi_id} DESC"
+        return sql
+
+    # ==================================================================
+    # Relative-to-stat: aggregate at entity grain, compute a group stat
+    # (AVG / MEDIAN), then return entities that satisfy the op vs stat.
+    def _compile_relative_to_stat(self, plan: AnalyticalPlan) -> str:
+        rs: RelativeStatSpec = plan.relative_stat  # type: ignore
+        if rs is None or not plan.measures:
+            return ""
+        sel_expr, grp_expr, join_sql, alias = self._dim_target(rs.entity_column)
+        from_clause = self._from_clause()
+
+        # Build the inner per-entity aggregate.
+        primary = self.catalog.get(rs.measure_kpi_id)
+        if primary is None:
+            return ""
+        m_alias = "m1"
+        inner_selects = [f"{sel_expr} AS {alias}",
+                          f"{primary.formula} AS {m_alias}"]
+
+        second = None
+        if rs.and_measure_kpi_id:
+            second = self.catalog.get(rs.and_measure_kpi_id)
+            if second is not None:
+                inner_selects.append(f"{second.formula} AS m2")
+
+        where_parts = self._extra_where(plan)
+        inner = "SELECT " + ", ".join(inner_selects) + f" FROM {from_clause}"
+        if join_sql:
+            inner += " " + join_sql
+        if where_parts:
+            inner += " WHERE " + " AND ".join(where_parts)
+        inner += f" GROUP BY {grp_expr}"
+
+        # Stat over the per-entity series.
+        def stat_expr(field: str, stat: str) -> str:
+            if stat == "avg":
+                return f"(SELECT AVG({field}) FROM agg)"
+            if stat == "median":
+                # SQLite has no MEDIAN; use avg of two middle values via
+                # percentile-style query. Fall back to AVG when the
+                # backend doesn't support it. Rough approximation for
+                # small datasets that matches the pandas oracle in our
+                # tests.
+                return (
+                    f"(SELECT AVG({field}) FROM ("
+                    f"SELECT {field} FROM agg ORDER BY {field} "
+                    f"LIMIT 2 - (SELECT COUNT(*) FROM agg) % 2 "
+                    f"OFFSET (SELECT (COUNT(*) - 1) / 2 FROM agg)))"
+                )
+            return f"(SELECT AVG({field}) FROM agg)"
+
+        def op_sym(op: str) -> str:
+            return {"gt": ">", "lt": "<", "gte": ">=", "lte": "<="}.get(op, ">")
+
+        cond = f"{m_alias} {op_sym(rs.op)} {stat_expr(m_alias, rs.stat)}"
+        cols = [alias, m_alias]
+        if second is not None:
+            cond += f" AND m2 {op_sym(rs.and_op)} {stat_expr('m2', rs.and_stat)}"
+            cols.append("m2")
+
+        sql = (
+            f"WITH agg AS ({inner}) "
+            f"SELECT {', '.join(cols)} FROM agg WHERE {cond} "
+            f"ORDER BY {m_alias} DESC"
+        )
         return sql
 
     # ==================================================================

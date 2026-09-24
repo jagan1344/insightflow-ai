@@ -34,18 +34,20 @@ from .explain.explainer import explain, recommend, plan_evidence_line
 from .knowledge.dataset_registry import get_active_dataset
 from .knowledge.kpi import KPI, KPIS
 from .knowledge.kpi_catalog import build_catalog
+from .knowledge.semantic_model import build_semantic_model
 from .llm import LLMClient
 from .memory import Memory
 from .nlsql.generator import GenSQL, generate_sql
 from .plan import (
-    AnalyticalPlan, IntentKind, Planner, PlanValidator, SQLCompiler,
-    ValidationReport,
+    AnalyticalPlan, FailureCategory, FidelityValidator, IntentKind, Planner,
+    PlanValidator, SQLCompiler, ValidationReport, classify_failure,
 )
 from .reliability.confidence import Confidence, score_confidence
 from .reliability.decision import (
     ANSWER, WARN, CLARIFY, ABSTAIN, Decision, decide,
 )
 from .reliability.evidence import Evidence, build_evidence
+from .reliability.result_validator import ResultValidator
 from .validation.kpi_validator import KPIValidationResult, validate_kpi
 from .validation.sql_validator import ValidationResult, validate_sql
 
@@ -65,6 +67,8 @@ class InsightResponse:
     chart: Dict[str, Any]
     notes: List[str] = field(default_factory=list)
     plan_trace: Optional[Dict[str, Any]] = None
+    failure_category: str = FailureCategory.NONE
+    diagnostics: Optional[Dict[str, Any]] = None
 
     @property
     def answered(self) -> bool:
@@ -107,7 +111,7 @@ def _legacy_intent_of(plan: AnalyticalPlan) -> str:
         return "diagnostic"
     if ik in (IntentKind.BREAKDOWN, IntentKind.TOP_N, IntentKind.BOTTOM_N,
               IntentKind.SHARE_OF_TOTAL, IntentKind.COMPARISON,
-              IntentKind.RATIO):
+              IntentKind.RATIO, IntentKind.RELATIVE_TO_STAT):
         return "breakdown"
     return "aggregate"
 
@@ -148,7 +152,11 @@ class Orchestrator:
                 question, plan, report,
                 reason="Could not compile a SQL query for this plan.")
 
-        # 5. Structural SQL validation.
+        # 5a. Plan → SQL fidelity check (rejects "executes but doesn't
+        # answer" SQL before we run it).
+        fidelity = FidelityValidator().check(plan, sql)
+
+        # 5b. Structural SQL validation.
         sqlval = validate_sql(sql)
 
         # 6. Execute if valid.
@@ -157,6 +165,9 @@ class Orchestrator:
         else:
             result = QueryResult(
                 error="SQL failed validation: " + "; ".join(sqlval.issues))
+
+        # 6b. Result validation (post-execution semantic checks).
+        result_report = ResultValidator().check(plan, result)
 
         # 7. Result-level KPI validation.
         headline_kpi = _headline_kpi_from_plan(plan)
@@ -197,21 +208,26 @@ class Orchestrator:
         evidence = build_evidence(question, sql, headline_kpi,
                                     filters_dict, result)
 
-        # 10. Confidence (plan-aware).
+        # 10. Confidence (plan-aware + fidelity + result-report aware).
         confidence = score_confidence(
             sqlval, kpival, result,
             ambiguous=False, out_of_scope=False,
             query_intent=None, sql=sql,
             plan=plan, plan_report=report,
+            fidelity_score=fidelity.score,
+            result_score=result_report.score,
         )
 
         # 11. Decision.
         demanded = bool(plan.dims or plan.filters
-                        or plan.comparison or plan.contribution)
+                        or plan.comparison or plan.contribution
+                        or plan.relative_stat)
         decision = decide(confidence, sql_ok=sqlval.ok, exec_ok=result.ok,
                           ambiguous=False, query_intent=None,
                           plan=plan, plan_report=report,
-                          demanded_breakdown=demanded)
+                          demanded_breakdown=demanded,
+                          fidelity_ok=fidelity.ok,
+                          result_ok=result_report.ok)
 
         # 12. Explain (evidence-first).
         if decision.action in (ANSWER, WARN):
@@ -243,6 +259,25 @@ class Orchestrator:
             notes.append(f"kpi_issues={kpival.issues}")
         if sqlval.issues:
             notes.append(f"sql_issues={sqlval.issues}")
+        if not fidelity.ok:
+            notes.append("fidelity_failed=" + "; ".join(
+                f"{c.name}:{c.detail}" for c in fidelity.failed()))
+        if result_report.issues:
+            notes.append("result_issues=" + "; ".join(
+                f"{i.severity}:{i.message}" for i in result_report.issues))
+
+        failure = (classify_failure(
+            plan, report, sql, sqlval, fidelity, result, kpival=kpival,
+            result_ok=result_report.ok,
+        ) if decision.action not in (ANSWER, WARN) else FailureCategory.NONE)
+
+        diagnostics = self._diagnostics(
+            question=question, ds=ds, plan=plan, plan_report=report,
+            sql=sql, sqlval=sqlval, fidelity=fidelity,
+            result=result, result_report=result_report,
+            kpival=kpival, confidence=confidence, decision=decision,
+            failure=failure,
+        )
 
         # Keep `.intent` as the LEGACY intent string so existing test
         # assertions that inspect `resp.intent == 'diagnostic'` still hold.
@@ -253,9 +288,59 @@ class Orchestrator:
             result=result, explanation=explanation,
             recommendation=recommendation, chart=chart, notes=notes,
             plan_trace=plan.as_trace(),
+            failure_category=failure, diagnostics=diagnostics,
         )
         self.memory.add(question, decision.action, confidence.score)
         return response
+
+    # ==================================================================
+    def _diagnostics(self, *, question, ds, plan, plan_report, sql,
+                      sqlval, fidelity, result, result_report, kpival,
+                      confidence, decision, failure) -> dict:
+        return {
+            "question": question,
+            "dataset": {"id": ds.id, "kind": ds.kind, "table": ds.table},
+            "plan": plan.as_trace(),
+            "plan_validation": {
+                "ok": plan_report.ok, "fidelity": plan_report.fidelity,
+                "issues": [
+                    {"kind": i.kind, "severity": i.severity,
+                     "message": i.message}
+                    for i in plan_report.issues
+                ],
+            },
+            "sql": sql,
+            "sql_validation": {
+                "ok": sqlval.ok, "issues": list(sqlval.issues),
+                "referenced_tables": list(sqlval.referenced_tables),
+            },
+            "fidelity": {
+                "ok": fidelity.ok, "score": fidelity.score,
+                "checks": [
+                    {"name": c.name, "passed": c.passed, "detail": c.detail}
+                    for c in fidelity.checks
+                ],
+            },
+            "execution": {"ok": result.ok, "n_rows": result.n_rows,
+                           "error": result.error},
+            "result_validation": {
+                "ok": result_report.ok, "score": result_report.score,
+                "issues": [
+                    {"severity": i.severity, "message": i.message}
+                    for i in result_report.issues
+                ],
+            },
+            "kpi_validation": {
+                "recognised": kpival.kpi_recognised,
+                "rules_passed": kpival.rules_passed,
+                "score": kpival.score,
+                "issues": list(kpival.issues),
+            },
+            "confidence": {"score": confidence.score,
+                            "signals": dict(confidence.signals)},
+            "decision": {"action": decision.action, "reason": decision.reason},
+            "failure_category": failure,
+        }
 
     # ==================================================================
     def _clarify_message_from_plan(self, plan: AnalyticalPlan,
@@ -295,12 +380,39 @@ class Orchestrator:
         evidence = build_evidence(question, "", None, {}, empty)
         analysis = Analysis(summary=reason)
         explanation = self._clarify_message_from_plan(plan, report)
+        failure = classify_failure(
+            plan, report, "", ValidationResult(ok=False, score=0.0,
+                                                 issues=[reason]),
+            None, empty, kpival=kpival, result_ok=False,
+        )
+        diagnostics = {
+            "question": question,
+            "dataset": {"id": getattr(plan, "table", ""),
+                         "kind": "unknown", "table": plan.table},
+            "plan": plan.as_trace(),
+            "plan_validation": {"ok": report.ok, "fidelity": report.fidelity,
+                                 "issues": [{"kind": i.kind,
+                                              "severity": i.severity,
+                                              "message": i.message}
+                                             for i in report.issues]},
+            "sql": "", "sql_validation": {"ok": False, "issues": [reason]},
+            "fidelity": {"ok": False, "score": 0.0, "checks": []},
+            "execution": {"ok": False, "n_rows": 0, "error": reason},
+            "result_validation": {"ok": False, "score": 0.0, "issues": []},
+            "kpi_validation": {"recognised": False, "rules_passed": False,
+                                "score": 0.0, "issues": [reason]},
+            "confidence": {"score": confidence.score,
+                            "signals": dict(confidence.signals)},
+            "decision": {"action": decision.action, "reason": decision.reason},
+            "failure_category": failure,
+        }
         return InsightResponse(
             question=question, sql="", intent=plan.intent_kind,
             decision=decision, confidence=confidence, analysis=analysis,
             evidence=evidence, result=empty, explanation=explanation,
             recommendation=None, chart={"kind": "none"},
             notes=[reason], plan_trace=plan.as_trace(),
+            failure_category=failure, diagnostics=diagnostics,
         )
 
     # ==================================================================
@@ -338,6 +450,27 @@ class Orchestrator:
             reason = ("vague/open-ended — no specific KPI or dimension named"
                       if is_vague else "out of scope for the loaded dataset")
             decision = Decision(CLARIFY, reason)
+            failure = FailureCategory.AMBIGUITY if is_vague else FailureCategory.UNSUPPORTED_DATA
+            diagnostics = {
+                "question": question,
+                "dataset": {"id": ds.id, "kind": ds.kind, "table": ds.table},
+                "plan": plan.as_trace(),
+                "plan_validation": {"ok": report.ok,
+                                     "fidelity": report.fidelity,
+                                     "issues": []},
+                "sql": "", "sql_validation": {"ok": False, "issues": []},
+                "fidelity": {"ok": False, "score": 0.0, "checks": []},
+                "execution": {"ok": False, "n_rows": 0, "error": ""},
+                "result_validation": {"ok": False, "score": 0.0, "issues": []},
+                "kpi_validation": {"recognised": False,
+                                    "rules_passed": False, "score": 0.0,
+                                    "issues": [reason]},
+                "confidence": {"score": conf.score,
+                                "signals": dict(conf.signals)},
+                "decision": {"action": decision.action,
+                              "reason": decision.reason},
+                "failure_category": failure,
+            }
             return InsightResponse(
                 question=question, sql="", intent="unknown",
                 decision=decision, confidence=conf, analysis=analysis,
@@ -351,6 +484,7 @@ class Orchestrator:
                 ),
                 recommendation=None, chart={"kind": "none"},
                 notes=list(gen.notes), plan_trace=plan.as_trace(),
+                failure_category=failure, diagnostics=diagnostics,
             )
 
         sqlval = validate_sql(gen.sql)
@@ -397,6 +531,38 @@ class Orchestrator:
         chart = (chart_spec(result, gen.intent)
                  if decision.action in (ANSWER, WARN) else {"kind": "none"})
 
+        # A minimal diagnostic block for the legacy path — enough for
+        # audit but doesn't fabricate fields it can't fill.
+        failure = (classify_failure(
+            plan, report, gen.sql, sqlval, None, result, kpival=kpival,
+            result_ok=result.ok) if decision.action not in (ANSWER, WARN)
+            else FailureCategory.NONE)
+        diagnostics = {
+            "question": question,
+            "dataset": {"id": ds.id, "kind": ds.kind, "table": ds.table},
+            "plan": plan.as_trace(),
+            "plan_validation": {"ok": report.ok, "fidelity": report.fidelity,
+                                 "issues": [{"kind": i.kind,
+                                              "severity": i.severity,
+                                              "message": i.message}
+                                             for i in report.issues]},
+            "sql": gen.sql,
+            "sql_validation": {"ok": sqlval.ok, "issues": list(sqlval.issues),
+                                "referenced_tables": list(sqlval.referenced_tables)},
+            "fidelity": {"ok": True, "score": 1.0,
+                          "checks": [], "note": "legacy path — not checked"},
+            "execution": {"ok": result.ok, "n_rows": result.n_rows,
+                           "error": result.error},
+            "result_validation": {"ok": True, "score": 1.0, "issues": []},
+            "kpi_validation": {"recognised": kpival.kpi_recognised,
+                                "rules_passed": kpival.rules_passed,
+                                "score": kpival.score,
+                                "issues": list(kpival.issues)},
+            "confidence": {"score": confidence.score,
+                            "signals": dict(confidence.signals)},
+            "decision": {"action": decision.action, "reason": decision.reason},
+            "failure_category": failure,
+        }
         return InsightResponse(
             question=question, sql=gen.sql, intent=gen.intent,
             decision=decision, confidence=confidence, analysis=analysis,
@@ -407,6 +573,7 @@ class Orchestrator:
                   + [f"sql_issues={sqlval.issues}" if sqlval.issues else ""]
                   + [f"legacy_fallback plan_kind={plan.intent_kind}"],
             plan_trace=plan.as_trace(),
+            failure_category=failure, diagnostics=diagnostics,
         )
 
     def _legacy_clarify(self, intent) -> str:

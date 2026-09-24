@@ -26,19 +26,22 @@ from typing import List, Optional
 # ---------------------------------------------------------------------------
 
 class IntentKind:
-    DIRECT_KPI       = "direct_kpi"          # "What's the revenue?"
-    BREAKDOWN        = "breakdown"           # "Revenue by region"
-    TREND            = "trend"               # "Revenue over time / by month"
-    COMPARISON       = "comparison"          # "June vs July revenue"
-    GROWTH           = "growth"              # "Revenue growth month-over-month"
-    TOP_N            = "top_n"               # "Top 5 products by revenue"
-    BOTTOM_N         = "bottom_n"            # "Bottom 3 regions by profit"
-    SHARE_OF_TOTAL   = "share_of_total"      # "% of revenue by region"
-    RATIO            = "ratio"               # "Profit per order"
-    AVERAGE_AT_GRAIN = "average_at_grain"    # "Average monthly revenue"
-    CONTRIBUTION     = "contribution"        # "Which region contributed most to the decline?"
-    UNSUPPORTED      = "unsupported"         # dataset can't answer this
-    AMBIGUOUS        = "ambiguous"           # question needs clarification
+    DIRECT_KPI          = "direct_kpi"          # "What's the revenue?"
+    BREAKDOWN           = "breakdown"           # "Revenue by region"
+    TREND               = "trend"               # "Revenue over time / by month"
+    COMPARISON          = "comparison"          # "June vs July revenue"
+    GROWTH              = "growth"              # "Revenue growth month-over-month"
+    TOP_N               = "top_n"               # "Top 5 products by revenue"
+    BOTTOM_N            = "bottom_n"            # "Bottom 3 regions by profit"
+    SHARE_OF_TOTAL      = "share_of_total"      # "% of revenue by region"
+    RATIO               = "ratio"               # "Profit per order"
+    AVERAGE_AT_GRAIN    = "average_at_grain"    # "Average monthly revenue"
+    CONTRIBUTION        = "contribution"        # "Which region contributed most to the decline?"
+    # NEW: entity-vs-stat comparisons: "customers with revenue above
+    # average", "products with profit below the median".
+    RELATIVE_TO_STAT    = "relative_to_stat"
+    UNSUPPORTED         = "unsupported"         # dataset can't answer this
+    AMBIGUOUS           = "ambiguous"           # question needs clarification
 
 
 ALL_INTENT_KINDS = frozenset({
@@ -46,6 +49,7 @@ ALL_INTENT_KINDS = frozenset({
     IntentKind.COMPARISON, IntentKind.GROWTH, IntentKind.TOP_N,
     IntentKind.BOTTOM_N, IntentKind.SHARE_OF_TOTAL, IntentKind.RATIO,
     IntentKind.AVERAGE_AT_GRAIN, IntentKind.CONTRIBUTION,
+    IntentKind.RELATIVE_TO_STAT,
     IntentKind.UNSUPPORTED, IntentKind.AMBIGUOUS,
 })
 
@@ -123,6 +127,28 @@ class ContributionSpec:
     direction: str = "any"   # "decline" | "gain" | "any"
 
 
+@dataclass
+class RelativeStatSpec:
+    """Compare an entity's aggregate against a group statistic.
+
+    Meaning: aggregate `measure` at grain (grouped by `entity_column`),
+    compute `stat` over the entity-level series, then keep only the
+    entities whose per-entity aggregate satisfies the `op` against the
+    stat. This is how "customers with revenue above average" or
+    "products with profit below the median" get expressed structurally.
+    """
+    measure_kpi_id: str
+    entity_column: str
+    stat: str = "avg"     # "avg" | "median" | "top_percentile"
+    op: str = "gt"        # "gt" | "lt" | "gte" | "lte"
+    threshold_pct: float = 0.0  # for top_percentile
+    # Second stat clause, ANDed with the first — supports
+    # "revenue above average AND profit below average"
+    and_measure_kpi_id: str = ""
+    and_stat: str = "avg"
+    and_op: str = "lt"
+
+
 # ---------------------------------------------------------------------------
 # The plan
 # ---------------------------------------------------------------------------
@@ -136,6 +162,7 @@ class AnalyticalPlan:
     grain: Optional[Grain] = None
     comparison: Optional[ComparisonSpec] = None
     contribution: Optional[ContributionSpec] = None
+    relative_stat: Optional["RelativeStatSpec"] = None
     top_n: Optional[int] = None
     share_of_total: bool = False
     order_by: str = ""       # "measure_desc" | "measure_asc" | "time_asc" | ""
@@ -191,6 +218,15 @@ class AnalyticalPlan:
                               "target": self.contribution.target_period,
                               "dim_column": self.contribution.dim_column,
                               "direction": self.contribution.direction}),
+            "relative_stat": (None if self.relative_stat is None else
+                              {"measure": self.relative_stat.measure_kpi_id,
+                               "entity": self.relative_stat.entity_column,
+                               "stat": self.relative_stat.stat,
+                               "op": self.relative_stat.op,
+                               "threshold_pct": self.relative_stat.threshold_pct,
+                               "and_measure": self.relative_stat.and_measure_kpi_id,
+                               "and_stat": self.relative_stat.and_stat,
+                               "and_op": self.relative_stat.and_op}),
             "top_n": self.top_n,
             "share_of_total": self.share_of_total,
             "order_by": self.order_by,

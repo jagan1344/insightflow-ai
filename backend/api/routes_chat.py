@@ -45,4 +45,7 @@ def ask(req: AskRequest):
             row_count=resp.evidence.row_count,
         ),
         notes=[n for n in resp.notes if n],
+        failure_category=getattr(resp, "failure_category", "NONE"),
+        diagnostics=getattr(resp, "diagnostics", None),
+        plan_trace=getattr(resp, "plan_trace", None),
     )

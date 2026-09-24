@@ -43,6 +43,8 @@ def decide(confidence: Confidence,
            plan: Optional[AnalyticalPlan] = None,
            plan_report: Optional[ValidationReport] = None,
            demanded_breakdown: Optional[bool] = None,
+           fidelity_ok: bool = True,
+           result_ok: bool = True,
            ) -> Decision:
     if not sql_ok:
         return Decision(ABSTAIN, "generated SQL failed validation")
@@ -64,6 +66,23 @@ def decide(confidence: Confidence,
             CLARIFY,
             "semantic plan validation failed: " + "; ".join(
                 i.message for i in plan_report.issues if i.severity == "error"),
+        )
+
+    # Plan/SQL fidelity: SQL executes but doesn't implement the plan.
+    if not fidelity_ok:
+        return Decision(
+            CLARIFY,
+            "plan → SQL fidelity check failed: the generated SQL does "
+            "not fully implement the analytical plan",
+        )
+
+    # Result validation: e.g. top-N returned wrong sort, shares don't
+    # sum to 1, comparison returned wrong number of rows.
+    if not result_ok:
+        return Decision(
+            WARN,
+            "result did not pass semantic validation — see diagnostics "
+            "for details",
         )
 
     # Something the user asked for isn't in the loaded schema — say so
