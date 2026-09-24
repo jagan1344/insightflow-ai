@@ -136,9 +136,20 @@ def _infer_role(col_name: str, sql_type: str, sample_texts: list) -> str:
     # id-ish
     if lower == "id" or lower.endswith("_id") or lower == "pk":
         return "id"
-    # date-ish
+    # date-ish (by name OR by sample content — ISO-8601 leading tokens)
     if any(h in lower for h in _DATE_HINTS):
         return "date"
+    if sample_texts:
+        iso_hits = 0
+        n = 0
+        for s in sample_texts[:20]:
+            if s is None:
+                continue
+            n += 1
+            if re.match(r"^\d{4}-\d{2}(?:-\d{2})?", str(s).strip()):
+                iso_hits += 1
+        if n and iso_hits / n > 0.6:
+            return "date"
     # numeric column named like a measure
     numeric = any(k in (sql_type or "").upper()
                   for k in ("INT", "REAL", "NUM", "DEC", "FLOAT", "DOUBLE"))
@@ -275,6 +286,33 @@ def get_active_dataset() -> ActiveDataset:
         for cname, r in role_overrides.items():
             if cname in cols:
                 cols[cname].role = r
+        # Surface joined-in dimensions as first-class ColumnInfo so the
+        # planner + validator + compiler see them uniformly. The compiler
+        # knows how to lower them (see `_demo_dim_target`). Only expose
+        # pseudo-columns for joined dimensions that ACTUALLY exist in
+        # their source table — otherwise a schema-adaptive question like
+        # "revenue by sub-category" would spuriously succeed on a demo
+        # that has no sub_category column.
+        insp2 = inspect(engine)
+        all_tables_cols = {t: [c["name"] for c in insp2.get_columns(t)]
+                           for t in insp2.get_table_names()}
+        joined_dims = {
+            "region_name":  ("regions",   "region_name"),
+            "product_name": ("products",  "product_name"),
+            "category":     ("products",  "category"),
+            "sub_category": ("products",  "sub_category"),
+            "customer_name":("customers", "customer_name"),
+            "segment":      ("customers", "segment"),
+        }
+        for pseudo, (src_table, src_col) in joined_dims.items():
+            if pseudo in cols:
+                continue
+            src_cols = all_tables_cols.get(src_table, [])
+            if src_col in src_cols:
+                cols[pseudo] = ColumnInfo(
+                    name=pseudo, sql_type="TEXT", role="dimension",
+                    sample_values=[],
+                )
         return ActiveDataset(
             id=ds_id, name=name, table=table_name, kind="demo",
             columns=cols,

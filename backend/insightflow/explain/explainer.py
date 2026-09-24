@@ -6,6 +6,7 @@ from typing import Optional
 
 from ..analysis.analyzer import Analysis
 from ..llm import LLMClient
+from ..plan import AnalyticalPlan, IntentKind
 from ..reliability.evidence import Evidence
 
 
@@ -16,6 +17,50 @@ _SYSTEM = (
     "explains the answer. Ground every claim in the evidence. Do not invent "
     "numbers. If unsure, say so."
 )
+
+
+def plan_evidence_line(plan: AnalyticalPlan, table: str) -> str:
+    """A one-line evidence trace surfaced above the answer.
+
+    Shape: "KPI · formula · grain · filters · comparison · dataset".
+    """
+    parts: list[str] = []
+    if plan.measures:
+        m = plan.measures[0]
+        parts.append(f"KPI: {m.kpi_id} ≡ {m.formula}")
+    if plan.dims:
+        dims = ", ".join(d.column + (f" (by {d.time_unit})" if d.is_time
+                                      and d.time_unit else "")
+                         for d in plan.dims)
+        parts.append(f"Grouped by: {dims}")
+    if plan.grain and plan.grain.kind == "time":
+        parts.append(f"Grain: {plan.grain.time_unit} of {plan.grain.time_column}")
+    if plan.comparison:
+        parts.append(f"Comparison: {plan.comparison.base_period} vs "
+                     f"{plan.comparison.target_period}")
+    if plan.contribution:
+        parts.append(f"Contribution: {plan.contribution.base_period} → "
+                     f"{plan.contribution.target_period} across "
+                     f"{plan.contribution.dim_column}")
+    if plan.filters:
+        fs: list[str] = []
+        for f in plan.filters:
+            if f.kind == "time_range":
+                fs.append(f"time ∈ [{f.lo}, {f.hi}]")
+            elif f.kind == "metric_lt":
+                fs.append(f"{f.kpi_id} < {f.threshold}")
+            elif f.kind == "metric_gt":
+                fs.append(f"{f.kpi_id} > {f.threshold}")
+            elif f.kind == "eq" and f.column:
+                fs.append(f"{f.column} = {f.value}")
+        if fs:
+            parts.append("Filters: " + "; ".join(fs))
+    if plan.top_n is not None:
+        parts.append(f"Top-N: {plan.top_n}")
+    if plan.share_of_total:
+        parts.append("Share of total")
+    parts.append(f"Dataset: {table}")
+    return " · ".join(parts)
 
 
 def explain(evidence: Evidence, analysis: Analysis, llm: Optional[LLMClient] = None) -> str:

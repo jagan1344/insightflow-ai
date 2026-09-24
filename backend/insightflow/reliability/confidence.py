@@ -1,16 +1,26 @@
-"""Eight-signal confidence engine.
+"""Nine-signal confidence engine.
 
-The eighth signal, `intent_coverage`, measures the fraction of a
-question's required elements (metrics, dimensions, filters, explicit
-factors) that the generated SQL actually touches. It's the fix for the
-class of failures where a bare `SELECT SUM(revenue) FROM orders` scored
-0.97 on a question that explicitly asked for a per-sub-category
-breakdown filtered to loss-makers. A hard cap
-`overall = min(overall, intent_coverage + 0.05)` guarantees a
-low-coverage SQL cannot score high, regardless of every other signal.
+Signals:
+    sql_validity        — structural SQL validation
+    schema_match        — referenced tables exist in the loaded schema
+    kpi_match           — KPI rules (non_negative, ratio_0_1) hold on results
+    context_consistency — ambiguous / out-of-scope penalties
+    data_completeness   — NULL fraction in returned rows
+    evidence_strength   — row count adequacy
+    result_consistency  — result exists AND KPI rules held
+    intent_coverage     — LEGACY: fraction of QueryIntent covered by SQL
+                          (kept for legacy pipeline compatibility)
+    plan_fidelity       — NEW: plan validator's fidelity score, plus
+                          post-compile check that the SQL actually
+                          references the plan's headline formula
+
+The `plan_fidelity` hard cap `overall ≤ min(intent_coverage, plan_fidelity) + 0.05`
+means neither a legacy-parse miss nor a plan-shape mismatch can be masked
+by other signals.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 
@@ -18,6 +28,7 @@ from ..config import settings
 from ..execution.executor import QueryResult
 from ..knowledge.schema_agent import get_schema
 from ..nlsql.generator import QueryIntent, compute_intent_coverage
+from ..plan import AnalyticalPlan, ValidationReport
 from ..validation.kpi_validator import KPIValidationResult
 from ..validation.sql_validator import ValidationResult
 
@@ -61,21 +72,54 @@ def _evidence_strength(result: QueryResult) -> float:
     return min(1.0, 0.6 + 0.1 * min(4, n))
 
 
+def _plan_fidelity(plan: Optional[AnalyticalPlan],
+                   report: Optional[ValidationReport],
+                   sql: str) -> float:
+    """Combine the semantic validator's fidelity with a post-compile
+    check that the SQL text actually contains each plan measure's
+    canonical formula."""
+    if plan is None or report is None:
+        return 1.0
+    base = report.fidelity
+    if not plan.measures or not sql:
+        return base
+    # Post-compile check: is every measure formula present in the SQL?
+    lo = sql.lower().replace(" ", "")
+    hits = 0
+    for m in plan.measures:
+        f = (m.formula or "").lower().replace(" ", "")
+        if not f:
+            continue
+        # match either the exact expression or a mildly rewritten one
+        if f in lo:
+            hits += 1
+            continue
+        # fuzzy: strip quotes and check
+        f2 = re.sub(r'["\`\[\]]', "", f)
+        lo2 = re.sub(r'["\`\[\]]', "", lo)
+        if f2 in lo2:
+            hits += 1
+    ratio = hits / max(len(plan.measures), 1) if plan.measures else 1.0
+    return max(0.0, min(1.0, base * (0.5 + 0.5 * ratio)))
+
+
 def score_confidence(sqlval: ValidationResult,
                      kpival: KPIValidationResult,
                      result: QueryResult,
                      ambiguous: bool,
                      out_of_scope: bool,
                      query_intent: Optional[QueryIntent] = None,
-                     sql: str = "") -> Confidence:
-    # intent_coverage ∈ [0,1] — computed against the actual SQL the
-    # generator emitted; degrades context_consistency for questions the
-    # SQL missed.
+                     sql: str = "",
+                     plan: Optional[AnalyticalPlan] = None,
+                     plan_report: Optional[ValidationReport] = None,
+                     ) -> Confidence:
     coverage = compute_intent_coverage(query_intent, sql)
     partially_covered = query_intent is not None and coverage < 0.99 and (
         query_intent.dimensions or query_intent.filters
         or query_intent.explicit_factors
     )
+
+    fidelity = _plan_fidelity(plan, plan_report, sql)
 
     ctx = 1.0
     if ambiguous:
@@ -83,9 +127,10 @@ def score_confidence(sqlval: ValidationResult,
     if out_of_scope:
         ctx = 0.10
     elif partially_covered:
-        # Missing required dimensions / filters lowers our "we understood
-        # the question" belief in proportion to what we missed.
         ctx = min(ctx, 0.30 + 0.55 * coverage)
+    # If plan says fidelity is low (semantic error), degrade context too.
+    if plan_report is not None and not plan_report.ok:
+        ctx = min(ctx, 0.30)
 
     executed_ok = result.ok
     result_consistency = 1.0 if (kpival.rules_passed and executed_ok) else 0.3
@@ -99,6 +144,7 @@ def score_confidence(sqlval: ValidationResult,
         "evidence_strength":   _evidence_strength(result),
         "result_consistency":  result_consistency,
         "intent_coverage":     max(0.0, min(1.0, coverage)),
+        "plan_fidelity":       max(0.0, min(1.0, fidelity)),
     }
 
     weights = settings.confidence_weights
@@ -107,10 +153,9 @@ def score_confidence(sqlval: ValidationResult,
     if out_of_scope:
         score = min(score, 0.30)
 
-    # Hard cap — you cannot be more confident than the query is relevant.
-    # `+ 0.05` gives a small margin so a bare aggregate on a bare-aggregate
-    # question (coverage = 1.0) still scores near 1.0.
-    score = min(score, coverage + 0.05)
+    # Twin hard caps — neither a legacy-parse miss nor a plan-shape
+    # mismatch can be masked by other signals.
+    score = min(score, coverage + 0.05, fidelity + 0.05)
 
     score = max(0.0, min(1.0, score))
     return Confidence(score=score, signals=signals)

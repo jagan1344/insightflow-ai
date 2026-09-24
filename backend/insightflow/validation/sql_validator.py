@@ -23,22 +23,28 @@ class ValidationResult:
     referenced_tables: List[str] = field(default_factory=list)
 
 
+_CTE_ALIAS = re.compile(r"(?:\bWITH\b|,)\s+([A-Za-z_][A-Za-z0-9_]*)\s+AS\s*\(",
+                         re.I)
+
+
 def _find_referenced_tables(sql: str) -> Set[str]:
     """Best-effort table detection from FROM and JOIN clauses.
     Supports quoted identifiers ("table_name", [table_name], `table_name`)
-    and plain ones."""
+    and plain ones. CTE aliases (`WITH x AS (...)`) are recognised and
+    excluded from the "unknown table" check.
+    """
     tables: Set[str] = set()
-    # Plain identifier
     for m in re.finditer(r"\b(?:from|join)\s+([A-Za-z_][A-Za-z0-9_]*)",
                          sql, flags=re.I):
         tables.add(m.group(1).lower())
-    # Double-quoted
     for m in re.finditer(r'\b(?:from|join)\s+"([^"]+)"', sql, flags=re.I):
         tables.add(m.group(1).lower())
-    # Backtick
     for m in re.finditer(r"\b(?:from|join)\s+`([^`]+)`", sql, flags=re.I):
         tables.add(m.group(1).lower())
-    return tables
+    # Subquery: also skip FROM ( ... )
+    # Subtract CTE aliases so they aren't counted as unknown tables.
+    ctes = {m.group(1).lower() for m in _CTE_ALIAS.finditer(sql)}
+    return tables - ctes
 
 
 def _find_qualified_columns(sql: str) -> Set[str]:
