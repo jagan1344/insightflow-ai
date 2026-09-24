@@ -194,6 +194,45 @@ def test_different_questions_same_dataset_produce_different_sql():
 # 4) Reactivating demo restores the demo data flow (no leftover state).
 # ---------------------------------------------------------------------------
 
+def test_dashboard_reflects_active_dataset():
+    """GET /api/dashboard must show the ACTIVE dataset's data.
+
+    Was previously hardcoded to the demo `orders` table, so uploads
+    silently kept showing demo numbers on the Live Dashboard. This is
+    the regression guard for that bug.
+    """
+    with _client() as client:
+        # Baseline: demo dashboard shows the demo total (~3.4M)
+        d_demo = client.get("/api/dashboard").json()
+        assert d_demo["kpis"]["total_revenue"]["value"] > 1_000_000, d_demo
+
+        # Upload A → dashboard must show A's tiny numbers
+        client.post(
+            "/api/upload/orders?mode=replace&dataset_name=A",
+            files={"file": ("A.csv", DATASET_A, "text/csv")},
+        )
+        d_a = client.get("/api/dashboard").json()
+        assert abs(d_a["kpis"]["total_revenue"]["value"] - 3500.0) < 1.0, d_a
+        assert d_a["kpis"]["order_count"]["value"] == 4
+
+        # Upload B → dashboard changes again
+        client.post(
+            "/api/upload/orders?mode=replace&dataset_name=B",
+            files={"file": ("B.csv", DATASET_B, "text/csv")},
+        )
+        d_b = client.get("/api/dashboard").json()
+        assert abs(d_b["kpis"]["total_revenue"]["value"] - 18000.0) < 1.0, d_b
+        # Series come from real data
+        assert d_b["revenue_by_month"], d_b["revenue_by_month"]
+        # revenue_by_region on B is really "revenue by department" (only dim)
+        assert d_b["revenue_by_region"], d_b["revenue_by_region"]
+
+        # Reactivate demo → back to demo numbers
+        client.post("/api/datasets/activate/demo")
+        d_back = client.get("/api/dashboard").json()
+        assert d_back["kpis"]["total_revenue"]["value"] > 1_000_000
+
+
 def test_reseed_reactivates_demo():
     with _client() as client:
         client.post(

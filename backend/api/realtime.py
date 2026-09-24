@@ -72,14 +72,31 @@ async def broadcast(message: dict) -> None:
 # ---------------------------------------------------------------------------
 
 def compute_signature() -> tuple:
+    """Cheap change signature of the ACTIVE dataset. Used by the
+    watcher loop to decide when to re-broadcast the dashboard payload.
+
+    For the demo dataset we retain the original three-value signature
+    (row_count, max_order_id, rounded_sum_revenue) so tests that count
+    on that behaviour still pass. For uploaded datasets we use
+    (dataset_id, row_count) — enough to fire an update whenever the
+    active dataset switches or new rows appear.
+    """
     try:
+        from insightflow.knowledge.dataset_registry import get_active_dataset
+        ds = get_active_dataset()
         engine = get_engine()
         with engine.connect() as conn:
+            if ds.kind == "demo":
+                row = conn.execute(text(
+                    "SELECT COUNT(*), COALESCE(MAX(order_id),0), "
+                    "ROUND(COALESCE(SUM(revenue),0), 2) FROM orders"
+                )).fetchone()
+                return (ds.id, int(row[0]), int(row[1]), float(row[2]))
+            # uploaded — table name may be arbitrary
             row = conn.execute(text(
-                "SELECT COUNT(*), COALESCE(MAX(order_id),0), "
-                "ROUND(COALESCE(SUM(revenue),0), 2) FROM orders"
+                f'SELECT COUNT(*) FROM "{ds.table}"'
             )).fetchone()
-        return (int(row[0]), int(row[1]), float(row[2]))
+            return (ds.id, int(row[0]))
     except Exception:
         return tuple()
 
