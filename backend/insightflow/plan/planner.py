@@ -295,46 +295,51 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
     ql = _norm(question).replace("-", " ")
 
     for pat in [
-        r"\bby\s+([a-z][a-z_\-\s]{1,30})",
-        r"\bacross\s+([a-z][a-z_\-\s]{1,30})",
-        r"\bper\s+([a-z][a-z_\-\s]{1,30})",
+        r"\bby\s+([a-z][a-z_\-\s,]{1,60})",
+        r"\bacross\s+([a-z][a-z_\-\s,]{1,60})",
+        r"\bper\s+([a-z][a-z_\-\s,]{1,30})",
         r"\bfor\s+each\s+([a-z][a-z_\-\s]{1,30})",
         r"\bfrom\s+each\s+([a-z][a-z_\-\s]{1,30})",
         r"\bin\s+each\s+([a-z][a-z_\-\s]{1,30})",
     ]:
         for m in re.finditer(pat, ql):
-            # Multi-word dims: try progressively longer sub-phrases (e.g.
-            # "sub category", "product line") before falling back to the
-            # first word.
             phrase = m.group(1).strip().rstrip("?.")
-            candidates = []
-            words = phrase.split()
-            for k in range(min(3, len(words)), 0, -1):
-                candidates.append(" ".join(words[:k]))
-            noun = words[0]
-            if noun in _STOPWORDS_AFTER_BY:
-                continue
-            # time-unit words are handled separately
-            if noun in _TIME_UNIT_WORDS:
-                continue
-            if noun in seen_nouns:
-                continue
-            col = ""
-            bound_noun = noun
-            for cand in candidates:
-                col = _bind_dim_column(ds, cand) or ""
-                if col:
-                    bound_noun = cand
-                    break
-            seen_nouns.add(noun)
-            # Skip "by <measure_col_or_kpi>" — that names a metric
-            # ordering, not a dim to CLARIFY on. Only add to `out` when
-            # either bound to a dim or clearly not a measure/kpi.
-            if not col and _looks_like_measure(noun, ds, catalog):
-                continue
-            if _already_bound(col):
-                continue
-            out.append((bound_noun, col))
+            # "by region and category" or "by region, category, month" —
+            # split on "and"/comma first and bind each part in ORDER.
+            # Otherwise "by region and category" was binding to
+            # 'category' (longer name → higher score) and losing the
+            # dim ordering the user actually asked for.
+            parts = [p.strip() for p in
+                      re.split(r"\s+and\s+|\s*,\s*", phrase) if p.strip()]
+            for part in parts:
+                # Multi-word single-dim: try progressively longer
+                # sub-phrases (e.g. "sub category", "product line").
+                words = part.split()
+                if not words:
+                    continue
+                noun = words[0]
+                if noun in _STOPWORDS_AFTER_BY:
+                    continue
+                if noun in _TIME_UNIT_WORDS:
+                    continue
+                if noun in seen_nouns:
+                    continue
+                candidates: list[str] = []
+                for k in range(min(3, len(words)), 0, -1):
+                    candidates.append(" ".join(words[:k]))
+                col = ""
+                bound_noun = noun
+                for cand in candidates:
+                    col = _bind_dim_column(ds, cand) or ""
+                    if col:
+                        bound_noun = cand
+                        break
+                seen_nouns.add(noun)
+                if not col and _looks_like_measure(noun, ds, catalog):
+                    continue
+                if _already_bound(col):
+                    continue
+                out.append((bound_noun, col))
 
     # "top/bottom N <dim> by X" / "top <dim>" — dim between top and by
     m_top = re.search(r"\b(?:top|bottom|worst|best|highest|lowest)\s+"
