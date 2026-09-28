@@ -78,7 +78,11 @@ _COMPARE_WORDS  = ("vs", "versus", "compared to", "compare",
                     "compared with", "against")
 _CONTRIB_WORDS  = ("contributed", "contribution", "contributor",
                     "drove", "responsible for", "biggest driver",
-                    "why did", "explain the change")
+                    "why did", "explain the change",
+                    "swing", "biggest change", "largest change",
+                    "biggest movement", "largest movement",
+                    "biggest shift", "largest shift", "biggest delta",
+                    "largest delta")
 _AMBIGUOUS_HINTS = (
     "how is my business", "how are we doing", "how's business",
     "how's it going", "tell me about", "what should i do",
@@ -284,6 +288,9 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
     """
     out: List[Tuple[str, str]] = []
     seen_nouns: set = set()
+
+    def _already_bound(col: str) -> bool:
+        return col != "" and any(c == col for _, c in out)
     # Normalise the query so hyphens between two words look like spaces.
     ql = _norm(question).replace("-", " ")
 
@@ -325,6 +332,8 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
             # either bound to a dim or clearly not a measure/kpi.
             if not col and _looks_like_measure(noun, ds, catalog):
                 continue
+            if _already_bound(col):
+                continue
             out.append((bound_noun, col))
 
     # "top/bottom N <dim> by X" / "top <dim>" — dim between top and by
@@ -334,19 +343,44 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
         noun = m_top.group(1).strip().split()[-1]
         if noun and noun not in seen_nouns and noun not in _STOPWORDS_AFTER_BY:
             col = _bind_dim_column(ds, noun) or ""
-            if col:
+            if col and not _already_bound(col):
                 out.append((noun, col))
                 seen_nouns.add(noun)
 
-    # "which <dim>" — implicit top/bottom 1
+    # "which <dim>" — implicit top/bottom 1. Try progressively longer
+    # sub-phrases (up to 3 words) so "which sub category" binds the
+    # multi-word dim column, not just "sub".
     m_which = re.search(r"\bwhich\s+([a-z][a-z_\s]{1,30}?)\b", ql)
     if m_which:
-        noun = m_which.group(1).strip().split()[0]
-        if noun and noun not in seen_nouns and noun not in _STOPWORDS_AFTER_BY:
-            col = _bind_dim_column(ds, noun) or ""
+        phrase = m_which.group(1).strip()
+        words = phrase.split()
+        col = ""
+        bound_noun = words[0]
+        for k in range(min(3, len(words)), 0, -1):
+            cand = " ".join(words[:k])
+            col = _bind_dim_column(ds, cand) or ""
             if col:
-                out.append((noun, col))
-                seen_nouns.add(noun)
+                bound_noun = cand
+                break
+        # Widen the search a bit: also try the noun immediately after
+        # "which" (e.g. "which sub category" → "sub category").
+        if not col:
+            extended = re.search(r"\bwhich\s+([a-z][a-z_\s]{1,40})",
+                                  ql)
+            if extended:
+                tail = extended.group(1).strip().split()
+                for k in range(min(3, len(tail)), 1, -1):
+                    cand = " ".join(tail[:k])
+                    col = _bind_dim_column(ds, cand) or ""
+                    if col:
+                        bound_noun = cand
+                        break
+        if bound_noun and bound_noun not in seen_nouns \
+                and bound_noun not in _STOPWORDS_AFTER_BY \
+                and col and not _already_bound(col):
+            out.append((bound_noun, col))
+            for w in bound_noun.split():
+                seen_nouns.add(w)
 
     # bare mention of a dimension column (hyphen/underscore-tolerant),
     # longest-name-first so 'sub_category' beats 'category'.
@@ -367,7 +401,9 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
             base_sing = base[:-1]
         sub_dim = f"sub_{base_sing}"
         bound = _bind_dim_column(ds, sub_dim) or ""
-        if sub_dim not in [c for c, _ in [(nn, cc) for nn, cc in out]] \
+        if bound and _already_bound(bound):
+            continue
+        if sub_dim not in [c for c, _ in out] \
                 and not any(n == sub_dim for n, _ in out):
             out.append((sub_dim, bound))
             if bound:
@@ -504,9 +540,19 @@ def _detect_intent_kind(
     if _has_word(question, _SHARE_WORDS) and dims:
         return IntentKind.SHARE_OF_TOTAL
 
-    # top-N / bottom-N.
+    # top-N / bottom-N. But if TWO periods are named plus a
+    # change-flavored word ("largest ... from A to B") the user really
+    # wants the biggest per-dim swing across periods — that's
+    # contribution, not a plain top-N on one period.
+    change_flavored = any(w in ql for w in _GROWTH_WORDS + _CONTRIB_WORDS)
+    if _has_word(question, _TOP_WORDS) and dims and two_months \
+            and change_flavored:
+        return IntentKind.CONTRIBUTION
     if _has_word(question, _TOP_WORDS) and dims:
         return IntentKind.TOP_N
+    if _has_word(question, _BOTTOM_WORDS) and dims and two_months \
+            and change_flavored:
+        return IntentKind.CONTRIBUTION
     if _has_word(question, _BOTTOM_WORDS) and dims:
         return IntentKind.BOTTOM_N
     # "which X had the highest/lowest Y" — implicit top/bottom 1
