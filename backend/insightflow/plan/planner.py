@@ -745,6 +745,70 @@ def _detect_relative_to_stat(question: str, ds: ActiveDataset,
     return spec
 
 
+def _first_clause(question: str) -> str:
+    """Split a compound question on ", " or " and " between independent
+    clauses and return the first. Doesn't split short natural phrases
+    like "revenue and profit" (a coordinated noun pair, no verb after
+    "and"), only clear multi-clause forms like
+    "Top 5 X by Y in Q2 2026, Revenue in the first half of the year".
+    """
+    q = question.strip()
+    # Comma-followed-by-capitalised-word is the strongest signal.
+    m = re.search(r",\s+([A-Z][A-Za-z]+)", q)
+    if m and m.start() > 8:
+        return q[:m.start()].rstrip(" ,.;")
+    # Otherwise, split on " and " ONLY when the second half looks like a
+    # separate clause (has its own noun+verb pattern). Cheap heuristic:
+    # second half contains a KPI-sounding word AND a preposition.
+    lo = q.lower()
+    idx = lo.find(" and ")
+    if idx > 8:
+        second = q[idx + 5:].strip()
+        # If the second half starts with a metric-y word AND contains
+        # "in "/"by "/"per "/"from " → probably a second clause.
+        if re.match(r"^[A-Za-z]+\s+(?:in|by|per|from|for|across)\b",
+                     second):
+            return q[:idx].rstrip(" ,.;")
+    return q
+
+
+def _promote_by_measure(question: str, measures: List[MeasureRef],
+                          catalog: KPICatalog) -> List[MeasureRef]:
+    """For "top N X by <metric> ...": find the KPI whose alias appears
+    right after "by" and move it to position 0 of the measures list, so
+    ORDER BY / LIMIT rank on the metric the user asked for — not on
+    whichever KPI happened to match a longer alias earlier in the
+    question ("Revenue ..." matching "revenue" is 7 chars vs "profit"
+    at 6, so total_revenue would otherwise win)."""
+    if len(measures) < 2:
+        return measures
+    ql = question.lower()
+    m = re.search(r"\bby\s+([a-z][a-z_ ]{1,30})", ql)
+    if not m:
+        return measures
+    tail = m.group(1).strip()
+    # Try progressively shorter prefixes so "by average order value" and
+    # "by profit in Q2" both bind correctly.
+    words = tail.split()
+    best_kpi_id: Optional[str] = None
+    for k in range(min(4, len(words)), 0, -1):
+        cand = " ".join(words[:k])
+        for kpi in catalog.kpis.values():
+            for alias in kpi.aliases:
+                if alias.lower() == cand:
+                    best_kpi_id = kpi.kpi_id
+                    break
+            if best_kpi_id:
+                break
+        if best_kpi_id:
+            break
+    if not best_kpi_id:
+        return measures
+    ordered: List[MeasureRef] = [m for m in measures if m.kpi_id == best_kpi_id]
+    ordered.extend(m for m in measures if m.kpi_id != best_kpi_id)
+    return ordered
+
+
 def _mref(kpi: KPIDefinition) -> MeasureRef:
     return MeasureRef(
         kpi_id=kpi.kpi_id,
@@ -774,6 +838,12 @@ class Planner:
         ds = self.ds
         catalog = self.catalog
 
+        # Compound questions ("Sales by region, Profit by month" or
+        # "Top 5 by profit in Q2, revenue in H1") are not one plan.
+        # Keep only the first clause so the plan pipeline gives a clean
+        # answer to one question. The user can ask the second question
+        # separately.
+        question = _first_clause(question)
         ql_lo = question.lower()
         kpis = _bind_kpis(question, catalog)
         # dim mentions (bound + unbound)
@@ -907,6 +977,7 @@ class Planner:
             if re.search(r"\bwhich\b", question.lower()) and not n_match:
                 top_n = 1
             order_by = "measure_desc"
+            measures = _promote_by_measure(question, measures, catalog)
 
         elif kind == IntentKind.BOTTOM_N:
             n_match = re.search(r"\bbottom\s+(\d+)\b", question.lower())
@@ -914,6 +985,7 @@ class Planner:
             if re.search(r"\bwhich\b", question.lower()) and not n_match:
                 top_n = 1
             order_by = "measure_asc"
+            measures = _promote_by_measure(question, measures, catalog)
 
         elif kind == IntentKind.SHARE_OF_TOTAL:
             share = True
