@@ -213,6 +213,9 @@ class Orchestrator:
         if plan.intent_kind == IntentKind.CONTRIBUTION and result.ok \
                 and result.rows and plan.contribution is not None:
             analysis = self._contribution_summary(plan, result, headline_kpi)
+        elif plan.intent_kind == IntentKind.SHARE_OF_TOTAL and result.ok \
+                and result.rows:
+            analysis = self._share_summary(plan, result, headline_kpi)
         else:
             analysis = analyse(headline_kpi, result, legacy_intent, month)
 
@@ -361,6 +364,39 @@ class Orchestrator:
         return Analysis(summary=headline, headline_value=curr_total,
                         contributors=contributors,
                         prev_total=prev_total, curr_total=curr_total)
+
+    # ==================================================================
+    def _share_summary(self, plan, result, kpi) -> Analysis:
+        """Build a summary for share_of_total. The last column is the
+        share ratio (0..1). We render it as a percentage in the natural-
+        language answer, and populate `headline_value` so the chart
+        renders % on the axis when the frontend inspects it."""
+        from .analysis.analyzer import Analysis
+        rows = result.rows
+        cols = [c.lower() for c in (result.columns or [])]
+        share_idx = None
+        for i, c in enumerate(cols):
+            if c == "share" or c.endswith("_share") or c.endswith("_pct"):
+                share_idx = i; break
+        if share_idx is None:
+            share_idx = len(cols) - 1  # fall back to last
+
+        # Sort by share desc, pick the top slice
+        try:
+            top = max(rows, key=lambda r: float(r[share_idx] or 0.0))
+            top_label = str(top[0])
+            top_share = float(top[share_idx] or 0.0)
+        except (TypeError, ValueError):
+            top_label, top_share = "n/a", 0.0
+
+        kpi_name = kpi.name if kpi else "value"
+        n = len(rows)
+        summary = (
+            f"{kpi_name} split across {n} "
+            f"{result.columns[0] if result.columns else 'group'} values — "
+            f"leader: {top_label} ({top_share * 100:.1f}%)."
+        )
+        return Analysis(summary=summary, headline_value=top_share)
 
     # ==================================================================
     def _diagnostics(self, *, question, ds, plan, plan_report, sql,
