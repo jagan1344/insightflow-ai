@@ -256,6 +256,17 @@ class Orchestrator:
         if decision.action in (ANSWER, WARN):
             trace = plan_evidence_line(plan, catalog.table)
             body = explain(evidence, analysis, llm=self.llm)
+            # Tell the user when we truncated a compound question so
+            # they know the second half wasn't answered.
+            dropped = ""
+            for note in (plan.notes or []):
+                if note.startswith("compound_question_dropped_suffix="):
+                    dropped = note.split("=", 1)[1].strip("'\"")
+                    break
+            if dropped:
+                body = (f"{body}\n\nNote: this question had multiple parts. "
+                        f"I answered the first one. Ask the follow-up "
+                        f"separately for a clean answer: {dropped!r}")
             explanation = f"{trace}\n\n{body}"
             recommendation = (recommend(analysis)
                               if plan.intent_kind == IntentKind.CONTRIBUTION

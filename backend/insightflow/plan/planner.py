@@ -842,8 +842,13 @@ class Planner:
         # "Top 5 by profit in Q2, revenue in H1") are not one plan.
         # Keep only the first clause so the plan pipeline gives a clean
         # answer to one question. The user can ask the second question
-        # separately.
+        # separately. Record the dropped part in plan.notes so the
+        # response can surface it to the user.
+        original = question
         question = _first_clause(question)
+        _dropped_suffix = ""
+        if question != original:
+            _dropped_suffix = original[len(question):].lstrip(" ,.;")
         ql_lo = question.lower()
         kpis = _bind_kpis(question, catalog)
         # dim mentions (bound + unbound)
@@ -1073,6 +1078,8 @@ class Planner:
 
         # ---------- unavailable dims ----------
         unavailable: List[str] = [f"dimension:{n}" for n in unbound_dims]
+        if _dropped_suffix:
+            notes.append(f"compound_question_dropped_suffix={_dropped_suffix!r}")
 
         return AnalyticalPlan(
             intent_kind=kind,
