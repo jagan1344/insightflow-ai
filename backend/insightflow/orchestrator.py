@@ -205,7 +205,16 @@ class Orchestrator:
                 month = int(plan.comparison.target_period.split("-")[1])
             except Exception:
                 pass
-        analysis = analyse(headline_kpi, result, legacy_intent, month)
+        # For contribution plans we already have the per-dim base/target
+        # /delta rows in the executed result — build the summary from
+        # those directly. The legacy `analyse(intent="diagnostic")`
+        # branch re-queries the demo `orders` table, which returns
+        # nonsense on uploaded datasets.
+        if plan.intent_kind == IntentKind.CONTRIBUTION and result.ok \
+                and result.rows and plan.contribution is not None:
+            analysis = self._contribution_summary(plan, result, headline_kpi)
+        else:
+            analysis = analyse(headline_kpi, result, legacy_intent, month)
 
         # 9. Evidence (with a plan trace).
         filters_dict: Dict[str, Any] = {}
@@ -303,6 +312,55 @@ class Orchestrator:
         )
         self.memory.add(question, decision.action, confidence.score)
         return response
+
+    # ==================================================================
+    def _contribution_summary(self, plan, result, kpi) -> Analysis:
+        """Build a diagnostic-style summary from the contribution query's
+        own rows (columns: dim, base_value, target_value, delta)."""
+        from .analysis.analyzer import Analysis, Contributor
+        cs = plan.contribution
+        rows = result.rows
+        # rows are sorted by delta already (compiler emits ORDER BY delta)
+        contributors = []
+        prev_total = 0.0
+        curr_total = 0.0
+        for r in rows:
+            try:
+                dim_name = str(r[0])
+                base_v = float(r[1] or 0.0)
+                targ_v = float(r[2] or 0.0)
+                delta = float(r[3] or 0.0)
+            except (TypeError, ValueError):
+                continue
+            prev_total += base_v
+            curr_total += targ_v
+            pct = (delta / base_v * 100.0) if base_v else 0.0
+            contributors.append(Contributor(
+                dimension=cs.dim_column, name=dim_name,
+                prev=base_v, curr=targ_v, delta=delta, pct=pct))
+        total_delta = curr_total - prev_total
+        pct_change = (total_delta / prev_total * 100.0) if prev_total else 0.0
+        kpi_name = kpi.name if kpi else "Value"
+        # Pick the most-extreme contributor in the direction requested.
+        want_decline = cs.direction == "decline"
+        candidates = [c for c in contributors
+                       if (c.delta < 0 if want_decline else True)] or contributors
+        top = (min(candidates, key=lambda c: c.delta) if want_decline
+               else max(candidates, key=lambda c: abs(c.delta)))
+        headline = (
+            f"{kpi_name} changed from {prev_total:,.2f} to {curr_total:,.2f} "
+            f"({total_delta:+,.2f}, {pct_change:+.1f}%) between "
+            f"{cs.base_period} and {cs.target_period}."
+        )
+        if top is not None:
+            headline += (
+                f" Largest {'decline' if top.delta < 0 else 'gain'} came from "
+                f"{cs.dim_column} '{top.name}' ({top.delta:+,.2f}, "
+                f"{top.pct:+.1f}%)."
+            )
+        return Analysis(summary=headline, headline_value=curr_total,
+                        contributors=contributors,
+                        prev_total=prev_total, curr_total=curr_total)
 
     # ==================================================================
     def _diagnostics(self, *, question, ds, plan, plan_report, sql,
