@@ -597,20 +597,60 @@ def _find_entity_column(ds: ActiveDataset,
                          question: str) -> Optional[str]:
     """Pick the "entity" the relative-to-stat filter is talking about.
 
-    Priority: explicitly-mentioned dim / id column in the question →
-    first bound dim → first id column → first dimension.
+    Priority:
+      1. The entity noun in the question — "customers with ...",
+         "which products have ...", "products whose ...". Bind to a
+         real column via the dim resolver (with plural handling and
+         friendly aliases like customer→customer_name).
+      2. Any dim/id column whose name appears in the question.
+      3. First bound dim.
+      4. First dim column (prefer named entities, not ids).
+      5. First id column.
     """
     ql = question.lower()
+
+    # 1) Entity-noun pattern: "<noun> with/whose/that/having"
+    entity_patterns = [
+        r"^\s*(?:which\s+|show\s+me\s+|list\s+)?([a-z][a-z_ ]{1,30}?)s?\s+(?:with|whose|that|having|where|are)\b",
+        r"\bfor\s+(?:each|every)\s+([a-z][a-z_]+)s?\b",
+    ]
+    for pat in entity_patterns:
+        m = re.search(pat, ql)
+        if not m:
+            continue
+        noun = m.group(1).strip().split()[-1]
+        if not noun or noun in _STOPWORDS_AFTER_BY:
+            continue
+        # Friendly alias — a user saying "customers" typically wants
+        # the customer_name label column, not the customer_id key.
+        _NAME_ALIAS = {
+            "customer": "customer_name",
+            "product": "product_name",
+            "region": "region_name",
+        }
+        preferred = _NAME_ALIAS.get(noun)
+        if preferred and preferred in ds.columns:
+            return preferred
+        col = _bind_dim_column(ds, noun)
+        if col:
+            return col
+
+    # 2) Explicit column mention (existing behaviour)
     for cname, info in ds.columns.items():
         if info.role in ("id", "dimension"):
             token = cname.lower().replace("_", " ")
             if re.search(rf"\b{re.escape(token)}s?\b", ql):
                 return cname
+
+    # 3) First bound dim
     if bound_dims:
         return bound_dims[0][1]
-    for cname in catalog.id_columns:
-        return cname
+
+    # 4) Prefer a named-entity dim over a raw id (row_id would be a
+    # terrible group-by choice).
     for cname in catalog.dimensions:
+        return cname
+    for cname in catalog.id_columns:
         return cname
     return None
 
