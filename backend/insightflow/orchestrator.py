@@ -135,13 +135,24 @@ class Orchestrator:
         validator = PlanValidator(ds, catalog)
         report = validator.validate(plan)
 
-        # 3. If the plan is ambiguous OR was rejected on demo but the
-        #    demo pipeline can still parse it, fall back so all legacy
-        #    tests still pass. On uploaded datasets we NEVER fall back —
-        #    the plan-based path is authoritative.
-        if plan.intent_kind == IntentKind.AMBIGUOUS or \
-                (ds.kind == "demo" and not report.ok):
+        # 3. Fall back to the legacy generator ONLY on the demo dataset,
+        #    where 55 regression tests depend on its behaviour.
+        #
+        #    On uploaded datasets we NEVER fall back — the plan is
+        #    authoritative. In particular, an AMBIGUOUS plan on an
+        #    uploaded dataset must CLARIFY cleanly (no fabricated SQL,
+        #    no accidental "SUM(sales)" answer to "meaning of life").
+        if ds.kind == "demo" and (plan.intent_kind == IntentKind.AMBIGUOUS
+                                    or not report.ok):
             return self._legacy_ask(question, ds, plan, report)
+        if plan.intent_kind == IntentKind.AMBIGUOUS:
+            return self._unanswerable_response(
+                question, plan, report,
+                reason=(
+                    "Question is too vague or off-scope for the "
+                    f"loaded dataset ({ds.name!r}). Try asking about a "
+                    "specific measure in the dataset — optionally with "
+                    "a breakdown, time window, or comparison."))
 
         # 4. Compile.
         compiler = SQLCompiler(ds, catalog)
