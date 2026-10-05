@@ -350,9 +350,11 @@ docker compose --profile osrm up -d osrm                    # after running scri
 docker compose --profile monitoring up -d                   # Prometheus :9090, Grafana :3000 (optional)
 ```
 UI at http://localhost:5173. Inside compose, set `DOCKER_OSRM_URL=http://osrm:5000` to enable OSRM.
-Note: the compose file was written for this project but could not be fully exercised in the
-development sandbox because Docker Hub rate-limited image pulls there (`429 Too Many Requests`).
-The OSRM container commands above *were* run successfully.
+Verification status in the development sandbox: the **backend image** (`backend/Dockerfile`, also used
+by the simulator service) was built, including the model-training step, and the container started healthy
+against PostGIS/Mosquitto/OSRM (`/api/health` → `ok`, `osm+osrm`). The OSRM container commands were also
+run. The complete `docker compose up` and the frontend image were **not** run there: the sandbox's
+TLS-intercepting proxy blocks package downloads inside image builds. Run them on your machine.
 
 ## 16. Demo scenario
 UI: **Simulation → Run demo scenario** (or `POST /api/simulation/demo-scenario`). Requires the
