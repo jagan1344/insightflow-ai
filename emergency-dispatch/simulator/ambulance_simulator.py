@@ -96,8 +96,9 @@ class AmbulanceSimulator:
             if cmd == "FOLLOW_ROUTE":
                 segs = [Seg(s.get("road_id"), float(s["length_m"]), float(s["speed_kph"]), float(s.get("base_speed_kph", s["speed_kph"])),
                             [tuple(c) for c in s["coords"]]) for s in p["segments"] if s.get("coords")]
-                if not segs:
-                    return
+                if not segs:  # zero-length route (already at the destination)
+                    dest = tuple(p.get("dest") or p.get("origin") or (u.lat, u.lon))
+                    segs = [Seg(None, 0.0, 1.0, 1.0, [dest, dest])]
                 if u.mission and u.mission.route_id == p["route_id"]:
                     return  # duplicate (retained) delivery
                 u.mission = Mission(p["route_id"], p.get("leg", ""), float(p.get("time_scale", 1.0)), segs)

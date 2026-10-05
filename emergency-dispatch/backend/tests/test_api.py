@@ -147,3 +147,13 @@ def test_websocket_requires_token_and_streams(client, dispatcher_headers):
                 break
         assert msg["data"]["congestion_level"] == "HEAVY"
         client.post("/api/traffic/events", json={"event_type": "CLEAR", "road_id": road}, headers=dispatcher_headers)
+
+
+def test_zero_length_route_is_stored(client, viewer_headers):
+    """Regression: an incident located exactly on a hospital node produced an empty LINESTRING."""
+    from app.services.state import STATE
+    lat, lon = float(STATE.graph.lat[0]), float(STATE.graph.lon[0])
+    p = {"latitude": lat, "longitude": lon}
+    r = client.post("/api/routes/calculate", json={"origin": p, "destination": p}, headers=viewer_headers)
+    assert r.status_code == 200, r.text
+    assert r.json()["distance_m"] == 0 and len(r.json()["geometry"]) == 2

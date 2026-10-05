@@ -8,4 +8,5 @@ frontend/dist/
 frontend/test-results/
 frontend/playwright-report/
 *.log
-app/ml/data/*.csv
+backend/app/ml/data/*.csv
+frontend/tsconfig.tsbuildinfo

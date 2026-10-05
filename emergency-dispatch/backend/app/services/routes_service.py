@@ -79,7 +79,7 @@ def save_route(db: Session, rr: RouteResult, *, leg: str, origin: tuple[float, f
         engine=rr.engine, network_source=rr.network_source, origin_lat=origin[0], origin_lon=origin[1],
         dest_lat=dest[0], dest_lon=dest[1], distance_m=rr.distance_m, base_duration_s=rr.base_duration_s,
         adjusted_duration_s=rr.adjusted_duration_s, osrm_duration_s=rr.osrm_duration_s,
-        shortest_distance_m=rr.shortest_distance_m, geometry=linestring_wkt(rr.coords),
+        shortest_distance_m=rr.shortest_distance_m, geometry=linestring_wkt(rr.coords or [origin, dest]),
         alternatives=rr.alternatives, active=leg != "PREVIEW", reroute_of=reroute_of, reroute_reason=reroute_reason,
         old_eta_s=None if old_eta_s is None or math.isinf(old_eta_s) else old_eta_s,
         time_saved_s=(None if old_eta_s is None or math.isinf(old_eta_s)
@@ -103,6 +103,7 @@ def route_command(route: Route, rr: RouteResult, incident_id, leg: str) -> dict:
     return {
         "command": "FOLLOW_ROUTE", "route_id": str(route.id), "incident_id": str(incident_id) if incident_id else None,
         "leg": leg, "time_scale": get_settings().sim_time_scale,
+        "origin": [route.origin_lat, route.origin_lon], "dest": [route.dest_lat, route.dest_lon],
         "segments": [{"road_id": s.road_id, "length_m": round(s.length_m, 2), "speed_kph": round(s.adj_speed_kph, 2),
                       "base_speed_kph": round(s.base_speed_kph, 2), "coords": [[round(c[0], 7), round(c[1], 7)] for c in s.coords]}
                      for s in rr.segments],

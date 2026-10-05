@@ -41,6 +41,9 @@ class SeverityModel:
     def load(self) -> bool:
         try:
             self._bundle = joblib.load(self.path)
+            clf = self._bundle["pipeline"].named_steps.get("clf")
+            if hasattr(clf, "n_jobs"):
+                clf.n_jobs = 1   # single-row inference: thread-pool start-up would dominate latency
             self.error = None
             log.info("model loaded", extra={"event": "ML_MODEL_LOADED", "fields": {"version": self.version}})
             return True

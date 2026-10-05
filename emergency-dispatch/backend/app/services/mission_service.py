@@ -187,20 +187,28 @@ def mission_tick() -> int:
             EmergencyIncident.status == "ARRIVED", EmergencyIncident.arrived_at <= now - scene_wall)
             .with_for_update(skip_locked=True)).all()
         for inc in ready:
-            amb = db.get(Ambulance, inc.assigned_ambulance, with_for_update=True)
-            if amb is not None:
-                with db.begin_nested():
-                    load_patient_and_transport(db, inc, amb)
-                n += 1
+            n += _transition(db, inc, load_patient_and_transport)
         done = db.scalars(select(EmergencyIncident).where(
             EmergencyIncident.status == "TO_HOSPITAL", EmergencyIncident.hospital_arrived_at.is_not(None),
             EmergencyIncident.hospital_arrived_at <= now - handover_wall).with_for_update(skip_locked=True)).all()
         for inc in done:
-            amb = db.get(Ambulance, inc.assigned_ambulance, with_for_update=True)
-            if amb is not None:
-                complete_incident(db, inc, amb)
-                n += 1
+            n += _transition(db, inc, complete_incident)
     return n
+
+
+def _transition(db: Session, inc: EmergencyIncident, fn) -> int:
+    """Run one incident transition inside a savepoint so a failure cannot block the other incidents."""
+    amb = db.get(Ambulance, inc.assigned_ambulance, with_for_update=True) if inc.assigned_ambulance else None
+    if amb is None:
+        return 0
+    try:
+        with db.begin_nested():
+            fn(db, inc, amb)
+        return 1
+    except Exception:
+        log.exception("mission transition failed", extra={"event": "MISSION_TRANSITION_FAILED",
+                                                          "fields": {"incident_id": str(inc.id), "step": fn.__name__}})
+        return 0
 
 
 def cancel_incident(db: Session, inc: EmergencyIncident, by: str | None = None) -> None:
