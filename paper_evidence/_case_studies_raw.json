@@ -1,0 +1,464 @@
+[
+  {
+    "config": "Full",
+    "question": "Which region contributed most to the decline from June to July?",
+    "action": "ANSWER",
+    "reason": "confidence 0.85 \u2265 0.70",
+    "confidence": 0.852,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 0.4,
+      "context_consistency": 1.0,
+      "data_completeness": 1.0,
+      "evidence_strength": 1.0,
+      "result_consistency": 0.3,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 1.0
+    },
+    "sql": "WITH base AS (SELECT regions.region_name AS region, SUM(revenue) AS v FROM orders JOIN regions ON regions.region_id = orders.region_id WHERE order_date >= '2026-06-01' AND order_date < '2026-07-01' GROUP BY regions.region_name), targ AS (SELECT regions.region_name AS region, SUM(revenue) AS v FROM orders JOIN regions ON regions.region_id = orders.region_id WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01' GROUP BY regions.region_name), merged AS (SELECT base.region AS region, base.v AS base_value, COALESCE(targ.v, 0) AS target_value FROM base LEFT JOIN targ ON base.region = targ.region UNION ALL SELECT targ.region AS region, 0 AS base_value, targ.v AS target_value FROM targ LEFT JOIN base ON base.region = targ.region WHERE base.region IS NULL) SELECT region, base_value, target_value, (target_value - base_value) AS delta FROM merged ORDER BY delta ASC",
+    "result_columns": [
+      "region",
+      "base_value",
+      "target_value",
+      "delta"
+    ],
+    "result_rows": [
+      [
+        "East",
+        156850.94,
+        30479.76,
+        -126371.18000000001
+      ],
+      [
+        "North",
+        124899.54000000001,
+        47207.72,
+        -77691.82
+      ],
+      [
+        "West",
+        72123.66,
+        32535.24,
+        -39588.42
+      ],
+      [
+        "South",
+        101120.27,
+        92313.93,
+        -8806.340000000011
+      ]
+    ],
+    "plan_intent_kind": "contribution",
+    "measures": [
+      "total_revenue"
+    ],
+    "dims": [
+      "region_name"
+    ],
+    "explanation": "KPI: total_revenue \u2261 SUM(revenue) \u00b7 Grouped by: region_name \u00b7 Contribution: 2026-06 \u2192 2026-07 across region_name \u00b7 Dataset: orders\n\nTotal Revenue changed from 454,994.41 to 202,536.65 (-252,457.76, -55.5%) between 2026-06 and 2026-07. Largest decline came from region_name 'East' (-126,371.18, -80.6%).",
+    "failure_category": "NONE"
+  },
+  {
+    "config": "B1",
+    "question": "Which region contributed most to the decline from June to July?",
+    "action": "ANSWER",
+    "reason": "B1-forced (was ANSWER)",
+    "confidence": 0.852,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 0.4,
+      "context_consistency": 1.0,
+      "data_completeness": 1.0,
+      "evidence_strength": 1.0,
+      "result_consistency": 0.3,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 1.0
+    },
+    "sql": "WITH base AS (SELECT regions.region_name AS region, SUM(revenue) AS v FROM orders JOIN regions ON regions.region_id = orders.region_id WHERE order_date >= '2026-06-01' AND order_date < '2026-07-01' GROUP BY regions.region_name), targ AS (SELECT regions.region_name AS region, SUM(revenue) AS v FROM orders JOIN regions ON regions.region_id = orders.region_id WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01' GROUP BY regions.region_name), merged AS (SELECT base.region AS region, base.v AS base_value, COALESCE(targ.v, 0) AS target_value FROM base LEFT JOIN targ ON base.region = targ.region UNION ALL SELECT targ.region AS region, 0 AS base_value, targ.v AS target_value FROM targ LEFT JOIN base ON base.region = targ.region WHERE base.region IS NULL) SELECT region, base_value, target_value, (target_value - base_value) AS delta FROM merged ORDER BY delta ASC",
+    "result_columns": [
+      "region",
+      "base_value",
+      "target_value",
+      "delta"
+    ],
+    "result_rows": [
+      [
+        "East",
+        156850.94,
+        30479.76,
+        -126371.18000000001
+      ],
+      [
+        "North",
+        124899.54000000001,
+        47207.72,
+        -77691.82
+      ],
+      [
+        "West",
+        72123.66,
+        32535.24,
+        -39588.42
+      ],
+      [
+        "South",
+        101120.27,
+        92313.93,
+        -8806.340000000011
+      ]
+    ],
+    "plan_intent_kind": "contribution",
+    "measures": [
+      "total_revenue"
+    ],
+    "dims": [
+      "region_name"
+    ],
+    "explanation": "KPI: total_revenue \u2261 SUM(revenue) \u00b7 Grouped by: region_name \u00b7 Contribution: 2026-06 \u2192 2026-07 across region_name \u00b7 Dataset: orders\n\nTotal Revenue changed from 454,994.41 to 202,536.65 (-252,457.76, -55.5%) between 2026-06 and 2026-07. Largest decline came from region_name 'East' (-126,371.18, -80.6%).",
+    "failure_category": "NONE"
+  },
+  {
+    "config": "Full",
+    "question": "Which customers have revenue above average but profit below average?",
+    "action": "ANSWER",
+    "reason": "confidence 0.99 \u2265 0.70",
+    "confidence": 0.993,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 1.0,
+      "context_consistency": 1.0,
+      "data_completeness": 1.0,
+      "evidence_strength": 0.9,
+      "result_consistency": 1.0,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 1.0
+    },
+    "sql": "WITH agg AS (SELECT customers.customer_name AS customer, SUM(revenue) AS m1, SUM(revenue-cost) AS m2 FROM orders JOIN customers ON customers.customer_id = orders.customer_id GROUP BY customers.customer_name) SELECT customer, m1, m2 FROM agg WHERE m1 > (SELECT AVG(m1) FROM agg) AND m2 < (SELECT AVG(m2) FROM agg) ORDER BY m1 DESC",
+    "result_columns": [
+      "customer",
+      "m1",
+      "m2"
+    ],
+    "result_rows": [
+      [
+        "Customer 030",
+        63300.29,
+        20754.08
+      ],
+      [
+        "Customer 028",
+        57410.07,
+        21170.4
+      ],
+      [
+        "Customer 021",
+        57231.62,
+        20587.51
+      ]
+    ],
+    "plan_intent_kind": "relative_to_stat",
+    "measures": [
+      "total_revenue",
+      "profit"
+    ],
+    "dims": [
+      "customer_name"
+    ],
+    "explanation": "KPI: total_revenue \u2261 SUM(revenue) \u00b7 Grouped by: customer_name \u00b7 Dataset: orders\n\nTotal Revenue across 3 customer values \u2014 leader: Customer 030 (20,754.08).",
+    "failure_category": "NONE"
+  },
+  {
+    "config": "B1",
+    "question": "Which customers have revenue above average but profit below average?",
+    "action": "ANSWER",
+    "reason": "B1-forced (was ANSWER)",
+    "confidence": 0.993,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 1.0,
+      "context_consistency": 1.0,
+      "data_completeness": 1.0,
+      "evidence_strength": 0.9,
+      "result_consistency": 1.0,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 1.0
+    },
+    "sql": "WITH agg AS (SELECT customers.customer_name AS customer, SUM(revenue) AS m1, SUM(revenue-cost) AS m2 FROM orders JOIN customers ON customers.customer_id = orders.customer_id GROUP BY customers.customer_name) SELECT customer, m1, m2 FROM agg WHERE m1 > (SELECT AVG(m1) FROM agg) AND m2 < (SELECT AVG(m2) FROM agg) ORDER BY m1 DESC",
+    "result_columns": [
+      "customer",
+      "m1",
+      "m2"
+    ],
+    "result_rows": [
+      [
+        "Customer 030",
+        63300.29,
+        20754.08
+      ],
+      [
+        "Customer 028",
+        57410.07,
+        21170.4
+      ],
+      [
+        "Customer 021",
+        57231.62,
+        20587.51
+      ]
+    ],
+    "plan_intent_kind": "relative_to_stat",
+    "measures": [
+      "total_revenue",
+      "profit"
+    ],
+    "dims": [
+      "customer_name"
+    ],
+    "explanation": "KPI: total_revenue \u2261 SUM(revenue) \u00b7 Grouped by: customer_name \u00b7 Dataset: orders\n\nTotal Revenue across 3 customer values \u2014 leader: Customer 030 (20,754.08).",
+    "failure_category": "NONE"
+  },
+  {
+    "config": "Full",
+    "question": "What is customer retention?",
+    "action": "CLARIFY",
+    "reason": "question is too vague to plan",
+    "confidence": 0.05,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 1.0,
+      "context_consistency": 0.3,
+      "data_completeness": 1.0,
+      "evidence_strength": 1.0,
+      "result_consistency": 1.0,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 0.0
+    },
+    "sql": "SELECT customers.customer_name AS customer FROM orders JOIN customers ON customers.customer_id = orders.customer_id GROUP BY customers.customer_name",
+    "result_columns": [
+      "customer"
+    ],
+    "result_rows": [
+      [
+        "Customer 001"
+      ],
+      [
+        "Customer 002"
+      ],
+      [
+        "Customer 003"
+      ],
+      [
+        "Customer 004"
+      ],
+      [
+        "Customer 005"
+      ],
+      [
+        "Customer 006"
+      ],
+      [
+        "Customer 007"
+      ],
+      [
+        "Customer 008"
+      ],
+      [
+        "Customer 009"
+      ],
+      [
+        "Customer 010"
+      ]
+    ],
+    "plan_intent_kind": "ambiguous",
+    "measures": [],
+    "dims": [],
+    "explanation": "I have an overall figure, but the question asks for a breakdown by customer. Want that breakdown?",
+    "failure_category": "AMBIGUITY"
+  },
+  {
+    "config": "B1",
+    "question": "What is customer retention?",
+    "action": "ANSWER",
+    "reason": "B1-forced (was CLARIFY)",
+    "confidence": 0.05,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 1.0,
+      "context_consistency": 0.3,
+      "data_completeness": 1.0,
+      "evidence_strength": 1.0,
+      "result_consistency": 1.0,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 0.0
+    },
+    "sql": "SELECT customers.customer_name AS customer FROM orders JOIN customers ON customers.customer_id = orders.customer_id GROUP BY customers.customer_name",
+    "result_columns": [
+      "customer"
+    ],
+    "result_rows": [
+      [
+        "Customer 001"
+      ],
+      [
+        "Customer 002"
+      ],
+      [
+        "Customer 003"
+      ],
+      [
+        "Customer 004"
+      ],
+      [
+        "Customer 005"
+      ],
+      [
+        "Customer 006"
+      ],
+      [
+        "Customer 007"
+      ],
+      [
+        "Customer 008"
+      ],
+      [
+        "Customer 009"
+      ],
+      [
+        "Customer 010"
+      ]
+    ],
+    "plan_intent_kind": "ambiguous",
+    "measures": [],
+    "dims": [],
+    "explanation": "I have an overall figure, but the question asks for a breakdown by customer. Want that breakdown?",
+    "failure_category": "AMBIGUITY"
+  },
+  {
+    "config": "Full",
+    "question": "Top 5 products by profit in Q2 2026, revenue in H1",
+    "action": "ANSWER",
+    "reason": "confidence 1.00 \u2265 0.70",
+    "confidence": 1.0,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 1.0,
+      "context_consistency": 1.0,
+      "data_completeness": 1.0,
+      "evidence_strength": 1.0,
+      "result_consistency": 1.0,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 1.0
+    },
+    "sql": "SELECT products.product_name AS product, SUM(revenue-cost) AS profit, SUM(revenue) AS total_revenue FROM orders JOIN products ON products.product_id = orders.product_id WHERE order_date >= '2026-04-01' AND order_date < '2026-07-01' GROUP BY products.product_name ORDER BY profit DESC LIMIT 5",
+    "result_columns": [
+      "product",
+      "profit",
+      "total_revenue"
+    ],
+    "result_rows": [
+      [
+        "Monitor",
+        76857.33,
+        257987.11000000002
+      ],
+      [
+        "Laptop",
+        69056.76,
+        231218.38
+      ],
+      [
+        "Headphones",
+        67237.74,
+        227262.35
+      ],
+      [
+        "Chair",
+        45463.71,
+        130030.06
+      ],
+      [
+        "Office Suite",
+        45023.39,
+        69151.65
+      ]
+    ],
+    "plan_intent_kind": "top_n",
+    "measures": [
+      "profit",
+      "total_revenue"
+    ],
+    "dims": [
+      "product_name"
+    ],
+    "explanation": "KPI: profit \u2261 SUM(revenue-cost) \u00b7 Grouped by: product_name \u00b7 Filters: time \u2208 [2026-04, 2026-06] \u00b7 Top-N: 5 \u00b7 Dataset: orders\n\nProfit across 5 product values \u2014 leader: Monitor (257,987.11).",
+    "failure_category": "NONE"
+  },
+  {
+    "config": "B1",
+    "question": "Top 5 products by profit in Q2 2026, revenue in H1",
+    "action": "ANSWER",
+    "reason": "B1-forced (was ANSWER)",
+    "confidence": 1.0,
+    "signals": {
+      "sql_validity": 1.0,
+      "schema_match": 1.0,
+      "kpi_match": 1.0,
+      "context_consistency": 1.0,
+      "data_completeness": 1.0,
+      "evidence_strength": 1.0,
+      "result_consistency": 1.0,
+      "intent_coverage": 1.0,
+      "plan_fidelity": 1.0
+    },
+    "sql": "SELECT products.product_name AS product, SUM(revenue-cost) AS profit, SUM(revenue) AS total_revenue FROM orders JOIN products ON products.product_id = orders.product_id WHERE order_date >= '2026-04-01' AND order_date < '2026-07-01' GROUP BY products.product_name ORDER BY profit DESC LIMIT 5",
+    "result_columns": [
+      "product",
+      "profit",
+      "total_revenue"
+    ],
+    "result_rows": [
+      [
+        "Monitor",
+        76857.33,
+        257987.11000000002
+      ],
+      [
+        "Laptop",
+        69056.76,
+        231218.38
+      ],
+      [
+        "Headphones",
+        67237.74,
+        227262.35
+      ],
+      [
+        "Chair",
+        45463.71,
+        130030.06
+      ],
+      [
+        "Office Suite",
+        45023.39,
+        69151.65
+      ]
+    ],
+    "plan_intent_kind": "top_n",
+    "measures": [
+      "profit",
+      "total_revenue"
+    ],
+    "dims": [
+      "product_name"
+    ],
+    "explanation": "KPI: profit \u2261 SUM(revenue-cost) \u00b7 Grouped by: product_name \u00b7 Filters: time \u2208 [2026-04, 2026-06] \u00b7 Top-N: 5 \u00b7 Dataset: orders\n\nProfit across 5 product values \u2014 leader: Monitor (257,987.11).",
+    "failure_category": "NONE"
+  }
+]
