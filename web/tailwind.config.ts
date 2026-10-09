@@ -27,12 +27,21 @@ const config: Config = {
           teal:    "#14B8A6",
           deep:    "#0E7C6B",
           glow:    "#22D3B7",
+          accent:  "#F97316",
+          "accent-soft": "#FB923C",
         },
         state: {
           answer:  "#22C55E",
           warn:    "#F59E0B",
           clarify: "#38BDF8",
           abstain: "#F43F5E",
+        },
+        chart: {
+          blue:    "#3B82F6",
+          green:   "#10B981",
+          purple:  "#8B5CF6",
+          red:     "#EF4444",
+          amber:   "#F59E0B",
         },
       },
       fontFamily: {

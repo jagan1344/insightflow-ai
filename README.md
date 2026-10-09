@@ -89,8 +89,48 @@ npm install
 npm run dev
 ```
 
+### Windows PowerShell
+
+```powershell
+# 1) Backend
+cd backend
+py -m venv .venv ; .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python data\seed.py
+$env:DATABASE_URL="sqlite:///$PWD/data/insightflow.db"
+uvicorn api.main:app --reload --port 8000
+
+# 2) Frontend (new PowerShell window)
+cd web
+npm install
+npm run dev
+```
+
 Open [http://localhost:3000](http://localhost:3000) for the landing page and
-[http://localhost:3000/app](http://localhost:3000/app) for the chat + dashboard.
+[http://localhost:3000/app](http://localhost:3000/app) for the dashboard shell.
+From there the left sidebar reaches:
+
+| Page                       | Route                     | Backend                           |
+|----------------------------|---------------------------|-----------------------------------|
+| Executive Overview         | `/app`                    | `/api/dashboard` + `/ws`          |
+| Analytics Explorer         | `/app/explorer`           | `/api/pages/explorer`, `/api/ask` |
+| Ask AI                     | `/app/ask`                | `/api/ask`                        |
+| Anomaly Detection          | `/app/anomaly`            | `/api/pages/anomaly`              |
+| Forecasting                | `/app/forecast`           | `/api/pages/forecast`             |
+| Recommendations            | `/app/recommendations`    | `/api/pages/recommendations`      |
+| Reports                    | `/app/reports`            | `/api/pages/reports/summary`      |
+| Data Sources               | `/app/sources`            | `/api/pages/sources`              |
+| Semantic Models            | `/app/semantic`           | `/api/pages/semantic`             |
+| Settings                   | `/app/settings`           | `/api/pages/settings`, `/api/mcp/*` |
+
+### MCP servers
+
+Four stdio MCP servers (`db`, `analytics`, `data_quality`, `reporting`) are
+listed in `backend/mcp_config.yaml` and spawned on demand through the
+official `mcp` Python SDK. The FastAPI backend exposes a tool-call surface
+at `/api/mcp/*`; the Settings page connects them with one click. Tool
+calls run through a policy guard that rejects anything but SELECT/WITH
+SQL and limits results to the allowed table prefixes.
 
 ### Prove real-time is working
 
