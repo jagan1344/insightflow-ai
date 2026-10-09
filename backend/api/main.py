@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import realtime
 from .routes_chat import router as chat_router
 from .routes_dashboard import router as dashboard_router
+from .routes_mcp import router as mcp_router
+from .routes_pages import router as pages_router
 from .routes_research import router as research_router
 from .routes_upload import router as upload_router
 
@@ -50,6 +52,17 @@ app.include_router(chat_router)
 app.include_router(dashboard_router)
 app.include_router(research_router)
 app.include_router(upload_router)
+app.include_router(mcp_router)
+app.include_router(pages_router)
+
+
+@app.on_event("shutdown")
+def _close_mcp():
+    try:
+        from insightflow.mcp_integration import get_manager
+        get_manager().shutdown()
+    except Exception:
+        pass
 
 
 @app.get("/api/health")

@@ -37,6 +37,12 @@ from .knowledge.kpi_catalog import build_catalog
 from .knowledge.semantic_model import build_semantic_model
 from .llm import LLMClient
 from .memory import Memory
+# Optional — MCP integration is loaded lazily so the orchestrator still
+# works when the mcp SDK isn't installed or the config file is missing.
+try:
+    from .mcp_integration import AgentMCP
+except Exception:
+    AgentMCP = None  # type: ignore
 from .nlsql.generator import GenSQL, generate_sql
 from .plan import (
     AnalyticalPlan, FailureCategory, FidelityValidator, IntentKind, Planner,

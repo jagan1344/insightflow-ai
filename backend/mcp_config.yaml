@@ -1,0 +1,94 @@
+# MCP server registry for InsightFlow AI.
+#
+# The agent orchestrator only connects to servers listed here. Each entry
+# is explicit — the LLM cannot inject a new server command, URL, or
+# transport. Add servers by editing this file manually.
+#
+# Fields per server:
+#   name:      unique identifier used by the client manager and the tool
+#              policy (`db.list_tables` etc.)
+#   enabled:   false to keep the server config but skip loading it
+#   transport: "stdio" (default) or "sse" / "streamable_http" if added later
+#   command:   argv to spawn when transport is stdio
+#   cwd:       working directory to run the server from (defaults to the
+#              backend/ repo root)
+#   allowed_tools: tool names the client is allowed to invoke on this
+#              server — if omitted, all discovered tools are allowed.
+#              An empty list means "none allowed" (hard shutoff).
+#   call_timeout_seconds: per-call timeout. Default 15s.
+#   startup_timeout_seconds: how long to wait for the server to come up.
+#              Default 10s.
+
+servers:
+
+  - name: db
+    enabled: true
+    transport: stdio
+    command: ["python", "-m", "mcp_servers.db_server"]
+    allowed_tools:
+      - list_schemas
+      - list_tables
+      - describe_table
+      - get_column_metadata
+      - get_relationships
+      - execute_readonly_query
+      - get_data_freshness
+    call_timeout_seconds: 20
+
+  - name: analytics
+    enabled: true
+    transport: stdio
+    command: ["python", "-m", "mcp_servers.analytics_server"]
+    allowed_tools:
+      - calculate_kpi
+      - compare_periods
+      - analyze_trend
+      - analyze_metric_breakdown
+      - detect_anomalies
+      - evaluate_forecast
+      - get_business_metric_definition
+    call_timeout_seconds: 30
+
+  - name: data_quality
+    enabled: true
+    transport: stdio
+    command: ["python", "-m", "mcp_servers.data_quality_server"]
+    allowed_tools:
+      - profile_table
+      - check_missing_values
+      - check_duplicate_records
+      - validate_metric_definition
+      - check_query_policy
+      - get_data_quality_summary
+    call_timeout_seconds: 20
+
+  - name: reporting
+    enabled: true
+    transport: stdio
+    command: ["python", "-m", "mcp_servers.reporting_server"]
+    allowed_tools:
+      - generate_summary_report
+      - export_query_results
+      - generate_metric_report
+    call_timeout_seconds: 30
+
+# Policy: additional guards applied on top of per-server allowed_tools.
+policy:
+  # Maximum rows any tool is permitted to return. Enforced on the client
+  # side as a defense-in-depth check even when a server misbehaves.
+  max_rows: 10000
+  # Maximum string length for a tool response (JSON-serialised).
+  max_response_chars: 200_000
+  # Hard allowlist of SQL verbs. The database server already enforces
+  # read-only, but the client re-checks before forwarding to a tool.
+  allowed_sql_verbs: ["select", "with"]
+  # Allowed schemas / table prefixes. Supports both exact and prefix match.
+  # "*" means allow all. "orders", "customers", "products", "regions" are
+  # the demo star schema; "dataset_" is the uploaded-dataset namespace.
+  allowed_table_prefixes:
+    - "orders"
+    - "customers"
+    - "products"
+    - "regions"
+    - "dataset_"
+    - "_datasets"
