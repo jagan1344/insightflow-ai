@@ -86,3 +86,12 @@ def test_or_predicate_cannot_bypass_safe_join_key():
     )
     report = check_join_fidelity(sql)
     assert not report.ok
+
+
+def test_join_cannot_borrow_an_unrelated_safe_relationship():
+    sql = (
+        "SELECT SUM(orders.revenue) FROM orders "
+        "JOIN products ON customers.customer_id = orders.customer_id"
+    )
+    report = check_join_fidelity(sql)
+    assert not report.ok
