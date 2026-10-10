@@ -242,7 +242,7 @@ def main() -> int:
     orch = Orchestrator()
     benchmark = _load_benchmark()
     print(f"Loaded {len(benchmark)} benchmark items")
-    print(f"Running InsightFlow orchestrator (offline, LLM available={orch.llm.available})...\n")
+    print(f"Running InsightFlow orchestrator (provider={orch.llm.provider}, model={orch.llm.model}, LLM available={orch.llm.available})...\n")
     rows = evaluate(orch, benchmark)
     write_outputs(rows, RESULTS_DIR)
     return 0
