@@ -95,3 +95,27 @@ def test_join_cannot_borrow_an_unrelated_safe_relationship():
     )
     report = check_join_fidelity(sql)
     assert not report.ok
+
+
+def test_grouped_period_ctes_joined_on_group_key_are_accepted():
+    sql = (
+        "WITH base AS (SELECT region, SUM(revenue) AS v FROM sales "
+        "WHERE order_date < '2026-07-01' GROUP BY region), "
+        "targ AS (SELECT region, SUM(revenue) AS v FROM sales "
+        "WHERE order_date >= '2026-07-01' GROUP BY region) "
+        "SELECT base.region, base.v, targ.v FROM base "
+        "LEFT JOIN targ ON base.region = targ.region"
+    )
+    report = check_join_fidelity(sql)
+    assert report.ok, report.checks
+
+
+def test_grouped_cte_join_on_non_grouped_key_is_flagged():
+    sql = (
+        "WITH base AS (SELECT region, SUM(revenue) AS v FROM sales GROUP BY region), "
+        "targ AS (SELECT region, SUM(revenue) AS v FROM sales GROUP BY region) "
+        "SELECT base.region, targ.v FROM base "
+        "LEFT JOIN targ ON base.v = targ.v"
+    )
+    report = check_join_fidelity(sql)
+    assert not report.ok
