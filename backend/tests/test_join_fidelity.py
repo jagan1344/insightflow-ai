@@ -59,3 +59,20 @@ def test_negative_revenue_level_still_fails_nonnegative_rule():
     report = validate_kpi(revenue, result)
     assert not report.rules_passed
     assert any("must be non-negative" in issue for issue in report.issues)
+
+
+def test_plan_fidelity_report_includes_join_guard():
+    from insightflow.plan.fidelity import FidelityValidator
+    from insightflow.plan.plan import AnalyticalPlan, MeasureRef
+
+    plan = AnalyticalPlan(
+        table="orders",
+        measures=[MeasureRef(kpi_id="total_revenue", formula="SUM(revenue)")],
+    )
+    sql = (
+        "SELECT SUM(revenue) AS total_revenue FROM orders "
+        "JOIN products ON products.category = orders.product_id"
+    )
+    report = FidelityValidator().check(plan, sql)
+    assert not report.ok
+    assert any(c.name.startswith("join:") and not c.passed for c in report.checks)
