@@ -2,9 +2,17 @@ name: Research evaluation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - claude/insightflow-ai-build-2neph7
+    paths:
+      - "backend/**"
+      - "evaluation/**"
+      - ".github/workflows/research-evaluation.yml"
   push:
     branches:
       - fix/join-fidelity-guard
+      - claude/insightflow-ai-build-2neph7
     paths:
       - "backend/**"
       - "evaluation/**"
