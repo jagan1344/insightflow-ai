@@ -91,7 +91,12 @@ def check_join_fidelity(sql: str) -> JoinFidelityReport:
         # OR can bypass a key equality (e.g. FK=PK OR 1=1), so do not
         # certify the join even if one safe equality is also present.
         has_or = bool(re.search(r"\bOR\b", condition, re.IGNORECASE))
-        safe = bool(relationships & _SAFE_RELATIONSHIPS) and not has_or
+        safe_relationships = {
+            rel for rel in relationships
+            if rel in _SAFE_RELATIONSHIPS
+            and joined_table in {table for table, _column in rel}
+        }
+        safe = bool(safe_relationships) and not has_or
         checks.append(JoinCheck(
             f"join_{index}_cardinality", safe,
             (f"Join to {joined_table!r} uses a known FK/PK relationship."
