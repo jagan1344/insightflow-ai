@@ -50,13 +50,13 @@ _EQ_RE = re.compile(r"([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)\s*=\s*([a-zA-Z_]\w*)\.([a-z
 def _extract_cte_bodies(sql: str) -> dict[str, str]:
     """Extract top-level WITH CTE bodies using balanced parentheses."""
     out: dict[str, str] = {}
-    with_match = re.search(r"\\bWITH\\b", sql, re.IGNORECASE)
+    with_match = re.search(r"\bWITH\b", sql, re.IGNORECASE)
     if not with_match:
         return out
     pos = with_match.end()
     while pos < len(sql):
         match = re.match(
-            r"\\s*,?\\s*([a-zA-Z_]\\w*)\\s+AS\\s*\\(",
+            r"\s*,?\s*([a-zA-Z_]\w*)\s+AS\s*\(",
             sql[pos:], re.IGNORECASE,
         )
         if not match:
@@ -86,7 +86,7 @@ def _extract_cte_bodies(sql: str) -> dict[str, str]:
         out[name] = sql[body_start:i - 1]
         pos = i
         # Another CTE starts with a comma; otherwise the WITH clause ended.
-        probe = re.match(r"\\s*,", sql[pos:])
+        probe = re.match(r"\s*,", sql[pos:])
         if not probe:
             break
         pos += probe.end()
@@ -99,7 +99,7 @@ def _cte_join_is_one_to_one(sql: str, condition: str,
     """Certify joins between grouped CTEs only when join keys are grouped."""
     if len(referenced_ctes) < 2 or not referenced_ctes.issubset(cte_bodies):
         return False
-    if re.search(r"\\bOR\\b", condition, re.IGNORECASE):
+    if re.search(r"\bOR\b", condition, re.IGNORECASE):
         return False
     equalities = list(_EQ_RE.finditer(condition))
     if not equalities:
@@ -107,7 +107,7 @@ def _cte_join_is_one_to_one(sql: str, condition: str,
     for name in referenced_ctes:
         body = cte_bodies[name]
         group = re.search(
-            r"\\bGROUP\\s+BY\\b(.*?)(?:\\bHAVING\\b|\\bORDER\\s+BY\\b|\\bLIMIT\\b|$)",
+            r"\bGROUP\s+BY\b(.*?)(?:\bHAVING\b|\bORDER\s+BY\b|\bLIMIT\b|$)",
             body, re.IGNORECASE | re.DOTALL,
         )
         if not group:
@@ -124,7 +124,7 @@ def _cte_join_is_one_to_one(sql: str, condition: str,
             if right_alias == name:
                 relevant_cols.append(right_col)
         if not relevant_cols or any(
-            not re.search(rf"\\b{re.escape(col)}\\b", group_clause, re.IGNORECASE)
+            not re.search(rf"\b{re.escape(col)}\b", group_clause, re.IGNORECASE)
             for col in relevant_cols
         ):
             return False
