@@ -47,6 +47,90 @@ _JOIN_RE = re.compile(
 )
 _EQ_RE = re.compile(r"([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)\s*=\s*([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)", re.IGNORECASE)
 
+def _extract_cte_bodies(sql: str) -> dict[str, str]:
+    """Extract top-level WITH CTE bodies using balanced parentheses."""
+    out: dict[str, str] = {}
+    with_match = re.search(r"\\bWITH\\b", sql, re.IGNORECASE)
+    if not with_match:
+        return out
+    pos = with_match.end()
+    while pos < len(sql):
+        match = re.match(
+            r"\\s*,?\\s*([a-zA-Z_]\\w*)\\s+AS\\s*\\(",
+            sql[pos:], re.IGNORECASE,
+        )
+        if not match:
+            break
+        name = match.group(1).lower()
+        body_start = pos + match.end()
+        depth = 1
+        quote = None
+        i = body_start
+        while i < len(sql) and depth:
+            ch = sql[i]
+            if quote:
+                if ch == quote:
+                    if i + 1 < len(sql) and sql[i + 1] == quote:
+                        i += 1
+                    else:
+                        quote = None
+            elif ch in ("'", '"', "`"):
+                quote = ch
+            elif ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+            i += 1
+        if depth:
+            break
+        out[name] = sql[body_start:i - 1]
+        pos = i
+        # Another CTE starts with a comma; otherwise the WITH clause ended.
+        probe = re.match(r"\\s*,", sql[pos:])
+        if not probe:
+            break
+        pos += probe.end()
+    return out
+
+
+def _cte_join_is_one_to_one(sql: str, condition: str,
+                            referenced_ctes: set[str],
+                            cte_bodies: dict[str, str]) -> bool:
+    """Certify joins between grouped CTEs only when join keys are grouped."""
+    if len(referenced_ctes) < 2 or not referenced_ctes.issubset(cte_bodies):
+        return False
+    if re.search(r"\\bOR\\b", condition, re.IGNORECASE):
+        return False
+    equalities = list(_EQ_RE.finditer(condition))
+    if not equalities:
+        return False
+    for name in referenced_ctes:
+        body = cte_bodies[name]
+        group = re.search(
+            r"\\bGROUP\\s+BY\\b(.*?)(?:\\bHAVING\\b|\\bORDER\\s+BY\\b|\\bLIMIT\\b|$)",
+            body, re.IGNORECASE | re.DOTALL,
+        )
+        if not group:
+            return False
+        group_clause = group.group(1)
+        relevant_cols = []
+        for eq in equalities:
+            left_alias, left_col, right_alias, right_col = (
+                eq.group(1).lower(), eq.group(2).lower(),
+                eq.group(3).lower(), eq.group(4).lower(),
+            )
+            if left_alias == name:
+                relevant_cols.append(left_col)
+            if right_alias == name:
+                relevant_cols.append(right_col)
+        if not relevant_cols or any(
+            not re.search(rf"\\b{re.escape(col)}\\b", group_clause, re.IGNORECASE)
+            for col in relevant_cols
+        ):
+            return False
+    return True
+
+
 def check_join_fidelity(sql: str) -> JoinFidelityReport:
     """Check joins for known safe key relationships; unknown joins fail closed."""
     if not sql or not re.search(r"\bJOIN\b", sql, re.IGNORECASE):
@@ -54,6 +138,8 @@ def check_join_fidelity(sql: str) -> JoinFidelityReport:
             JoinCheck("join_cardinality", True, "No JOIN clause; no join fan-out risk.")
         ])
 
+    cte_bodies = _extract_cte_bodies(sql)
+    cte_names = set(cte_bodies)
     aliases = {}
     for match in _TABLE_RE.finditer(sql):
         table = match.group(2).lower()
@@ -81,6 +167,22 @@ def check_join_fidelity(sql: str) -> JoinFidelityReport:
             aliases.get(a.lower(), a.lower())
             for a in re.findall(r"\b([a-zA-Z_]\w*)\.[a-zA-Z_]\w*\b", condition)
         }
+        # The compiler deliberately joins grouped CTEs for comparisons and
+        # contribution analysis. Certify these only when every participating
+        # CTE is grouped by the exact equality key; otherwise fail closed.
+        if joined_table in cte_names:
+            cte_refs = known_tables_in_condition & cte_names
+            cte_safe = _cte_join_is_one_to_one(
+                sql, condition, cte_refs, cte_bodies,
+            )
+            checks.append(JoinCheck(
+                f"join_{index}_cardinality", cte_safe,
+                ("Join between grouped CTEs uses grouped equality keys."
+                 if cte_safe else
+                 f"Join to CTE {joined_table!r} has unverified cardinality; aggregate totals cannot be certified.")
+            ))
+            continue
+
         if joined_table not in _KNOWN_TABLES or not known_tables_in_condition.issubset(_KNOWN_TABLES):
             checks.append(JoinCheck(
                 f"join_{index}_cardinality", False,
