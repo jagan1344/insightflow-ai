@@ -32,3 +32,5 @@ jobs:
         run: python data/seed.py
       - name: Run backend tests
         run: pytest -q
+      - name: Run join and KPI fault-injection experiment
+        run: python ../evaluation/scripts/run_join_fidelity_mutations.py
