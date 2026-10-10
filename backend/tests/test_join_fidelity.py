@@ -76,3 +76,13 @@ def test_plan_fidelity_report_includes_join_guard():
     report = FidelityValidator().check(plan, sql)
     assert not report.ok
     assert any(c.name.startswith("join:") and not c.passed for c in report.checks)
+
+
+def test_or_predicate_cannot_bypass_safe_join_key():
+    sql = (
+        "SELECT SUM(orders.revenue) FROM orders "
+        "JOIN products ON products.product_id = orders.product_id "
+        "OR 1 = 1"
+    )
+    report = check_join_fidelity(sql)
+    assert not report.ok
