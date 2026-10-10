@@ -123,11 +123,25 @@ def _cte_join_is_one_to_one(sql: str, condition: str,
                 relevant_cols.append(left_col)
             if right_alias == name:
                 relevant_cols.append(right_col)
-        if not relevant_cols or any(
-            not re.search(rf"\b{re.escape(col)}\b", group_clause, re.IGNORECASE)
-            for col in relevant_cols
-        ):
+        if not relevant_cols:
             return False
+        for col in relevant_cols:
+            if re.search(rf"\b{re.escape(col)}\b", group_clause, re.IGNORECASE):
+                continue
+            # The compiler may expose a dimension alias (for example region)
+            # while grouping by its physical source (regions.region_name).
+            alias_expr = re.search(
+                rf"([^,]+?)\s+AS\s+{re.escape(col)}\b", body,
+                re.IGNORECASE,
+            )
+            if not alias_expr:
+                return False
+            source_col = re.findall(r"[a-zA-Z_]\w*", alias_expr.group(1))
+            if not source_col or not re.search(
+                rf"\b{re.escape(source_col[-1])}\b",
+                group_clause, re.IGNORECASE,
+            ):
+                return False
     return True
 
 
