@@ -192,14 +192,39 @@ OUT_OF_SCOPE = [
 DIAGNOSTIC = [
     ("D01",
      "Why did revenue decrease in July?",
-     # gold SQL returns the July total; the analyzer computes contributors.
-     "SELECT SUM(revenue) AS total_revenue FROM orders "
-     "WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01'",
-     "total_revenue", None, "challenging", "diagnostic"),
+     # Diagnostic gold must evaluate the contribution breakdown, not just
+     # compare the generated multi-column result to a single July total.
+     "WITH base AS ("
+     "SELECT products.category AS category, SUM(revenue) AS v FROM orders "
+     "JOIN products ON products.product_id = orders.product_id "
+     "WHERE order_date >= '2026-06-01' AND order_date < '2026-07-01' "
+     "GROUP BY products.category), "
+     "targ AS ("
+     "SELECT products.category AS category, SUM(revenue) AS v FROM orders "
+     "JOIN products ON products.product_id = orders.product_id "
+     "WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01' "
+     "GROUP BY products.category), "
+     "merged AS ("
+     "SELECT base.category AS category, base.v AS base_value, "
+     "COALESCE(targ.v, 0) AS target_value FROM base "
+     "LEFT JOIN targ ON base.category = targ.category "
+     "UNION ALL "
+     "SELECT targ.category AS category, 0 AS base_value, targ.v AS target_value "
+     "FROM targ LEFT JOIN base ON base.category = targ.category "
+     "WHERE base.category IS NULL) "
+     "SELECT category, base_value, target_value, "
+     "(target_value - base_value) AS delta FROM merged ORDER BY delta DESC",
+     "total_revenue", "category", "challenging", "diagnostic"),
     ("D02",
      "Why did revenue drop in July compared to June?",
-     "SELECT SUM(revenue) AS total_revenue FROM orders "
-     "WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01'",
+     # Compare both periods, rather than using the July total as the sole
+     # ground truth for a two-period comparison query.
+     "SELECT '2026-07' AS period, SUM(revenue) AS total_revenue FROM orders "
+     "WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01' "
+     "UNION ALL "
+     "SELECT '2026-06' AS period, SUM(revenue) AS total_revenue FROM orders "
+     "WHERE order_date >= '2026-06-01' AND order_date < '2026-07-01' "
+     "ORDER BY period",
      "total_revenue", None, "challenging", "diagnostic"),
 ]
 
