@@ -35,9 +35,11 @@ def _seed_demo():
     """Fresh demo DB so every case runs against the known-good schema."""
     from insightflow.execution.executor import reset_engine
     from insightflow.knowledge.schema_agent import refresh_schema
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
     yield
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
 

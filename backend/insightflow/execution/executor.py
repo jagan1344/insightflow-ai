@@ -36,7 +36,11 @@ def get_engine() -> Engine:
 
 
 def reset_engine() -> None:
+    # Dispose pooled connections before tests recreate the SQLite database.
+    engine = get_engine() if get_engine.cache_info().currsize else None
     get_engine.cache_clear()
+    if engine is not None:
+        engine.dispose()
 
 
 def run_sql(sql: str) -> QueryResult:

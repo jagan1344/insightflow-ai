@@ -345,8 +345,8 @@ def reseed():
     import runpy
     from pathlib import Path
     seed_path = Path(__file__).resolve().parent.parent / "data" / "seed.py"
-    runpy.run_path(str(seed_path), run_name="__main__")
     reset_engine()
+    runpy.run_path(str(seed_path), run_name="__main__")
     refresh_schema()
     # switch active back to demo
     try:

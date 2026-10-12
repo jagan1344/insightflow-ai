@@ -29,10 +29,12 @@ def _seed_and_restore():
     from insightflow.execution.executor import reset_engine
     from insightflow.knowledge.schema_agent import refresh_schema
     from insightflow.knowledge.dataset_registry import set_active, DEMO_ID
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
     set_active(DEMO_ID)
     yield
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
     set_active(DEMO_ID)

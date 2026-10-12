@@ -39,8 +39,10 @@ def mgr():
     from insightflow.mcp_integration import MCPClientManager, load_config
 
     # Reseed so every tool sees the demo star schema.
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
-    reset_engine(); refresh_schema()
+    reset_engine()
+    refresh_schema()
     set_active(DEMO_ID)
 
     manager = MCPClientManager(load_config())
