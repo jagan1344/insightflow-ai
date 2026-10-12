@@ -20,7 +20,7 @@ is sourced from code or a logged run.**
 | 11 | ABSTAIN threshold | implicit: below `threshold_low` with SQL/exec failure → ABSTAIN; otherwise CLARIFY. Paper's Table III should say "below 0.40, or SQL/execution failure". | `backend/insightflow/reliability/decision.py` |
 | 12 | Hard-cap formula | `C = min(S, coverage + 0.05, fidelity + 0.05)` — equivalent to `C = min(S, min(σ_cov, σ_fid) + 0.05)` | `backend/insightflow/reliability/confidence.py` |
 | 13 | MCP SDK version | **2.3.0** | `pip show mcp` |
-| 14 | MCP spec version / access date | Access date **2026-10-09**; SDK upstream = `pypi.org/project/mcp/`; spec document (model-context-protocol spec) not pinned to a version in this repo. **HUMAN: specify spec version used.** | — |
+| 14 | MCP spec version / access date | Access date **2026-10-09** (pack built), re-checked **2026-10-12**. SDK upstream = `pypi.org/project/mcp/` version **2.3.0** (confirmed via `pip show mcp`). The **MCP specification document** itself is NOT pinned to a specific revision in this repo (the SDK selects it at runtime). Current authoritative revisions per the Model Context Protocol maintainers' public materials: **`2026-07-28`** (latest, "stateless MCP") and **`2024-11-05`** (earlier revision, still supported by many implementations). **HUMAN: verify which revision string your paper cites against the modelcontextprotocol.io/specification page — do not rely on this secondary summary.** | web search 2026-10-12 (secondary sources — not the official spec page, which was unreachable from this environment) |
 | 15 | Four MCP servers + responsibility | `db` (introspection + read-only query), `analytics` (KPI math + anomalies + forecasts), `data_quality` (profiling, policy check), `reporting` (summary + CSV export + per-KPI report) | `backend/mcp_config.yaml` + per-server docstrings |
 | 16 | Total MCP tools | **23** (db 7 + analytics 7 + data_quality 6 + reporting 3) | discovery output in `test_mcp_integration.py` |
 | 17 | Demo DB table list | `_datasets, customers, orders, products, regions` | `facts.md §12` |
@@ -32,7 +32,7 @@ is sourced from code or a logged run.**
 | 23 | Benchmark question count | **27** (master prompt said 55; see discrepancies.md D2) | `wc -l evaluation/dataset/reliability_benchmark.jsonl` |
 | 24 | Tolerance ε | **1e-6** relative | `evaluation/oracle.py::EPSILON` |
 | 25 | Test run date / env / commit | **2026-10-09T15:22Z, Linux 6.18.44, Python 3.11.15, commit 3c843de**, 118 / 118 passed in 15.33 s | `paper_evidence/test_run.log` |
-| 26 | Safety-matrix size | **25 cases** in `test_safety.py::SAFETY_CASES` | — |
+| 26 | Safety-matrix size | **25 cases** in `backend/tests/test_safety.py::CASES` (the variable is `CASES`, not `SAFETY_CASES`; the file imports no `SAFETY_CASES` name) | AST walk of `test_safety.py` |
 | 27 | Superstore dataset | NOT MEASURED in this evidence pack — no Superstore file in-tree at the eval time. The frontend upload flow accepts the real Tableau Superstore .xls but we did not have one to upload here. | — |
 | 28 | Evidence-record checklist | SQL identical to executed SQL ✓, KPI formula matches catalog ✓, filters listed ✓, assumptions (plan.notes) listed ✓, dataset table in `diagnostics.dataset.table` ✓ | `backend/insightflow/orchestrator.py::_diagnostics` |
 | 29 | Dataset URL | repo + commit (above). No external dataset dependency for the demo. | — |
@@ -40,12 +40,22 @@ is sourced from code or a logged run.**
 
 ## Items the paper should **not** quote without re-running
 
-- "zero unsafe-answer rate" — true only on the controlled safety matrix,
-  false on the 27-question benchmark (2 unsafe answers, Wilson CI
-  0.021–0.234). See discrepancies.md D4.
+- "zero unsafe-answer rate" — true only on the controlled 25-case
+  safety matrix, false on the 27-question benchmark (2 unsafe answers,
+  Wilson CI 0.021–0.234). See `discrepancies.md` D4 and
+  `limitations.md` L1.
 - "55 regression questions" — benchmark has 27; test node count is 118.
-  See D2.
-- Ablation deltas — null-result on this benchmark. See D5.
+  See `discrepancies.md` D2.
+- Ablation deltas on the 27-question benchmark alone — null-result,
+  do not quote as effect sizes. The adversarial diagnostic set
+  (`paper_evidence/adversarial_results.md`) is a separate artefact and
+  must be labeled as such; it shows real divergences for B1 (4/12) and
+  A1 (1/12). See `limitations.md` L2.
+- Overall latency as representative of LLM-backed agentic BI — the
+  p50=4ms, p95=6ms numbers are the deterministic-pipeline cost only.
+  See `limitations.md` L7.
+- "well-calibrated confidence" — ECE on the 27-question dev set is
+  0.416. See `limitations.md` L4.
 
 ## HUMAN MUST SUPPLY
 

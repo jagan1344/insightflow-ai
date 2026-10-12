@@ -145,9 +145,10 @@ def summarise(rows: List[dict], cfg: str) -> dict:
                       if r["answerability"] == "answerable"
                       and not as_bool(r.get("semantic_match")))
 
-    # Clarification precision: CLARIFY on ambiguous ÷ all CLARIFY
-    # (Benchmark has no 'ambiguous' label in this release, so this
-    # typically reports 0/clarify when the dataset lacks the category.)
+    # Clarification precision: CLARIFY on ambiguous ÷ all CLARIFY.
+    # Benchmark has 4 'ambiguous' rows + 6 'out_of_scope' rows; both are
+    # legitimate CLARIFY targets, but "precision on ambiguous" uses only
+    # the 'ambiguous' label to match the definition in the paper.
     clar_on_amb = sum(1 for r in clarify if r["answerability"] == "ambiguous")
     unanswerable_or_clar = [r for r in unanswerable_rows
                              if r["action"] in ("CLARIFY", "ABSTAIN")]

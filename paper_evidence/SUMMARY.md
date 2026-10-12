@@ -56,7 +56,7 @@ measurements use the deterministic rule-based plan pipeline.
 - ECE = 0.416 (10 equal-width bins); only 3 bins populated so the
   calibration estimate itself is noisy.
 
-### Full vs B1 (gate-removed)
+### Full vs B1 (gate-removed) on the 27-question benchmark
 
 **Identical** — B1 "forces ANSWER whenever SQL executed and succeeded"
 but on this benchmark no additional queries slipped past the gate
@@ -66,6 +66,26 @@ for both semantic correctness and unsafe. **Same holds for A1, A2, A3.**
 This is a genuine null-result finding on the current benchmark; see
 `discrepancies.md` D5 for why ("the 27 questions do not trigger the
 specific checks these guards exist to catch").
+
+### Guards work — proved on separate artefacts
+
+Two artefacts added after the initial pack show the guards are
+functioning, even though the 27-question benchmark null-results:
+
+1. **`paper_evidence/ablation_verification.md`** — unit-level proof
+   that each ablation switch (A1, A2, A3) actually disables its
+   guard on a crafted input designed to trigger that guard.
+2. **`paper_evidence/adversarial_results.md`** — 12 natural-language
+   questions constructed to stress the guards. Divergences:
+   B1 ≠ Full on **4 / 12** (gate removal: 4 unsafe answers Full refused),
+   A1 ≠ Full on **1 / 12** (fidelity validator saves ADV05 from a
+   wrong ANSWER at confidence 0.98),
+   A2 ≠ Full on 0 / 12,
+   A3 ≠ Full on 0 / 12.
+
+The paper should cite both artefacts and clearly flag the adversarial
+set as a diagnostic artefact (hand-built by the author), not a headline
+accuracy result.
 
 ## Suggested result statements
 
@@ -87,6 +107,8 @@ specific checks these guards exist to catch").
 ```
 paper_evidence/
 ├── SUMMARY.md
+├── PROVENANCE.md                  ← pins measurements to 3c843de
+├── limitations.md                 ← honest full picture
 ├── environment.md
 ├── requirements_frozen.txt
 ├── facts.md
@@ -100,32 +122,60 @@ paper_evidence/
 ├── calibration.png
 ├── discrepancies.md
 ├── placeholder_fill.md
+├── ablation_verification.md       ← unit-level guard proofs
+├── adversarial_results.md         ← 12-question diagnostic set run
+├── adversarial_per_question.csv
+├── benchmark_regen.md             ← regenerated expected_result diff
+├── heldout_review_checklist.md    ← per-question review worksheet
 └── _case_studies_raw.json
 evaluation/
 ├── oracle.py
 ├── run_paper_eval.py
 ├── compute_paper_metrics.py
+├── verify_ablations.py            ← guard switch unit tests
+├── run_adversarial.py             ← adversarial set runner
+├── regenerate_benchmark.py        ← rebuilds expected_result
+├── build_heldout_checklist.py     ← builds the human-review worksheet
 └── dataset/
-    └── heldout_DRAFT.json     ← NOT YET REVIEWED
+    ├── reliability_benchmark.jsonl              ← current benchmark (unchanged)
+    ├── reliability_benchmark_v1.jsonl.archive   ← verbatim archive
+    ├── reliability_benchmark_v2.jsonl           ← opt-in fresh expected_result
+    ├── adversarial_diagnostic.jsonl             ← 12 adversarial drafts
+    └── heldout_DRAFT.json                       ← NOT YET REVIEWED
 ```
 
-## Human review checklist
+## Human review checklist (post-corrections)
 
-1. **Authors + emails + MCP spec version** in `placeholder_fill.md`.
+1. **Authors + emails** in `placeholder_fill.md`. **MCP spec revision**
+   — pick between `2026-07-28` and `2024-11-05` to match the version
+   your text cites (see `placeholder_fill.md` row 14; also verify
+   against the modelcontextprotocol.io/specification page).
 2. **Paste the measured values** into the actual paper .docx (not
    present in this checkout).
-3. **Review the 42 held-out drafts** in
-   `evaluation/dataset/heldout_DRAFT.json` — specifically verify
-   `gold_sql` and `answerability` for each row. Then rename and run.
-4. **Decide the public story about ablations**: either (a) report the
-   null result honestly on this benchmark, or (b) build an adversarial
-   set and re-run.
-5. **Decide the public story about the "0 unsafe" claim**: the
-   `test_safety.py` matrix passes with 0 unsafe, the benchmark produces
-   2 / 27. Both numbers are real; pick the one the paper quotes and
-   describe its scope precisely.
-6. **Re-generate `expected_result` fields** in the benchmark against
-   the current seed if you want them trustworthy — or document that
-   the metrics use re-executed `gold_sql` instead.
+3. **Review the 42 held-out drafts** using
+   `paper_evidence/heldout_review_checklist.md` — tick each row only
+   after SQL correctness, answerability, decision alignment, and
+   type/difficulty are all verified. Then rename
+   `heldout_DRAFT.json` → `heldout_REVIEWED.json` and run.
+4. **Decide the public story about ablations**: null result on the
+   27-question benchmark is reported honestly in
+   `discrepancies.md` D5 and `limitations.md` L2. Divergences on the
+   adversarial diagnostic are reported in
+   `paper_evidence/adversarial_results.md` as a separate diagnostic
+   artefact. The paper may cite both; it must NOT quote adversarial
+   divergences as if they were measured on the benchmark.
+5. **Decide the public story about the "0 unsafe" claim**: see
+   `limitations.md` L1. The paper should quote the 2/27 benchmark
+   number as primary and report the 0/25 safety matrix separately,
+   both with scopes stated.
+6. **Adopt regenerated `expected_result` (optional)**: review
+   `paper_evidence/benchmark_regen.md` (17 rows change). If the diff
+   looks right, rename `reliability_benchmark_v2.jsonl` into place.
+   The oracle re-executes `gold_sql` so this is cosmetic for the
+   metrics, but good hygiene for the file.
 7. **Verify every placeholder in the actual .docx** matches a row in
    `placeholder_fill.md`.
+8. **Preserve provenance** (`PROVENANCE.md`): all numbers in this
+   pack are from commit `3c843de`. If the paper is finalized at a
+   later commit, either re-run the pack at that commit or state
+   clearly that the measurements are frozen at 3c843de.

@@ -57,7 +57,10 @@ def run_gold_sql(db_path: pathlib.Path, sql: str) -> list[list]:
 def compute_oracle(row: dict,
                     db_path: pathlib.Path = DEFAULT_DB) -> OracleResult:
     qid = row["question_id"]
-    if row.get("answerability") == "unanswerable":
+    # The benchmark uses three answerability labels: 'answerable',
+    # 'ambiguous', 'out_of_scope'. The last two are the "cannot answer"
+    # population — a correct system responds with CLARIFY or ABSTAIN.
+    if row.get("answerability") in ("unanswerable", "ambiguous", "out_of_scope"):
         return OracleResult(qid, source="unanswerable",
                              value=None,
                              note="dataset cannot answer; expected CLARIFY/ABSTAIN")
