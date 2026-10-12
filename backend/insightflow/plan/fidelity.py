@@ -16,6 +16,7 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 
+from .join_fidelity import check_join_fidelity
 from .plan import (
     AnalyticalPlan, ComparisonSpec, ContributionSpec, FilterExpr,
     IntentKind, MeasureRef, RelativeStatSpec,
@@ -183,6 +184,14 @@ class FidelityValidator:
             checks.append(FidelityCheck(
                 "avg_at_grain_shape", ok,
                 "SQL has AVG of grouped SUM"))
+
+        # 11) Join-cardinality guard. This checks known FK/PK relationships
+        # and marks unknown join schemas as unverified instead of assuming safe.
+        join_report = check_join_fidelity(sql)
+        for jc in join_report.checks:
+            checks.append(FidelityCheck(
+                f"join:{jc.name}", jc.passed, jc.detail,
+            ))
 
         passed = sum(1 for c in checks if c.passed)
         total = max(1, len(checks))

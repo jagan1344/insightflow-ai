@@ -1,0 +1,62 @@
+name: Research evaluation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - claude/insightflow-ai-build-2neph7
+    paths:
+      - "backend/**"
+      - "evaluation/**"
+      - ".github/workflows/research-evaluation.yml"
+  push:
+    branches:
+      - fix/join-fidelity-guard
+      - claude/insightflow-ai-build-2neph7
+    paths:
+      - "backend/**"
+      - "evaluation/**"
+      - ".github/workflows/research-evaluation.yml"
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: sqlite:///${{ github.workspace }}/backend/data/insightflow.db
+      LLM_PROVIDER: offline
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r backend/requirements.txt
+      - name: Seed demo database
+        run: python backend/data/seed.py
+      - name: Rebuild benchmark ground truth from seeded database
+        run: python evaluation/scripts/prepare_dataset.py
+      - name: Run full orchestrator benchmark
+        run: python evaluation/scripts/run_evaluation.py
+      - name: Calculate benchmark metrics
+        run: python evaluation/scripts/calculate_metrics.py
+      - name: Run confidence ablation study
+        run: python evaluation/scripts/run_ablation.py
+      - name: Regenerate figures
+        run: python evaluation/scripts/generate_figures.py
+      - name: Upload research evaluation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insightflow-research-evaluation-${{ github.sha }}
+          path: |
+            evaluation/results/
+            evaluation/figures/
+            evaluation/dataset/reliability_benchmark.jsonl
+            evaluation/dataset/reliability_benchmark.csv
+          if-no-files-found: warn
+          retention-days: 30

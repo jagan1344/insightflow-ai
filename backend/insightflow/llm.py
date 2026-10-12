@@ -1,6 +1,7 @@
 """LLM client with pluggable providers. Degrades to offline on any failure."""
 from __future__ import annotations
 
+import os
 from typing import Optional
 
 from .config import settings
@@ -23,6 +24,7 @@ class LLMClient:
         self.model = model or settings.llm_model
         self.api_key = api_key or settings.llm_api_key
         self.base_url = base_url or settings.llm_base_url
+        self.strict_mode = os.environ.get("LLM_STRICT_MODE", "false").strip().lower() in ("1", "true", "yes", "on")
         self._client = None
         self.available = False
         self._init_client()
@@ -30,34 +32,46 @@ class LLMClient:
     # ------------------------------------------------------------------
     def _init_client(self) -> None:
         if self.provider == "offline":
+            if self.strict_mode:
+                raise RuntimeError("LLM_STRICT_MODE is enabled but LLM_PROVIDER=offline. Configure a real provider for model-backed evaluation.")
             return
         if self.provider not in ("openai", "local"):
+            if self.strict_mode:
+                raise RuntimeError(f"Unsupported LLM_PROVIDER={self.provider!r} in strict mode.")
             self.provider = "offline"
             return
         try:
             from openai import OpenAI  # type: ignore
-        except Exception:
+        except Exception as exc:
+            if self.strict_mode:
+                raise RuntimeError("LLM provider SDK is unavailable in strict mode.") from exc
             self.provider = "offline"
             return
         try:
             kwargs = {}
             if self.provider == "openai":
                 if not self.api_key:
+                    if self.strict_mode:
+                        raise RuntimeError("OPENAI_API_KEY is required for strict OpenAI evaluation.")
                     self.provider = "offline"
                     return
                 kwargs["api_key"] = self.api_key
             else:  # local
                 if not self.base_url:
+                    if self.strict_mode:
+                        raise RuntimeError("LLM_BASE_URL is required for strict local/Ollama evaluation.")
                     self.provider = "offline"
                     return
                 kwargs["base_url"] = self.base_url
                 kwargs["api_key"] = self.api_key or "not-needed"
             self._client = OpenAI(**kwargs)
             self.available = True
-        except Exception:
+        except Exception as exc:
             self._client = None
-            self.provider = "offline"
             self.available = False
+            if self.strict_mode:
+                raise RuntimeError(f"Could not initialize LLM provider {self.provider!r}.") from exc
+            self.provider = "offline"
 
     # ------------------------------------------------------------------
     def complete(self, prompt: str, system: str = "", temperature: float = 0.0) -> str:
@@ -74,8 +88,11 @@ class LLMClient:
                 temperature=temperature,
             )
             return (resp.choices[0].message.content or "").strip()
-        except Exception:
-            # Any failure at call time → soft-fail to offline for this call.
+        except Exception as exc:
+            # Evaluation must not silently record offline fallback as model output.
+            if self.strict_mode:
+                raise RuntimeError(f"LLM request failed for provider={self.provider!r}, model={self.model!r}. Check that the local server is reachable and the model is available.") from exc
+            # Normal interactive use may soft-fail to deterministic offline narration.
             return self._offline_stub(prompt, system)
 
     # ------------------------------------------------------------------

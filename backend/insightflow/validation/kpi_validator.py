@@ -40,8 +40,24 @@ def validate_kpi(kpi: Optional[KPI], result: QueryResult) -> KPIValidationResult
     if kpi.key in result.columns:
         col_idx = result.columns.index(kpi.key)
     else:
-        # fall back to the last numeric-looking column
-        col_idx = len(result.columns) - 1 if result.columns else None
+        # A change/delta column is not the KPI's level. In contribution and
+        # period-comparison results, negative deltas are legitimate even when
+        # the underlying revenue/profit levels are non-negative.
+        change_columns = {
+            "delta", "change", "growth", "variance", "difference",
+            "pct_change", "percent_change", "change_pct",
+        }
+        has_change_column = any(
+            any(token in str(c).lower() for token in change_columns)
+            for c in result.columns
+        )
+        # Keep the legacy fallback for simple outputs, but never mistake a
+        # change column for the KPI value when the canonical KPI column is
+        # absent.
+        col_idx = (
+            None if has_change_column
+            else (len(result.columns) - 1 if result.columns else None)
+        )
 
     values = []
     if col_idx is not None:
