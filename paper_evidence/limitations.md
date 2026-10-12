@@ -158,11 +158,19 @@ report those numbers separately.
 ## L9. Provenance
 
 Every number in `paper_evidence/` was measured at commit
-**`3c843de88ca0b62669749b217aaef000e3e6363e`**. HEAD at the time of
-writing this file is `a7e5f957...`, which adds the evidence pack and
-evaluation scripts but does NOT change the production pipeline. See
-`paper_evidence/PROVENANCE.md`. Do not attribute these numbers to a
-later commit without rerunning them.
+**`3c843de88ca0b62669749b217aaef000e3e6363e`**.
+
+**Update after the merge of upstream commits (2026-10-12):** HEAD now
+includes upstream work beyond `a7e5f95` — notably a join-cardinality
+fidelity guard (`backend/insightflow/plan/join_fidelity.py`),
+integrated into `plan/fidelity.py`; a `kpi_validator.py` change (no
+longer invalid-flagging negative KPI deltas); and a strict mode in
+`llm.py`. The test suite grew from 118 to 132 tests. **These upstream
+changes are NOT reflected in any `paper_evidence/` measurement.**
+Rerun the full reproduction command (L10) against the current HEAD if
+the paper is to cite the current pipeline, or state explicitly that
+the measurements are frozen at `3c843de`. See `PROVENANCE.md` for the
+full statement.
 
 ## L10. Reproduction command
 

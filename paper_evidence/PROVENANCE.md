@@ -45,17 +45,41 @@ is identical to `3c843de`.
 
 ## What changed between 3c843de and HEAD
 
-Nothing in the production pipeline. `git log 3c843de..HEAD --name-status`:
+**UPDATE 2026-10-12:** HEAD is no longer at `a7e5f95`. Upstream pushed
+substantial production changes to `backend/` after this evidence pack
+was built — in particular a new **join-cardinality fidelity guard**
+(`backend/insightflow/plan/join_fidelity.py`), integration of that
+guard into `plan/fidelity.py`, a change in `validation/kpi_validator.py`
+(negative KPI deltas no longer treated as invalid), and a strict-mode
+option in `insightflow/llm.py`. The test suite grew from 118 to 132
+tests.
 
-```
-a7e5f95 Paper evidence pack: oracle, eval runner, ablations + 27-question results
-    paper_evidence/*            (new files only)
-    evaluation/oracle.py        (new)
-    evaluation/run_paper_eval.py (new)
-    evaluation/compute_paper_metrics.py (new)
-    evaluation/dataset/heldout_DRAFT.json (new)
-```
+**None of the paper_evidence numbers were re-measured at this new HEAD.**
+They remain pinned to `3c843de` for the production pipeline and to
+`a7e5f95` for the evaluation scripts themselves. In particular:
 
-So the evidence pack's claims about `backend/`, the plan pipeline,
-MCP servers, confidence engine, and decision gate are unchanged
-between 3c843de and HEAD.
+- `paper_evidence/results.json`
+- `paper_evidence/per_question.csv`
+- `paper_evidence/results_tables.md`
+- `paper_evidence/case_studies.md`
+- `paper_evidence/calibration.png`
+- `paper_evidence/_case_studies_raw.json`
+
+all reflect the pipeline at `3c843de`. The adversarial-set results
+(`adversarial_per_question.csv`, `adversarial_results.md`) and the
+ablation-verification artefact (`ablation_verification.md`) were
+measured against the local tree at the time of commit `9756ca1`
+(before this merge), which also matched `a7e5f95`'s backend. The
+newly merged upstream backend changes are **unmeasured** by this pack.
+
+### If the paper will be finalized at the current HEAD
+
+Either (a) re-run the complete reproduction command in
+`limitations.md` L10 against the current HEAD and overwrite the
+measurement files, or (b) state in the paper that the measurements
+are frozen at `3c843de`.
+
+Do NOT silently update code revision pointers in the paper without
+rerunning. The join-fidelity guard in particular is likely to change
+semantic-accuracy, unsafe-rate, and fidelity-signal numbers on both
+the 27-question benchmark and the 12-question adversarial set.
