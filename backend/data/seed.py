@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SCHEMA_PATH = ROOT / "schema.sql"
-DB_PATH = ROOT / "insightflow.db"
+DB_PATH = Path(os.environ.get("INSIGHTFLOW_SEED_DB_PATH", str(ROOT / "insightflow.db"))).resolve()
 
 
 REGIONS = ["North", "South", "East", "West"]
@@ -59,9 +59,9 @@ def month_days(year: int, month: int) -> list[date]:
 
 
 def build() -> None:
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-
+    # Rebuild tables in place. schema.sql drops existing tables, so
+    # deleting the database file is unnecessary and can fail on Windows
+    # when another SQLite connection still has the file open.
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(SCHEMA_PATH.read_text())
 
