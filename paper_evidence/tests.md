@@ -1,7 +1,10 @@
 # Test suite — 2026-10-09T15:22Z at commit 3c843de
 
 Full invocation: `pytest -v` under the live DB at `backend/data/insightflow.db`.
-Full log: `paper_evidence/test_run.log`.
+**Raw-log status:** `paper_evidence/test_run.log` is not present in the repository at
+`3c843de`, `6daa968`, `e31824c`, or the current audit branch. The 118-pass result
+and per-file counts below are retained as recorded historical results, but the
+original console output is unavailable here for independent verification.
 
 ## Headline
 
@@ -35,7 +38,7 @@ The master prompt's narrative groups tests as "55 regression + 17 synthetic +
 | 18 novel-schema| test_semantic_reasoning | — |
 | 28 MCP         | tests/mcp/test_mcp_integration | — |
 
-Exact counts (from the test_run.log):
+Recorded per-file counts (the referenced raw log is unavailable):
 - test_dataset_switching: 5 nodes
 - test_evaluation: 10 nodes
 - test_intent_coverage: 6 nodes
