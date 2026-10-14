@@ -28,8 +28,9 @@ measurements use the deterministic rule-based plan pipeline.
 
 ## What was NOT measured — and why
 
-- **B0 (legacy pre-plan generator)** — still callable in-tree, but only
-  through the demo→AMBIGUOUS path. Reaching it on every benchmark
+- **B0 (legacy pre-plan generator)** — still callable in-tree, but the
+  demo-dataset fallback is reached when the plan is AMBIGUOUS or plan
+  validation fails (`not report.ok`). Reaching it on every benchmark
   question would require monkey-patching the plan dispatcher. Marked
   NOT MEASURED.
 - **B2 (direct LLM text-to-SQL)** — no `OPENAI_API_KEY` and no local LLM
