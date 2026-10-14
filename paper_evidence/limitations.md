@@ -122,10 +122,10 @@ until a human reviews the diff in
 
 - **B0** (legacy pre-plan rule-based generator) is still callable at
   `backend/insightflow/nlsql/generator.py` but, as currently wired
-  (`orchestrator._legacy_ask`), is only reached on the demo dataset
-  when the plan returns AMBIGUOUS. Reaching it uniformly on all 27
-  benchmark questions would require monkey-patching the plan
-  dispatcher, which this evaluation does not do.
+  (`orchestrator._legacy_ask`), the demo-dataset fallback is reached
+  when the plan is AMBIGUOUS or plan validation fails (`not report.ok`).
+  Reaching it uniformly on all 27 benchmark questions would require
+  monkey-patching the plan dispatcher, which this evaluation does not do.
 - **B2** (direct LLM text-to-SQL) requires `OPENAI_API_KEY` or a
   local LLM endpoint; `backend/insightflow/llm.py` is in offline
   mode in this environment. Not run.
