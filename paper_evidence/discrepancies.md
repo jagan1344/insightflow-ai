@@ -95,9 +95,10 @@ the paper should say.
   generator".
 - **Reality:** the legacy generator lives at
   `backend/insightflow/nlsql/generator.py` and is still callable through
-  `orchestrator._legacy_ask`, but **only when the active dataset is
-  `demo` AND the plan returns AMBIGUOUS**. Reaching it uniformly on all
-  27 benchmark questions requires monkey-patching the plan dispatcher.
+  `orchestrator._legacy_ask`, but the demo-dataset fallback is reached
+  when the plan is AMBIGUOUS **or** plan validation fails
+  (`not report.ok`). Reaching it uniformly on all 27 benchmark questions
+  requires monkey-patching the plan dispatcher.
   Reported as **NOT MEASURED** in `results_tables.md`; the paper should
   state this honestly rather than cite an invented B0 number.
 
