@@ -10,8 +10,10 @@ measurements use the deterministic rule-based plan pipeline.
 - **Implementation facts** (`facts.md`) — every IR field, intent kind,
   signal, weight, cap formula, decision threshold, validator check,
   MCP tool, with code citations (`file:line`).
-- **Full test suite** — 118 / 118 pytest nodes passed in 15.33 s;
-  per-file breakdown in `tests.md`, full log in `test_run.log`.
+- **Historical full test suite** — `tests.md` records 118 / 118 pytest nodes
+  passed in 15.33 s at `3c843de`. The original raw log is not present in this
+  repository revision, so the recorded result cannot be independently checked
+  against that log from this checkout.
 - **Benchmark audit** — 27-question dataset, 3 answerability labels
   (`answerable` 17, `ambiguous` 4, `out_of_scope` 6). Independent
   pandas / sqlite3 oracle at `evaluation/oracle.py`.
@@ -114,7 +116,7 @@ paper_evidence/
 ├── requirements_frozen.txt
 ├── facts.md
 ├── tests.md
-├── test_run.log
+├── tests.md                         ← historical test summary; raw log unavailable
 ├── benchmark.md
 ├── per_question.csv
 ├── results.json
