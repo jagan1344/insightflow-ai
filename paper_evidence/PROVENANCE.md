@@ -11,6 +11,11 @@ pipeline. The *production code* measured by all tables below (plan
 pipeline, confidence engine, decision gate, MCP servers, catalog)
 is identical to `3c843de`.
 
+**Test-log limitation:** `paper_evidence/tests.md` records 118 passing pytest
+nodes at `3c843de`, but the referenced raw `test_run.log` is absent from the
+repository history checked for this audit. Treat the count as a recorded
+historical result, not as independently verified from a committed raw log.
+
 ## What is pinned to 3c843de
 
 | Artefact | Value |
