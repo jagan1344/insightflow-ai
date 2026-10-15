@@ -157,20 +157,32 @@ report those numbers separately.
 
 ## L9. Provenance
 
-Every number in `paper_evidence/` was measured at commit
-**`3c843de88ca0b62669749b217aaef000e3e6363e`**.
+The results tables, per_question CSVs, adversarial outputs, and
+ablation verification were **re-run on 2026-10-15 against the merged
+HEAD `f302888`**, which includes recent upstream work (join_fidelity
+guard, kpi_validator change, llm strict mode; 132 tests passing).
 
-**Update after the merge of upstream commits (2026-10-12):** HEAD now
-includes upstream work beyond `a7e5f95` — notably a join-cardinality
-fidelity guard (`backend/insightflow/plan/join_fidelity.py`),
-integrated into `plan/fidelity.py`; a `kpi_validator.py` change (no
-longer invalid-flagging negative KPI deltas); and a strict mode in
-`llm.py`. The test suite grew from 118 to 132 tests. **These upstream
-changes are NOT reflected in any `paper_evidence/` measurement.**
-Rerun the full reproduction command (L10) against the current HEAD if
-the paper is to cite the current pipeline, or state explicitly that
-the measurements are frozen at `3c843de`. See `PROVENANCE.md` for the
-full statement.
+The pre-rerun versions (measurements at `3c843de`) are archived
+verbatim under `paper_evidence/pinned_3c843de/`.
+
+**Still frozen at `3c843de`** (not re-run; archived in the same
+folder for safety):
+
+- `paper_evidence/case_studies.md`
+- `paper_evidence/_case_studies_raw.json`
+- `paper_evidence/calibration.png`
+
+**Headline findings are stable between the two commits.** Semantic
+accuracy on answerable (0.882), unsafe-answer rate (0.074), coverage
+(0.630), the 2 unsafe cases D01/D02, and the adversarial B1=4/12 +
+A1=1/12 divergences are all identical. ECE drifted 0.416 → 0.422,
+Brier 0.402 → 0.412, and ADV05 confidence 0.850 → 0.883 — minor
+drifts, all documented in `PROVENANCE.md`.
+
+The new join_fidelity guard **does not fire on any question in either
+set**. The paper should discuss this as an informative null: the guard
+is loaded insurance for a failure mode the current benchmarks do not
+provoke.
 
 ## L10. Reproduction command
 

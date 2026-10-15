@@ -1,8 +1,14 @@
 # paper_evidence — summary
 
-Measured 2026-10-09 at commit `3c843de` on branch
-`claude/insightflow-ai-build-2neph7`. No LLM API key present; all
-measurements use the deterministic rule-based plan pipeline.
+Initial measurements 2026-10-09 at commit `3c843de`; **re-run
+2026-10-15 at commit `f302888`** (merge of upstream pipeline changes:
+join_fidelity guard, kpi_validator change, llm strict mode; 118 → 132
+tests). The headline numbers below are **from the f302888 re-run**;
+the pre-rerun files are archived under `pinned_3c843de/`. See
+`PROVENANCE.md` for the per-file split and `limitations.md` L9 for the
+discussion of minor drifts. Branch: `claude/insightflow-ai-build-2neph7`.
+No LLM API key present; all measurements use the deterministic
+rule-based plan pipeline.
 
 ## What was measured
 
@@ -52,8 +58,9 @@ measurements use the deterministic rule-based plan pipeline.
 - **Unsafe-answer rate, Full: 0.074 (0.021, 0.234) — 2 / 27**. The two
   unsafe cases are benchmark IDs D01 and D02, both answered at high
   confidence (0.85 and 0.99) but semantically wrong.
-- Latency: p50 = 4 ms, p95 = 6 ms end-to-end on this benchmark.
-- ECE = 0.416 (10 equal-width bins); only 3 bins populated so the
+- Latency: p50 = 6 ms, p95 = 8 ms end-to-end on this benchmark
+  (deterministic pipeline only; no LLM; see `limitations.md` L7).
+- ECE = 0.422 (10 equal-width bins); only 3 bins populated so the
   calibration estimate itself is noisy.
 
 ### Full vs B1 (gate-removed) on the 27-question benchmark

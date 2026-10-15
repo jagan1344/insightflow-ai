@@ -54,32 +54,48 @@ guard into `plan/fidelity.py`, a change in `validation/kpi_validator.py`
 option in `insightflow/llm.py`. The test suite grew from 118 to 132
 tests.
 
-**None of the paper_evidence numbers were re-measured at this new HEAD.**
-They remain pinned to `3c843de` for the production pipeline and to
-`a7e5f95` for the evaluation scripts themselves. In particular:
+**UPDATE 2026-10-15:** The full reproduction command in
+`limitations.md` L10 was re-run against the current merged HEAD. The
+following files now reflect `f302888` (the merge commit on top of all
+upstream work):
 
 - `paper_evidence/results.json`
 - `paper_evidence/per_question.csv`
 - `paper_evidence/results_tables.md`
+- `paper_evidence/adversarial_per_question.csv`
+- `paper_evidence/adversarial_results.md`
+- `paper_evidence/ablation_verification.md`
+
+The pre-rerun versions of these files (as of commit `9756ca1`,
+measurements taken at `3c843de`) are preserved under
+`paper_evidence/pinned_3c843de/`.
+
+**Still pinned to `3c843de` and NOT re-run** (archived in
+`pinned_3c843de/` too, in case they ever need to be regenerated):
+
 - `paper_evidence/case_studies.md`
-- `paper_evidence/calibration.png`
 - `paper_evidence/_case_studies_raw.json`
+- `paper_evidence/calibration.png`
 
-all reflect the pipeline at `3c843de`. The adversarial-set results
-(`adversarial_per_question.csv`, `adversarial_results.md`) and the
-ablation-verification artefact (`ablation_verification.md`) were
-measured against the local tree at the time of commit `9756ca1`
-(before this merge), which also matched `a7e5f95`'s backend. The
-newly merged upstream backend changes are **unmeasured** by this pack.
+The headline numbers are essentially unchanged between `3c843de` and
+`f302888` (semantic accuracy on answerable: 0.882 both; unsafe-answer
+rate: 0.074 both; coverage: 0.630 both; adversarial B1≠Full: 4/12
+both; adversarial A1≠Full: 1/12 both). The join-fidelity guard does
+not fire on any question in either set, which is itself an informative
+finding and belongs in the paper's discussion.
 
-### If the paper will be finalized at the current HEAD
+### Minor drifts between the two runs
 
-Either (a) re-run the complete reproduction command in
-`limitations.md` L10 against the current HEAD and overwrite the
-measurement files, or (b) state in the paper that the measurements
-are frozen at `3c843de`.
+- `ece_10bin`: 0.416 → 0.422 (floating-point noise in a signal, not a
+  model change)
+- `brier`: 0.402 → 0.412
+- latency `p50/p95` (ms): 4/6 → 6/8 (measurement noise, not a model
+  change)
+- `ADV05` confidence: 0.850 → 0.883 (fidelity signal nudged by the
+  new guard; action unchanged — still CLARIFY)
 
-Do NOT silently update code revision pointers in the paper without
-rerunning. The join-fidelity guard in particular is likely to change
-semantic-accuracy, unsafe-rate, and fidelity-signal numbers on both
-the 27-question benchmark and the 12-question adversarial set.
+### If the paper is finalized at a later commit than `f302888`
+
+Rerun the reproduction command (`limitations.md` L10) against that
+commit and update this file. Do NOT silently update revision pointers
+in the paper without rerunning.

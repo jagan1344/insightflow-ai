@@ -12,7 +12,7 @@ not a broken switch.
 
 | Case | Guard | Full output | Ablated output | Fired in Full | Disabled in ablation | Verdict |
 |---|---|---|---|:---:|:---:|:---:|
-| A1: dropped filter | `FidelityValidator.check` | ok=False, score=0.667, failed=['filter_eq:region_id'] | ok=True, score=1.000 | YES | YES | **PASS** |
+| A1: dropped filter | `FidelityValidator.check` | ok=False, score=0.750, failed=['filter_eq:region_id'] | ok=True, score=1.000 | YES | YES | **PASS** |
 | A2: top_n=5 with 7 rows + unsorted | `ResultValidator.check` | ok=False, score=0.000, issues=['top_n=N=5 but result returned 7 rows', 'top_n result is not sorted descending'] | ok=True, score=1.000 | YES | YES | **PASS** |
 | A3: raw sum high, coverage/fidelity low | `score_confidence hard cap` | score=0.3500 (raw sum = 0.7943, cov+.05=0.7167, fid+.05=0.3500) | score=0.7943 (raw sum) | YES | YES | **PASS** |
 

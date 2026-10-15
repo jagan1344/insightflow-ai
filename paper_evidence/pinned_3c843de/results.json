@@ -1,0 +1,342 @@
+{
+  "summaries": [
+    {
+      "config": "Full",
+      "n": 27,
+      "n_answerable": 17,
+      "n_unanswerable": 10,
+      "n_ambiguous": 4,
+      "exec_accuracy": [
+        1.0,
+        0.8754409628553641,
+        1.0
+      ],
+      "semantic_accuracy_on_answerable": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "semantic_accuracy_on_answered": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "coverage": [
+        0.6296296296296297,
+        0.442289046234463,
+        0.7846771293206314
+      ],
+      "unsafe_answer_rate": [
+        0.07407407407407407,
+        0.020554221697383523,
+        0.2336997729073062
+      ],
+      "unsafe_count": 2,
+      "incorrect_warn_rate_on_warn": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_answered": 17,
+      "n_clarify": 10,
+      "n_abstain": 0,
+      "clarification_precision_on_ambiguous_label": [
+        0.4,
+        0.16817758120350967,
+        0.6873304525498135
+      ],
+      "abstention_on_unanswerable": [
+        1.0,
+        0.7224598312333834,
+        1.0
+      ],
+      "ece_10bin": 0.416037037037037,
+      "brier": 0.40222840740740734,
+      "fidelity_mean": 0.6296296296296297,
+      "latency_p50_ms": 4,
+      "latency_p95_ms": 6
+    },
+    {
+      "config": "B1",
+      "n": 27,
+      "n_answerable": 17,
+      "n_unanswerable": 10,
+      "n_ambiguous": 4,
+      "exec_accuracy": [
+        1.0,
+        0.8754409628553641,
+        1.0
+      ],
+      "semantic_accuracy_on_answerable": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "semantic_accuracy_on_answered": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "coverage": [
+        0.6296296296296297,
+        0.442289046234463,
+        0.7846771293206314
+      ],
+      "unsafe_answer_rate": [
+        0.07407407407407407,
+        0.020554221697383523,
+        0.2336997729073062
+      ],
+      "unsafe_count": 2,
+      "incorrect_warn_rate_on_warn": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_answered": 17,
+      "n_clarify": 10,
+      "n_abstain": 0,
+      "clarification_precision_on_ambiguous_label": [
+        0.4,
+        0.16817758120350967,
+        0.6873304525498135
+      ],
+      "abstention_on_unanswerable": [
+        1.0,
+        0.7224598312333834,
+        1.0
+      ],
+      "ece_10bin": 0.416037037037037,
+      "brier": 0.40222840740740734,
+      "fidelity_mean": 0.6296296296296297,
+      "latency_p50_ms": 4,
+      "latency_p95_ms": 6
+    },
+    {
+      "config": "A1",
+      "n": 27,
+      "n_answerable": 17,
+      "n_unanswerable": 10,
+      "n_ambiguous": 4,
+      "exec_accuracy": [
+        1.0,
+        0.8754409628553641,
+        1.0
+      ],
+      "semantic_accuracy_on_answerable": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "semantic_accuracy_on_answered": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "coverage": [
+        0.6296296296296297,
+        0.442289046234463,
+        0.7846771293206314
+      ],
+      "unsafe_answer_rate": [
+        0.07407407407407407,
+        0.020554221697383523,
+        0.2336997729073062
+      ],
+      "unsafe_count": 2,
+      "incorrect_warn_rate_on_warn": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_answered": 17,
+      "n_clarify": 10,
+      "n_abstain": 0,
+      "clarification_precision_on_ambiguous_label": [
+        0.4,
+        0.16817758120350967,
+        0.6873304525498135
+      ],
+      "abstention_on_unanswerable": [
+        1.0,
+        0.7224598312333834,
+        1.0
+      ],
+      "ece_10bin": 0.416037037037037,
+      "brier": 0.40222840740740734,
+      "fidelity_mean": 0.6296296296296297,
+      "latency_p50_ms": 5,
+      "latency_p95_ms": 7
+    },
+    {
+      "config": "A2",
+      "n": 27,
+      "n_answerable": 17,
+      "n_unanswerable": 10,
+      "n_ambiguous": 4,
+      "exec_accuracy": [
+        1.0,
+        0.8754409628553641,
+        1.0
+      ],
+      "semantic_accuracy_on_answerable": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "semantic_accuracy_on_answered": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "coverage": [
+        0.6296296296296297,
+        0.442289046234463,
+        0.7846771293206314
+      ],
+      "unsafe_answer_rate": [
+        0.07407407407407407,
+        0.020554221697383523,
+        0.2336997729073062
+      ],
+      "unsafe_count": 2,
+      "incorrect_warn_rate_on_warn": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_answered": 17,
+      "n_clarify": 10,
+      "n_abstain": 0,
+      "clarification_precision_on_ambiguous_label": [
+        0.4,
+        0.16817758120350967,
+        0.6873304525498135
+      ],
+      "abstention_on_unanswerable": [
+        1.0,
+        0.7224598312333834,
+        1.0
+      ],
+      "ece_10bin": 0.416037037037037,
+      "brier": 0.40222840740740734,
+      "fidelity_mean": 0.6296296296296297,
+      "latency_p50_ms": 4,
+      "latency_p95_ms": 6
+    },
+    {
+      "config": "A3",
+      "n": 27,
+      "n_answerable": 17,
+      "n_unanswerable": 10,
+      "n_ambiguous": 4,
+      "exec_accuracy": [
+        1.0,
+        0.8754409628553641,
+        1.0
+      ],
+      "semantic_accuracy_on_answerable": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "semantic_accuracy_on_answered": [
+        0.8823529411764706,
+        0.6566315750229009,
+        0.967120919987079
+      ],
+      "coverage": [
+        0.6296296296296297,
+        0.442289046234463,
+        0.7846771293206314
+      ],
+      "unsafe_answer_rate": [
+        0.07407407407407407,
+        0.020554221697383523,
+        0.2336997729073062
+      ],
+      "unsafe_count": 2,
+      "incorrect_warn_rate_on_warn": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_answered": 17,
+      "n_clarify": 10,
+      "n_abstain": 0,
+      "clarification_precision_on_ambiguous_label": [
+        0.4,
+        0.16817758120350967,
+        0.6873304525498135
+      ],
+      "abstention_on_unanswerable": [
+        1.0,
+        0.7224598312333834,
+        1.0
+      ],
+      "ece_10bin": 0.416037037037037,
+      "brier": 0.40222840740740734,
+      "fidelity_mean": 0.6296296296296297,
+      "latency_p50_ms": 5,
+      "latency_p95_ms": 7
+    }
+  ],
+  "pairwise": [
+    {
+      "base": "Full",
+      "other": "B1",
+      "semantic": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      },
+      "unsafe": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      }
+    },
+    {
+      "base": "Full",
+      "other": "A1",
+      "semantic": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      },
+      "unsafe": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      }
+    },
+    {
+      "base": "Full",
+      "other": "A2",
+      "semantic": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      },
+      "unsafe": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      }
+    },
+    {
+      "base": "Full",
+      "other": "A3",
+      "semantic": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      },
+      "unsafe": {
+        "b": 0,
+        "c": 0,
+        "p": 1.0
+      }
+    }
+  ]
+}
