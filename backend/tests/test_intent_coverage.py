@@ -32,10 +32,12 @@ def _seed_demo():
     from insightflow.execution.executor import reset_engine
     from insightflow.knowledge.schema_agent import refresh_schema
     import runpy
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
     yield
     # restore demo for downstream tests
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
 
@@ -139,6 +141,7 @@ def test_total_revenue_still_answers_high_confidence():
     import runpy
     from insightflow.execution.executor import reset_engine
     from insightflow.knowledge.schema_agent import refresh_schema
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
 
@@ -160,6 +163,7 @@ def test_missing_dimension_clarifies_on_demo():
     import runpy
     from insightflow.execution.executor import reset_engine
     from insightflow.knowledge.schema_agent import refresh_schema
+    reset_engine()
     runpy.run_path(str(ROOT / "data" / "seed.py"), run_name="__main__")
     reset_engine(); refresh_schema()
 

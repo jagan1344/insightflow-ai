@@ -24,13 +24,14 @@ Comparison rule for the paper:
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import sqlite3
 from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
 
-DEFAULT_DB = pathlib.Path(__file__).resolve().parents[1] / "backend/data/insightflow.db"
+DEFAULT_DB = pathlib.Path(os.environ.get("INSIGHTFLOW_SEED_DB_PATH", str(pathlib.Path(__file__).resolve().parents[1] / "backend/data/insightflow.db"))).resolve()
 DEFAULT_BENCH = pathlib.Path(__file__).resolve().parent / "dataset/reliability_benchmark.jsonl"
 EPSILON = 1e-6
 

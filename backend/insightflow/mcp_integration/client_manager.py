@@ -26,6 +26,7 @@ import json
 import logging
 import os
 import pathlib
+import sys
 import threading
 import time
 from contextlib import AsyncExitStack
@@ -185,8 +186,14 @@ class MCPClientManager:
         env = os.environ.copy()
         env.setdefault("PYTHONPATH", str(default_cwd))
 
+        # Use the same Python interpreter as the running application/test
+        # process so MCP subprocesses inherit its installed dependencies.
+        command = list(cfg.command)
+        if pathlib.Path(command[0]).name.lower() in {"python", "python.exe"}:
+            command[0] = sys.executable
+
         params = StdioServerParameters(
-            command=cfg.command[0], args=cfg.command[1:], cwd=cwd, env=env,
+            command=command[0], args=command[1:], cwd=cwd, env=env,
         )
 
         ready = asyncio.Event()

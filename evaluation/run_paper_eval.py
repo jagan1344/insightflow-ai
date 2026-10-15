@@ -1,12 +1,13 @@
 """Paper-evidence evaluation runner.
 
 Runs the InsightFlow Reliability Benchmark through several system
-configurations and emits:
+configurations and writes the isolated diagnostic output:
 
-    * paper_evidence/per_question.csv  — one row per (question × config)
-    * paper_evidence/results.json      — aggregated metrics
-    * paper_evidence/results_tables.md — human-readable tables with CIs
+    * paper_evidence/per_question_isolated_rerun_20261012.csv
+      One row per question and configuration.
 
+Historical benchmark results and aggregate reports are not overwritten
+by this runner.
 Configurations:
     Full : default orchestrator (plan pipeline, confidence engine, cap)
     B1   : plan pipeline, but every answered query becomes ANSWER
@@ -63,11 +64,19 @@ CONFIGS = ["Full", "B1", "A1", "A2", "A3"]
 # ---------------------------------------------------------------------------
 
 def _reseed():
-    runpy.run_path(str(BACKEND / "data/seed.py"), run_name="__main__")
+    # Dispose cached connections before importing modules that may initialize
+    # schema or dataset state, then rebuild the database.
     from insightflow.execution.executor import reset_engine
+    reset_engine()
+
+    runpy.run_path(str(BACKEND / "data/seed.py"), run_name="__main__")
+
+    # Import only after the database has been recreated.
     from insightflow.knowledge.schema_agent import refresh_schema
     from insightflow.knowledge.dataset_registry import set_active, DEMO_ID
-    reset_engine(); refresh_schema(); set_active(DEMO_ID)
+
+    refresh_schema()
+    set_active(DEMO_ID)
 
 
 def _ask_full(question: str):
@@ -252,12 +261,12 @@ def main() -> None:
             rows_out.append(out)
     # Write CSV
     fieldnames = sorted({k for r in rows_out for k in r.keys()})
-    with (EV / "per_question.csv").open("w", newline="") as f:
+    with (EV / "per_question_isolated_rerun_20261012.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
         for r in rows_out:
             w.writerow(r)
-    print(f"wrote {len(rows_out)} rows to paper_evidence/per_question.csv")
+    print(f"wrote {len(rows_out)} rows to paper_evidence/per_question_isolated_rerun_20261012.csv")
 
 
 if __name__ == "__main__":

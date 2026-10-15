@@ -217,6 +217,7 @@ def test_upload_orders_csv_creates_new_active_dataset():
         # Restore demo as active for downstream tests
         import runpy
         from pathlib import Path
+        reset_engine()
         runpy.run_path(str(Path(__file__).resolve().parent.parent / "data" / "seed.py"),
                        run_name="__main__")
         reset_engine(); refresh_schema()
