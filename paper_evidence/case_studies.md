@@ -1,5 +1,12 @@
 # Case studies — 4 questions on Full vs B1
 
+**Evidence boundary:** the raw pinned case-study artifact records the plan fields,
+SQL, result rows, action, confidence, signals, and failure category. It does not
+record every individual validator/check outcome shown in the manuscript's proposed
+"Checks" row. Do not present individual check outcomes as verified from this file
+alone. Publish a deterministic run artifact that records those outcomes, or narrow
+the manuscript's checks row to the fields actually captured here.
+
 Each question run on both configurations against the demo DB
 (2 037 orders, 2026-01 to 2026-09). Full = default orchestrator;
 B1 = same pipeline but every executed SQL is forced to ANSWER.
