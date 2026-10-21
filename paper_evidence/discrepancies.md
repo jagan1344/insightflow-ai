@@ -68,18 +68,17 @@ the paper should say.
   validator / result validator / hard cap should change results.
 - **Reality:** every A1/A2/A3/B1 configuration produced byte-identical
   per-question results to Full on all 27 benchmark questions. The
-  pairwise McNemar tests return `b=0, c=0, p=1.0000` for both semantic
-  correctness and unsafe-answer rate across every pair.
-- **Interpretation (candidate):** the 27 benchmark questions do not
-  trigger the specific checks these guards exist to catch — i.e. this
-  benchmark is **too easy to differentiate the ablations**. The guards
-  may still matter in practice; the paper must either (a) construct
-  adversarial questions that force each guard to fire and re-run, or
-  (b) honestly report that on this benchmark the ablations are
-  indistinguishable.
-- **What NOT to do:** do not quote ablation deltas on this benchmark.
-  Report them as "no measurable effect on this 27-question benchmark;
-  effect size on an adversarial set is NOT MEASURED".
+  pairwise McNemar tests return `b=0, c=0, p=1.0000` for semantic
+  correctness and the benchmark-defined unsafe-answer metric across every pair.
+- **Interpretation:** the 27-question benchmark does not distinguish
+  these configurations. The separate 12-question author-constructed
+  adversarial diagnostic set is measured in `adversarial_results.md`:
+  B1 differs from Full on 4/12 questions and A1 on 1/12; A2 and A3
+  differ on 0/12. Unit-level checks separately confirm that the A1/A2/A3
+  switches disable their intended guards on crafted inputs.
+- **What NOT to do:** do not quote ablation deltas on the 27-question
+  benchmark. Report its null result separately from the diagnostic set;
+  do not present the hand-built diagnostic as a headline accuracy result.
 
 ## D6. Clarification mix: no `ambiguous` label in the released benchmark — actually, there are 4
 
