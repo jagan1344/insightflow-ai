@@ -1,21 +1,52 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Upload, Download } from "lucide-react";
 
 import { TopBar } from "@/components/shell/TopBar";
 import { Panel, Pill, EmptyState } from "@/components/shell/Page";
-import { fetchSources } from "@/lib/api";
+import { Button } from "@/components/ui/Button";
+import { UploadDialog } from "@/components/dashboard/UploadDialog";
+import { fetchSources, SAMPLE_CSV_URL } from "@/lib/api";
 import type { SourcesInfo } from "@/lib/api";
 
 export default function SourcesPage() {
   const [data, setData] = useState<SourcesInfo | null>(null);
-  useEffect(() => { fetchSources().then(setData).catch(() => {}); }, []);
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  function refresh() {
+    fetchSources().then(setData).catch(() => {});
+  }
+  useEffect(() => { refresh(); }, []);
 
   return (
     <>
       <TopBar title="Data Sources"
               subtitle="Configured database + registered datasets. No credentials shown." />
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <Panel title="Upload a dataset"
+               subtitle="CSV, XLSX, or XLS. Becomes active immediately."
+               right={<Pill tone="answer">ready</Pill>}>
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm text-ink-muted">
+              Required column: <code>revenue</code>. Optional: <code>order_date</code>,{" "}
+              <code>region</code>, <code>category</code>, <code>product</code>,{" "}
+              <code>customer</code>, <code>segment</code>, <code>quantity</code>,{" "}
+              <code>cost</code>, <code>discount</code>. The Tableau Superstore workbook
+              works — the backend maps common column aliases.
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <a href={SAMPLE_CSV_URL}
+                 className="inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink">
+                <Download size={12} /> Sample CSV
+              </a>
+              <Button onClick={() => setUploadOpen(true)}>
+                <Upload size={14} /> Upload dataset
+              </Button>
+            </div>
+          </div>
+        </Panel>
+
         <Panel title="Database connection"
                right={<Pill tone="answer">connected</Pill>}>
           {!data ? <EmptyState title="Loading…" /> : (
@@ -68,6 +99,10 @@ export default function SourcesPage() {
           )}
         </Panel>
       </div>
+
+      <UploadDialog open={uploadOpen}
+                    onClose={() => setUploadOpen(false)}
+                    onSuccess={() => { refresh(); }} />
     </>
   );
 }
