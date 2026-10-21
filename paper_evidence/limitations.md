@@ -139,7 +139,7 @@ in Table VI, not quote an invented number for either.
 
 ## L7. Latency numbers are deterministic-pipeline only
 
-Measured p50 / p95 end-to-end: **4 ms / 6 ms**. These are measured
+Measured p50 / p95 end-to-end in the **2026-10-15 `f302888` rerun: 6 ms / 8 ms**. The pinned `3c843de` historical run measured 4 ms / 6 ms. These are measured
 with the deterministic rule-based planner (no LLM calls) against the
 2,037-row demo DB. They DO NOT include the cost of an LLM-planner path
 or an MCP tool-call path.
