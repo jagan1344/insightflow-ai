@@ -149,3 +149,19 @@ the paper should say.
   used as a hold-out. Treat the 27 current questions as a **development
   set**; use `evaluation/dataset/heldout_DRAFT.json` (after human
   review) as the actual held-out set.
+
+
+## D6. The 12 October isolated rerun is not an exact reproduction of the pinned revision
+
+- **Artifact:** `paper_evidence/per_question_isolated_rerun_20261012.csv`.
+- **Provenance limitation:** the exact source revision for this rerun was not recorded.
+- **Observed differences:** actions, SQL and oracle verdicts were retained in the inspected comparison, but D01's KPI-match and result-consistency signals changed from 0.4 and 0.3 to 1.0 and 1.0, respectively, and its confidence changed from 0.852 to 1.000. Latency also varied across the rerun.
+- **Correction for the manuscript:** do not say that only confidence changed, and do not use this artifact as an exact reproduction of `3c843de`. Suggested wording:
+
+  > An isolated rerun dated 12 October, for which the exact source revision was not recorded, retained the historical actions, SQL and oracle verdicts in the inspected comparison. For D01, the KPI-match and result-consistency signals changed from 0.4 and 0.3 to 1.0 and 1.0, respectively, raising confidence from 0.852 to 1.000. Latency also varied across the rerun. Because its exact source revision was not recorded, this run is retained as a separate diagnostic artifact rather than treated as an exact reproduction of revision 3c843de.
+
+## D7. Table III's individual check outcomes are not all present in the pinned raw case-study artifact
+
+- **Available evidence:** `paper_evidence/pinned_3c843de/_case_studies_raw.json` records the plan fields, SQL, result rows, action, confidence signals, confidence score and failure category for the case study.
+- **Gap:** the raw artifact does not independently record every individual validator/check outcome displayed in the manuscript's Table III “Checks” row.
+- **Correction:** publish the deterministic run output that records each check outcome and its environment/revision, or narrow the table to fields supported by the existing raw artifact. Do not infer individual check results from confidence signals alone.
