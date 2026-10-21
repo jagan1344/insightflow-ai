@@ -176,12 +176,14 @@ folder for safety):
 - `paper_evidence/_case_studies_raw.json`
 - `paper_evidence/calibration.png`
 
-**Headline findings are stable between the two commits.** Semantic
-accuracy on answerable (0.882), unsafe-answer rate (0.074), coverage
-(0.630), the 2 unsafe cases D01/D02, and the adversarial B1=4/12 +
-A1=1/12 divergences are all identical. ECE drifted 0.416 → 0.422,
-Brier 0.402 → 0.412, and ADV05 confidence 0.850 → 0.883 — minor
-drifts, all documented in `PROVENANCE.md`.
+**Main benchmark outcomes are stable between the two commits.**
+Reference-SQL agreement on answerable questions (0.882), coverage
+(0.630), the D01/D02 reference-SQL mismatches, and the adversarial
+B1=4/12 + A1=1/12 divergences are unchanged. ECE drifted 0.416 → 0.422,
+Brier 0.402 → 0.412, and ADV05 confidence 0.850 → 0.883; these changes
+are documented in `PROVENANCE.md`. The two reference-SQL mismatches
+should not be labelled confirmed unsafe answers without independent
+semantic adjudication.
 
 The new join_fidelity guard **does not fire on any question in either
 set**. Report this as a null finding on the tested sets; it does not
