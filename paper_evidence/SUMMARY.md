@@ -55,9 +55,13 @@ rule-based plan pipeline.
 - Coverage (ANSWER+WARN), Full: **0.630 (0.442, 0.785)** — 17 / 27.
 - Abstention on non-answerable, Full: **1.000 (0.722, 1.000)** —
   10 / 10 correctly routed to CLARIFY.
-- **Unsafe-answer rate, Full: 0.074 (0.021, 0.234) — 2 / 27**. The two
-  unsafe cases are benchmark IDs D01 and D02, both answered at high
-  confidence (0.85 and 0.99) but semantically wrong.
+- **Reference-SQL mismatch rate on the answerable benchmark, Full: 2 / 17**
+  (11.8%; 95% Wilson CI 3.3–34.3%). D01 and D02 were answered at high
+  confidence (0.85 and 0.99), but their generated SQL did not match the
+  reference SQL under the benchmark oracle. The reference queries do not
+  independently settle the intended semantics, so describe these as
+  high-confidence reference-SQL mismatches, not confirmed unsafe or
+  semantically incorrect answers.
 - Latency: p50 = 6 ms, p95 = 8 ms end-to-end on this benchmark
   (deterministic pipeline only; no LLM; see `limitations.md` L7).
 - ECE = 0.422 (10 equal-width bins); only 3 bins populated so the
@@ -98,10 +102,12 @@ accuracy result.
 
 - **Abstract (one sentence):** "On a 27-question benchmark targeting
   our demo star schema, InsightFlow AI's full pipeline attains 100 %
-  execution accuracy, 88 % semantic accuracy on answerable questions
-  (95 % CI 66–97 %), and 100 % correct abstention on 10 non-answerable
-  questions, at 2 unsafe answers out of 27 (95 % CI 2–23 %) and p95
-  latency 6 ms."
+  execution accuracy, 88 % reference-SQL agreement on answerable questions
+  (95 % CI 66–97 %), and 100 % correct clarification routing on 10
+  non-answerable questions. Two of 17 answerable questions (D01, D02)
+  had high-confidence reference-SQL mismatches; their intended semantics
+  require independent adjudication. The deterministic pipeline's p95
+  latency was 8 ms in the 2026-10-15 rerun."
 - **Conclusion (one sentence):** "The confidence-cap + plan-fidelity
   guards are **not demonstrably superior** to the uncapped pipeline on
   this benchmark; adversarial examples that stress the guards remain to

@@ -12,21 +12,25 @@ The system has **zero unsafe answers on the 25-case safety matrix**
 passes with no exceptions). The safety matrix tests a controlled slice:
 clean answerable questions, vague-ask → CLARIFY, out-of-schema → CLARIFY.
 
-On the **27-question InsightFlow Reliability Benchmark**, Full produces
-**2 unsafe answers**:
+On the **27-question InsightFlow Reliability Benchmark**, two answerable
+items (D01 and D02) produced high-confidence answers whose generated SQL
+did not match the benchmark's `gold_sql` reference under the oracle:
 
 - **D01** "Which category changed the most from June to July?" —
-  decision ANSWER, confidence 0.85, SQL semantically different from
-  `gold_sql` oracle output.
+  decision ANSWER, confidence 0.85, reference-SQL mismatch.
 - **D02** "Compare July vs June revenue" — decision ANSWER, confidence
-  0.99, SQL semantically different from `gold_sql`.
+  0.99, reference-SQL mismatch.
 
-Benchmark unsafe-answer rate: **2 / 27 = 0.074** (95% Wilson CI
-0.021 – 0.234).
+The mismatch rate is **2 / 17 answerable questions = 11.8%**
+(95% Wilson CI 3.3–34.3%). Both cases are high-confidence reference-SQL
+mismatches. The reference queries do not independently establish the
+intended semantics, so this evidence alone does not prove that the
+answers were semantically wrong or unsafe. Do not label these cases
+confirmed unsafe answers unless independent adjudication is added.
 
-**The paper must report both numbers with their scopes.** Quoting only
-the zero number without qualifying it would be a research-integrity
-violation.
+Report the **25-case safety matrix** and the **27-question benchmark**
+separately, with their scopes stated. Passing the safety matrix does not
+cancel or replace the two observed reference-SQL mismatches.
 
 ## L2. Ablation null result on the current benchmark; genuine effect on an adversarial set
 
@@ -135,7 +139,7 @@ in Table VI, not quote an invented number for either.
 
 ## L7. Latency numbers are deterministic-pipeline only
 
-Measured p50 / p95 end-to-end: **4 ms / 6 ms**. These are measured
+Measured p50 / p95 end-to-end in the **2026-10-15 `f302888` rerun: 6 ms / 8 ms**. The pinned `3c843de` historical run measured 4 ms / 6 ms. These are measured
 with the deterministic rule-based planner (no LLM calls) against the
 2,037-row demo DB. They DO NOT include the cost of an LLM-planner path
 or an MCP tool-call path.
@@ -172,17 +176,18 @@ folder for safety):
 - `paper_evidence/_case_studies_raw.json`
 - `paper_evidence/calibration.png`
 
-**Headline findings are stable between the two commits.** Semantic
-accuracy on answerable (0.882), unsafe-answer rate (0.074), coverage
-(0.630), the 2 unsafe cases D01/D02, and the adversarial B1=4/12 +
-A1=1/12 divergences are all identical. ECE drifted 0.416 → 0.422,
-Brier 0.402 → 0.412, and ADV05 confidence 0.850 → 0.883 — minor
-drifts, all documented in `PROVENANCE.md`.
+**Main benchmark outcomes are stable between the two commits.**
+Reference-SQL agreement on answerable questions (0.882), coverage
+(0.630), the D01/D02 reference-SQL mismatches, and the adversarial
+B1=4/12 + A1=1/12 divergences are unchanged. ECE drifted 0.416 → 0.422,
+Brier 0.402 → 0.412, and ADV05 confidence 0.850 → 0.883; these changes
+are documented in `PROVENANCE.md`. The two reference-SQL mismatches
+should not be labelled confirmed unsafe answers without independent
+semantic adjudication.
 
 The new join_fidelity guard **does not fire on any question in either
-set**. The paper should discuss this as an informative null: the guard
-is loaded insurance for a failure mode the current benchmarks do not
-provoke.
+set**. Report this as a null finding on the tested sets; it does not
+establish that the guard is effective on untested failure modes.
 
 ## L10. Reproduction command
 

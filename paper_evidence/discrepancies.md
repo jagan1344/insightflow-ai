@@ -47,18 +47,20 @@ the paper should say.
   current seed, or (b) describe the comparison methodology precisely
   (we rerun gold_sql; we do not trust `expected_result`).
 
-## D4. "Zero unsafe answers" is not true on the benchmark
+## D4. Keep the safety matrix separate from reference-SQL mismatches
 
-- **Claim (earlier chat):** "zero unsafe-answer rate on the safety matrix".
-- **Reality:** on `test_safety.py` (25 safety-matrix cases) the aggregate
-  test does pass — those 25 are a controlled slice. But on the full
-  27-question **reliability benchmark**, Full produces **2 unsafe
-  answers** (`D01` and `D02`, both answered as ANSWER at high confidence
-  but semantically wrong per the gold_sql oracle). Unsafe-answer rate =
-  **0.074 (95 % Wilson 0.021–0.234)**.
-- **Correction:** the paper should quote the 2/27 unsafe rate with its
-  CI and say that the system still clarifies on 10/10 non-answerable
-  questions in the same benchmark.
+- **Claim to avoid:** "zero unsafe-answer rate" as a general system-wide result.
+- **Evidence:** the aggregate test for `test_safety.py` (25 safety-matrix
+  cases) passes on its controlled test slice. In the 27-question
+  reliability benchmark, D01 and D02 are high-confidence ANSWER decisions
+  whose generated SQL does not match the `gold_sql` reference under the
+  oracle. The two reference queries do not independently establish the
+  intended semantics, so the evidence does not by itself prove that the
+  answers were unsafe or semantically wrong.
+- **Correction:** report the 25-case safety matrix and the two reference-SQL
+  mismatches among 17 answerable benchmark questions separately. State that
+  all 10 non-answerable benchmark questions were routed to CLARIFY. Do not
+  describe D01/D02 as confirmed unsafe answers without independent adjudication.
 
 ## D5. Ablations A1/A2/A3 and baseline B1 produce **identical outputs** to Full on this benchmark
 
@@ -66,18 +68,17 @@ the paper should say.
   validator / result validator / hard cap should change results.
 - **Reality:** every A1/A2/A3/B1 configuration produced byte-identical
   per-question results to Full on all 27 benchmark questions. The
-  pairwise McNemar tests return `b=0, c=0, p=1.0000` for both semantic
-  correctness and unsafe-answer rate across every pair.
-- **Interpretation (candidate):** the 27 benchmark questions do not
-  trigger the specific checks these guards exist to catch — i.e. this
-  benchmark is **too easy to differentiate the ablations**. The guards
-  may still matter in practice; the paper must either (a) construct
-  adversarial questions that force each guard to fire and re-run, or
-  (b) honestly report that on this benchmark the ablations are
-  indistinguishable.
-- **What NOT to do:** do not quote ablation deltas on this benchmark.
-  Report them as "no measurable effect on this 27-question benchmark;
-  effect size on an adversarial set is NOT MEASURED".
+  pairwise McNemar tests return `b=0, c=0, p=1.0000` for semantic
+  correctness and the benchmark-defined unsafe-answer metric across every pair.
+- **Interpretation:** the 27-question benchmark does not distinguish
+  these configurations. The separate 12-question author-constructed
+  adversarial diagnostic set is measured in `adversarial_results.md`:
+  B1 differs from Full on 4/12 questions and A1 on 1/12; A2 and A3
+  differ on 0/12. Unit-level checks separately confirm that the A1/A2/A3
+  switches disable their intended guards on crafted inputs.
+- **What NOT to do:** do not quote ablation deltas on the 27-question
+  benchmark. Report its null result separately from the diagnostic set;
+  do not present the hand-built diagnostic as a headline accuracy result.
 
 ## D6. Clarification mix: no `ambiguous` label in the released benchmark — actually, there are 4
 
@@ -147,3 +148,19 @@ the paper should say.
   used as a hold-out. Treat the 27 current questions as a **development
   set**; use `evaluation/dataset/heldout_DRAFT.json` (after human
   review) as the actual held-out set.
+
+
+## D6. The 12 October isolated rerun is not an exact reproduction of the pinned revision
+
+- **Artifact:** `paper_evidence/per_question_isolated_rerun_20261012.csv`.
+- **Provenance limitation:** the exact source revision for this rerun was not recorded.
+- **Observed differences:** actions, SQL and oracle verdicts were retained in the inspected comparison, but D01's KPI-match and result-consistency signals changed from 0.4 and 0.3 to 1.0 and 1.0, respectively, and its confidence changed from 0.852 to 1.000. Latency also varied across the rerun.
+- **Correction for the manuscript:** do not say that only confidence changed, and do not use this artifact as an exact reproduction of `3c843de`. Suggested wording:
+
+  > An isolated rerun dated 12 October, for which the exact source revision was not recorded, retained the historical actions, SQL and oracle verdicts in the inspected comparison. For D01, the KPI-match and result-consistency signals changed from 0.4 and 0.3 to 1.0 and 1.0, respectively, raising confidence from 0.852 to 1.000. Latency also varied across the rerun. Because its exact source revision was not recorded, this run is retained as a separate diagnostic artifact rather than treated as an exact reproduction of revision 3c843de.
+
+## D7. Table III's individual check outcomes are not all present in the pinned raw case-study artifact
+
+- **Available evidence:** `paper_evidence/pinned_3c843de/_case_studies_raw.json` records the plan fields, SQL, result rows, action, confidence signals, confidence score and failure category for the case study.
+- **Gap:** the raw artifact does not independently record every individual validator/check outcome displayed in the manuscript's Table III “Checks” row.
+- **Correction:** publish the deterministic run output that records each check outcome and its environment/revision, or narrow the table to fields supported by the existing raw artifact. Do not infer individual check results from confidence signals alone.
