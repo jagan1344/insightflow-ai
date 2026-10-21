@@ -153,10 +153,11 @@ cd backend && source .venv/bin/activate
 pytest -q
 ```
 
-The 8 tests cover: total revenue happy-path, July diagnostic root-cause,
-out-of-scope clarify, SQL validator rejects mutations, gross-margin ratio bounds,
-`/api/dashboard` payload shape, the `POST /api/ask` HTTP surface, and the realtime
-watcher broadcasting a `dashboard_update` after an INSERT.
+The full pytest suite includes coverage for the revenue path, the July revenue-dip diagnostic,
+out-of-scope clarification, SQL mutation rejection, gross-margin bounds, API payloads,
+the `POST /api/ask` surface, and realtime dashboard updates. Run `pytest -q` to execute
+the tests present in the checked-out revision; historical test counts in the research
+evidence refer to their explicitly pinned commits.
 
 ---
 
