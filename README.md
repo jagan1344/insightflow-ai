@@ -5,8 +5,8 @@ intelligence — with real-time auto-updating dashboards.**
 
 Ask a business question in natural language and the system plans the query, generates
 SQL, validates it against a KPI/business semantic layer, executes it read-only,
-analyses the result (with root-cause contributor analysis for "why" questions), builds
-an evidence chain, scores its own confidence across seven signals, and applies a
+analyses the result (with contributing-factor analysis for supported comparison questions), builds
+an evidence chain, scores its confidence using nine signals, and applies a
 decision policy — **Answer / Warn / Clarify / Abstain** — so it can refuse rather than
 fluently mislead. Meanwhile the Live Dashboard subscribes to a WebSocket and
 **animates its charts in place whenever the underlying data changes — no page refresh.**
@@ -233,11 +233,11 @@ than the poll.
   expression, unit, and business rules. Synonyms map "sales", "aov",
   "profitability" etc. to canonical KPIs. This is what makes answers
   business-correct rather than only SQL-correct.
-- **Confidence is a vector, not a slogan.** Seven signals (`sql_validity`,
-  `schema_match`, `kpi_match`, `context_consistency`, `data_completeness`,
-  `evidence_strength`, `result_consistency`) are weighted and summed; out-of-scope
-  questions are hard-capped at 0.30 so a fluent answer to "what is the meaning of
-  life?" is impossible.
+- **Confidence is represented by nine signals.** `sql_validity`, `schema_match`,
+  `kpi_match`, `context_consistency`, `data_completeness`, `evidence_strength`,
+  `result_consistency`, `intent_coverage`, and `plan_fidelity` contribute to a
+  heuristic confidence score. This score is not a calibrated probability, and the
+  current evaluation does not establish that every unsupported question is detected.
 - **Decision policy, not just an answer.** Above 0.70 → **Answer**; between 0.40
   and 0.70 → **Warn** (or **Clarify** if ambiguous); below → **Abstain**.
 - **Every answer is auditable.** The evidence chain (question → SQL → KPI
