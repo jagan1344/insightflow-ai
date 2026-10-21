@@ -102,10 +102,12 @@ accuracy result.
 
 - **Abstract (one sentence):** "On a 27-question benchmark targeting
   our demo star schema, InsightFlow AI's full pipeline attains 100 %
-  execution accuracy, 88 % semantic accuracy on answerable questions
-  (95 % CI 66–97 %), and 100 % correct abstention on 10 non-answerable
-  questions, at 2 unsafe answers out of 27 (95 % CI 2–23 %) and p95
-  latency 6 ms."
+  execution accuracy, 88 % reference-SQL agreement on answerable questions
+  (95 % CI 66–97 %), and 100 % correct clarification routing on 10
+  non-answerable questions. Two of 17 answerable questions (D01, D02)
+  had high-confidence reference-SQL mismatches; their intended semantics
+  require independent adjudication. The deterministic pipeline's p95
+  latency was 8 ms in the 2026-10-15 rerun."
 - **Conclusion (one sentence):** "The confidence-cap + plan-fidelity
   guards are **not demonstrably superior** to the uncapped pipeline on
   this benchmark; adversarial examples that stress the guards remain to
