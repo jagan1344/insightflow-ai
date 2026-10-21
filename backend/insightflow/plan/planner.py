@@ -26,6 +26,8 @@ the dataset registry already carry that knowledge.
 """
 from __future__ import annotations
 
+import datetime as _dt
+import os
 import re
 from dataclasses import replace
 from typing import List, Optional, Tuple
@@ -109,10 +111,27 @@ def _tokens(q: str) -> List[str]:
 # =============================================================================
 
 def _find_time_unit(q: str) -> Optional[str]:
+    """Detect a trend/grain word ("monthly", "quarterly", "year-over-year").
+
+    Suppressed when the unit word is actually part of a relative-period
+    phrase ("last year", "this month", "next quarter"), which is a
+    specific-period filter, not a trend request. See _find_relative_period.
+    """
     ql = _norm(q)
+    _REL_PREFIXES = ("last", "this", "previous", "current", "next",
+                      "upcoming", "coming")
     for phrase, unit in _TIME_UNIT_WORDS.items():
-        if f" {phrase} " in ql or f" {phrase}?" in ql:
-            return unit
+        if f" {phrase} " not in ql and f" {phrase}?" not in ql:
+            continue
+        # Reject if preceded by a relative-period prefix.
+        reject = False
+        for prefix in _REL_PREFIXES:
+            if f" {prefix} {phrase} " in ql or f" {prefix} {phrase}?" in ql:
+                reject = True
+                break
+        if reject:
+            continue
+        return unit
     return None
 
 
@@ -133,8 +152,16 @@ def _find_month_number(q: str) -> Optional[int]:
 
 
 def _find_two_months(q: str) -> Optional[Tuple[int, int]]:
-    """Find two month names in order, for comparison / contribution."""
+    """Find two month names in order, for comparison / contribution.
+
+    Suppressed when the connector between the two months is a RANGE
+    connector ("through"/"to"/"until"/"-"/"and") rather than a comparison
+    one ("vs"/"versus"/"compared to"/"against"). A range of months is a
+    time filter, not a two-period comparison.
+    """
     ql = q.lower()
+    if _find_month_range(q) is not None:
+        return None
     hits: List[Tuple[int, int]] = []  # (position, month#)
     for name, num in _MONTHS.items():
         for m in re.finditer(rf"\b{name}\b", ql):
@@ -143,6 +170,181 @@ def _find_two_months(q: str) -> Optional[Tuple[int, int]]:
         return None
     hits.sort()
     return (hits[0][1], hits[1][1])
+
+
+# ---------------------------------------------------------------------------
+# Month-range detection (Defect A)
+# ---------------------------------------------------------------------------
+
+_RANGE_CONNECTORS = r"(?:through|thru|to|until|-|–|—|and)"
+
+
+def _find_month_range(q: str) -> Optional[Tuple[int, int, Optional[int]]]:
+    """Extract an inclusive month range of the form
+    "from <A> (through|to|until|-|and) <B> [20YY]" or "<A> to <B> [20YY]".
+
+    Returns (lo_month, hi_month, year_or_None). Only matches when the
+    connector is a range connector, not a comparison one; so "January vs
+    September" never matches here.
+    """
+    ql = q.lower()
+    # Suppress when a comparison connector is present.
+    if any(c in ql for c in (" vs ", " vs. ", " versus ",
+                              " compared to ", " compared with ",
+                              " against ")):
+        return None
+    # Suppress when growth/change wording is present — "how did revenue
+    # change from June to July" is a two-period COMPARISON, not a
+    # 2-month filter. Keep "monthly revenue from Jan through Sep" (no
+    # growth words) as a range filter.
+    _CHANGE_HINTS = (" change ", " changed ", " growth ", " grow ",
+                      " grew ", " increase ", " decrease ", " decline ",
+                      " trend ", " trending ", " how did ")
+    if any(h in ql for h in _CHANGE_HINTS):
+        return None
+
+    # Build the month alternation.
+    month_pat = "(" + "|".join(sorted(_MONTHS.keys(), key=len,
+                                       reverse=True)) + ")"
+    year_a_pat = r"(?:\s+(20\d{2}))?"  # optional year after month-A
+    year_b_pat = r"(?:\s+(?:in\s+)?(20\d{2}))?"  # optional year after B
+    patterns = [
+        rf"\bfrom\s+{month_pat}{year_a_pat}\s+(?:through|thru|to|until|-|–|—|and)\s+{month_pat}{year_b_pat}\b",
+        rf"\bbetween\s+{month_pat}{year_a_pat}\s+and\s+{month_pat}{year_b_pat}\b",
+        rf"\b{month_pat}{year_a_pat}\s+(?:through|thru|to|until|–|—)\s+{month_pat}{year_b_pat}\b",
+    ]
+    for pat in patterns:
+        m = re.search(pat, ql)
+        if not m:
+            continue
+        a, year_a_raw, b, year_b_raw = m.group(1), m.group(2), m.group(3), m.group(4)
+        if a not in _MONTHS or b not in _MONTHS:
+            continue
+        lo, hi = _MONTHS[a], _MONTHS[b]
+        year = int(year_a_raw) if year_a_raw else (
+            int(year_b_raw) if year_b_raw else None)
+        year_hi = int(year_b_raw) if year_b_raw else (
+            int(year_a_raw) if year_a_raw else None)
+        return (lo, hi, year, year_hi)
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Relative-period resolution (Defect B)
+# ---------------------------------------------------------------------------
+
+def _reference_date() -> _dt.date:
+    """The 'now' date relative-period phrases are resolved against.
+    Override with env var INSIGHTFLOW_REF_DATE=YYYY-MM-DD for deterministic
+    tests."""
+    override = os.environ.get("INSIGHTFLOW_REF_DATE")
+    if override:
+        try:
+            return _dt.date.fromisoformat(override)
+        except ValueError:
+            pass
+    return _dt.date.today()
+
+
+def _find_relative_period(q: str) -> Optional[Tuple[int, int, int, str]]:
+    """Resolve relative-period phrases to (lo_year, lo_month, hi_year,
+    hi_month inclusive) plus a kind label. Returns None if no relative
+    phrase matches.
+
+    Recognised: last year, this year, year to date / ytd, last month,
+    this month, last quarter, this quarter.
+    """
+    ql = _norm(q)
+    ref = _reference_date()
+    y, m = ref.year, ref.month
+
+    if re.search(r"\blast\s+year\b", ql):
+        return (y - 1, 1, y - 1, 12, "last_year")
+    if re.search(r"\bthis\s+year\b|\bcurrent\s+year\b", ql):
+        return (y, 1, y, 12, "this_year")
+    if re.search(r"\byear[- ]to[- ]date\b|\bytd\b", ql):
+        return (y, 1, y, m, "ytd")
+    if re.search(r"\blast\s+month\b|\bprevious\s+month\b", ql):
+        lm_y, lm_m = (y, m - 1) if m > 1 else (y - 1, 12)
+        return (lm_y, lm_m, lm_y, lm_m, "last_month")
+    if re.search(r"\bthis\s+month\b|\bcurrent\s+month\b", ql):
+        return (y, m, y, m, "this_month")
+    if re.search(r"\blast\s+quarter\b|\bprevious\s+quarter\b", ql):
+        q_num = (m - 1) // 3 + 1
+        lq = q_num - 1 if q_num > 1 else 4
+        lq_y = y if q_num > 1 else y - 1
+        lo_m = (lq - 1) * 3 + 1
+        hi_m = lo_m + 2
+        return (lq_y, lo_m, lq_y, hi_m, "last_quarter")
+    if re.search(r"\bthis\s+quarter\b|\bcurrent\s+quarter\b", ql):
+        q_num = (m - 1) // 3 + 1
+        lo_m = (q_num - 1) * 3 + 1
+        hi_m = lo_m + 2
+        return (y, lo_m, y, hi_m, "this_quarter")
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Forecasting / destructive-intent detection (Defects C, E)
+# ---------------------------------------------------------------------------
+
+_FORECAST_PATTERNS = (
+    r"\bforecast(?:ed|ing|s)?\b",
+    r"\bpredict(?:ed|ion|ions|s)?\b",
+    r"\bprojection[s]?\b",
+    r"\bprojected\b",
+    r"\bwill\b.*\brevenue\b",
+    r"\bwill\s+(?:the|our|my|be)\b",
+    r"\bexpected\s+to\b",
+    r"\bgoing\s+to\s+(?:be|see|make|earn)\b",
+    r"\bestimate(?:d|s)?\s+(?:for|next|future)\b",
+    r"\bnext\s+(?:day|week|month|quarter|year)\b",
+    r"\bupcoming\s+(?:day|week|month|quarter|year)\b",
+    r"\bfuture\s+(?:day|week|month|quarter|year|revenue|sales|orders)\b",
+)
+
+
+def is_forecast_question(q: str) -> bool:
+    ql = _norm(q)
+    return any(re.search(p, ql) for p in _FORECAST_PATTERNS)
+
+
+_DESTRUCTIVE_VERBS = (
+    "delete", "drop", "truncate", "destroy", "wipe", "erase", "purge",
+    "clear", "remove", "modify", "update", "insert", "alter",
+    "rollback", "reset",
+)
+_DESTRUCTIVE_TARGETS = (
+    "orders", "customers", "products", "regions", "data", "database",
+    "db", "records", "rows", "table", "tables", "entries", "everything",
+    "all", "every",
+)
+
+
+def is_destructive_request(q: str) -> bool:
+    """Detect a request to delete/modify/truncate data BEFORE SQL
+    generation. Matches an imperative verb (optionally preceded by
+    'please' or a prompt marker like '[ ]') followed by a destructive
+    target word within a short window.
+    """
+    ql = _norm(q).strip()
+    # Strip common prompt-template markers at the very start.
+    ql = re.sub(r"^\s*[\[\(][^\]\)]*[\]\)]\s*", "", ql)
+    ql = ql.lstrip(" .,:;-")
+    verb_group = "|".join(_DESTRUCTIVE_VERBS)
+    tgt_group = "|".join(_DESTRUCTIVE_TARGETS)
+    # Imperative: optional "please", then verb within first few words,
+    # then a destructive target within ~8 words.
+    pat = rf"^(?:please\s+)?(?:{verb_group})\b[\w\s'\",\.]{{0,60}}?\b(?:{tgt_group})\b"
+    if re.search(pat, ql):
+        return True
+    # Also match "I want to delete X" / "can you delete X"
+    pat2 = (rf"\b(?:want|need|would like|try|can you|could you|please)\b"
+            rf"[\w\s]*?\b(?:{verb_group})\b[\w\s'\",\.]{{0,60}}?"
+            rf"\b(?:{tgt_group})\b")
+    if re.search(pat2, ql):
+        return True
+    return False
 
 
 def _period_string(year: int, month: int) -> str:
@@ -459,23 +661,64 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
 # =============================================================================
 
 def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
-    """Extract time-window filters from text and bind them to a date column."""
+    """Extract time-window filters from text and bind them to a date column.
+
+    Precedence (first match wins):
+      1. Relative period ("last year", "year to date", "last month", ...).
+      2. Explicit month range ("from January through September 2026").
+      3. Quarter ("Q2 2026").
+      4. Single explicit month ("in July 2026", "July 2026").
+    """
     date_col = ds.dates[0] if ds.dates else ""
     if not date_col:
         return []
     filters: List[FilterExpr] = []
-    year  = _find_year(question) or 2026
-    month = _find_month_number(question)
     ql = question.lower()
 
-    # explicit year+month
+    # 1. Relative period (Defect B)
+    rel = _find_relative_period(question)
+    if rel is not None:
+        lo_y, lo_m, hi_y, hi_m, _kind = rel
+        filters.append(FilterExpr(
+            kind="time_range", column=date_col,
+            lo=_period_string(lo_y, lo_m),
+            hi=_period_string(hi_y, hi_m),
+        ))
+        return filters
+
+    # 2. Month range (Defect A)
+    rng = _find_month_range(question)
+    if rng is not None:
+        lo_m, hi_m, year_lo, year_hi = rng
+        # If either year is missing, borrow from the other side or the
+        # bare year token in the question, or default to 2026.
+        default_year = _find_year(question) or 2026
+        lo_year = year_lo if year_lo is not None else (
+            year_hi if year_hi is not None else default_year)
+        hi_year = year_hi if year_hi is not None else (
+            year_lo if year_lo is not None else default_year)
+        # Backwards range ("September through January" with no explicit
+        # hi-year) crosses year boundary into the next year.
+        if hi_m < lo_m and year_hi is None:
+            hi_year = lo_year + 1
+        filters.append(FilterExpr(
+            kind="time_range", column=date_col,
+            lo=_period_string(lo_year, lo_m),
+            hi=_period_string(hi_year, hi_m),
+        ))
+        return filters
+
+    year = _find_year(question) or 2026
+    month = _find_month_number(question)
+
+    # 3. Explicit single month (unchanged behaviour)
     if month is not None and "vs" not in ql and "versus" not in ql \
             and "compared" not in ql:
         period = _period_string(year, month)
         filters.append(FilterExpr(kind="time_range", column=date_col,
                                    lo=period, hi=period))
         return filters
-    # quarter
+    # 4. Quarter
     m = re.search(r"\bq([1-4])\b", ql)
     if m:
         qkey = f"q{m.group(1)}"
@@ -763,17 +1006,32 @@ def _first_clause(question: str) -> str:
     if m and m.start() > 8:
         return q[:m.start()].rstrip(" ,.;")
     # Otherwise, split on " and " ONLY when the second half looks like a
-    # separate clause (has its own noun+verb pattern). Cheap heuristic:
-    # second half contains a KPI-sounding word AND a preposition.
+    # separate clause. Cheap heuristic: second half starts with a metric
+    # word AND contains a preposition.
+    #
+    # Important exception (Defect G): "noun1 and noun2 by X" is NOT a
+    # compound question — it's a coordinated noun pair that shares the
+    # grouping "by X". So if the token immediately before " and " is
+    # itself a bare noun (not followed by "in"/"by"/"per"/… — i.e. the
+    # grouping/filter clause is only AFTER noun2), do not split.
     lo = q.lower()
     idx = lo.find(" and ")
     if idx > 8:
         second = q[idx + 5:].strip()
-        # If the second half starts with a metric-y word AND contains
-        # "in "/"by "/"per "/"from " → probably a second clause.
         if re.match(r"^[A-Za-z]+\s+(?:in|by|per|from|for|across)\b",
                      second):
-            return q[:idx].rstrip(" ,.;")
+            # Check the pre-"and" context — if it ends with a bare noun
+            # that could also take the grouping ("revenue and profit by
+            # X"), don't split. Specifically: if the first clause does
+            # NOT already contain its own grouping/filter preposition,
+            # the "by X" after "and" belongs to BOTH nouns.
+            first = q[:idx]
+            first_has_grouping = bool(re.search(
+                r"\b(?:in|by|per|from|for|across)\s+[A-Za-z]",
+                first.lower()))
+            if first_has_grouping:
+                return first.rstrip(" ,.;")
+            # else fall through: treat as coordinated noun pair, keep whole.
     return q
 
 
@@ -888,17 +1146,24 @@ class Planner:
             kind = IntentKind.RELATIVE_TO_STAT
 
         # Diagnostic questions — "why did X drop/decline in <month>" —
-        # implicitly compare that month against the previous one. When
-        # no dim is bound we default to the first dimension the dataset
-        # exposes so the plan can produce a contribution decomposition.
+        # implicitly compare that month against the previous one, and
+        # when a dim is available (either explicitly bound by the user
+        # OR a natural default on the dataset) decompose by dimension.
+        # (Defect D: this used to require `not two_months`, which skipped
+        # the diagnostic path for "Why did X drop in July compared to
+        # June?" because _find_two_months would already have returned
+        # (6, 7).)
+        _DIAG_WORDS = ("why", "cause", "reason", "drop",
+                        "decline", "fell", "decrease", "lower",
+                        "diagnose", "dropped", "declined", "fallen")
+        has_diag_word = any(w in ql_lo for w in _DIAG_WORDS)
         one_month = _find_month_number(question)
-        is_diagnostic = one_month is not None and not two_months and any(
-            w in ql_lo for w in ("why", "cause", "reason", "drop",
-                                  "decline", "fell", "decrease", "lower",
-                                  "diagnose"))
+        is_diagnostic = has_diag_word and (
+            one_month is not None or two_months is not None)
         if is_diagnostic:
-            prev = one_month - 1 if one_month > 1 else 12
-            two_months = (prev, one_month)
+            if two_months is None and one_month is not None:
+                prev = one_month - 1 if one_month > 1 else 12
+                two_months = (prev, one_month)
             if not bound_dims:
                 # pick the first "natural" dimension the dataset has
                 for cand in ("category", "region_name", "sub_category",
@@ -945,6 +1210,17 @@ class Planner:
         dims = [_dref(c, ds) for _, c in bound_dims]
         filters = _bind_time_filter(question, ds) + metric_filters
         notes: List[str] = []
+        # Tag the plan when the time filter came from a relative-period
+        # phrase (Defect B). The orchestrator reads this note so an
+        # empty result on a relative-period filter becomes CLARIFY
+        # instead of a quiet ANSWER with no rows.
+        _rel = _find_relative_period(question)
+        if _rel is not None:
+            lo_y, lo_m, hi_y, hi_m, _kind_rel = _rel
+            notes.append(
+                f"relative_period={_kind_rel}:"
+                f"{_period_string(lo_y, lo_m)}..{_period_string(hi_y, hi_m)}"
+            )
 
         grain: Optional[Grain] = None
         comparison: Optional[ComparisonSpec] = None

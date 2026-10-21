@@ -133,6 +133,32 @@ class Orchestrator:
         ds = get_active_dataset()
         catalog = build_catalog(ds)
 
+        # 0. Pre-SQL safety / intent check. Destructive requests ABSTAIN;
+        # forecasting requests CLARIFY (not implemented). Both bypass the
+        # planner entirely so no SQL is generated or executed.
+        from .safety import check_request
+        safety = check_request(question)
+        if safety.destructive:
+            empty_plan = AnalyticalPlan(
+                intent_kind=IntentKind.UNSUPPORTED,
+                question=question, table=ds.table,
+                notes=["refused: destructive request"],
+                unavailable=["destructive_operation"],
+            )
+            empty_report = ValidationReport(ok=False, fidelity=0.0, issues=[])
+            return self._safety_abstain_response(question, empty_plan,
+                                                 empty_report, safety.reason)
+        if safety.forecast:
+            empty_plan = AnalyticalPlan(
+                intent_kind=IntentKind.UNSUPPORTED,
+                question=question, table=ds.table,
+                notes=["refused: forecasting not implemented"],
+                unavailable=["forecasting"],
+            )
+            empty_report = ValidationReport(ok=False, fidelity=0.0, issues=[])
+            return self._unanswerable_response(question, empty_plan,
+                                                empty_report, safety.reason)
+
         # 1. Plan the question against the active dataset.
         planner = Planner(ds, catalog)
         plan = planner.plan(question)
@@ -257,6 +283,46 @@ class Orchestrator:
                           demanded_breakdown=demanded,
                           fidelity_ok=fidelity.ok,
                           result_ok=result_report.ok)
+
+        # 11b. Relative-period coverage check (Defect B). If the time
+        # filter came from a relative-period phrase ("last year",
+        # "last month", ...) and executing the query returned no actual
+        # data (either zero rows, or SUM/COUNT aggregated to NULL
+        # because the filter matched no base rows), the dataset doesn't
+        # cover the requested window. A quiet ANSWER-with-no-rows is
+        # wrong — downgrade to CLARIFY with a specific message.
+        def _is_data_empty(res) -> bool:
+            if not res.ok:
+                return False
+            if not res.rows:
+                return True
+            # SUM(x) on an empty filter yields [(None,)] etc. Treat an
+            # aggregate result where every numeric cell is None as empty.
+            for row in res.rows:
+                for v in row:
+                    if v is None:
+                        continue
+                    if isinstance(v, (int, float)) and v == 0 \
+                            and len(res.rows) == 1:
+                        # A single zero row from COUNT(*) on empty filter
+                        # should also count as "no data for that period".
+                        continue
+                    # anything non-None, non-zero → real data
+                    return False
+            return True
+
+        rel_note = next((n for n in (plan.notes or [])
+                          if n.startswith("relative_period=")), None)
+        if (rel_note is not None and _is_data_empty(result)
+                and decision.action in (ANSWER, WARN)):
+            _rel_kind = rel_note.split("=", 1)[1].split(":", 1)[0]
+            _rel_range = rel_note.split(":", 1)[1] if ":" in rel_note else ""
+            decision = Decision(
+                CLARIFY,
+                f"'{_rel_kind.replace('_', ' ')}' resolved to "
+                f"{_rel_range} but the dataset has no rows in that "
+                f"range. Try a period inside the dataset's date range.",
+            )
 
         # 12. Explain (evidence-first).
         if decision.action in (ANSWER, WARN):
@@ -483,6 +549,57 @@ class Orchestrator:
             return f"The current dataset can't satisfy this question: {joined}"
         return ("I'm not confident enough to answer this. Could you name a "
                 "specific KPI and (optionally) a dimension or time window?")
+
+    # ==================================================================
+    def _safety_abstain_response(self, question: str, plan: AnalyticalPlan,
+                                   report: ValidationReport, reason: str
+                                   ) -> InsightResponse:
+        """ABSTAIN response for destructive-intent refusals. Reuses the
+        shell of `_unanswerable_response` but hard-codes the Decision to
+        ABSTAIN and the failure category to UNSUPPORTED, since the
+        pipeline is deliberately not planning / executing the request."""
+        empty = QueryResult()
+        sqlval = ValidationResult(ok=False, score=0.0, issues=[reason])
+        kpival = KPIValidationResult(
+            kpi_recognised=False, rules_passed=False, score=0.0,
+            issues=[reason])
+        confidence = score_confidence(
+            sqlval, kpival, empty, ambiguous=False, out_of_scope=True,
+            query_intent=None, sql="", plan=plan, plan_report=report)
+        decision = Decision(ABSTAIN, reason)
+        evidence = build_evidence(question, "", None, {}, empty)
+        analysis = Analysis(summary=reason)
+        diagnostics = {
+            "question": question,
+            "dataset": {"id": getattr(plan, "table", ""),
+                         "kind": "unknown", "table": plan.table},
+            "plan": plan.as_trace(),
+            "plan_validation": {"ok": False, "fidelity": 0.0,
+                                 "issues": [{"kind": "safety",
+                                              "severity": "error",
+                                              "message": reason}]},
+            "sql": "", "sql_validation": {"ok": False, "issues": [reason]},
+            "fidelity": {"ok": False, "score": 0.0, "checks": []},
+            "execution": {"ok": False, "n_rows": 0, "error": reason},
+            "result_validation": {"ok": False, "score": 0.0, "issues": []},
+            "kpi_validation": {"recognised": False, "rules_passed": False,
+                                "score": 0.0, "issues": [reason]},
+            "confidence": {"score": confidence.score,
+                            "signals": dict(confidence.signals)},
+            "decision": {"action": decision.action,
+                         "reason": decision.reason},
+            "failure_category": FailureCategory.UNSUPPORTED_DATA,
+            "safety": {"destructive": True, "reason": reason},
+        }
+        return InsightResponse(
+            question=question, sql="", intent=plan.intent_kind,
+            decision=decision, confidence=confidence, analysis=analysis,
+            evidence=evidence, result=empty, explanation=reason,
+            recommendation=None, chart={"kind": "none"},
+            notes=[reason], plan_trace=plan.as_trace(),
+            failure_category=FailureCategory.UNSUPPORTED_DATA,
+            diagnostics=diagnostics,
+        )
 
     # ==================================================================
     def _unanswerable_response(self, question: str, plan: AnalyticalPlan,
