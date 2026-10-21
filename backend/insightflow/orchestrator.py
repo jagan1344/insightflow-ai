@@ -54,7 +54,9 @@ from .reliability.decision import (
 )
 from .reliability.evidence import Evidence, build_evidence
 from .reliability.result_validator import ResultValidator
+from .validation.dialect_validator import DialectReport, validate_dialect
 from .validation.kpi_validator import KPIValidationResult, validate_kpi
+from .validation.semantic_fulfilment import FulfilmentReport, validate_fulfilment
 from .validation.sql_validator import ValidationResult, validate_sql
 
 
@@ -202,6 +204,19 @@ class Orchestrator:
         # 5b. Structural SQL validation.
         sqlval = validate_sql(sql)
 
+        # 5c. Dialect compatibility — reject Postgres/MSSQL/MySQL
+        # idioms before they hit SQLite. Rule-based compiler emits
+        # SQLite SQL, so this almost never fires on the deterministic
+        # path; it's the gate that catches an LLM-text-to-SQL fallback
+        # or a future compiler regression.
+        dialect = validate_dialect(sql, dialect="sqlite")
+        if sqlval.ok and not dialect.ok:
+            sqlval = ValidationResult(
+                ok=False, score=0.0,
+                issues=list(sqlval.issues) + list(dialect.issues),
+                referenced_tables=list(sqlval.referenced_tables),
+            )
+
         # 6. Execute if valid.
         if sqlval.ok:
             result = run_sql(sql)
@@ -211,6 +226,12 @@ class Orchestrator:
 
         # 6b. Result validation (post-execution semantic checks).
         result_report = ResultValidator().check(plan, result)
+
+        # 6c. Semantic fulfilment — did the executed result actually
+        # answer the planned intent? e.g. a 9-month trend question
+        # that returns a single aggregate row is "SQL executed OK but
+        # the question wasn't answered".
+        fulfilment = validate_fulfilment(plan, result)
 
         # 7. Result-level KPI validation.
         headline_kpi = _headline_kpi_from_plan(plan)
@@ -284,6 +305,15 @@ class Orchestrator:
                           fidelity_ok=fidelity.ok,
                           result_ok=result_report.ok)
 
+        # 11a. Semantic-fulfilment gate (overrides a would-be ANSWER
+        # when the executed result failed to match the planned intent).
+        if (not fulfilment.ok) and decision.action in (ANSWER, WARN):
+            decision = Decision(
+                WARN if fulfilment.score >= 0.4 else CLARIFY,
+                "semantic fulfilment check failed: "
+                + "; ".join(fulfilment.issues),
+            )
+
         # 11b. Relative-period coverage check (Defect B). If the time
         # filter came from a relative-period phrase ("last year",
         # "last month", ...) and executing the query returned no actual
@@ -327,7 +357,7 @@ class Orchestrator:
         # 12. Explain (evidence-first).
         if decision.action in (ANSWER, WARN):
             trace = plan_evidence_line(plan, catalog.table)
-            body = explain(evidence, analysis, llm=self.llm)
+            body = explain(evidence, analysis, llm=self.llm, plan=plan)
             # Tell the user when we truncated a compound question so
             # they know the second half wasn't answered.
             dropped = ""
@@ -727,12 +757,26 @@ class Orchestrator:
             )
 
         sqlval = validate_sql(gen.sql)
+        # Dialect check (same gate as the plan path). The LLM path is
+        # the usual source of EXTRACT(), DATE_TRUNC(), etc.
+        dialect = validate_dialect(gen.sql, dialect="sqlite")
+        if sqlval.ok and not dialect.ok:
+            sqlval = ValidationResult(
+                ok=False, score=0.0,
+                issues=list(sqlval.issues) + list(dialect.issues),
+                referenced_tables=list(sqlval.referenced_tables),
+            )
         if sqlval.ok:
             result = run_sql(gen.sql)
         else:
             result = QueryResult(
                 error="SQL failed validation: " + "; ".join(sqlval.issues))
         kpival = validate_kpi(gen.kpi, result)
+        # Semantic fulfilment vs. the plan the planner originally built
+        # (not the legacy GenSQL, which has no structured intent beyond
+        # month/dimension). This catches "LLM wrote SQL but it answers a
+        # different question than the user asked" in the legacy path.
+        legacy_fulfilment = validate_fulfilment(plan, result)
         analysis = analyse(gen.kpi, result, gen.intent, gen.month)
 
         filters: Dict[str, Any] = {}
@@ -756,8 +800,19 @@ class Orchestrator:
                           plan=plan, plan_report=report,
                           demanded_breakdown=bool(demanded))
 
+        # Semantic-fulfilment gate on the legacy / LLM path. Overrides
+        # a would-be ANSWER when the executed SQL did not match the
+        # planned intent (e.g. a trend question answered with a single
+        # aggregate row, or a forecast question answered with history).
+        if (not legacy_fulfilment.ok) and decision.action in (ANSWER, WARN):
+            decision = Decision(
+                WARN if legacy_fulfilment.score >= 0.4 else CLARIFY,
+                "semantic fulfilment check failed: "
+                + "; ".join(legacy_fulfilment.issues),
+            )
+
         if decision.action in (ANSWER, WARN):
-            explanation = explain(evidence, analysis, llm=self.llm)
+            explanation = explain(evidence, analysis, llm=self.llm, plan=plan)
             recommendation = recommend(analysis) if gen.diagnostic else None
         elif decision.action == CLARIFY:
             explanation = self._legacy_clarify(gen.query_intent)

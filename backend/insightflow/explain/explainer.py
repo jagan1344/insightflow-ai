@@ -63,16 +63,63 @@ def plan_evidence_line(plan: AnalyticalPlan, table: str) -> str:
     return " · ".join(parts)
 
 
-def explain(evidence: Evidence, analysis: Analysis, llm: Optional[LLMClient] = None) -> str:
-    if llm is None or not llm.available:
-        return analysis.summary
-    prompt = (
-        f"Evidence chain (JSON):\n{json.dumps(evidence.as_chain(), default=str, indent=2)}\n\n"
-        f"Deterministic summary:\n{analysis.summary}\n\n"
-        "Write one paragraph (<= 90 words) that a business stakeholder can act on."
-    )
-    text = llm.complete(prompt, system=_SYSTEM, temperature=0.0)
-    return text or analysis.summary
+_FORECAST_PHRASES = (
+    "will be", "projected", "projection", "forecast", "forecasted",
+    "forecasting", "expected to be", "going to be", "estimate for next",
+    "estimate for the next", "prediction", "predicted", "we predict",
+    "we project",
+)
+
+_CAUSAL_PHRASES = (
+    "caused by", "due to", "because of", "the cause is", "the reason is",
+    "driven by",  # mild — allowed inside diagnostics with contributor data
+)
+
+
+def _looks_like_forecast(text: str) -> bool:
+    lo = text.lower()
+    return any(p in lo for p in _FORECAST_PHRASES)
+
+
+def explain(evidence: Evidence, analysis: Analysis,
+             llm: Optional[LLMClient] = None,
+             plan: Optional[AnalyticalPlan] = None) -> str:
+    """Build the user-facing paragraph. Guarded so the explainer can
+    never label a historical aggregate as a forecast / projection.
+    """
+    base = analysis.summary
+    text = base
+    if llm is not None and llm.available:
+        prompt = (
+            f"Evidence chain (JSON):\n{json.dumps(evidence.as_chain(), default=str, indent=2)}\n\n"
+            f"Deterministic summary:\n{analysis.summary}\n\n"
+            "Rules: Describe only what the evidence shows. Do NOT project, "
+            "predict, forecast, or claim causality the data does not support. "
+            "If the question asked for a forecast or future value, say that "
+            "a forecast is not supported by this evidence instead of "
+            "inventing one.\n\n"
+            "Write one paragraph (<= 90 words) grounded in the evidence."
+        )
+        candidate = llm.complete(prompt, system=_SYSTEM, temperature=0.0)
+        if candidate:
+            text = candidate
+
+    # Hard explanation gate — regardless of whether the LLM or the
+    # deterministic summary produced the text, strip forecast phrasing
+    # when the plan does NOT support forecasting. The pipeline has no
+    # genuine forecaster today; see safety/__init__.py.
+    if plan is not None and plan.intent_kind != IntentKind.UNSUPPORTED \
+            and _looks_like_forecast(text):
+        # The plan is NOT a forecast request (safety gate would have
+        # fired earlier) — the LLM is hallucinating. Fall back to the
+        # deterministic summary.
+        return base
+    if plan is not None and plan.intent_kind == IntentKind.UNSUPPORTED \
+            and "forecasting" in (plan.unavailable or []):
+        return ("I can't produce a forecast for this question. "
+                "Forecasting is not implemented in this build. "
+                "Here is the evidence I do have: " + base)
+    return text or base
 
 
 def recommend(analysis: Analysis) -> Optional[str]:
