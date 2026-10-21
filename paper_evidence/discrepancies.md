@@ -47,18 +47,20 @@ the paper should say.
   current seed, or (b) describe the comparison methodology precisely
   (we rerun gold_sql; we do not trust `expected_result`).
 
-## D4. "Zero unsafe answers" is not true on the benchmark
+## D4. Keep the safety matrix separate from reference-SQL mismatches
 
-- **Claim (earlier chat):** "zero unsafe-answer rate on the safety matrix".
-- **Reality:** on `test_safety.py` (25 safety-matrix cases) the aggregate
-  test does pass — those 25 are a controlled slice. But on the full
-  27-question **reliability benchmark**, Full produces **2 unsafe
-  answers** (`D01` and `D02`, both answered as ANSWER at high confidence
-  but semantically wrong per the gold_sql oracle). Unsafe-answer rate =
-  **0.074 (95 % Wilson 0.021–0.234)**.
-- **Correction:** the paper should quote the 2/27 unsafe rate with its
-  CI and say that the system still clarifies on 10/10 non-answerable
-  questions in the same benchmark.
+- **Claim to avoid:** "zero unsafe-answer rate" as a general system-wide result.
+- **Evidence:** the aggregate test for `test_safety.py` (25 safety-matrix
+  cases) passes on its controlled test slice. In the 27-question
+  reliability benchmark, D01 and D02 are high-confidence ANSWER decisions
+  whose generated SQL does not match the `gold_sql` reference under the
+  oracle. The two reference queries do not independently establish the
+  intended semantics, so the evidence does not by itself prove that the
+  answers were unsafe or semantically wrong.
+- **Correction:** report the 25-case safety matrix and the two reference-SQL
+  mismatches among 17 answerable benchmark questions separately. State that
+  all 10 non-answerable benchmark questions were routed to CLARIFY. Do not
+  describe D01/D02 as confirmed unsafe answers without independent adjudication.
 
 ## D5. Ablations A1/A2/A3 and baseline B1 produce **identical outputs** to Full on this benchmark
 
