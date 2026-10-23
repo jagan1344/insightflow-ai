@@ -50,6 +50,7 @@ def orch():
 # Capability gate — must CLARIFY, never silent-ANSWER with a fallback KPI
 # ===========================================================================
 
+# ---- Still SAFELY REFUSED (genuinely unsupported in SQLite 3.45) ----
 @pytest.mark.parametrize("q,label", [
     ("What is the median order revenue?",                "median"),
     ("Show me the median revenue by region",             "median_breakdown"),
@@ -57,36 +58,113 @@ def orch():
     ("Give me the p95 of order value",                   "p95"),
     ("What is the standard deviation of revenue?",       "stddev"),
     ("What is the variance of monthly revenue?",         "variance"),
-    ("What is the 3-month rolling average revenue?",     "rolling_3m"),
-    ("Give me the trailing 12-month revenue",            "trailing_12m"),
-    ("Moving average of order value",                    "moving_avg"),
-    ("What was revenue in the last 90 days?",            "last_n_days"),
-    ("Revenue for the past 7 days",                      "past_n_days"),
-    ("Top 3 products in each category",                  "top_n_per_group"),
-    ("Rank products within each category",               "rank_within"),
-    ("How many orders have missing cost?",               "null_count"),
-    ("Show me rows with null discount",                  "null_rows"),
+    ("Give me the trailing 12-day revenue",              "trailing_12d_non_monthly"),
     ("Find duplicate orders",                            "duplicates"),
-    ("What is the smallest order revenue?",              "min_row_short"),
-    ("Give me the maximum single order value",           "max_row"),
-    ("How many unique customers do we have?",            "count_distinct"),
-    ("Distinct count of products",                       "distinct_count_phrase"),
-    ("In which months did revenue exceed 400000?",       "threshold_grouped"),
-    ("Regions with revenue above 1 million",             "threshold_num"),
     ("List customers with the most orders this year",    "list_with_rank"),
     ("List products with the highest profit",            "list_with_highest"),
+    ("Show me the missing values",                       "generic_data_quality"),
 ])
 def test_unsupported_capability_routes_to_clarify(orch, q, label):
     r = orch.ask(q)
     assert r.decision.action in ("CLARIFY", "ABSTAIN"), \
         f"[{label}] expected CLARIFY/ABSTAIN, got {r.decision.action!r} " \
         f"with sql={r.sql!r}"
-    # The historical defect: silent SUM(revenue) fallback. Guard against it.
     sql_lower = (r.sql or "").lower().strip()
     assert sql_lower not in (
         "select sum(revenue) as total_revenue from orders",
         "select count(*) as order_count from orders",
     ), f"[{label}] regressed to silent fallback: {r.sql!r}"
+
+
+# ---- IMPLEMENTED AND VERIFIED — oracle-matched answers ----
+import sqlite3
+
+_ORACLE_DB = str(ROOT / "data" / "insightflow.db")
+
+
+def _oracle(sql: str):
+    with sqlite3.connect(_ORACLE_DB) as c:
+        return c.execute(sql).fetchall()
+
+
+IMPLEMENTED_CASES = [
+    # (tag, question, oracle_sql, extractor returning the comparable value)
+    ("count_distinct_customers",
+     "How many distinct customers do we have?",
+     "SELECT COUNT(DISTINCT customer_name) FROM customers",
+     lambda rows: rows[0][0]),
+    ("count_distinct_products",
+     "How many distinct products are there?",
+     "SELECT COUNT(DISTINCT product_name) FROM products",
+     lambda rows: rows[0][0]),
+    ("null_count_cost",
+     "How many orders have missing cost?",
+     "SELECT COUNT(*) FROM orders WHERE cost IS NULL",
+     lambda rows: rows[0][0]),
+    ("extremum_max_revenue",
+     "What is the maximum revenue?",
+     "SELECT MAX(revenue) FROM orders",
+     lambda rows: rows[0][0]),
+    ("extremum_min_revenue",
+     "What is the minimum revenue?",
+     "SELECT MIN(revenue) FROM orders",
+     lambda rows: rows[0][0]),
+    ("extremum_max_quantity",
+     "What is the maximum quantity?",
+     "SELECT MAX(quantity) FROM orders",
+     lambda rows: rows[0][0]),
+    ("last_30_days",
+     "Revenue in the last 30 days",
+     "SELECT SUM(revenue) FROM orders "
+     "WHERE order_date >= '2026-09-22' AND order_date < '2026-10-22'",
+     lambda rows: rows[0][0]),
+    ("threshold_months_gt",
+     "In which months did revenue exceed 400000?",
+     "SELECT substr(order_date,1,7), SUM(revenue) FROM orders "
+     "GROUP BY substr(order_date,1,7) HAVING SUM(revenue) > 400000 "
+     "ORDER BY SUM(revenue) DESC",
+     lambda rows: sorted(rows)),
+    ("threshold_regions_gt",
+     "Regions with revenue above 500000",
+     "SELECT regions.region_name, SUM(revenue) FROM orders "
+     "JOIN regions ON regions.region_id = orders.region_id "
+     "GROUP BY regions.region_name HAVING SUM(revenue) > 500000 "
+     "ORDER BY SUM(revenue) DESC",
+     lambda rows: sorted(rows)),
+    ("rolling_avg_3m",
+     "3-month rolling average revenue",
+     "WITH agg AS (SELECT substr(order_date,1,7) m, SUM(revenue) v "
+     "FROM orders GROUP BY m) "
+     "SELECT m, v, AVG(v) OVER (ORDER BY m ROWS BETWEEN 2 PRECEDING "
+     "AND CURRENT ROW) FROM agg ORDER BY m",
+     lambda rows: rows),  # whole series
+    ("top_2_per_category",
+     "Top 2 products per category by revenue",
+     "WITH g AS (SELECT products.category c, products.product_name p, "
+     "SUM(revenue) v FROM orders JOIN products ON "
+     "products.product_id = orders.product_id GROUP BY c, p), "
+     "r AS (SELECT c, p, v, ROW_NUMBER() OVER (PARTITION BY c "
+     "ORDER BY v DESC) rk FROM g) "
+     "SELECT c, p, v FROM r WHERE rk <= 2 ORDER BY c, rk",
+     lambda rows: sorted(rows)),
+]
+
+
+@pytest.mark.parametrize("tag,q,oracle_sql,extract",
+                          [(c[0], c[1], c[2], c[3]) for c in IMPLEMENTED_CASES],
+                          ids=[c[0] for c in IMPLEMENTED_CASES])
+def test_implemented_capability_matches_oracle(orch, tag, q, oracle_sql, extract):
+    r = orch.ask(q)
+    assert r.decision.action in ("ANSWER", "WARN"), \
+        f"[{tag}] expected ANSWER/WARN, got {r.decision.action!r} " \
+        f"(reason={r.decision.reason!r})"
+    assert r.result.ok, f"[{tag}] execution failed: {r.result.error}"
+    sys_val = extract(list(r.result.rows))
+    ora_val = extract(_oracle(oracle_sql))
+    assert sys_val == ora_val, (
+        f"[{tag}] system/oracle mismatch:\n"
+        f"  system: {sys_val}\n"
+        f"  oracle: {ora_val}")
 
 
 # ===========================================================================
@@ -189,12 +267,12 @@ def test_invariant_semantic_failure_never_becomes_high_conf_answer(orch):
     for q in [
         "What is the median order revenue?",
         "What is the 90th percentile of revenue?",
-        "Rolling 3-month revenue average",
-        "In which months did revenue exceed 400k?",
-        "Top product in each category",
+        "Find duplicate orders",
+        "List products with the highest profit",
     ]:
         r = orch.ask(q)
-        assert r.decision.action in ("CLARIFY", "ABSTAIN")
+        assert r.decision.action in ("CLARIFY", "ABSTAIN"), (
+            f"{q!r} should be refused but got {r.decision.action}")
         assert r.confidence.score < 0.70, (
             f"{q!r} refused but with inflated confidence {r.confidence.score}")
 

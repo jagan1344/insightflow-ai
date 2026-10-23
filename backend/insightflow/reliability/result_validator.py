@@ -70,8 +70,10 @@ class ResultValidator:
                         f"share_of_total column sums to {total:.3f} — "
                         f"expected ~1.0"))
 
-        # 2) top/bottom N cardinality + ordering
-        if plan.top_n is not None and rows and plan.measures:
+        # 2) top/bottom N cardinality + ordering. Skip for
+        # TOP_N_PER_GROUP where plan.top_n is per-partition, not total.
+        if plan.top_n is not None and rows and plan.measures \
+                and plan.intent_kind != IntentKind.TOP_N_PER_GROUP:
             if len(rows) > plan.top_n:
                 issues.append(ResultIssue(
                     "error",

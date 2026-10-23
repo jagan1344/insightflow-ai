@@ -37,11 +37,16 @@ class IntentKind:
     RATIO               = "ratio"               # "Profit per order"
     AVERAGE_AT_GRAIN    = "average_at_grain"    # "Average monthly revenue"
     CONTRIBUTION        = "contribution"        # "Which region contributed most to the decline?"
-    # NEW: entity-vs-stat comparisons: "customers with revenue above
-    # average", "products with profit below the median".
     RELATIVE_TO_STAT    = "relative_to_stat"
-    UNSUPPORTED         = "unsupported"         # dataset can't answer this
-    AMBIGUOUS           = "ambiguous"           # question needs clarification
+    # NEW capabilities (2026-10-23 — Phase 2):
+    EXTREMUM            = "extremum"            # MIN/MAX of a column aggregate
+    DISTINCT_COUNT      = "distinct_count"      # COUNT(DISTINCT dim)
+    NULL_COUNT          = "null_count"          # COUNT(*) WHERE col IS NULL
+    ROLLING_AVG         = "rolling_avg"         # 3-month rolling average over a trend
+    TOP_N_PER_GROUP     = "top_n_per_group"     # top N of M per partition dim (ROW_NUMBER OVER PARTITION BY)
+    THRESHOLD_GROUPED   = "threshold_grouped"   # breakdown with HAVING on aggregated metric
+    UNSUPPORTED         = "unsupported"
+    AMBIGUOUS           = "ambiguous"
 
 
 ALL_INTENT_KINDS = frozenset({
@@ -50,6 +55,9 @@ ALL_INTENT_KINDS = frozenset({
     IntentKind.BOTTOM_N, IntentKind.SHARE_OF_TOTAL, IntentKind.RATIO,
     IntentKind.AVERAGE_AT_GRAIN, IntentKind.CONTRIBUTION,
     IntentKind.RELATIVE_TO_STAT,
+    IntentKind.EXTREMUM, IntentKind.DISTINCT_COUNT,
+    IntentKind.NULL_COUNT, IntentKind.ROLLING_AVG,
+    IntentKind.TOP_N_PER_GROUP, IntentKind.THRESHOLD_GROUPED,
     IntentKind.UNSUPPORTED, IntentKind.AMBIGUOUS,
 })
 
@@ -89,14 +97,19 @@ class DimRef:
 class FilterExpr:
     """A structured filter. Kept as a small vocabulary so compiler can
     lower each one; free-form SQL is never injected."""
-    kind: str                # "eq" | "range" | "in" | "time_range" | "metric_lt" | "metric_gt"
+    # kind: "eq" | "range" | "in" | "time_range" | "metric_lt" |
+    #       "metric_gt" | "null" | "not_null" |
+    #       "metric_gt_grouped" | "metric_lt_grouped"  (post-aggregate HAVING)
+    kind: str
     column: str = ""
     value: object = None
     lo: object = None
     hi: object = None
-    # For metric_lt / metric_gt:
+    # For metric_lt / metric_gt and metric_*_grouped (HAVING):
     kpi_id: str = ""
     threshold: float = 0.0
+    # For top_n_per_group: how many rows to keep inside each group.
+    per_group_n: int = 0
 
 
 @dataclass

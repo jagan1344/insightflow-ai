@@ -55,124 +55,58 @@ _UNSUPPORTED: list[tuple[str, str, str]] = [
      "instead."),
 
     # ---- Rolling / moving / trailing windows ----
+    # IMPLEMENTED in Phase 2 for monthly cadence via window AVG() with
+    # ROWS BETWEEN N PRECEDING AND CURRENT ROW. The planner intent is
+    # ROLLING_AVG; the compiler lowers to SQLite 3.25+ window SQL.
+    # Only non-monthly cadences (daily / weekly / quarterly) remain
+    # refused for now.
     (r"\b(?:rolling|moving|trailing)\s+(?:\d+[\s-]+)?"
-     r"(?:day|week|month|quarter|year|average|sum)",
-     "rolling_window",
-     "I can't compute rolling / moving / trailing-window aggregates "
-     "yet. Ask for a specific period instead "
-     "(e.g. 'revenue in June 2026', 'monthly revenue in Q2 2026')."),
+     r"(?:day|days|week|weeks|quarter|quarters|year|years)\b",
+     "rolling_window_non_monthly",
+     "I can only compute monthly rolling / moving averages right now. "
+     "Daily / weekly / quarterly / yearly rolling windows aren't "
+     "implemented yet — try the monthly equivalent."),
 
-    (r"\b(?:last|past|previous)\s+\d+\s+(?:day|days|week|weeks)\b",
-     "sliding_window_days",
-     "I can't compute arbitrary 'last N days / weeks' windows yet. "
-     "Try a calendar range such as 'revenue in July 2026' or "
-     "'last month'."),
+    # "Last N days / weeks" is NOW IMPLEMENTED in Phase 2 as a day-level
+    # time_range filter. No refusal needed.
 
-    # ---- Within-group ranking ----
-    (r"\btop\s+\d+\s+\w+\s+(?:in|per|within|for)\s+each\b",
-     "top_n_within_group",
-     "I can't compute 'top-N within each group' (window-ranking) yet. "
-     "Try a plain 'top N by metric' breakdown instead."),
-
-    (r"\btop\s+\w+\s+(?:in|per|within|for)\s+each\b",
-     "top_1_within_group",
-     "I can't pick 'the top entry within each group' yet (window "
-     "ranking). Try asking about one group at a time, or a plain "
-     "top-N by metric."),
-
-    (r"\brank(?:ed|ing|s)?\s+\w+\s+(?:within|per|by|in)\s+each\b",
-     "rank_within_group",
-     "I can't compute ranks within each group yet. Ask for a plain "
-     "top-N breakdown instead."),
-    (r"\brank(?:ed|ing|s)?\s+(?:within|per|by)\s+(?:each|group)\b",
-     "rank_within_group",
-     "I can't compute ranks within each group yet. Ask for a plain "
-     "top-N breakdown instead."),
+    # Within-group ranking is NOW IMPLEMENTED in Phase 2 via window
+    # functions. No refusal needed.
 
     # ---- Data-quality / null-aware questions ----
+    # Null-aware counts for a specific column are NOW IMPLEMENTED.
+    # Keep the refusal for GENERIC data-quality asks that don't name a
+    # concrete column.
     (r"\b(?:missing|null|nulls|empty|blank|unknown|unspecified|incomplete)\s+"
-     r"(?:value|values|rows|records|cost|revenue|discount|date|dates|data|cells|column|columns)\b",
-     "null_awareness",
-     "I can't query for missing / null / empty values yet. The "
-     "pipeline treats every row's columns as populated. If you "
-     "need a data-quality view, use the Data Quality page / API "
-     "(/api/pages/data_quality) which profiles coverage directly."),
+     r"(?:value|values|data|cells|column|columns)\b",
+     "generic_data_quality",
+     "I can only answer null / missing questions about a specific "
+     "column (e.g. 'orders with missing cost'). For a dataset-wide "
+     "data-quality view, use the Data Quality page / API."),
 
     (r"\bduplicate(?:s|d)?\s+(?:row|rows|record|records|order|orders)\b",
      "duplicate_detection",
      "I can't detect duplicate rows yet. Use the Data Quality page "
      "or write a direct SQL query via the Analytics Explorer."),
 
-    # ---- Row-level MIN/MAX (as opposed to aggregate) ----
-    # Allow optional "single"/"individual" filler between the adjective
-    # and the noun ("maximum single order value", "largest individual
-    # revenue").
-    (r"\b(?:minimum|smallest|lowest)\s+(?:single\s+|individual\s+)?"
-     r"(?:order|row|transaction)\s*"
-     r"(?:single\s+|individual\s+)?"
-     r"(?:revenue|value|amount|quantity|discount|profit|margin)\b",
-     "row_level_min",
-     "I can't retrieve the single smallest-row value yet. Try asking "
-     "for a 'bottom N' breakdown instead."),
+    # ---- Row-level MIN / MAX for a single transaction ----
+    # The aggregate MIN / MAX of a column is NOW IMPLEMENTED in Phase 2.
+    # The refusal only remains for the "single order" phrasing which
+    # asks for the row-level record not an aggregate.
+    (r"\b(?:minimum|smallest|lowest|maximum|largest|highest|biggest)\s+"
+     r"(?:single\s+|individual\s+)?(?:order|row|transaction)\s+"
+     r"(?:single\s+|individual\s+)?record\b",
+     "row_level_record",
+     "I can compute the single minimum / maximum VALUE of a column, "
+     "but I can't retrieve the full record for that single row. Try "
+     "'bottom 5 orders by revenue' instead."),
 
-    (r"\b(?:maximum|largest|highest|biggest)\s+(?:single\s+|individual\s+)?"
-     r"(?:order|row|transaction)\s*"
-     r"(?:single\s+|individual\s+)?"
-     r"(?:revenue|value|amount|quantity|discount|profit|margin)\b",
-     "row_level_max",
-     "I can't retrieve the single largest-row value yet. Try asking "
-     "for a 'top N' breakdown instead."),
+    # COUNT DISTINCT phrased as "how many distinct X" is NOW
+    # IMPLEMENTED for recognised dimension columns. No refusal needed.
 
-    (r"^\s*(?:please\s+)?(?:what(?:'s|\s+is)?\s+the\s+)?"
-     r"(?:min|minimum|smallest|lowest)\s+(?:order\s+)?(?:revenue|value|amount)\s*\??$",
-     "row_level_min_short",
-     "I can't compute the single smallest-row value yet. Try "
-     "'bottom 5 orders by revenue' or a filtered sum."),
-
-    # ---- COUNT DISTINCT (not currently in the catalog) ----
-    (r"\b(?:how\s+many\s+(?:unique|distinct|different|separate))\b",
-     "count_distinct",
-     "I can't compute count-distinct yet — try asking for the "
-     "breakdown directly (e.g. 'revenue by customer', 'revenue "
-     "by product')."),
-
-    (r"\b(?:distinct|unique)\s+(?:count|number)\b",
-     "count_distinct_phrase",
-     "I can't compute count-distinct yet. Try a breakdown by that "
-     "dimension instead."),
-
-    # ---- Threshold on a grouped metric with a NUMERIC literal
-    # ("months where revenue > 400k", "regions with revenue above
-    # 1 million"). Requires a numeric literal (optionally with
-    # k / m / million) after the comparison word so "above average /
-    # below the median" (relative_to_stat) are NOT caught here.
-    #
-    # Variant A: starts with a question word ("Which months...").
-    (r"\b(?:which|what|in\s+which)\s+(?:month|months|quarter|quarters|"
-     r"year|years|region|regions|category|categories|product|products|"
-     r"customer|customers|segment|segments)\b"
-     r"[^?]{0,80}?\b(?:exceed(?:ed|s)?|above|over|greater\s+than|"
-     r">\s*|more\s+than|at\s+least|than)\s*"
-     r"(?:\$\s*)?\d[\d,]*(?:\.\d+)?\s*(?:k|m|million|thousand|billion)?\b",
-     "threshold_on_grouped_metric",
-     "I can't yet filter groups by a numeric threshold on their "
-     "aggregated metric (e.g. 'months where revenue > 400k'). Ask "
-     "for the breakdown ('revenue by month') and apply the threshold "
-     "visually, or use the Analytics Explorer for a direct SQL "
-     "query with HAVING."),
-    # Variant B: declarative noun phrase ("regions with revenue above
-    # 1 million", "months with sales over 400k").
-    (r"\b(?:month|months|quarter|quarters|year|years|region|regions|"
-     r"category|categories|product|products|customer|customers|"
-     r"segment|segments)\s+with\s+\w+\s+"
-     r"(?:exceed(?:ed|s)?|above|over|greater\s+than|more\s+than|"
-     r"at\s+least|than)\s+"
-     r"(?:\$\s*)?\d[\d,]*(?:\.\d+)?\s*(?:k|m|million|thousand|billion)?\b",
-     "threshold_on_grouped_metric_declarative",
-     "I can't yet filter groups by a numeric threshold on their "
-     "aggregated metric (e.g. 'regions with revenue above 1 million'). "
-     "Ask for the breakdown and apply the threshold visually, or use "
-     "the Analytics Explorer for a direct SQL query with HAVING."),
+    # Threshold on a grouped metric with a NUMERIC literal is NOW
+    # IMPLEMENTED via metric_gt_grouped / metric_lt_grouped filters.
+    # No refusal needed.
 
     # ---- "List X" when there's no bound dim / only an aggregate target ----
     # Narrower: "list customers with the most orders" → implies ranking

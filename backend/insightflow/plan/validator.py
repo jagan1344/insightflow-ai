@@ -59,6 +59,13 @@ class PlanValidator:
         for m in plan.measures:
             kpi = self.catalog.get(m.kpi_id)
             if kpi is None:
+                # Synthetic measure (DISTINCT_COUNT / NULL_COUNT /
+                # EXTREMUM / ad-hoc formulas): accept when the plan
+                # supplied its own concrete formula + aggregation. The
+                # formula is baked by the planner so SQL fidelity is
+                # preserved end-to-end.
+                if m.formula and m.aggregation:
+                    continue
                 issues.append(SemanticIssue(
                     "missing_kpi",
                     f"KPI '{m.kpi_id}' not defined for dataset "

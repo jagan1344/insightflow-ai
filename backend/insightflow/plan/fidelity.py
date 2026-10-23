@@ -99,8 +99,10 @@ class FidelityValidator:
                     f"dim_referenced:{d.column}", ok,
                     f"dim '{d.column}' present in SQL"))
 
-        # 4) top_n / bottom_n → LIMIT N and ORDER BY
-        if plan.top_n is not None:
+        # 4) top_n / bottom_n → LIMIT N and ORDER BY (except for
+        # TOP_N_PER_GROUP, which uses ROW_NUMBER() OVER PARTITION BY
+        # and intentionally keeps N rows per partition — no LIMIT N).
+        if plan.top_n is not None and plan.intent_kind != IntentKind.TOP_N_PER_GROUP:
             has_limit = f"limit {plan.top_n}" in s
             checks.append(FidelityCheck(
                 "top_n_limit", has_limit,
@@ -108,6 +110,17 @@ class FidelityValidator:
             checks.append(FidelityCheck(
                 "top_n_order_by", "order by" in s,
                 "SQL contains ORDER BY when top_n is set"))
+        elif plan.intent_kind == IntentKind.TOP_N_PER_GROUP:
+            # For TOP_N_PER_GROUP the SQL must use ROW_NUMBER OVER
+            # PARTITION BY + a WHERE rk filter.
+            has_pattern = ("row_number() over" in s
+                           and "partition by" in s
+                           and "rk" in s)
+            checks.append(FidelityCheck(
+                "top_n_per_group_window",
+                has_pattern,
+                "SQL uses ROW_NUMBER() OVER (PARTITION BY ...) for "
+                "per-group top-N"))
 
         # 5) share_of_total → window SUM OVER () or subquery divide
         if plan.share_of_total:

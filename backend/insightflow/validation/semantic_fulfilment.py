@@ -138,8 +138,12 @@ def validate_fulfilment(plan: AnalyticalPlan,
                     f"share_of_total shares sum to {total:.3f} — expected "
                     f"≈ 1.0; the SQL may be missing a denominator.")
 
-    # TOP_N / BOTTOM_N — count bound
-    if plan.top_n is not None and plan.top_n > 0 and len(rows) > plan.top_n:
+    # TOP_N / BOTTOM_N — count bound. Skip for TOP_N_PER_GROUP where
+    # `top_n` is the per-group N and total rows legitimately equals
+    # N × number_of_groups.
+    if plan.top_n is not None and plan.top_n > 0 \
+            and ik not in (IntentKind.TOP_N_PER_GROUP,) \
+            and len(rows) > plan.top_n:
         issues.append(
             f"result returned {len(rows)} rows but plan.top_n={plan.top_n}.")
 

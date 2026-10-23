@@ -173,12 +173,106 @@ class SQLCompiler:
             return self._compile_share(plan)
         if ik == IntentKind.RELATIVE_TO_STAT:
             return self._compile_relative_to_stat(plan)
+        # Phase 2 (2026-10-23) new intents
+        if ik == IntentKind.ROLLING_AVG:
+            return self._compile_rolling_avg(plan)
+        if ik == IntentKind.TOP_N_PER_GROUP:
+            return self._compile_top_n_per_group(plan)
+        # DISTINCT_COUNT / NULL_COUNT / EXTREMUM / THRESHOLD_GROUPED
+        # all share the flat shape (measures + dims + where + having).
         # default: SELECT dims, measures FROM t [joins] [WHERE] [GROUP] [ORDER] [LIMIT]
         return self._compile_flat(plan)
 
     # ==================================================================
+    # Flat compiler already handles COUNT(DISTINCT …) correctly for a
+    # synthetic measure, but when the DISTINCT column lives in a joined
+    # table we must emit the JOIN. The `demo` dim-target map above tells
+    # us which join each column belongs to; _ensure_join_for_formula
+    # scans the formula and injects any needed JOIN clauses.
+    def _ensure_join_for_formula(self, formula: str) -> List[str]:
+        if self.kind != "demo":
+            return []
+        joins_needed: List[str] = []
+        for key, (_sel, _grp, join_sql, _alias) in _DEMO_DIM_MAP.items():
+            table = key.split(".", 1)[0]
+            if table in formula and join_sql:
+                if join_sql not in joins_needed:
+                    joins_needed.append(join_sql)
+        return joins_needed
+
+    # ==================================================================
+    # Rolling / moving average over a monthly trend.
+    # Uses SQLite window functions (3.25+) with ROWS BETWEEN N PRECEDING
+    # AND CURRENT ROW.
+    def _compile_rolling_avg(self, plan: AnalyticalPlan) -> str:
+        if not plan.measures or not plan.grain or plan.grain.kind != "time":
+            return ""
+        m = plan.measures[0]
+        bucket = self._time_bucket(plan.grain.time_column,
+                                     plan.grain.time_unit)
+        from_clause = self._from_clause()
+        where, having = self._filter_clauses(plan)
+        # Window size from a plan.notes entry like "rolling_window=3".
+        window = 3
+        for note in plan.notes or []:
+            if note.startswith("rolling_window="):
+                try:
+                    window = max(1, int(note.split("=", 1)[1]))
+                except ValueError:
+                    pass
+        agg_sql = (f"SELECT {bucket} AS {plan.grain.time_unit}, "
+                    f"{m.formula} AS v FROM {from_clause}")
+        if where:
+            agg_sql += " WHERE " + " AND ".join(where)
+        agg_sql += f" GROUP BY {bucket}"
+        sql = (
+            f"WITH agg AS ({agg_sql}) "
+            f"SELECT {plan.grain.time_unit}, v AS {m.kpi_id}, "
+            f"AVG(v) OVER (ORDER BY {plan.grain.time_unit} "
+            f"ROWS BETWEEN {window - 1} PRECEDING AND CURRENT ROW) "
+            f"AS rolling_avg_{window}m "
+            f"FROM agg ORDER BY {plan.grain.time_unit}"
+        )
+        return sql
+
+    # ==================================================================
+    # Top-N within each group — ROW_NUMBER() OVER PARTITION BY.
+    def _compile_top_n_per_group(self, plan: AnalyticalPlan) -> str:
+        if not plan.measures or len(plan.dims) < 2 or not plan.top_n:
+            return ""
+        part_dim, inner_dim = plan.dims[0], plan.dims[1]
+        p_sel, p_grp, p_join, p_alias = self._dim_target(part_dim.column)
+        i_sel, i_grp, i_join, i_alias = self._dim_target(inner_dim.column)
+        joins: List[str] = []
+        joins_seen: set = set()
+        for js in (p_join, i_join):
+            if js and js not in joins_seen:
+                joins.append(js); joins_seen.add(js)
+        m = plan.measures[0]
+        from_clause = self._from_clause()
+        where, having = self._filter_clauses(plan)
+        base = (f"SELECT {p_sel} AS {p_alias}, {i_sel} AS {i_alias}, "
+                f"{m.formula} AS {m.kpi_id} FROM {from_clause}")
+        if joins:
+            base += " " + " ".join(joins)
+        if where:
+            base += " WHERE " + " AND ".join(where)
+        base += f" GROUP BY {p_grp}, {i_grp}"
+        sql = (
+            f"WITH grouped AS ({base}), "
+            f"ranked AS (SELECT {p_alias}, {i_alias}, {m.kpi_id}, "
+            f"ROW_NUMBER() OVER (PARTITION BY {p_alias} "
+            f"ORDER BY {m.kpi_id} DESC) AS rk FROM grouped) "
+            f"SELECT {p_alias}, {i_alias}, {m.kpi_id} FROM ranked "
+            f"WHERE rk <= {plan.top_n} "
+            f"ORDER BY {p_alias}, rk"
+        )
+        return sql
+
+    # ==================================================================
     # Flat compiler: direct_kpi / breakdown / trend / top_n / bottom_n /
-    # ratio all share this shape.
+    # ratio / distinct_count / null_count / extremum / threshold_grouped
+    # all share this shape.
     def _compile_flat(self, plan: AnalyticalPlan) -> str:
         select_parts: List[str] = []
         group_parts: List[str] = []
@@ -203,6 +297,11 @@ class SQLCompiler:
         for m in plan.measures:
             expr = self._measure_expr(m)
             select_parts.append(f"{expr} AS {m.kpi_id}")
+            # If the formula references a joined table (e.g. COUNT(DISTINCT
+            # customers.customer_name)), inject the join automatically.
+            for j in self._ensure_join_for_formula(expr):
+                if j not in joins_seen:
+                    joins.append(j); joins_seen.add(j)
 
         if not select_parts:
             return ""
@@ -493,6 +592,10 @@ class SQLCompiler:
     def _measure_expr(self, m: MeasureRef) -> str:
         kpi = self.catalog.get(m.kpi_id)
         if kpi is None:
+            # Synthetic measure (DISTINCT_COUNT / NULL_COUNT / EXTREMUM
+            # etc.) — fall back to the measure's own baked formula.
+            if m.formula:
+                return m.formula
             return "NULL"
         # Use catalog's canonical formula — that's the whole point.
         return kpi.formula
@@ -502,9 +605,20 @@ class SQLCompiler:
         for f in plan.filters:
             if f.kind == "time_range" and f.column:
                 lo = str(f.lo); hi = str(f.hi)
-                parts.append(_period_range_predicate(
-                    f.column, lo, hi,
-                    quoted=(self.kind == "uploaded")))
+                # If lo/hi look like full ISO dates (YYYY-MM-DD) rather
+                # than months (YYYY-MM), emit a day-level filter — this
+                # is how "last N days" is lowered.
+                if len(lo) >= 10 and len(hi) >= 10:
+                    col = _q(f.column) if self.kind == "uploaded" else f.column
+                    parts.append(f"{col} >= '{lo}' AND {col} < '{hi}'")
+                else:
+                    parts.append(_period_range_predicate(
+                        f.column, lo, hi,
+                        quoted=(self.kind == "uploaded")))
+            elif f.kind == "null" and f.column:
+                parts.append(f"{self._colref(f.column)} IS NULL")
+            elif f.kind == "not_null" and f.column:
+                parts.append(f"{self._colref(f.column)} IS NOT NULL")
             elif f.kind == "eq" and f.column:
                 parts.append(f'{self._colref(f.column)} = {_sql_escape(f.value)}')
             elif f.kind == "in" and f.column and isinstance(f.value, (list, tuple)):
@@ -528,6 +642,14 @@ class SQLCompiler:
                 kpi = self.catalog.get(f.kpi_id)
                 if kpi:
                     having.append(f"{kpi.formula} > {f.threshold}")
+            elif f.kind == "metric_gt_grouped":
+                kpi = self.catalog.get(f.kpi_id)
+                if kpi:
+                    having.append(f"{kpi.formula} > {f.threshold}")
+            elif f.kind == "metric_lt_grouped":
+                kpi = self.catalog.get(f.kpi_id)
+                if kpi:
+                    having.append(f"{kpi.formula} < {f.threshold}")
         return where, having
 
     def _colref(self, col: str) -> str:

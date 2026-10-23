@@ -723,7 +723,23 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     filters: List[FilterExpr] = []
     ql = question.lower()
 
-    # 1. Relative period (Defect B)
+    # 1a. "Last N days" sliding window (Phase 2).
+    n_days = _find_last_n_days(question)
+    if n_days is not None and n_days > 0:
+        import datetime as _d
+        ref = _reference_date()
+        lo_date = ref - _d.timedelta(days=n_days - 1)
+        # time_range here carries full ISO dates ("YYYY-MM-DD") as lo/hi;
+        # the compiler recognises that shape and emits a day-level filter
+        # instead of the month-range predicate.
+        filters.append(FilterExpr(
+            kind="time_range", column=date_col,
+            lo=lo_date.isoformat(),
+            hi=(ref + _d.timedelta(days=1)).isoformat(),
+        ))
+        return filters
+
+    # 1b. Relative period (Defect B)
     rel = _find_relative_period(question)
     if rel is not None:
         lo_y, lo_m, hi_y, hi_m, _kind = rel
@@ -792,6 +808,256 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     return filters
 
 
+def _find_last_n_days(question: str) -> Optional[int]:
+    """Detect 'last N days / weeks' and return the number of days.
+    Weeks are converted to days (* 7)."""
+    ql = question.lower()
+    m = re.search(r"\b(?:last|past|previous)\s+(\d{1,4})\s+days?\b", ql)
+    if m:
+        return int(m.group(1))
+    m = re.search(r"\b(?:last|past|previous)\s+(\d{1,3})\s+weeks?\b", ql)
+    if m:
+        return int(m.group(1)) * 7
+    return None
+
+
+def _find_rolling_window(question: str) -> Optional[int]:
+    """Detect 'N-month rolling average' / 'rolling N-month average'
+    / 'moving average' and return the window size in months. Returns
+    `None` when the phrase isn't rolling-flavoured."""
+    ql = question.lower()
+    patterns = (
+        r"\b(\d{1,3})[\s-]+month\s+(?:rolling|moving|trailing)\b",
+        r"\b(?:rolling|moving|trailing)[\s-]+(\d{1,3})[\s-]+month\b",
+        r"\b(?:rolling|moving|trailing)\s+average\b.*\b(\d{1,3})\b",
+    )
+    for p in patterns:
+        m = re.search(p, ql)
+        if m:
+            try:
+                return max(1, int(m.group(1)))
+            except (TypeError, ValueError):
+                pass
+    if re.search(r"\b(?:rolling|moving|trailing)\s+average\b", ql):
+        return 3  # default window
+    return None
+
+
+def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
+    """Detect 'orders with missing <col>' / 'rows where <col> is null'
+    and return the physical column name. The column must exist on the
+    dataset."""
+    ql = question.lower()
+    patterns = (
+        r"\b(?:with|where)\s+(?:missing|null|empty|blank|no|unspecified|unknown)\s+([a-z_]+)\b",
+        r"\b([a-z_]+)\s+is\s+(?:null|missing|empty|blank)\b",
+        r"\bmissing\s+([a-z_]+)\b",
+        r"\bnull\s+([a-z_]+)\b",
+    )
+    for p in patterns:
+        m = re.search(p, ql)
+        if not m:
+            continue
+        token = m.group(1)
+        # Direct column match.
+        for cname in ds.columns:
+            if cname.lower() == token:
+                return cname
+        # Common aliases.
+        aliases = {
+            "cost": "cost", "revenue": "revenue", "price": "revenue",
+            "amount": "revenue", "quantity": "quantity", "qty": "quantity",
+            "discount": "discount", "date": "order_date",
+        }
+        if token in aliases:
+            for cname in ds.columns:
+                if cname.lower() == aliases[token]:
+                    return cname
+    return None
+
+
+def _find_distinct_count_dim(question: str, ds: ActiveDataset
+                              ) -> Optional[Tuple[str, str]]:
+    """Detect 'how many distinct X' / 'count of unique X' and bind X to
+    a dimension column. Returns (noun, column) or None."""
+    ql = question.lower()
+    patterns = (
+        r"\bhow\s+many\s+(?:distinct|unique|different|separate)\s+([a-z_]+)\b",
+        r"\b(?:distinct|unique)\s+count\s+of\s+([a-z_]+)\b",
+        r"\bcount\s+of\s+(?:distinct|unique|different)\s+([a-z_]+)\b",
+        r"\bnumber\s+of\s+(?:distinct|unique|different)\s+([a-z_]+)\b",
+    )
+    for p in patterns:
+        m = re.search(p, ql)
+        if not m:
+            continue
+        noun = m.group(1)
+        col = _bind_dim_column(ds, noun)
+        if col:
+            return (noun, col)
+        # Try singular form.
+        if noun.endswith("s"):
+            col = _bind_dim_column(ds, noun[:-1])
+            if col:
+                return (noun, col)
+    return None
+
+
+_EXTREMUM_WORDS = {
+    "max":     ("MAX", "max"),
+    "maximum": ("MAX", "max"),
+    "largest": ("MAX", "largest"),
+    "highest": ("MAX", "highest"),
+    "biggest": ("MAX", "biggest"),
+    "greatest":("MAX", "greatest"),
+    "min":     ("MIN", "min"),
+    "minimum": ("MIN", "minimum"),
+    "smallest":("MIN", "smallest"),
+    "lowest":  ("MIN", "lowest"),
+}
+
+
+def _find_extremum(question: str, catalog: KPICatalog
+                    ) -> Optional[Tuple[str, str, str]]:
+    """Detect 'minimum/maximum order <metric>' / 'largest order value'.
+    Returns (sql_fn, display_name, column_expr) or None.
+
+    Only matches ROW-LEVEL extremum (not aggregate "max revenue in July",
+    which is a filtered sum).
+    """
+    ql = question.lower()
+    # Column alias → physical column on the orders table.
+    _COL = {
+        "revenue": "revenue", "value": "revenue", "amount": "revenue",
+        "quantity": "quantity", "qty": "quantity", "units": "quantity",
+        "discount": "discount", "cost": "cost",
+    }
+    for word, (fn, label) in _EXTREMUM_WORDS.items():
+        pat = rf"\b{word}\s+(?:single\s+|individual\s+)?(?:order|row|transaction)\s*(?:single\s+|individual\s+)?(revenue|value|amount|quantity|qty|units|discount|cost)\b"
+        m = re.search(pat, ql)
+        if m:
+            col = _COL.get(m.group(1), m.group(1))
+            return (fn, label, col)
+    # Short form: "what's the maximum revenue?" when no dim is implied.
+    # Reject when the question starts with "which <dim>" — that's a
+    # top-1-breakdown pattern, not an aggregate extremum.
+    if re.search(r"^\s*which\b", ql):
+        return None
+    for word, (fn, label) in _EXTREMUM_WORDS.items():
+        pat = rf"^\s*(?:please\s+)?what(?:'s|\s+is)?\s+the\s+{word}\s+(revenue|order\s+value|quantity|units|discount|cost)\s*\??\s*$"
+        m = re.search(pat, ql)
+        if m:
+            col = _COL.get(m.group(1).replace("order ", "").strip(), "revenue")
+            return (fn, label, col)
+    return None
+
+
+def _find_top_per_group(question: str, ds: ActiveDataset, catalog: KPICatalog
+                          ) -> Optional[Tuple[int, str, str]]:
+    """Detect 'top N <inner_dim> per/in-each/within-each <partition_dim>'.
+
+    Returns (n, inner_col, partition_col) or None.
+    """
+    ql = question.lower()
+    m = re.search(
+        r"\btop\s+(\d+|one|two|three|four|five|ten)?\s*([a-z_]+)\s+"
+        r"(?:per|in\s+each|within\s+each|for\s+each|by\s+each)\s+([a-z_]+)\b", ql)
+    if not m:
+        # "top <dim> in each <group>" with no N → N=1
+        m = re.search(
+            r"\btop\s+([a-z_]+)\s+(?:in\s+each|per|within\s+each|for\s+each|by\s+each)\s+([a-z_]+)\b", ql)
+        if not m:
+            return None
+        n = 1
+        inner_token, part_token = m.group(1), m.group(2)
+    else:
+        n_raw = m.group(1) or "1"
+        word_nums = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "ten": 10}
+        try:
+            n = int(n_raw)
+        except ValueError:
+            n = word_nums.get(n_raw, 1)
+        inner_token, part_token = m.group(2), m.group(3)
+    inner_col = _bind_dim_column(ds, inner_token) \
+                 or _bind_dim_column(ds, inner_token.rstrip("s"))
+    part_col = _bind_dim_column(ds, part_token) \
+                 or _bind_dim_column(ds, part_token.rstrip("s"))
+    if not inner_col or not part_col or inner_col == part_col:
+        return None
+    return (n, inner_col, part_col)
+
+
+def _find_threshold_grouped(question: str, ds: ActiveDataset,
+                              catalog: KPICatalog
+                              ) -> Optional[Tuple[str, str, float, str]]:
+    """Detect 'months where <metric> > N' / 'regions with <metric>
+    above M'. Returns (dim_col, kpi_id, threshold, operator) or None.
+
+    `operator` is 'gt' or 'lt' (metric_gt_grouped / metric_lt_grouped).
+    """
+    ql = question.lower()
+    _NUM_SUFFIX = {"k": 1_000, "thousand": 1_000, "m": 1_000_000,
+                    "million": 1_000_000, "billion": 1_000_000_000}
+    # Variant A: "which <dim-plural> ... <metric> <op> <num>"
+    # Variant B: "<dim-plural> with <metric> <op> <num>"
+    patterns = [
+        (r"\b(?:which|what|in\s+which)\s+([a-z_]+)\b[^?]{0,60}?"
+         r"\b([a-z_ ]+?)\s+"
+         r"(exceed(?:ed|s)?|above|over|greater\s+than|more\s+than|>\s*|at\s+least)\s*"
+         r"(?:\$\s*)?(\d[\d,]*(?:\.\d+)?)\s*(k|m|million|thousand|billion)?\b", "gt"),
+        (r"\b([a-z_]+)\s+with\s+([a-z_ ]+?)\s+"
+         r"(exceed(?:ed|s)?|above|over|greater\s+than|more\s+than|>\s*|at\s+least)\s*"
+         r"(?:\$\s*)?(\d[\d,]*(?:\.\d+)?)\s*(k|m|million|thousand|billion)?\b", "gt"),
+        (r"\b(?:which|what|in\s+which)\s+([a-z_]+)\b[^?]{0,60}?"
+         r"\b([a-z_ ]+?)\s+"
+         r"(below|under|less\s+than|<\s*|at\s+most)\s*"
+         r"(?:\$\s*)?(\d[\d,]*(?:\.\d+)?)\s*(k|m|million|thousand|billion)?\b", "lt"),
+    ]
+    for pat, op in patterns:
+        m = re.search(pat, ql)
+        if not m:
+            continue
+        dim_token = m.group(1)
+        metric_phrase = m.group(2).strip()
+        num_raw = m.group(4)
+        suffix = (m.group(5) or "").lower()
+        try:
+            threshold = float(num_raw.replace(",", ""))
+        except ValueError:
+            continue
+        threshold *= _NUM_SUFFIX.get(suffix, 1)
+        # Bind the dim. "months" → time bucket month; otherwise lookup.
+        if dim_token in ("month", "months"):
+            dim_col = "__month__"  # special sentinel; compiler handles
+        elif dim_token in ("quarter", "quarters"):
+            dim_col = "__quarter__"
+        elif dim_token in ("year", "years"):
+            dim_col = "__year__"
+        else:
+            dim_col = _bind_dim_column(ds, dim_token) \
+                       or _bind_dim_column(ds, dim_token.rstrip("s"))
+            if not dim_col:
+                continue
+        # Resolve the KPI from the metric phrase.
+        kpi: Optional[KPIDefinition] = None
+        for word_phrase in (metric_phrase,
+                             metric_phrase.split()[-1],
+                             metric_phrase.split()[0]):
+            for k in catalog.kpis.values():
+                if any(a.lower() == word_phrase for a in k.aliases):
+                    kpi = k
+                    break
+            if kpi:
+                break
+        if not kpi:
+            # Default to revenue when the user said "revenue"/"sales".
+            kpi = catalog.get("total_revenue")
+        if not kpi:
+            continue
+        return (dim_col, kpi.kpi_id, threshold, op)
+    return None
+
+
 def _bind_metric_filter(question: str, kpis: List[KPIDefinition],
                          catalog: Optional[KPICatalog] = None
                          ) -> List[FilterExpr]:
@@ -824,8 +1090,30 @@ def _detect_intent_kind(
     dims: List[Tuple[str, str]],
     time_unit: Optional[str],
     two_months: Optional[Tuple[int, int]],
+    *,
+    ds: Optional[ActiveDataset] = None,
+    catalog: Optional[KPICatalog] = None,
 ) -> str:
     ql = _norm(question)
+
+    # New capability intents (Phase 2 2026-10-23) — these are checked
+    # BEFORE the generic fallbacks so they are not mistaken for a
+    # simple DIRECT_KPI / BREAKDOWN / TREND.
+    if ds is not None:
+        if _find_null_target_column(question, ds):
+            return IntentKind.NULL_COUNT
+        if _find_distinct_count_dim(question, ds):
+            return IntentKind.DISTINCT_COUNT
+    if _find_rolling_window(question) is not None:
+        return IntentKind.ROLLING_AVG
+    if catalog is not None and _find_extremum(question, catalog):
+        return IntentKind.EXTREMUM
+    if ds is not None and catalog is not None \
+            and _find_top_per_group(question, ds, catalog):
+        return IntentKind.TOP_N_PER_GROUP
+    if ds is not None and catalog is not None \
+            and _find_threshold_grouped(question, ds, catalog):
+        return IntentKind.THRESHOLD_GROUPED
 
     # ambiguous first — a vague/judgement question with no bindings.
     if not kpis and not dims and not time_unit and any(h in ql for h in _AMBIGUOUS_HINTS):
@@ -1192,7 +1480,8 @@ class Planner:
                 kpis = [k] + kpis
 
         kind = _detect_intent_kind(question, kpis, bound_dims,
-                                    time_unit, two_months)
+                                    time_unit, two_months,
+                                    ds=ds, catalog=catalog)
 
         # "loss-making sub-categories" is a filtered breakdown, not a
         # direct KPI on the aggregate: promote it.
@@ -1396,6 +1685,120 @@ class Planner:
             # If exactly one KPI and there's an id column mentioned, use
             # that id's count. Otherwise treat as direct KPI.
             pass
+
+        elif kind == IntentKind.DISTINCT_COUNT:
+            hit = _find_distinct_count_dim(question, ds)
+            if hit is not None:
+                _noun, dim_col = hit
+                # Use a synthetic measure whose formula is COUNT(DISTINCT ...).
+                sel = dim_col
+                if ds.kind == "demo":
+                    # Translate common tokens to the correct joined-table col.
+                    _joined = {
+                        "customer": "customers.customer_name",
+                        "customer_name": "customers.customer_name",
+                        "product": "products.product_name",
+                        "product_name": "products.product_name",
+                        "region": "regions.region_name",
+                        "region_name": "regions.region_name",
+                        "category": "products.category",
+                        "sub_category": "products.sub_category",
+                        "segment": "customers.segment",
+                    }
+                    sel = _joined.get(dim_col, dim_col)
+                alias = f"distinct_{dim_col.replace('.', '_')}"
+                measures = [MeasureRef(
+                    kpi_id=alias,
+                    display_name=f"Distinct {dim_col.replace('_', ' ').title()}",
+                    formula=f"COUNT(DISTINCT {sel})",
+                    aggregation="count_distinct", unit="count")]
+                dims = []  # scalar
+
+        elif kind == IntentKind.NULL_COUNT:
+            null_col = _find_null_target_column(question, ds)
+            if null_col:
+                measures = [MeasureRef(
+                    kpi_id=f"null_{null_col}",
+                    display_name=f"Rows with missing {null_col}",
+                    formula="COUNT(*)",
+                    aggregation="count", unit="count")]
+                dims = []
+                filters = [FilterExpr(kind="null", column=null_col)]
+
+        elif kind == IntentKind.EXTREMUM:
+            hit = _find_extremum(question, catalog)
+            if hit is not None:
+                fn, label, col = hit
+                measures = [MeasureRef(
+                    kpi_id=f"{fn.lower()}_{col}",
+                    display_name=f"{label.title()} {col.title()}",
+                    formula=f"{fn}({col})",
+                    aggregation=fn.lower(), unit="currency" if col != "quantity" else "count")]
+                dims = []
+
+        elif kind == IntentKind.ROLLING_AVG:
+            window = _find_rolling_window(question) or 3
+            if date_col:
+                dims = [DimRef(column=date_col, display_name=date_col.title(),
+                                is_time=True, time_unit="month")]
+                grain = Grain(kind="time", time_unit="month",
+                               time_column=date_col)
+                # Fallback KPI to total_revenue if none bound.
+                if not measures:
+                    rev = catalog.get("total_revenue")
+                    if rev:
+                        measures = [_mref(rev)]
+                # Store window in notes so the compiler reads it.
+                notes.append(f"rolling_window={window}")
+                order_by = "time_asc"
+
+        elif kind == IntentKind.TOP_N_PER_GROUP:
+            hit = _find_top_per_group(question, ds, catalog)
+            if hit is not None:
+                n, inner_col, part_col = hit
+                dims = [DimRef(column=part_col,
+                                display_name=part_col.replace("_", " ").title()),
+                        DimRef(column=inner_col,
+                                display_name=inner_col.replace("_", " ").title())]
+                if not measures:
+                    rev = catalog.get("total_revenue")
+                    if rev:
+                        measures = [_mref(rev)]
+                top_n = n   # repurpose top_n to carry inner-group N
+                order_by = "measure_desc"
+
+        elif kind == IntentKind.THRESHOLD_GROUPED:
+            hit = _find_threshold_grouped(question, ds, catalog)
+            if hit is not None:
+                dim_col, kpi_id, threshold, op = hit
+                k = catalog.get(kpi_id)
+                if k:
+                    measures = [_mref(k)]
+                # Dim: time-bucket sentinels resolve to date_col with a
+                # time_unit; everything else is a plain dim column.
+                if dim_col == "__month__":
+                    dims = [DimRef(column=date_col, display_name="Month",
+                                     is_time=True, time_unit="month")]
+                    grain = Grain(kind="time", time_unit="month",
+                                   time_column=date_col)
+                elif dim_col == "__quarter__":
+                    dims = [DimRef(column=date_col, display_name="Quarter",
+                                     is_time=True, time_unit="quarter")]
+                    grain = Grain(kind="time", time_unit="quarter",
+                                   time_column=date_col)
+                elif dim_col == "__year__":
+                    dims = [DimRef(column=date_col, display_name="Year",
+                                     is_time=True, time_unit="year")]
+                    grain = Grain(kind="time", time_unit="year",
+                                   time_column=date_col)
+                else:
+                    dims = [DimRef(column=dim_col,
+                                     display_name=dim_col.replace("_", " ").title())]
+                hv_kind = "metric_gt_grouped" if op == "gt" \
+                           else "metric_lt_grouped"
+                filters = filters + [FilterExpr(
+                    kind=hv_kind, kpi_id=kpi_id, threshold=threshold)]
+                order_by = "measure_desc"
 
         elif kind == IntentKind.RELATIVE_TO_STAT and rel_spec is not None:
             # measures come from the spec so the SELECT list matches
