@@ -160,6 +160,21 @@ class Orchestrator:
             empty_report = ValidationReport(ok=False, fidelity=0.0, issues=[])
             return self._unanswerable_response(question, empty_plan,
                                                 empty_report, safety.reason)
+        if safety.unsupported:
+            # Unsupported capability (median / percentile / rolling /
+            # top-per-group / null-aware / row-level min/max /
+            # count-distinct / threshold-on-grouped-metric / list-with-rank).
+            # Refuse specifically — do NOT let the planner fall back to
+            # total_revenue and emit a semantically unrelated query.
+            empty_plan = AnalyticalPlan(
+                intent_kind=IntentKind.UNSUPPORTED,
+                question=question, table=ds.table,
+                notes=[f"refused: unsupported capability={safety.code}"],
+                unavailable=[f"capability:{safety.code}"],
+            )
+            empty_report = ValidationReport(ok=False, fidelity=0.0, issues=[])
+            return self._unanswerable_response(question, empty_plan,
+                                                empty_report, safety.reason)
 
         # 1. Plan the question against the active dataset.
         planner = Planner(ds, catalog)

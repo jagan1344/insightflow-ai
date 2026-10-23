@@ -152,12 +152,17 @@ def _find_month_number(q: str) -> Optional[int]:
 
 
 def _find_two_months(q: str) -> Optional[Tuple[int, int]]:
-    """Find two month names in order, for comparison / contribution.
+    """Find two month names (or quarter refs) in order for comparison
+    or contribution.
 
     Suppressed when the connector between the two months is a RANGE
     connector ("through"/"to"/"until"/"-"/"and") rather than a comparison
     one ("vs"/"versus"/"compared to"/"against"). A range of months is a
     time filter, not a two-period comparison.
+
+    Also handles "Q2 and Q3 2026" / "Q2 vs Q3 2026" by returning the
+    middle months of each quarter — the planner's COMPARISON branch
+    uses those as period labels downstream.
     """
     ql = q.lower()
     if _find_month_range(q) is not None:
@@ -166,6 +171,11 @@ def _find_two_months(q: str) -> Optional[Tuple[int, int]]:
     for name, num in _MONTHS.items():
         for m in re.finditer(rf"\b{name}\b", ql):
             hits.append((m.start(), num))
+    # Quarter mentions — use middle month of each quarter.
+    for m in re.finditer(r"\bq([1-4])\b", ql):
+        q_num = int(m.group(1))
+        mid_month = (q_num - 1) * 3 + 2
+        hits.append((m.start(), mid_month))
     if len(hits) < 2:
         return None
     hits.sort()
@@ -264,6 +274,12 @@ def _find_relative_period(q: str) -> Optional[Tuple[int, int, int, str]]:
         return (y, 1, y, 12, "this_year")
     if re.search(r"\byear[- ]to[- ]date\b|\bytd\b", ql):
         return (y, 1, y, m, "ytd")
+    if re.search(r"\bmonth[- ]to[- ]date\b|\bmtd\b", ql):
+        return (y, m, y, m, "mtd")
+    if re.search(r"\bquarter[- ]to[- ]date\b|\bqtd\b", ql):
+        q_num = (m - 1) // 3 + 1
+        lo_m = (q_num - 1) * 3 + 1
+        return (y, lo_m, y, m, "qtd")
     if re.search(r"\blast\s+month\b|\bprevious\s+month\b", ql):
         lm_y, lm_m = (y, m - 1) if m > 1 else (y - 1, 12)
         return (lm_y, lm_m, lm_y, lm_m, "last_month")
@@ -297,10 +313,14 @@ _FORECAST_PATTERNS = (
     r"\bwill\s+(?:the|our|my|be)\b",
     r"\bexpected\s+to\b",
     r"\bgoing\s+to\s+(?:be|see|make|earn)\b",
-    r"\bestimate(?:d|s)?\s+(?:for|next|future)\b",
+    r"\bestimate(?:d|s)?\s+(?:for|next|future|upcoming)\b",
+    r"\bestimate\s+revenue\s+for\s+(?:november|december|january|february|march|april|may|june|july|august|september|october)\s+20(?:2[7-9]|[3-9]\d)\b",
     r"\bnext\s+(?:day|week|month|quarter|year)\b",
     r"\bupcoming\s+(?:day|week|month|quarter|year)\b",
     r"\bfuture\s+(?:day|week|month|quarter|year|revenue|sales|orders)\b",
+    r"\bbudget\s+for\s+(?:next|upcoming|future|20(?:2[7-9]|[3-9]\d))\b",
+    r"\bshould\s+we\s+expect\b",
+    r"\bwhat\s+(?:do\s+)?(?:you\s+)?expect\b",
 )
 
 
@@ -349,6 +369,34 @@ def is_destructive_request(q: str) -> bool:
 
 def _period_string(year: int, month: int) -> str:
     return f"{year:04d}-{month:02d}"
+
+
+# Spelled-number → integer, used by TOP_N / BOTTOM_N so "top three" and
+# "top 3" plan identically.
+_WORD_NUMBERS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+    "eleven": 11, "twelve": 12, "fifteen": 15, "twenty": 20,
+    "thirty": 30, "fifty": 50, "hundred": 100,
+}
+
+
+def _parse_count_after(ql: str, head: str, default: int = 5) -> int:
+    """Parse the integer after a leading token like 'top' or 'bottom'.
+
+    Accepts both digits ('top 3') and English spellings ('top three').
+    Returns `default` when no count is given.
+    """
+    m = re.search(rf"\b{re.escape(head)}\s+(\d+)\b", ql)
+    if m:
+        return max(1, int(m.group(1)))
+    m2 = re.search(
+        rf"\b{re.escape(head)}\s+("
+        + "|".join(sorted(_WORD_NUMBERS, key=len, reverse=True))
+        + r")\b", ql)
+    if m2:
+        return _WORD_NUMBERS[m2.group(1)]
+    return default
 
 
 # =============================================================================
@@ -718,7 +766,20 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         filters.append(FilterExpr(kind="time_range", column=date_col,
                                    lo=period, hi=period))
         return filters
-    # 4. Quarter
+    # 4. Quarters.
+    # 4a. TWO quarters mentioned together → treat as a two-period
+    # comparison. _find_two_months is where the planner expects two
+    # periods; convert each quarter to its middle month so the
+    # COMPARISON intent branch picks it up.
+    q_hits = re.findall(r"\bq([1-4])\b", ql)
+    if len(q_hits) >= 2 and any(w in ql for w in
+                                 (" vs ", " vs. ", " versus ",
+                                  " compared ", " and ", " to ",
+                                  " between ")):
+        # Return no filter here — the planner's COMPARISON branch (via
+        # the two-months path) will emit the correct UNION ALL SQL.
+        return filters
+    # 4b. Single quarter.
     m = re.search(r"\bq([1-4])\b", ql)
     if m:
         qkey = f"q{m.group(1)}"
@@ -1258,17 +1319,17 @@ class Planner:
             grain = Grain(kind="time", time_unit=unit, time_column=date_col)
 
         elif kind == IntentKind.TOP_N:
-            n_match = re.search(r"\btop\s+(\d+)\b", question.lower())
-            top_n = int(n_match.group(1)) if n_match else 5
-            if re.search(r"\bwhich\b", question.lower()) and not n_match:
+            top_n = _parse_count_after(question.lower(), "top", default=5)
+            if re.search(r"\bwhich\b", question.lower()) and top_n == 5 \
+                    and not re.search(r"\btop\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower()):
                 top_n = 1
             order_by = "measure_desc"
             measures = _promote_by_measure(question, measures, catalog)
 
         elif kind == IntentKind.BOTTOM_N:
-            n_match = re.search(r"\bbottom\s+(\d+)\b", question.lower())
-            top_n = int(n_match.group(1)) if n_match else 5
-            if re.search(r"\bwhich\b", question.lower()) and not n_match:
+            top_n = _parse_count_after(question.lower(), "bottom", default=5)
+            if re.search(r"\bwhich\b", question.lower()) and top_n == 5 \
+                    and not re.search(r"\bbottom\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower()):
                 top_n = 1
             order_by = "measure_asc"
             measures = _promote_by_measure(question, measures, catalog)

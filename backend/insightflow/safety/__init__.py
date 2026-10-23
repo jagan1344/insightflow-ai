@@ -12,29 +12,33 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..plan.planner import is_destructive_request, is_forecast_question
+from .capability_check import check_capability
 
 
 @dataclass
 class RequestSafety:
     destructive: bool = False
     forecast: bool = False
+    unsupported: bool = False
+    code: str = ""
     reason: str = ""
 
     @property
     def refuse(self) -> bool:
-        return self.destructive or self.forecast
+        return self.destructive or self.forecast or self.unsupported
 
 
 def check_request(question: str) -> RequestSafety:
     """Classify an incoming NL question for pre-SQL safety.
 
-    Order matters: destructive intent is a hard refuse (ABSTAIN).
-    Forecasting intent is a soft refuse (CLARIFY) because the system
-    does not implement forecasting.
+    Order matters:
+      1. destructive intent  → ABSTAIN
+      2. forecasting intent  → CLARIFY (not implemented)
+      3. unsupported capability → CLARIFY (named specifically)
     """
     if is_destructive_request(question):
         return RequestSafety(
-            destructive=True,
+            destructive=True, code="destructive",
             reason=("This request looks like a destructive data operation "
                     "(delete / modify / truncate). InsightFlow AI is "
                     "read-only and will not execute, nor will it "
@@ -43,11 +47,15 @@ def check_request(question: str) -> RequestSafety:
         )
     if is_forecast_question(question):
         return RequestSafety(
-            forecast=True,
+            forecast=True, code="forecast",
             reason=("This question asks for a forecast or prediction. "
                     "Forecasting is not implemented in this build — I "
                     "will not substitute a historical total for a future "
                     "estimate. Try asking about an observed period "
                     "(e.g. 'What was revenue in September 2026?')."),
         )
+    cap = check_capability(question)
+    if cap.unsupported:
+        return RequestSafety(unsupported=True, code=cap.code,
+                              reason=cap.reason)
     return RequestSafety()
