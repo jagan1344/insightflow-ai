@@ -45,6 +45,9 @@ class IntentKind:
     ROLLING_AVG         = "rolling_avg"         # 3-month rolling average over a trend
     TOP_N_PER_GROUP     = "top_n_per_group"     # top N of M per partition dim (ROW_NUMBER OVER PARTITION BY)
     THRESHOLD_GROUPED   = "threshold_grouped"   # breakdown with HAVING on aggregated metric
+    # Phase 4 (2026-10-23): post-aggregation statistics computed in
+    # Python because SQLite has no native aggregate.
+    POST_AGG_STAT       = "post_agg_stat"       # median / percentile / stddev / variance
     UNSUPPORTED         = "unsupported"
     AMBIGUOUS           = "ambiguous"
 
@@ -58,6 +61,7 @@ ALL_INTENT_KINDS = frozenset({
     IntentKind.EXTREMUM, IntentKind.DISTINCT_COUNT,
     IntentKind.NULL_COUNT, IntentKind.ROLLING_AVG,
     IntentKind.TOP_N_PER_GROUP, IntentKind.THRESHOLD_GROUPED,
+    IntentKind.POST_AGG_STAT,
     IntentKind.UNSUPPORTED, IntentKind.AMBIGUOUS,
 })
 

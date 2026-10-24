@@ -178,6 +178,8 @@ class SQLCompiler:
             return self._compile_rolling_avg(plan)
         if ik == IntentKind.TOP_N_PER_GROUP:
             return self._compile_top_n_per_group(plan)
+        if ik == IntentKind.POST_AGG_STAT:
+            return self._compile_post_agg_stat(plan)
         # DISTINCT_COUNT / NULL_COUNT / EXTREMUM / THRESHOLD_GROUPED
         # all share the flat shape (measures + dims + where + having).
         # default: SELECT dims, measures FROM t [joins] [WHERE] [GROUP] [ORDER] [LIMIT]
@@ -267,6 +269,22 @@ class SQLCompiler:
             f"WHERE rk <= {plan.top_n} "
             f"ORDER BY {p_alias}, rk"
         )
+        return sql
+
+    # ==================================================================
+    # Post-aggregation statistic: emit SELECT col FROM ... which the
+    # orchestrator reduces to the stat in Python (median / percentile /
+    # stddev / variance — SQLite 3.45 has no native aggregate).
+    def _compile_post_agg_stat(self, plan: AnalyticalPlan) -> str:
+        if not plan.measures:
+            return ""
+        col = plan.measures[0].formula  # raw column
+        from_clause = self._from_clause()
+        where, _having = self._filter_clauses(plan)
+        col_ref = col if self.kind == "demo" else _q(col)
+        sql = f"SELECT {col_ref} FROM {from_clause}"
+        if where:
+            sql += " WHERE " + " AND ".join(where)
         return sql
 
     # ==================================================================

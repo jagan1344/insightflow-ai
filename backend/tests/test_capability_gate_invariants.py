@@ -50,14 +50,15 @@ def orch():
 # Capability gate — must CLARIFY, never silent-ANSWER with a fallback KPI
 # ===========================================================================
 
-# ---- Still SAFELY REFUSED (genuinely unsupported in SQLite 3.45) ----
+# ---- Still SAFELY REFUSED (genuinely unsupported) ----
+# After Phase 4 (2026-10-23) median / percentile / stddev / variance
+# are IMPLEMENTED via Python post-aggregation (see analysis/stats.py).
+# Mode / skew / kurtosis / non-monthly rolling / duplicates /
+# list-with-rank / generic data quality remain refused.
 @pytest.mark.parametrize("q,label", [
-    ("What is the median order revenue?",                "median"),
-    ("Show me the median revenue by region",             "median_breakdown"),
-    ("What is the 90th percentile of revenue?",          "percentile"),
-    ("Give me the p95 of order value",                   "p95"),
-    ("What is the standard deviation of revenue?",       "stddev"),
-    ("What is the variance of monthly revenue?",         "variance"),
+    ("What is the skewness of revenue?",                 "skewness"),
+    ("What is the kurtosis of revenue?",                 "kurtosis"),
+    ("Give me the mode value of revenue",                "mode"),
     ("Give me the trailing 12-day revenue",              "trailing_12d_non_monthly"),
     ("Find duplicate orders",                            "duplicates"),
     ("List customers with the most orders this year",    "list_with_rank"),
@@ -147,7 +148,58 @@ IMPLEMENTED_CASES = [
      "ORDER BY v DESC) rk FROM g) "
      "SELECT c, p, v FROM r WHERE rk <= 2 ORDER BY c, rk",
      lambda rows: sorted(rows)),
+    # Phase 4 (2026-10-23) — statistical post-aggregations.
+    # Extractor handles both the ORACLE call (list of column rows)
+    # and the SYSTEM call (single aggregated-value row) by shape.
+    ("median_revenue",
+     "What is the median order revenue?",
+     "SELECT revenue FROM orders ORDER BY revenue",
+     lambda rows: round(_scalar_or_stat(rows, _python_median), 4)),
+    ("percentile_90_revenue",
+     "What is the 90th percentile of revenue?",
+     "SELECT revenue FROM orders",
+     lambda rows: round(_scalar_or_stat(rows, lambda vs: _python_percentile(vs, 90)), 4)),
+    ("stddev_revenue",
+     "What is the standard deviation of revenue?",
+     "SELECT revenue FROM orders",
+     lambda rows: round(_scalar_or_stat(rows, _python_stdev), 4)),
+    ("variance_revenue",
+     "What is the variance of revenue?",
+     "SELECT revenue FROM orders",
+     lambda rows: round(_scalar_or_stat(rows, _python_variance), 4)),
 ]
+
+
+def _scalar_or_stat(rows, stat_fn):
+    """When `rows` has exactly one row with one column, assume that
+    column is the already-aggregated statistic and return it as-is.
+    Otherwise compute `stat_fn` across the first column."""
+    if len(rows) == 1 and len(rows[0]) == 1:
+        return float(rows[0][0])
+    return stat_fn([r[0] for r in rows])
+
+
+import statistics as _stats_mod
+import math as _math
+
+
+def _python_median(vals):
+    return _stats_mod.median(float(v) for v in vals if v is not None)
+
+
+def _python_percentile(vals, p):
+    xs = sorted(float(v) for v in vals if v is not None)
+    k = (p / 100.0) * (len(xs) - 1)
+    lo, hi = int(_math.floor(k)), int(_math.ceil(k))
+    return xs[lo] if lo == hi else xs[lo] + (xs[hi] - xs[lo]) * (k - lo)
+
+
+def _python_stdev(vals):
+    return _stats_mod.stdev(float(v) for v in vals if v is not None)
+
+
+def _python_variance(vals):
+    return _stats_mod.variance(float(v) for v in vals if v is not None)
 
 
 @pytest.mark.parametrize("tag,q,oracle_sql,extract",
@@ -265,8 +317,8 @@ def test_invariant_semantic_failure_never_becomes_high_conf_answer(orch):
     """Across every CLARIFY'd capability-gate case, confidence must be
     < 0.70. A high-confidence CLARIFY would be a decision-policy bug."""
     for q in [
-        "What is the median order revenue?",
-        "What is the 90th percentile of revenue?",
+        "Give me the mode value of revenue",
+        "What is the skewness of revenue?",
         "Find duplicate orders",
         "List products with the highest profit",
     ]:

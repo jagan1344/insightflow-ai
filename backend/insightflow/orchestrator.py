@@ -129,11 +129,26 @@ class Orchestrator:
                  memory: Optional[Memory] = None):
         self.llm = llm or LLMClient()
         self.memory = memory or Memory()
+        # Phase 5 (2026-10-23): per-orchestrator conversation context
+        # for the minimal follow-up resolver. A fresh Orchestrator
+        # (one per session) has no shared state with others, so no
+        # cross-session leakage.
+        from .conversation import ConversationContext
+        self._ctx = ConversationContext()
 
     # ==================================================================
     def ask(self, question: str) -> InsightResponse:
         ds = get_active_dataset()
         catalog = build_catalog(ds)
+
+        # -1. Follow-up rewrite (Phase 5). "Now by region", "and in July
+        # 2026", "compare it to last month" are rewritten against the
+        # last successfully-answered question. If the active dataset
+        # has changed since then, no rewrite happens.
+        from .conversation import resolve_followup, capture_context
+        original_question = question
+        question = resolve_followup(question, self._ctx,
+                                     active_dataset_id=getattr(ds, "id", None))
 
         # 0. Pre-SQL safety / intent check. Destructive requests ABSTAIN;
         # forecasting requests CLARIFY (not implemented). Both bypass the
@@ -238,6 +253,52 @@ class Orchestrator:
         else:
             result = QueryResult(
                 error="SQL failed validation: " + "; ".join(sqlval.issues))
+
+        # 6a. Post-aggregation statistic (Phase 4). For POST_AGG_STAT
+        # plans the compiler emitted a column-SELECT; we fetch the
+        # whole column (bypassing the result row-cap in run_sql because
+        # a sample is semantically wrong for median/percentile/stddev)
+        # and reduce in Python.
+        if plan.intent_kind == IntentKind.POST_AGG_STAT and sqlval.ok:
+            from .analysis import stats as _stats
+            import sqlalchemy as _sa
+            spec = next((n for n in (plan.notes or [])
+                          if n.startswith("post_agg_stat=")), "")
+            if spec:
+                body = spec.split("=", 1)[1]
+                stat_part, _col = body.rsplit(":", 1)
+                if ":" in stat_part:
+                    stat_name, pct = stat_part.split(":", 1)
+                    pct_val = float(pct)
+                else:
+                    stat_name, pct_val = stat_part, None
+                # Direct unbounded fetch for the stat.
+                from .execution.executor import get_engine
+                vals = []
+                try:
+                    with get_engine().connect() as c:
+                        for row in c.execute(_sa.text(sql)):
+                            v = row[0]
+                            if v is not None:
+                                vals.append(float(v))
+                except Exception as e:
+                    result = QueryResult(error=str(e))
+                    vals = []
+                if stat_name == "median":
+                    out = _stats.median(vals)
+                elif stat_name == "percentile" and pct_val is not None:
+                    out = _stats.percentile(vals, pct_val)
+                elif stat_name == "stddev":
+                    out = _stats.stdev(vals)
+                elif stat_name == "variance":
+                    out = _stats.variance(vals)
+                else:
+                    out = None
+                alias = plan.measures[0].kpi_id if plan.measures \
+                         else stat_name
+                if result.ok:
+                    result = QueryResult(
+                        rows=[(out,)], columns=[alias], error=None)
 
         # 6b. Result validation (post-execution semantic checks).
         result_report = ResultValidator().check(plan, result)
@@ -442,6 +503,11 @@ class Orchestrator:
             failure_category=failure, diagnostics=diagnostics,
         )
         self.memory.add(question, decision.action, confidence.score)
+        # Capture context for Phase 5 follow-ups ONLY when we actually
+        # answered. CLARIFY/ABSTAIN leaves prior context intact.
+        if decision.action in (ANSWER, WARN):
+            capture_context(question, self._ctx,
+                             dataset_id=getattr(ds, "id", None))
         return response
 
     # ==================================================================

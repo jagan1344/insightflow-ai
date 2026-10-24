@@ -30,24 +30,12 @@ from typing import Optional
 # constructs come before generic ones.
 _UNSUPPORTED: list[tuple[str, str, str]] = [
     # ---- Statistical aggregations we don't compute ----
-    # "the median X" / "compute the median" → median-statistic ask.
-    # Exclude "above the median" / "below the median" / "versus the median"
-    # — those are the relative_to_stat intent and the planner handles them.
-    (r"\b(?:what(?:'s|\s+is)?\s+the\s+median|compute\s+(?:the\s+)?median|"
-     r"show\s+(?:me\s+)?(?:the\s+)?median|give\s+(?:me\s+)?(?:the\s+)?median)\b",
-     "median_statistic",
-     "I can't compute medians yet — only sums, counts, averages, "
-     "ratios, and shares. Try 'average order value' instead."),
-
-    (r"\b(?:percentile|percentiles|p(?:50|75|90|95|99)\b|quartile|quartiles|decile|deciles)\b",
-     "percentile_statistic",
-     "I can't compute percentiles / quartiles yet. Try 'average' or "
-     "'top N' to approximate."),
-
-    (r"\b(?:standard\s+deviation|stddev|variance|skewness|kurtosis)\b",
+    # Median / percentile / stddev / variance — IMPLEMENTED in Phase 4
+    # via Python post-aggregation. Only skew/kurtosis/mode remain
+    # refused for now.
+    (r"\b(?:skewness|kurtosis)\b",
      "distribution_statistic",
-     "I can't compute standard deviation or variance yet — only "
-     "sums, counts, averages, ratios and shares."),
+     "I can't compute skewness or kurtosis yet."),
 
     (r"\b(?:mode|modal)\s+(?:of|value)\b",
      "mode_statistic",

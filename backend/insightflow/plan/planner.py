@@ -808,6 +808,69 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     return filters
 
 
+def _find_post_agg_stat(question: str
+                          ) -> Optional[Tuple[str, Optional[float], str]]:
+    """Detect a request for median / percentile / stddev / variance.
+
+    Returns (statistic, parameter, column) where
+      statistic ∈ {"median", "percentile", "stddev", "variance"}
+      parameter is the percentile value (0-100) when statistic ==
+        "percentile", else None
+      column is the physical column to pull (one of
+        revenue / quantity / discount / cost — the only numeric
+        columns on `orders`).
+    Returns None when no match.
+    """
+    ql = " " + question.lower().strip() + " "
+    _COLS = {
+        "revenue": "revenue", "value": "revenue", "amount": "revenue",
+        "order value": "revenue", "order revenue": "revenue",
+        "sales": "revenue",
+        "quantity": "quantity", "qty": "quantity", "units": "quantity",
+        "discount": "discount", "cost": "cost",
+    }
+
+    def _pick_col(tail: str) -> str:
+        for phrase in sorted(_COLS, key=len, reverse=True):
+            if phrase in tail:
+                return _COLS[phrase]
+        return "revenue"
+
+    # Median
+    m = re.search(r"\bmedian\s+(?:order\s+|of\s+)?([a-z ]{3,30})", ql)
+    if m or re.search(r"\bmedian\b", ql):
+        tail = m.group(1).strip() if m else ql
+        return ("median", None, _pick_col(tail))
+    # Percentile — "90th percentile", "p95", "p75 of revenue"
+    m = re.search(r"\b(\d{1,3})(?:st|nd|rd|th)?\s+percentile\b.*?"
+                   r"(?:of\s+)?([a-z ]{3,30})?", ql)
+    if m:
+        try:
+            p = float(m.group(1))
+        except ValueError:
+            return None
+        if 0 <= p <= 100:
+            tail = m.group(2) or ""
+            return ("percentile", p, _pick_col(tail))
+    m = re.search(r"\bp(\d{1,3})\b.*?(?:of\s+)?([a-z ]{3,30})?", ql)
+    if m:
+        try:
+            p = float(m.group(1))
+        except ValueError:
+            return None
+        if 0 <= p <= 100:
+            tail = m.group(2) or ""
+            return ("percentile", p, _pick_col(tail))
+    # Stddev / variance
+    m = re.search(r"\b(?:standard\s+deviation|stddev|std\s+dev)\s+(?:of\s+)?([a-z ]{3,30})", ql)
+    if m:
+        return ("stddev", None, _pick_col(m.group(1)))
+    m = re.search(r"\bvariance\s+(?:of\s+)?([a-z ]{3,30})", ql)
+    if m:
+        return ("variance", None, _pick_col(m.group(1)))
+    return None
+
+
 def _find_last_n_days(question: str) -> Optional[int]:
     """Detect 'last N days / weeks' and return the number of days.
     Weeks are converted to days (* 7)."""
@@ -954,7 +1017,8 @@ def _find_extremum(question: str, catalog: KPICatalog
 
 def _find_top_per_group(question: str, ds: ActiveDataset, catalog: KPICatalog
                           ) -> Optional[Tuple[int, str, str]]:
-    """Detect 'top N <inner_dim> per/in-each/within-each <partition_dim>'.
+    """Detect 'top N <inner_dim> per/in-each/within-each <partition_dim>'
+    or 'rank <inner_dim> within each <partition_dim>'.
 
     Returns (n, inner_col, partition_col) or None.
     """
@@ -966,10 +1030,21 @@ def _find_top_per_group(question: str, ds: ActiveDataset, catalog: KPICatalog
         # "top <dim> in each <group>" with no N → N=1
         m = re.search(
             r"\btop\s+([a-z_]+)\s+(?:in\s+each|per|within\s+each|for\s+each|by\s+each)\s+([a-z_]+)\b", ql)
-        if not m:
-            return None
-        n = 1
-        inner_token, part_token = m.group(1), m.group(2)
+        if m:
+            n = 1
+            inner_token, part_token = m.group(1), m.group(2)
+        else:
+            # "rank <inner> within each <group>" — no explicit N; use 10
+            # as a reasonable default so each group's full rank list is
+            # not accidentally returned (which could be millions of rows).
+            m = re.search(
+                r"\brank\s+([a-z_]+)\s+"
+                r"(?:within\s+each|per|in\s+each|for\s+each)\s+([a-z_]+)\b", ql)
+            if m:
+                n = 10
+                inner_token, part_token = m.group(1), m.group(2)
+            else:
+                return None
     else:
         n_raw = m.group(1) or "1"
         word_nums = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "ten": 10}
@@ -1114,6 +1189,9 @@ def _detect_intent_kind(
     if ds is not None and catalog is not None \
             and _find_threshold_grouped(question, ds, catalog):
         return IntentKind.THRESHOLD_GROUPED
+    # Phase 4 (2026-10-23): post-aggregation stats computed in Python.
+    if _find_post_agg_stat(question):
+        return IntentKind.POST_AGG_STAT
 
     # ambiguous first — a vague/judgement question with no bindings.
     if not kpis and not dims and not time_unit and any(h in ql for h in _AMBIGUOUS_HINTS):
@@ -1766,6 +1844,28 @@ class Planner:
                         measures = [_mref(rev)]
                 top_n = n   # repurpose top_n to carry inner-group N
                 order_by = "measure_desc"
+
+        elif kind == IntentKind.POST_AGG_STAT:
+            hit = _find_post_agg_stat(question)
+            if hit is not None:
+                stat, param, col = hit
+                # The compiler emits SELECT col FROM ... [WHERE] which
+                # the orchestrator reduces in Python using stats.<fn>.
+                # Store the stat spec in plan.notes so the orchestrator
+                # can read it back without a new field.
+                param_str = f":{param}" if param is not None else ""
+                notes.append(f"post_agg_stat={stat}{param_str}:{col}")
+                alias = (f"{stat}_{col}" if param is None
+                          else f"p{int(param)}_{col}")
+                measures = [MeasureRef(
+                    kpi_id=alias,
+                    display_name=f"{stat.title()} of {col.title()}"
+                                  + (f" (p{param})" if param is not None else ""),
+                    formula=col,  # raw column; compiler pulls it as-is
+                    aggregation=f"post_agg_{stat}",
+                    unit="currency" if col in ("revenue", "cost", "discount")
+                           else "count")]
+                dims = []
 
         elif kind == IntentKind.THRESHOLD_GROUPED:
             hit = _find_threshold_grouped(question, ds, catalog)
