@@ -77,7 +77,7 @@ def main(config, label):
         ms = round((time.perf_counter() - t0) * 1000, 1)
         recs.append(dict(id=q["id"], db=q["db"], category=q["category"], answerability=q["expected_answerability"],
                          kind=q["kind"], question=q["question"], action=action, confidence=round(conf, 4),
-                         sql=sql, rows=rows[:50], n_rows=len(rows), expected=ref.get(q["id"]),
+                         sql=sql, rows=rows[:500], n_rows=len(rows), expected=ref.get(q["id"]),
                          reason=reason, semantic_findings=findings, failure_category=failure,
                          signals=signals, latency_ms=ms, error=err))
     json.dump(dict(config=config, ablate=CONFIGS[config], label=label, head=head, frozen_tree=FROZEN_TREE,

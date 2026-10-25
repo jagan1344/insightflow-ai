@@ -5,6 +5,33 @@ from run_eval import score  # same scoring rule as all earlier sealed sets
 
 ANSWER = ("ANSWER", "WARN")
 
+# Pre-registered before the first run (2026-10-25), from the author's notes:
+# rates/shares may be stated as percentages or fractions
+PERCENT_IDS = {"HO18", "HO19", "IN18", "IN20", "EN12", "EN13", "RI15", "RI16"}
+# items the author flagged as borderline; reported as a sensitivity analysis only
+BORDERLINE_IDS = {"EN15", "IN16", "EN12", "HO12", "IN13", "EN09", "RI12", "HO03", "IN02", "EN04", "RI04",
+                  "HO26", "IN28", "RI07", "EN16", "RI19", "HO23", "IN24", "EN19", "RI21"}
+
+
+def _match(r):
+    rows = [tuple(x) for x in r["rows"]]
+    exp = [tuple(x) for x in (r["expected"] or [])]
+    ok, _ = score(r["kind"], rows, exp)
+    if ok:
+        return True
+    if r["id"] in PERCENT_IDS and r["kind"] == "scalar" and len(rows) == 1 and exp and exp[0][0] is not None:
+        v = rows[0][-1]
+        try:
+            return any(abs(float(v) * f - float(exp[0][0])) <= 1e-6 * max(1.0, abs(float(exp[0][0])))
+                       for f in (100.0, 0.01))
+        except (TypeError, ValueError):
+            return False
+    if r["kind"] == "rowset":      # extra lookup members with no fact rows (value 0 or NULL) are allowed
+        keep = [x for x in rows if not (x[-1] is None or x[-1] == 0) or str(x[0]) in {str(e[0]) for e in exp}]
+        if len(keep) != len(rows):
+            return score("rowset", keep, exp)[0]
+    return False
+
 
 def outcome(r):
     ans = r["action"] in ANSWER
@@ -14,8 +41,7 @@ def outcome(r):
         return "correct_clarify" if not ans else "wrong_answer_to_clarify_item"
     if not ans:
         return "unnecessary_clarify"
-    ok, _ = score(r["kind"], [tuple(x) for x in r["rows"]], [tuple(x) for x in (r["expected"] or [])])
-    return "correct" if ok else "silent_wrong"
+    return "correct" if _match(r) else "silent_wrong"
 
 
 def wilson(k, n, z=1.96):
