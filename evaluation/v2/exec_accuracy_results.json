@@ -1,0 +1,482 @@
+{
+  "summary": {
+    "commit": "2ac37d5ad8d1d426a59ae27cc9c2258bb3975701",
+    "n": 27,
+    "action_correct": 27,
+    "action_accuracy": 1.0,
+    "exec_correct": 27,
+    "exec_accuracy": 1.0
+  },
+  "results": [
+    {
+      "id": "S01",
+      "question": "What is the total revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 3388831.47,
+      "expected": 3388831.47,
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders",
+      "latency_ms": 169
+    },
+    {
+      "id": "S02",
+      "question": "How many orders were placed?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 2037,
+      "expected": 2037,
+      "sql": "SELECT COUNT(*) AS order_count FROM orders",
+      "latency_ms": 54
+    },
+    {
+      "id": "S03",
+      "question": "What is the average order value?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 1663.6384241531666,
+      "expected": 1663.6384241531666,
+      "sql": "SELECT SUM(revenue)*1.0/COUNT(*) AS avg_order_value FROM orders",
+      "latency_ms": 54
+    },
+    {
+      "id": "S04",
+      "question": "What was revenue in July 2026?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 202536.65,
+      "expected": 202536.65,
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01'",
+      "latency_ms": 53
+    },
+    {
+      "id": "S05",
+      "question": "What was revenue in June 2026?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 454994.41,
+      "expected": 454994.41,
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-06-01' AND order_date < '2026-07-01'",
+      "latency_ms": 50
+    },
+    {
+      "id": "S06",
+      "question": "What was revenue in September 2026?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 372819.87,
+      "expected": 372819.87,
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-09-01' AND order_date < '2026-10-01'",
+      "latency_ms": 52
+    },
+    {
+      "id": "S07",
+      "question": "Revenue in the last 30 days",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 121979.22,
+      "expected": 121979.22,
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-09-22' AND order_date < '2026-10-22'",
+      "latency_ms": 52
+    },
+    {
+      "id": "S08",
+      "question": "What was revenue last month?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 372819.87,
+      "expected": 372819.87,
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-09-01' AND order_date < '2026-10-01'",
+      "latency_ms": 53
+    },
+    {
+      "id": "S09",
+      "question": "How many distinct customers do we have?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 60,
+      "expected": 60,
+      "sql": "SELECT COUNT(DISTINCT customers.customer_name) AS distinct_customer_name FROM orders JOIN customers ON customers.customer_id = orders.customer_id",
+      "latency_ms": 54
+    },
+    {
+      "id": "S10",
+      "question": "How many distinct products are there?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 12,
+      "expected": 12,
+      "sql": "SELECT COUNT(DISTINCT products.product_name) AS distinct_product_name FROM orders JOIN products ON products.product_id = orders.product_id",
+      "latency_ms": 54
+    },
+    {
+      "id": "S11",
+      "question": "What is the maximum revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 9482.06,
+      "expected": 9482.06,
+      "sql": "SELECT MAX(revenue) AS max_revenue FROM orders",
+      "latency_ms": 91
+    },
+    {
+      "id": "S12",
+      "question": "What is the minimum revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 5.01,
+      "expected": 5.01,
+      "sql": "SELECT MIN(revenue) AS min_revenue FROM orders",
+      "latency_ms": 52
+    },
+    {
+      "id": "ST1",
+      "question": "What is the median order revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 1058.2,
+      "expected": 1058.2,
+      "sql": "SELECT revenue FROM orders",
+      "latency_ms": 54
+    },
+    {
+      "id": "ST2",
+      "question": "What is the 90th percentile of revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 4180.496,
+      "expected": 4180.496,
+      "sql": "SELECT revenue FROM orders",
+      "latency_ms": 55
+    },
+    {
+      "id": "ST3",
+      "question": "What is the standard deviation of revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 1805.7331394489458,
+      "expected": 1805.7331394489458,
+      "sql": "SELECT revenue FROM orders",
+      "latency_ms": 54
+    },
+    {
+      "id": "ST4",
+      "question": "What is the variance of revenue?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 3260672.170904146,
+      "expected": 3260672.170904146,
+      "sql": "SELECT revenue FROM orders",
+      "latency_ms": 55
+    },
+    {
+      "id": "ST5",
+      "question": "What is the median order quantity?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": 4.0,
+      "expected": 4,
+      "sql": "SELECT quantity FROM orders",
+      "latency_ms": 55
+    },
+    {
+      "id": "B01",
+      "question": "Revenue by region",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": {
+        "East": 969084.07,
+        "South": 967823.2,
+        "North": 763684.64,
+        "West": 688239.56
+      },
+      "expected": {
+        "East": 969084.07,
+        "North": 763684.64,
+        "South": 967823.2,
+        "West": 688239.56
+      },
+      "sql": "SELECT regions.region_name AS region, SUM(revenue) AS total_revenue FROM orders JOIN regions ON regions.region_id = orders.region_id GROUP BY regions.region_name ORDER BY total_revenue DESC",
+      "latency_ms": 54
+    },
+    {
+      "id": "B02",
+      "question": "Revenue by category",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": {
+        "Electronics": 1822286.44,
+        "Furniture": 899583.78,
+        "Software": 590395.46,
+        "Office": 76565.79
+      },
+      "expected": {
+        "Electronics": 1822286.44,
+        "Furniture": 899583.78,
+        "Office": 76565.79,
+        "Software": 590395.46
+      },
+      "sql": "SELECT products.category AS category, SUM(revenue) AS total_revenue FROM orders JOIN products ON products.product_id = orders.product_id GROUP BY products.category ORDER BY total_revenue DESC",
+      "latency_ms": 53
+    },
+    {
+      "id": "T01",
+      "question": "Show monthly revenue from January through September 2026.",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": [
+        [
+          "2026-01",
+          384755.48
+        ],
+        [
+          "2026-02",
+          344681.6
+        ],
+        [
+          "2026-03",
+          413344.53
+        ],
+        [
+          "2026-04",
+          402345.86
+        ],
+        [
+          "2026-05",
+          453981.34
+        ],
+        [
+          "2026-06",
+          454994.41
+        ],
+        [
+          "2026-07",
+          202536.65
+        ],
+        [
+          "2026-08",
+          359371.73
+        ],
+        [
+          "2026-09",
+          372819.87
+        ]
+      ],
+      "expected": [
+        [
+          "2026-01",
+          384755.48
+        ],
+        [
+          "2026-02",
+          344681.6
+        ],
+        [
+          "2026-03",
+          413344.53
+        ],
+        [
+          "2026-04",
+          402345.86
+        ],
+        [
+          "2026-05",
+          453981.34
+        ],
+        [
+          "2026-06",
+          454994.41
+        ],
+        [
+          "2026-07",
+          202536.65
+        ],
+        [
+          "2026-08",
+          359371.73
+        ],
+        [
+          "2026-09",
+          372819.87
+        ]
+      ],
+      "sql": "SELECT substr(order_date,1,7) AS month, SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-01-01' AND order_date < '2026-10-01' GROUP BY substr(order_date,1,7) ORDER BY month",
+      "latency_ms": 53
+    },
+    {
+      "id": "R01",
+      "question": "Top 5 products by revenue",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": [
+        [
+          "Laptop",
+          628229.67
+        ],
+        [
+          "Headphones",
+          600572.68
+        ],
+        [
+          "Monitor",
+          593484.09
+        ],
+        [
+          "Desk",
+          316999.59
+        ],
+        [
+          "Chair",
+          306903.69
+        ]
+      ],
+      "expected": [
+        [
+          "Laptop",
+          628229.67
+        ],
+        [
+          "Headphones",
+          600572.68
+        ],
+        [
+          "Monitor",
+          593484.09
+        ],
+        [
+          "Desk",
+          316999.59
+        ],
+        [
+          "Chair",
+          306903.69
+        ]
+      ],
+      "sql": "SELECT products.product_name AS product, SUM(revenue) AS total_revenue FROM orders JOIN products ON products.product_id = orders.product_id GROUP BY products.product_name ORDER BY total_revenue DESC LIMIT 5",
+      "latency_ms": 53
+    },
+    {
+      "id": "H01",
+      "question": "In which months did revenue exceed 400000?",
+      "expected_action": "ANSWER",
+      "observed_action": "ANSWER",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": {
+        "2026-06": 454994.41,
+        "2026-05": 453981.34,
+        "2026-03": 413344.53,
+        "2026-04": 402345.86
+      },
+      "expected": {
+        "2026-03": 413344.53,
+        "2026-04": 402345.86,
+        "2026-05": 453981.34,
+        "2026-06": 454994.41
+      },
+      "sql": "SELECT substr(order_date,1,7) AS month, SUM(revenue) AS total_revenue FROM orders GROUP BY substr(order_date,1,7) HAVING SUM(revenue) > 400000.0 ORDER BY total_revenue DESC",
+      "latency_ms": 53
+    },
+    {
+      "id": "X01",
+      "question": "What will next month's revenue be?",
+      "expected_action": "CLARIFY",
+      "observed_action": "CLARIFY",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": null,
+      "expected": null,
+      "sql": "",
+      "latency_ms": 51
+    },
+    {
+      "id": "X02",
+      "question": "Delete all orders.",
+      "expected_action": "ABSTAIN",
+      "observed_action": "ABSTAIN",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": null,
+      "expected": null,
+      "sql": "",
+      "latency_ms": 51
+    },
+    {
+      "id": "X03",
+      "question": "What is the meaning of life?",
+      "expected_action": "CLARIFY",
+      "observed_action": "CLARIFY",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": null,
+      "expected": null,
+      "sql": "",
+      "latency_ms": 137
+    },
+    {
+      "id": "X04",
+      "question": "How is my business doing?",
+      "expected_action": "CLARIFY",
+      "observed_action": "CLARIFY",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": null,
+      "expected": null,
+      "sql": "",
+      "latency_ms": 102
+    },
+    {
+      "id": "X05",
+      "question": "Find duplicate orders",
+      "expected_action": "CLARIFY",
+      "observed_action": "CLARIFY",
+      "action_match": true,
+      "exec_match": true,
+      "sys_val": null,
+      "expected": null,
+      "sql": "",
+      "latency_ms": 51
+    }
+  ]
+}

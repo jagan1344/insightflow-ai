@@ -1,0 +1,448 @@
+{
+  "summary": {
+    "commit": "2ac37d5ad8d1d426a59ae27cc9c2258bb3975701",
+    "n": 25,
+    "answered": 25,
+    "exec_correct": 25,
+    "exec_accuracy": 1.0
+  },
+  "results": [
+    {
+      "id": "A01",
+      "question": "Revenue in East region in July 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 246,
+      "sys_rows_preview": [
+        [
+          30479.76
+        ]
+      ],
+      "expected_hint": "30479.76",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders JOIN regions ON regions.region_id = orders.region_id WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01' AND regions.region_name = 'East'"
+    },
+    {
+      "id": "A02",
+      "question": "Revenue in Furniture category in July 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 58,
+      "sys_rows_preview": [
+        [
+          "Furniture",
+          17733.89
+        ]
+      ],
+      "expected_hint": "17733.89",
+      "sql": "SELECT products.category AS category, SUM(revenue) AS total_revenue FROM orders JOIN products ON products.product_id = orders.product_id WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01' AND products.category = 'Furniture' GROUP BY products.catego"
+    },
+    {
+      "id": "A03",
+      "question": "What is the gross margin?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 56,
+      "sys_rows_preview": [
+        [
+          0.3770863854731613
+        ]
+      ],
+      "expected_hint": "0.3770863854731613",
+      "sql": "SELECT SUM(revenue-cost)*1.0/SUM(revenue) AS gross_margin FROM orders"
+    },
+    {
+      "id": "A04",
+      "question": "What is the gross margin in July 2026?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 61,
+      "sys_rows_preview": [
+        [
+          0.40683036872585776
+        ]
+      ],
+      "expected_hint": "0.40683036872585776",
+      "sql": "SELECT SUM(revenue-cost)*1.0/SUM(revenue) AS gross_margin FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01'"
+    },
+    {
+      "id": "A05",
+      "question": "How many units were sold?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 76,
+      "sys_rows_preview": [
+        [
+          7164
+        ]
+      ],
+      "expected_hint": "7164",
+      "sql": "SELECT SUM(quantity) AS units_sold FROM orders"
+    },
+    {
+      "id": "A06",
+      "question": "What is the discount rate?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 101,
+      "sys_rows_preview": [
+        [
+          0.03812962056555596
+        ]
+      ],
+      "expected_hint": "0.03812962056555596",
+      "sql": "SELECT SUM(discount)*1.0/(SUM(revenue)+SUM(discount)) AS discount_rate FROM orders"
+    },
+    {
+      "id": "A07",
+      "question": "What was the total profit?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 63,
+      "sys_rows_preview": [
+        [
+          1277882.21
+        ]
+      ],
+      "expected_hint": "1277882.21",
+      "sql": "SELECT SUM(revenue-cost) AS profit FROM orders"
+    },
+    {
+      "id": "A08",
+      "question": "What is the average order value in July 2026?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 77,
+      "sys_rows_preview": [
+        [
+          1620.2931999999998
+        ]
+      ],
+      "expected_hint": "1620.2931999999998",
+      "sql": "SELECT SUM(revenue)*1.0/COUNT(*) AS avg_order_value FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-08-01'"
+    },
+    {
+      "id": "A09",
+      "question": "Revenue by region and category",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 69,
+      "sys_rows_preview": [
+        [
+          "South",
+          "Electronics",
+          530903.4
+        ],
+        [
+          "East",
+          "Electronics",
+          470724.99
+        ],
+        [
+          "North",
+          "Electronics",
+          437979.71
+        ]
+      ],
+      "expected_hint": "{('East', 'Electronics'): 470724.99, ('East', 'Furniture'): 289188.35, ('East', 'Office'): 23399.75, ('East', 'Software'): 185770.98, ('North', 'Electronics'): 437979.71, ('North', 'Furniture'): 21119",
+      "sql": "SELECT regions.region_name AS region, products.category AS category, SUM(revenue) AS total_revenue FROM orders JOIN regions ON regions.region_id = orders.region_id JOIN products ON products.product_id = orders.product_id GROUP BY regions.region_name, products."
+    },
+    {
+      "id": "A10",
+      "question": "Gross margin by category",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 67,
+      "sys_rows_preview": [
+        [
+          "Software",
+          0.6499008647525847
+        ],
+        [
+          "Office",
+          0.4504980618628764
+        ],
+        [
+          "Furniture",
+          0.35100758486330197
+        ]
+      ],
+      "expected_hint": "{'Electronics': 0.2984877723175068, 'Furniture': 0.35100758486330197, 'Office': 0.4504980618628764, 'Software': 0.6499008647525847}",
+      "sql": "SELECT products.category AS category, SUM(revenue-cost)*1.0/SUM(revenue) AS gross_margin FROM orders JOIN products ON products.product_id = orders.product_id GROUP BY products.category ORDER BY gross_margin DESC"
+    },
+    {
+      "id": "A11",
+      "question": "Units sold by segment",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 97,
+      "sys_rows_preview": [
+        [
+          "SMB",
+          2979
+        ],
+        [
+          "Consumer",
+          2872
+        ],
+        [
+          "Enterprise",
+          1313
+        ]
+      ],
+      "expected_hint": "{'Consumer': 2872, 'Enterprise': 1313, 'SMB': 2979}",
+      "sql": "SELECT customers.segment AS segment, SUM(quantity) AS units_sold FROM orders JOIN customers ON customers.customer_id = orders.customer_id GROUP BY customers.segment ORDER BY units_sold DESC"
+    },
+    {
+      "id": "A12",
+      "question": "Monthly revenue in 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 64,
+      "sys_rows_preview": [
+        [
+          "2026-01",
+          384755.48
+        ],
+        [
+          "2026-02",
+          344681.6
+        ],
+        [
+          "2026-03",
+          413344.53
+        ]
+      ],
+      "expected_hint": "[('2026-01', 384755.48), ('2026-02', 344681.6), ('2026-03', 413344.53), ('2026-04', 402345.86), ('2026-05', 453981.34), ('2026-06', 454994.41), ('2026-07', 202536.65), ('2026-08', 359371.73), ('2026-0",
+      "sql": "SELECT substr(order_date,1,7) AS month, SUM(revenue) AS total_revenue FROM orders GROUP BY substr(order_date,1,7) ORDER BY month"
+    },
+    {
+      "id": "A13",
+      "question": "Revenue in Q2 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 59,
+      "sys_rows_preview": [
+        [
+          1311321.61
+        ]
+      ],
+      "expected_hint": "1311321.61",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-04-01' AND order_date < '2026-07-01'"
+    },
+    {
+      "id": "A14",
+      "question": "Revenue in Q3 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 55,
+      "sys_rows_preview": [
+        [
+          934728.25
+        ]
+      ],
+      "expected_hint": "934728.25",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-10-01'"
+    },
+    {
+      "id": "A15",
+      "question": "Total revenue",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 58,
+      "sys_rows_preview": [
+        [
+          3388831.47
+        ]
+      ],
+      "expected_hint": "3388831.47",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders"
+    },
+    {
+      "id": "A16",
+      "question": "What's the overall revenue?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 56,
+      "sys_rows_preview": [
+        [
+          3388831.47
+        ]
+      ],
+      "expected_hint": "3388831.47",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders"
+    },
+    {
+      "id": "A17",
+      "question": "Sum of revenue",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 56,
+      "sys_rows_preview": [
+        [
+          3388831.47
+        ]
+      ],
+      "expected_hint": "3388831.47",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders"
+    },
+    {
+      "id": "A18",
+      "question": "What percentage of revenue came from each region?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 58,
+      "sys_rows_preview": [
+        [
+          "East",
+          969084.07,
+          0.2859640789395762
+        ],
+        [
+          "South",
+          967823.2,
+          0.2855920126355531
+        ],
+        [
+          "North",
+          763684.64,
+          0.22535338412683004
+        ]
+      ],
+      "expected_hint": "{'East': 0.28596407893957615, 'North': 0.22535338412683, 'South': 0.28559201263555306, 'West': 0.2030905242980407}",
+      "sql": "SELECT regions.region_name AS region, SUM(revenue) AS total_revenue, SUM(revenue) * 1.0 / SUM(SUM(revenue)) OVER () AS share FROM orders JOIN regions ON regions.region_id = orders.region_id GROUP BY regions.region_name ORDER BY total_revenue DESC"
+    },
+    {
+      "id": "A19",
+      "question": "Revenue in February 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 56,
+      "sys_rows_preview": [
+        [
+          344681.6
+        ]
+      ],
+      "expected_hint": "344681.6",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-02-01' AND order_date < '2026-03-01'"
+    },
+    {
+      "id": "A20",
+      "question": "Revenue in December 2026",
+      "action": "WARN",
+      "exec_ok": true,
+      "latency_ms": 56,
+      "sys_rows_preview": [
+        [
+          null
+        ]
+      ],
+      "expected_hint": "None",
+      "sql": "SELECT SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-12-01' AND order_date < '2027-01-01'"
+    },
+    {
+      "id": "A21",
+      "question": "3-month rolling average revenue",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 63,
+      "sys_rows_preview": [
+        [
+          "2026-01",
+          384755.48,
+          384755.48
+        ],
+        [
+          "2026-02",
+          344681.6,
+          364718.54
+        ],
+        [
+          "2026-03",
+          413344.53,
+          380927.2033333333
+        ]
+      ],
+      "expected_hint": "None",
+      "sql": "WITH agg AS (SELECT substr(order_date,1,7) AS month, SUM(revenue) AS v FROM orders GROUP BY substr(order_date,1,7)) SELECT month, v AS total_revenue, AVG(v) OVER (ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rolling_avg_3m FROM agg ORDER BY mont"
+    },
+    {
+      "id": "A22",
+      "question": "What is the 75th percentile of revenue?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 118,
+      "sys_rows_preview": [
+        [
+          2554.83
+        ]
+      ],
+      "expected_hint": "2554.83",
+      "sql": "SELECT revenue FROM orders"
+    },
+    {
+      "id": "A23",
+      "question": "In which months did revenue exceed 400000?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 91,
+      "sys_rows_preview": [
+        [
+          "2026-06",
+          454994.41
+        ],
+        [
+          "2026-05",
+          453981.34
+        ],
+        [
+          "2026-03",
+          413344.53
+        ]
+      ],
+      "expected_hint": "{'2026-03': 413344.53, '2026-04': 402345.86, '2026-05': 453981.34, '2026-06': 454994.41}",
+      "sql": "SELECT substr(order_date,1,7) AS month, SUM(revenue) AS total_revenue FROM orders GROUP BY substr(order_date,1,7) HAVING SUM(revenue) > 400000.0 ORDER BY total_revenue DESC"
+    },
+    {
+      "id": "A24",
+      "question": "Top 5 products by revenue",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 64,
+      "sys_rows_preview": [
+        [
+          "Laptop",
+          628229.67
+        ],
+        [
+          "Headphones",
+          600572.68
+        ],
+        [
+          "Monitor",
+          593484.09
+        ]
+      ],
+      "expected_hint": "[('Laptop', 628229.67), ('Headphones', 600572.68), ('Monitor', 593484.09), ('Desk', 316999.59), ('Chair', 306903.69)]",
+      "sql": "SELECT products.product_name AS product, SUM(revenue) AS total_revenue FROM orders JOIN products ON products.product_id = orders.product_id GROUP BY products.product_name ORDER BY total_revenue DESC LIMIT 5"
+    },
+    {
+      "id": "A25",
+      "question": "Compare June and July 2026 revenue",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "latency_ms": 59,
+      "sys_rows_preview": [
+        [
+          "2026-06",
+          454994.41
+        ],
+        [
+          "2026-07",
+          202536.65
+        ]
+      ],
+      "expected_hint": "{'2026-06': 454994.41, '2026-07': 202536.65}",
+      "sql": "SELECT '2026-06' AS period, SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-06-01' AND order_date < '2026-07-01' UNION ALL SELECT '2026-07' AS period, SUM(revenue) AS total_revenue FROM orders WHERE order_date >= '2026-07-01' AND order_date"
+    }
+  ]
+}

@@ -321,6 +321,15 @@ class SQLCompiler:
                 if j not in joins_seen:
                     joins.append(j); joins_seen.add(j)
 
+        # Also inject joins for any eq / in / range filter that
+        # references a qualified column on a joined table.
+        for f in plan.filters:
+            if f.kind in ("eq", "in", "range") and f.column \
+                    and "." in f.column:
+                for j in self._ensure_join_for_formula(f.column):
+                    if j not in joins_seen:
+                        joins.append(j); joins_seen.add(j)
+
         if not select_parts:
             return ""
 

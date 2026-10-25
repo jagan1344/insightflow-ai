@@ -1133,6 +1133,134 @@ def _find_threshold_grouped(question: str, ds: ActiveDataset,
     return None
 
 
+def _find_value_filters(question: str, ds: ActiveDataset
+                          ) -> List[FilterExpr]:
+    """Detect value-equality filters of the form "<value> <dim-noun>"
+    or "in <value> region / category / segment / for <value>".
+
+    Returns a list of `FilterExpr(kind="eq", column=<physical column>,
+    value=<string>)` for each distinct match. The value must match a
+    known distinct value in the dataset's dim column — this prevents
+    spurious matches on arbitrary nouns.
+
+    Examples that match:
+      "revenue in East region" → eq(regions.region_name='East')
+      "revenue in Furniture category" → eq(products.category='Furniture')
+      "revenue for Enterprise segment" → eq(customers.segment='Enterprise')
+      "East region revenue" → same as above (prefix form)
+
+    Examples that do NOT match:
+      "revenue by region" (grouping, not filter)
+      "which region had the highest revenue" (question about dim)
+    """
+    import sqlite3
+    from ..config import settings
+    out: List[FilterExpr] = []
+
+    # Map of dim-noun → (physical column, candidate SQL for distinct values)
+    _DIM_MAP = []
+    if ds.kind == "demo":
+        _DIM_MAP = [
+            ("region", "regions.region_name",
+             "SELECT DISTINCT region_name FROM regions"),
+            ("category", "products.category",
+             "SELECT DISTINCT category FROM products"),
+            ("segment", "customers.segment",
+             "SELECT DISTINCT segment FROM customers"),
+            ("product", "products.product_name",
+             "SELECT DISTINCT product_name FROM products"),
+        ]
+    else:
+        # Uploaded single-table dataset: use the dataset's own dim columns.
+        for cname, info in ds.columns.items():
+            if info.role != "dimension":
+                continue
+            _DIM_MAP.append((cname.lower(), cname, None))
+
+    # Load distinct values once.
+    db_url = settings.database_url
+    db_path = db_url.split(":///", 1)[1] if ":///" in db_url else db_url
+    try:
+        with sqlite3.connect(db_path) as c:
+            values_per_dim = {}
+            for noun, col, sql in _DIM_MAP:
+                if sql is None:
+                    quoted_col = f'"{col}"'
+                    sql = f'SELECT DISTINCT {quoted_col} FROM "{ds.table}"'
+                try:
+                    values_per_dim[noun] = {
+                        str(r[0]): r[0] for r in c.execute(sql).fetchall()
+                        if r[0] is not None}
+                except Exception:
+                    values_per_dim[noun] = {}
+    except Exception:
+        return []
+
+    ql = question.lower()
+    seen: set = set()
+    for noun, col, _sql in _DIM_MAP:
+        values = values_per_dim.get(noun, {})
+        if not values:
+            continue
+        lower_to_orig = {k.lower(): v for k, v in values.items()}
+        for v_lo, v_orig in lower_to_orig.items():
+            if not v_lo or len(v_lo) < 2:
+                continue
+            if (col, v_orig) in seen:
+                continue
+            pat = (rf"\b(?:in|for|within|from)?\s*(?:the\s+)?"
+                   rf"{re.escape(v_lo)}\s+{re.escape(noun)}\b")
+            if re.search(pat, ql):
+                out.append(FilterExpr(kind="eq", column=col, value=v_orig))
+                seen.add((col, v_orig))
+    return out
+
+
+def _find_unknown_dim_values(question: str, ds: ActiveDataset
+                              ) -> List[str]:
+    """Detect patterns like '<proper noun> <dim-noun>' / 'in <X> region'
+    where the proper noun does NOT match any known dim value. Returns
+    a list of "<dim>:<unknown_value>" strings suitable for
+    `plan.unavailable` — the planner's existing CLARIFY path then
+    surfaces the issue instead of silently answering with the all-dim
+    total.
+    """
+    import sqlite3
+    from ..config import settings
+    if ds.kind != "demo":
+        return []
+    unknowns: List[str] = []
+    db_url = settings.database_url
+    db_path = db_url.split(":///", 1)[1] if ":///" in db_url else db_url
+    _DIM_SQL = [
+        ("region", "SELECT region_name FROM regions"),
+        ("category", "SELECT DISTINCT category FROM products"),
+        ("segment", "SELECT DISTINCT segment FROM customers"),
+    ]
+    try:
+        with sqlite3.connect(db_path) as c:
+            known_per_dim = {noun: {str(r[0]).lower()
+                                     for r in c.execute(sql).fetchall()
+                                     if r[0] is not None}
+                              for noun, sql in _DIM_SQL}
+    except Exception:
+        return []
+
+    ql = " " + question.lower() + " "
+    for noun, _sql in _DIM_SQL:
+        # "in <word> <noun>" / "<word> <noun>" / "for <word> <noun>"
+        for m in re.finditer(
+                rf"\b(?:in|for|within|from)\s+(?:the\s+)?([a-z][a-z\-]+)\s+{re.escape(noun)}\b",
+                ql):
+            value = m.group(1)
+            if value in ("a", "an", "the", "each", "every", "any",
+                          "which", "what"):
+                continue
+            if value not in known_per_dim.get(noun, set()):
+                unknowns.append(f"value:{noun}={value}")
+    return unknowns
+
+
 def _bind_metric_filter(question: str, kpis: List[KPIDefinition],
                          catalog: Optional[KPICatalog] = None
                          ) -> List[FilterExpr]:
@@ -1636,8 +1764,51 @@ class Planner:
         # ---------- build the plan by kind ----------
         measures = [_mref(k) for k in kpis]
         dims = [_dref(c, ds) for _, c in bound_dims]
-        filters = _bind_time_filter(question, ds) + metric_filters
-        notes: List[str] = []
+        # Phase 2 (2026-10-24): value-equality filters on dim values
+        # ("in East region", "for Furniture category", "SMB segment").
+        value_filters = _find_value_filters(question, ds)
+        filters = _bind_time_filter(question, ds) + metric_filters \
+                  + value_filters
+        # Early notes list — populated by the value-filter / dim-dedup
+        # pass below. Later code (`notes: List[str] = []`) overwrites;
+        # we re-assign to append-safe before then.
+        _early_notes: List[str] = []
+        # Unknown-dim-value detection ("Antarctica region" etc.):
+        # mark the request as unavailable so the planner's CLARIFY
+        # path fires instead of silently answering with the all-dim
+        # total.
+        _unknown_values: List[str] = _find_unknown_dim_values(question, ds)
+        # When a value filter is present for a given dim AND that
+        # same dim was bound as a grouping, remove the grouping (user
+        # asked for a filtered single row, not a breakdown).
+        if value_filters:
+            # Build the set of SHORT dim nouns a value filter targets,
+            # so we can match against the bound_dims noun column.
+            _NOUNS = {
+                "regions.region_name": {"region", "region_name"},
+                "products.category":   {"category"},
+                "products.sub_category": {"sub_category", "subcategory"},
+                "products.product_name": {"product", "product_name"},
+                "customers.segment":   {"segment"},
+                "customers.customer_name": {"customer", "customer_name"},
+            }
+            vf_dim_nouns: set = set()
+            for f in value_filters:
+                vf_dim_nouns |= _NOUNS.get(f.column, set())
+            _old_bound = list(bound_dims)
+            bound_dims = [(n, c) for n, c in bound_dims
+                           if not (n in vf_dim_nouns
+                                    or c in vf_dim_nouns)]
+            if bound_dims != _old_bound:
+                _early_notes.append(
+                    "value_filter_removed_redundant_breakdown=" +
+                    ",".join(f"{n}:{c}" for n, c in _old_bound
+                              if (n in vf_dim_nouns or c in vf_dim_nouns)))
+                # If this leaves BREAKDOWN with no bound dims, demote
+                # to DIRECT_KPI so the compiler emits a filtered scalar.
+                if kind == IntentKind.BREAKDOWN and not bound_dims:
+                    kind = IntentKind.DIRECT_KPI
+        notes: List[str] = list(_early_notes)
         # Tag the plan when the time filter came from a relative-period
         # phrase (Defect B). The orchestrator reads this note so an
         # empty result on a relative-period filter becomes CLARIFY
@@ -1923,6 +2094,7 @@ class Planner:
 
         # ---------- unavailable dims ----------
         unavailable: List[str] = [f"dimension:{n}" for n in unbound_dims]
+        unavailable.extend(_unknown_values)
         if _dropped_suffix:
             notes.append(f"compound_question_dropped_suffix={_dropped_suffix!r}")
 

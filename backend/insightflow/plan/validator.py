@@ -135,8 +135,13 @@ class PlanValidator:
                 ))
 
         # ---------- Filters ----------
+        # Qualified-column filters from the demo star schema
+        # (e.g. "regions.region_name", "products.category") are OK —
+        # they resolve to joined tables in the compiler. Only
+        # unqualified columns need to exist in `ds.columns`.
         for f in plan.filters:
-            if f.column and f.column not in self.ds.columns:
+            if f.column and f.column not in self.ds.columns \
+                    and "." not in f.column:
                 issues.append(SemanticIssue(
                     "missing_column",
                     f"Filter references missing column '{f.column}'",
