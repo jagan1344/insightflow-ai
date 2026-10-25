@@ -86,7 +86,8 @@ def test_verifier_exception_fails_closed(monkeypatch):
     assert "RuntimeError" not in r.explanation and "secret" not in r.explanation
     assert "Traceback" not in r.explanation
     assert r.chart == {"kind": "none"} and r.recommendation is None
-    assert r.diagnostics["semantic_verifier_error"].startswith("RuntimeError")
+    assert r.diagnostics["semantic_verifier_error"] == "RuntimeError"
+    assert "secret" not in str(r.diagnostics)
     assert any(n.startswith("semantic_verifier_error=RuntimeError") for n in r.notes)
     assert "semantic_findings" not in r.diagnostics     # no fabricated report
 
@@ -250,3 +251,23 @@ def test_negated_flag_count():
 
 def FR_count(db, sql):
     return ref(db, sql)[0][0]
+
+
+# ------------------------------------------------------------ independent verifier failure
+
+def test_answer_verifier_exception_fails_closed_without_leaking_details(monkeypatch):
+    from insightflow.verification import answer_verifier
+
+    def boom(*a, **k):
+        raise RuntimeError("internal verifier bug /secret/path")
+
+    monkeypatch.setattr(answer_verifier, "verify", boom)
+    r = ask(A_, "Total fare")
+    assert r.decision.action == "CLARIFY"
+    assert r.confidence.score <= 0.30
+    assert r.explanation.lower().startswith("the answer could not be independently checked")
+    assert "RuntimeError" not in r.explanation
+    assert "secret" not in r.explanation and "/secret/path" not in str(r.diagnostics)
+    assert r.chart == {"kind": "none"} and r.recommendation is None
+    assert r.diagnostics["answer_verifier_error"] == "RuntimeError"
+    assert any(n == "answer_verifier_error=RuntimeError" for n in r.notes)
