@@ -12,7 +12,7 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "backend")); sys.path.insert(0, str(HERE))
 import fixtures as F  # noqa: E402
 
-FACT = {"clinic": "visits", "logistics": "shipments"}
+FACT = {"clinic": "visits", "logistics": "shipments", "university": "enrollments"}
 
 
 def ref(db, sql):
