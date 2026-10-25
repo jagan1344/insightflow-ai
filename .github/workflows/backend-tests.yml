@@ -6,6 +6,7 @@ on:
       - main
       - claude/insightflow-ai-build-2neph7
       - fix/join-fidelity-guard
+      - 'research/**'
   pull_request:
     branches:
       - main

@@ -210,3 +210,21 @@ def test_unsupported_and_out_of_scope(r5):
     r5("bank", "transactions")
     for q in ("Forecast next quarter's deposits", "Which branches had no customers?", "Delete all transactions"):
         assert ask(q).decision.action in ("CLARIFY", "ABSTAIN"), q
+
+
+
+def test_boundary_sensitivity_skips_maximum_date_overflow():
+    from insightflow.verification.answer_verifier import (
+        VerificationReport, _boundary_sensitivity,
+    )
+
+    plan = NS(
+        dims=[],
+        measures=[NS(formula='SUM("amount")')],
+        filters=[NS(kind="time_range", column="hire_date",
+                    lo="2023-01-01", hi="9999-12-31")],
+    )
+    report = VerificationReport()
+    compiler = NS(compile=lambda _plan: "SELECT 1")
+    _boundary_sensitivity(report, plan, [(1,)], compiler, None)
+    assert report.findings == []
