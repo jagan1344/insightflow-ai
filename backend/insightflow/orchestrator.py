@@ -666,14 +666,28 @@ class Orchestrator:
 
         # 11d. Independent verification + sensitivity diagnostics.
         _caveats: List[str] = []
+        _answer_verifier_err = None
         if decision.action in (ANSWER, WARN) and result.ok and sql:
             try:
                 from .verification.answer_verifier import verify as _verify
                 from .execution.executor import db_file_path as _dbp2
                 _vrep = _verify(plan, sql, list(result.rows), ds, catalog,
                                 _dbp2())
-            except Exception:
+            except Exception as _e:
+                # Fail closed: a verifier failure is not evidence that the
+                # answer passed verification. Keep internals out of the user text.
                 _vrep = None
+                _answer_verifier_err = type(_e).__name__
+                self._extra_notes.append(
+                    f"answer_verifier_error={_answer_verifier_err}")
+                decision = Decision(
+                    CLARIFY,
+                    "the answer could not be independently checked, "
+                    "so it is not being given as correct")
+                explanation = decision.reason[0].upper() + decision.reason[1:] + "."
+                recommendation = None
+                confidence.signals["answer_verifier_error"] = 1.0
+                confidence.score = min(confidence.score, 0.30)
             if _vrep is not None:
                 if _vrep.violations:
                     decision = Decision(
@@ -828,6 +842,8 @@ class Orchestrator:
 
         if _sem_err:
             diagnostics["semantic_verifier_error"] = _sem_err
+        if _answer_verifier_err:
+            diagnostics["answer_verifier_error"] = _answer_verifier_err
         if _sem is not None:
             diagnostics["semantic_spec"] = _sem.spec.as_dict()
             diagnostics["semantic_findings"] = [
