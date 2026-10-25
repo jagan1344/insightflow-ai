@@ -101,6 +101,7 @@ class TableInfo:
     not_null: Set[str]
     unique_cols: Set[str]                    # single columns with no duplicates, no NULLs
     row_count: int
+    declared_keys: Set[str] = field(default_factory=set)   # PK / UNIQUE constraint
 
 
 _STOP_TOKENS = {"id", "key", "no", "ref", "fk", "pk", "code", "num", "number"}
@@ -111,17 +112,28 @@ def _tokens(name: str) -> List[str]:
     return [t for t in re.split(r"[^a-zA-Z0-9]+", name.lower()) if t]
 
 
-def _stem(word: str) -> str:
+def _stems(word: str) -> Set[str]:
+    """All plausible singular forms (plural rules are ambiguous:
+    'warehouses' -> warehouse, but 'boxes' -> box)."""
     w = word.lower()
-    for suf in ("ies", "es", "s"):
-        if w.endswith(suf) and len(w) - len(suf) >= 3:
-            return w[: -len(suf)] + ("y" if suf == "ies" else "")
-    return w
+    out = {w}
+    if w.endswith("ies") and len(w) > 4:
+        out.add(w[:-3] + "y")
+    if w.endswith("es") and len(w) > 4:
+        out.add(w[:-2])
+    if w.endswith("s") and not w.endswith("ss") and len(w) > 3:
+        out.add(w[:-1])
+    return out
 
 
 def _table_stems(table: str) -> Set[str]:
     toks = [t for t in _tokens(table) if t not in _STOP_TOKENS]
-    return {_stem(t) for t in toks} | ({_stem("".join(toks))} if toks else set())
+    out: Set[str] = set()
+    for t in toks:
+        out |= _stems(t)
+    if toks:
+        out |= _stems("".join(toks))
+    return out
 
 
 def _name_evidence(child_col: str, parent_table: str, parent_col: str) -> bool:
@@ -131,12 +143,12 @@ def _name_evidence(child_col: str, parent_table: str, parent_col: str) -> bool:
     for t in _tokens(child_col):
         if t in _STOP_TOKENS:
             continue
-        ts = _stem(t)
+        tss = _stems(t)
         for s in stems:
-            if ts == s:
+            if s in tss:
                 return True
             # abbreviation: "cust" ~ "customer", "shp" is too short to trust
-            if len(ts) >= 4 and s.startswith(ts):
+            if any(len(ts) >= 4 and s.startswith(ts) for ts in tss):
                 return True
     return False
 
@@ -185,7 +197,13 @@ class RelationalSchema:
                     f'SUM("{c}" IS NULL) FROM "{t}"').fetchone()
                 if d == n and not nul:
                     uniq.add(c)
-            tables[t] = TableInfo(t, cols, pk, nn, uniq, n)
+            dk: Set[str] = set(pk) if len(pk) == 1 else set()
+            for ix in con.execute(f'PRAGMA index_list("{t}")').fetchall():
+                if ix[2]:                      # unique index
+                    icols = [r[2] for r in con.execute(f'PRAGMA index_info("{ix[1]}")')]
+                    if len(icols) == 1:
+                        dk.add(icols[0])
+            tables[t] = TableInfo(t, cols, pk, nn, uniq, n, dk)
 
         edges: List[Edge] = []
         declared: Set[Tuple[str, str]] = set()
@@ -219,6 +237,13 @@ class RelationalSchema:
                             continue
                         if _contained(con, t, c, p, pc):
                             cands.append((p, pc))
+                if len(cands) > 1:
+                    # A declared key (PK/UNIQUE) is stronger evidence than a
+                    # column that merely happens to be duplicate-free today.
+                    strong = [(p, pc) for p, pc in cands
+                              if pc in tables[p].declared_keys]
+                    if len(strong) == 1:
+                        cands = strong
                 if len(cands) == 1:
                     p, pc = cands[0]
                     edges.append(Edge(t, c, p, pc, "inferred",
@@ -379,3 +404,30 @@ def discover_cached(db_path: str, anchor: str) -> RelationalSchema:
             _schema_cache.clear()
         _schema_cache[key] = sch
     return sch
+
+
+def schema_snapshot(db_path: str, anchor: str) -> dict:
+    ex = foreign_tables(db_path, anchor)
+    sch = discover_cached(db_path, anchor)
+    return {"tables": {t: sorted(i.columns) for t, i in sch.tables.items()
+                       if t not in ex},
+            "edges": sorted("%s.%s->%s.%s" % e.key() for e in sch.edges)}
+
+
+def snapshot_diff(old: dict, new: dict) -> str:
+    out = []
+    ot, nt = old["tables"], new["tables"]
+    for t in sorted(set(nt) - set(ot)):
+        out.append(f"table added: {t}")
+    for t in sorted(set(ot) - set(nt)):
+        out.append(f"table dropped: {t}")
+    for t in sorted(set(ot) & set(nt)):
+        for c in sorted(set(nt[t]) - set(ot[t])):
+            out.append(f"column added: {t}.{c}")
+        for c in sorted(set(ot[t]) - set(nt[t])):
+            out.append(f"column dropped: {t}.{c}")
+    for e in sorted(set(new["edges"]) - set(old["edges"])):
+        out.append(f"relationship added: {e}")
+    for e in sorted(set(old["edges"]) - set(new["edges"])):
+        out.append(f"relationship removed: {e}")
+    return "; ".join(out) or "metadata changed"

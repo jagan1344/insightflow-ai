@@ -81,3 +81,44 @@ def test_B_paths(B):
 def test_unsafe_never_chosen_when_safe_exists(A):
     r = A.resolve("patients", "clinics")
     assert r.kind == "unique" and r.path.safe      # via home_clinic_id only
+
+
+@pytest.fixture(scope="module")
+def C(tmp_path_factory):
+    return RelationalSchema.discover(str(F.build_c(tmp_path_factory.mktemp("c") / "c.db")))
+
+
+def test_edges_exact_C_mixed_declared_inferred(C):
+    assert {e.key() for e in C.edges} == F.C_EDGES
+    assert not (set(e.key() for e in C.edges) & F.C_DECOYS)
+    st = {e.key(): e.status for e in C.edges}
+    assert st[("students", "major_code", "departments", "dept_code")] == "declared"
+    assert st[("courses", "dept_code", "departments", "dept_code")] == "inferred"
+
+
+def test_C_declared_key_beats_coincidentally_unique_column(C):
+    # instructors.dept_code is duplicate-free today but is not a key
+    assert not C.edges_between("courses", "instructors")
+
+
+def test_C_department_reachable_two_ways_is_ambiguous(C):
+    assert C.resolve("enrollments", "departments").kind == "ambiguous"
+    assert C.resolve("enrollments", "instructors").kind in ("fanout", "ambiguous")   # never a plain join
+
+
+def test_inferred_edge_needs_name_evidence_AND_containment(tmp_path):
+    import sqlite3
+    db = tmp_path / "t.db"
+    c = sqlite3.connect(db)
+    c.executescript("""
+      CREATE TABLE a (id INTEGER PRIMARY KEY, label TEXT);
+      CREATE TABLE b (id INTEGER PRIMARY KEY, a_ref INTEGER, other INTEGER, a_id2 INTEGER);
+      INSERT INTO a VALUES (1,'x'),(2,'y'),(3,'z');
+      INSERT INTO b VALUES (1,1,2,9),(2,2,3,1),(3,3,1,2);
+    """)
+    c.commit(); c.close()
+    s = RelationalSchema.discover(str(db))
+    keys = {e.key() for e in s.edges}
+    assert ("b", "a_ref", "a", "id") in keys          # name + containment
+    assert ("b", "other", "a", "id") not in keys      # containment only
+    assert ("b", "a_id2", "a", "id") not in keys      # name only (9 not in a)

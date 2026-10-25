@@ -52,6 +52,8 @@ class KPICatalog:
     dimensions: List[str] = field(default_factory=list)
     dates: List[str] = field(default_factory=list)
     id_columns: List[str] = field(default_factory=list)
+    # alias -> [kpi_id,...] claimed by several definitions (must be clarified)
+    conflicts: Dict[str, List[str]] = field(default_factory=dict)
 
     def get(self, kpi_id: str) -> Optional[KPIDefinition]:
         return self.kpis.get(kpi_id)
@@ -437,8 +439,16 @@ def build_catalog(ds: ActiveDataset) -> KPICatalog:
     else:
         kpis = _derive_from_uploaded(ds)
 
+    conflicts: Dict[str, List[str]] = {}
+    if ds.kind != "demo":
+        try:
+            from ..governance.metrics import apply as _gov_apply
+            conflicts = _gov_apply(ds, kpis, KPIDefinition)
+        except Exception:
+            conflicts = {}
     cat = KPICatalog(
         dataset_id=ds.id,
+        conflicts=conflicts,
         table=ds.table,
         kpis=kpis,
         measures=list(ds.measures),

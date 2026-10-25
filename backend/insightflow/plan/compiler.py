@@ -766,6 +766,13 @@ class SQLCompiler:
                     and self.rel.source(f.column).kind == "fanout":
                 parts.append(self._rel_exists(
                     f.column, lambda x, v=f.value: f"{x} = {_sql_escape(v)}"))
+            elif f.kind == "in" and f.column and self.rel is not None \
+                    and self.rel.source(f.column) is not None \
+                    and self.rel.source(f.column).kind == "fanout" \
+                    and isinstance(f.value, (list, tuple)):
+                _vs = ", ".join(_sql_escape(v) for v in f.value)
+                parts.append(self._rel_exists(
+                    f.column, lambda x, vs=_vs: f"{x} IN ({vs})"))
             elif f.kind == "eq" and f.column:
                 parts.append(f'{self._colref(f.column)} = {_sql_escape(f.value)}')
             elif f.kind == "in" and f.column and isinstance(f.value, (list, tuple)):

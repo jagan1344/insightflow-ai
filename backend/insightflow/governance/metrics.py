@@ -100,8 +100,12 @@ def apply(ds, kpis: dict, KPIDefinition) -> Dict[str, List[str]]:
     for kid, k in kpis.items():
         for a in k.aliases:
             claims.setdefault(a.lower(), []).append(kid)
-    conflicts = {a: sorted(set(ids)) for a, ids in claims.items()
-                 if len(set(ids)) > 1}
+    conflicts = {}
+    for a, ids in claims.items():
+        ids = sorted(set(ids))
+        # same formula under two ids is a duplicate, not a conflict
+        if len({re.sub(r"\s+", "", kpis[i].formula) for i in ids}) > 1:
+            conflicts[a] = ids
     rev_like = [c for c, i in ds.columns.items()
                 if i.role == "measure" and any(
                     t in c.lower() for t in ("revenue", "sales", "amount",

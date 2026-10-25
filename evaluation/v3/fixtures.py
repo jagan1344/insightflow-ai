@@ -173,5 +173,76 @@ def build_b(path=None) -> pathlib.Path:
     return path
 
 
+# ---------------------------------------------------------------- C -----
+# University enrollments. Mixed conventions: TEXT primary key (dept_code),
+# some FKs declared and some only inferable, a role-ambiguous parent
+# (department via the course OR via the student's major), bridge table
+# (teaching), two date columns, a department with no courses, students with
+# no enrollments, punctuation-heavy values.
+C_DDL = """
+CREATE TABLE departments (dept_code TEXT PRIMARY KEY, dept_name TEXT NOT NULL, building TEXT);
+CREATE TABLE instructors (instr_id INTEGER PRIMARY KEY, instr_name TEXT NOT NULL, dept_code TEXT);
+CREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL, dept_code TEXT, credits INTEGER NOT NULL);
+CREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL, home_state TEXT NOT NULL,
+  major_code TEXT REFERENCES departments(dept_code));
+CREATE TABLE teaching (course_id INTEGER NOT NULL, instr_id INTEGER NOT NULL, PRIMARY KEY (course_id, instr_id));
+CREATE TABLE enrollments (enroll_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL REFERENCES students(student_id),
+  course_id INTEGER NOT NULL, enrolled_on TEXT NOT NULL, completed_on TEXT,
+  tuition_paid REAL NOT NULL, grade_points REAL);
+"""
+C_EDGES = {
+    ("students", "major_code", "departments", "dept_code"),
+    ("enrollments", "student_id", "students", "student_id"),
+    ("enrollments", "course_id", "courses", "course_id"),
+    ("courses", "dept_code", "departments", "dept_code"),
+    ("instructors", "dept_code", "departments", "dept_code"),
+    ("teaching", "course_id", "courses", "course_id"),
+    ("teaching", "instr_id", "instructors", "instr_id"),
+}
+C_DECOYS = {("courses", "credits", "instructors", "instr_id"),
+            ("courses", "credits", "courses", "course_id")}
+
+
+def build_c(path=None) -> pathlib.Path:
+    path = pathlib.Path(path or DATA / "university.db")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.unlink(missing_ok=True)
+    rng = random.Random(4242)
+    c = sqlite3.connect(str(path))
+    c.executescript(C_DDL)
+    c.executemany("INSERT INTO departments VALUES (?,?,?)", [
+        ("CS", "Computer Science", "Gates Hall"), ("MATH", "Mathematics & Statistics", "Euler Bldg"),
+        ("HIST", "History", "Old Main"), ("ART", "Art & Design", "Studio 5"),
+        ("BME", "Bio-Medical Eng.", "Lab Annex"), ("CLAS", "Classics", "Old Main")])  # CLAS: nothing
+    c.executemany("INSERT INTO instructors VALUES (?,?,?)", [
+        (1, "Prof. Ngozi Eze-Bello", "CS"), (2, "Dr. Li Wei", "MATH"), (3, "Prof. J. O'Hara", "HIST"),
+        (4, "Dr. Ana Souza", "ART"), (5, "Dr. Tom Brandt", "BME")])
+    courses = [(1, "Intro to Programming", "CS", 4), (2, "Calculus I", "MATH", 4),
+               (3, "Art History: 1800\u20131900", "ART", 3), (4, "Women's Studies", "HIST", 3),
+               (5, "Biomechanics", "BME", 4), (6, "Data Structures", "CS", 4),
+               (7, "Statistics & Probability", "MATH", 3), (8, "World History", "HIST", 3)]
+    c.executemany("INSERT INTO courses VALUES (?,?,?,?)", courses)
+    c.executemany("INSERT INTO teaching VALUES (?,?)", [
+        (1, 1), (6, 1), (2, 2), (7, 2), (4, 3), (8, 3), (3, 4), (5, 5), (1, 2)])
+    states = ["California", "New York", "Texas", "Ohio"]
+    studs = []
+    for i in range(1, 71):
+        nm = "O'Neil, Sam" if i == 7 else f"Student {i:02d}"
+        maj = None if i % 9 == 0 else rng.choice(["CS", "MATH", "HIST", "ART", "BME"])
+        studs.append((i, nm, rng.choice(states), maj))
+    c.executemany("INSERT INTO students VALUES (?,?,?,?)", studs)
+    enr = []
+    for e in range(1, 501):
+        m = rng.randint(1, 12)
+        on = f"2025-{m:02d}-{rng.randint(1, 20):02d}"
+        done = None if rng.random() < 0.12 else f"2025-{min(m + 1, 12):02d}-{rng.randint(21, 28):02d}"
+        gp = None if rng.random() < 0.15 else round(rng.uniform(0, 4), 2)
+        enr.append((e, rng.randint(1, 65), rng.randint(1, 8), on, done,
+                    round(rng.uniform(300, 2500), 2), gp))     # students 66-70 never enrol
+    c.executemany("INSERT INTO enrollments VALUES (?,?,?,?,?,?,?)", enr)
+    c.commit(); c.close()
+    return path
+
+
 if __name__ == "__main__":
-    print(build_a()); print(build_b())
+    print(build_a()); print(build_b()); print(build_c())

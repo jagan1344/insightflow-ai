@@ -509,7 +509,25 @@ def _bind_dim_column(ds: ActiveDataset, name: str) -> Optional[str]:
     rel = getattr(ds, "rel", None)
     if rel is not None:
         from ..knowledge.rel_context import table_noun_dimension
-        return table_noun_dimension(rel, name)
+        hit = table_noun_dimension(rel, name)
+        if hit:
+            return hit
+    # abbreviation-tolerant token match ("destination" ~ "dest",
+    # "cust" ~ "customer"): every noun token must match a column token
+    # by equality or a >=4-char prefix, and the match must be unique.
+    ntoks = [t for t in re.split(r"[^a-z0-9]+", name.lower()) if t]
+    if ntoks and ds.kind != "demo":
+        hits = []
+        for cname, info in ds.columns.items():
+            if info.role != "dimension":
+                continue
+            ctoks = [t for t in re.split(r"[^a-z0-9]+", cname.lower()) if t]
+            if all(any(a == b or (min(len(a), len(b)) >= 4 and
+                                   (a.startswith(b) or b.startswith(a)))
+                       for b in ctoks) for a in ntoks):
+                hits.append(cname)
+        if len(hits) == 1:
+            return hits[0]
     return None
 
 
@@ -713,10 +731,48 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
 # Filter binding
 # =============================================================================
 
+def _mentioned_date_col(question: str, ds: ActiveDataset) -> Optional[str]:
+    """The ONE date column the question points at. Specific words
+    ('delivered', 'discharge') beat the plain table noun ('shipments' for
+    ship_dt); the table noun only decides when nothing more specific is said."""
+    if len(ds.dates) < 2:
+        return None
+    ql = _norm(question)
+    words = re.findall(r"[a-z0-9]+", ql)
+    tnouns = set()
+    for t in re.split(r"[^a-z0-9]+", ds.table.lower()):
+        if t:
+            tnouns |= {t, t.rstrip("s")}
+    specific, noun_only = [], []
+    for d in ds.dates:
+        toks = [t for t in re.split(r"[^a-z0-9]+", d.lower())
+                if t and t not in ("date", "dt", "on", "at", "time")]
+        sp = nn = False
+        for t in toks:
+            if len(t) < 3:
+                continue
+            stem = t[:max(4, len(t) - 2)]
+            for w in words:
+                if w.startswith(stem):
+                    if w in tnouns:
+                        nn = True
+                    else:
+                        sp = True
+        if sp:
+            specific.append(d)
+        elif nn:
+            noun_only.append(d)
+    if len(specific) == 1:
+        return specific[0]
+    if not specific and len(noun_only) == 1:
+        return noun_only[0]
+    return None
+
+
 def _ambiguous_date_columns(question: str, ds: ActiveDataset,
                              time_unit: Optional[str]) -> List[str]:
     """>1 date column and a time-based question that does not say which."""
-    if len(ds.dates) < 2:
+    if len(ds.dates) < 2 or getattr(ds, "date_choice", None):
         return []
     ql = _norm(question)
     timey = bool(time_unit) or bool(re.search(
@@ -725,12 +781,7 @@ def _ambiguous_date_columns(question: str, ds: ActiveDataset,
         ql))
     if not timey:
         return []
-    for d in ds.dates:
-        toks = [t for t in re.split(r"[^a-z0-9]+", d.lower())
-                if t and t not in ("date", "dt", "on", "at")]
-        if any(re.search(rf"\b{re.escape(t)}", ql) for t in toks):
-            return []
-    return list(ds.dates)
+    return [] if _mentioned_date_col(question, ds) else list(ds.dates)
 
 
 def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
@@ -945,12 +996,22 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
     if ds.kind != "demo":
         m = re.search(r"\b(?:missing|null|empty|blank|unspecified)\s+"
                       r"([a-z_ ]+?)\s*\??\s*$", ql) or \
+            re.search(r"\b(?:have|has|with|where|having)\s+no\s+"
+                      r"([a-z_ ]+?)\s*\??\s*$", ql) or \
             re.search(r"\b(?:with|where)\s+(?:no|an?\s+)?"
                       r"([a-z_ ]+?)\s+(?:is\s+)?(?:null|missing|empty|blank)"
                       r"\b", ql)
         if m:
             phrase = _norm_words(m.group(1))
             best = None
+            _UNIT = {"usd", "eur", "gbp", "amt", "amount", "value", "val",
+                     "kg", "lb", "pct", "num", "cnt", "total"}
+            _pt = set(phrase.split())
+            core_hits = []
+            for cname in ds.columns:
+                ct = [t for t in _norm_words(cname).split() if t not in _UNIT]
+                if ct and all(t in _pt for t in ct):
+                    core_hits.append(cname)
             for cname in ds.columns:
                 n = _norm_words(cname)
                 if re.search(rf"(?<![a-z0-9]){re.escape(n)}(?![a-z0-9])",
@@ -959,6 +1020,8 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
                     best = cname
             if best:
                 return best
+            if len(core_hits) == 1:
+                return core_hits[0]
     for p in patterns:
         m = re.search(p, ql)
         if not m:
@@ -1311,6 +1374,41 @@ _NOT_ENTITY = {"january", "february", "march", "april", "may", "june", "july",
                "which", "how", "why", "compare", "list", "give", "total"}
 
 
+_NEG_CUE = re.compile(
+    r"\b(not\s+including|excluding|exclude|except(?:\s+for)?|without|minus|"
+    r"other\s+than|apart\s+from|not\s+counting|but\s+not|besides|"
+    r"not\s+(?:in|from|for|at))\b")
+
+
+def _find_negated_references(question: str, ds: ActiveDataset,
+                              catalog: Optional[KPICatalog]) -> List[str]:
+    """'everyone except Cardiology', 'total fee not including copay':
+    exclusion is not implemented, and ignoring the cue would answer the
+    OPPOSITE question (the excluded value becomes the filter). Refuse
+    instead of guessing."""
+    ql = question.lower()
+    out = []
+    for m in _NEG_CUE.finditer(ql):
+        tail = ql[m.end(): m.end() + 60]
+        hit = None
+        if ds.kind != "demo":
+            for lo, _c in _value_mentions(tail, _value_index(ds)):
+                hit = lo; break
+        if hit is None:
+            for c in ds.columns:
+                ph = re.sub(r"[^a-z0-9]+", " ", c.lower()).strip()
+                if ph and re.search(rf"(?<![a-z0-9]){re.escape(ph)}(?![a-z0-9])", tail):
+                    hit = ph; break
+        if hit is None and catalog is not None:
+            for k in catalog.kpis.values():
+                if any(re.search(rf"(?<![a-z0-9]){re.escape(a.lower())}(?![a-z0-9])", tail)
+                       for a in k.aliases if len(a) > 3):
+                    hit = k.display_name.lower(); break
+        if hit:
+            out.append(f"unsupported_exclusion:{m.group(0)} {hit}")
+    return out
+
+
 def _find_unknown_proper_nouns(question: str, ds: ActiveDataset,
                                 catalog: Optional[KPICatalog]) -> List[str]:
     """Capitalised phrases (not sentence-initial, not months) that match no
@@ -1394,7 +1492,17 @@ def _find_value_filters(question: str, ds: ActiveDataset
                     and _rel.source(col).kind == "ambiguous":
                 continue
             out.append(FilterExpr(kind="eq", column=col, value=orig))
-        return out
+        # Several values of the SAME column ("Cardiology and Pediatrics")
+        # are alternatives (IN), never a conjunction that matches nothing.
+        merged: List[FilterExpr] = []
+        for f in out:
+            same = [g for g in out if g.column == f.column]
+            if len(same) == 1:
+                merged.append(f)
+            elif not any(m.column == f.column for m in merged):
+                merged.append(FilterExpr(kind="in", column=f.column,
+                                         value=[g.value for g in same]))
+        return merged
     import sqlite3
     from ..config import settings
 
@@ -1490,8 +1598,8 @@ def _find_unknown_dim_values(question: str, ds: ActiveDataset
             if not value or value.split()[0] in _VALUE_STOPWORDS or \
                     value in ("a", "an", "each", "every", "any", "all"):
                 continue
-            if value in idx:        # known value (possibly other column)
-                continue
+            if value in idx or f"{value} {noun}" in idx:
+                continue            # known value (possibly other column)
             if re.fullmatch(r"[\d\W_]+", value):
                 continue
             # value with a known-value substring is handled by the filter
@@ -1933,6 +2041,14 @@ class Planner:
         # answer to one question. The user can ask the second question
         # separately. Record the dropped part in plan.notes so the
         # response can surface it to the user.
+        _dm = _mentioned_date_col(question, ds)
+        if _dm and ds.dates and _dm != ds.dates[0]:
+            import copy as _copy
+            ds = _copy.copy(ds)
+            ds.columns = {_dm: ds.columns[_dm],
+                          **{k: v for k, v in ds.columns.items() if k != _dm}}
+            ds.date_choice = _dm
+            self.ds = ds
         original = question
         question = _first_clause(question)
         _dropped_suffix = ""
@@ -1940,6 +2056,14 @@ class Planner:
             _dropped_suffix = original[len(question):].lstrip(" ,.;")
         ql_lo = question.lower()
         kpis = _bind_kpis(question, catalog)
+        _metric_conflicts: List[str] = []
+        for _alias, _ids in getattr(catalog, "conflicts", {}).items():
+            if _alias.startswith("__"):
+                continue
+            if re.search(rf"(?<![a-z0-9]){re.escape(_alias)}(?![a-z0-9])",
+                         ql_lo) and not any(k.kpi_id in _ids for k in kpis):
+                _metric_conflicts.append(
+                    f"ambiguous_metric:{_alias}=" + "|".join(_ids))
         # dim mentions (bound + unbound)
         dim_mentions = _find_dim_mentions(question, ds, catalog)
         bound_dims = [(n, c) for n, c in dim_mentions if c]
@@ -2055,6 +2179,7 @@ class Planner:
             )
             for n in unbound_dims:
                 plan.unavailable.append(f"dimension:{n}")
+            plan.unavailable.extend(_metric_conflicts)
             return plan
 
         # ---------- build the plan by kind ----------
@@ -2082,6 +2207,8 @@ class Planner:
         _unknown_values: List[str] = _find_unknown_dim_values(question, ds)
         _unknown_values += _find_ambiguous_values(question, ds)
         _unknown_values += _find_unknown_proper_nouns(question, ds, catalog)
+        _unknown_values += _metric_conflicts
+        _unknown_values += _find_negated_references(question, ds, catalog)
         _rel = getattr(ds, "rel", None)
         if _rel is not None:
             for _n, _c in bound_dims:
@@ -2132,6 +2259,7 @@ class Planner:
                 # to DIRECT_KPI so the compiler emits a filtered scalar.
                 if kind == IntentKind.BREAKDOWN and not bound_dims:
                     kind = IntentKind.DIRECT_KPI
+        dims = [_dref(c, ds) for _, c in bound_dims]
         notes: List[str] = list(_early_notes)
         # Tag the plan when the time filter came from a relative-period
         # phrase (Defect B). The orchestrator reads this note so an

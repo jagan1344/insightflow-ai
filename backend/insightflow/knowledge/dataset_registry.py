@@ -88,6 +88,8 @@ class ActiveDataset:
     # Relational context (multi-table schema around `table`); None for a
     # flat table. Populated automatically when relationships are found.
     rel: object = None
+    # Date column the user (or governance config) fixed for time questions
+    date_choice: Optional[str] = None
 
     # -- role queries ----------------------------------------------------
     @property
@@ -350,8 +352,18 @@ def get_active_dataset() -> ActiveDataset:
         rel = None
     if rel is not None:
         _apply_rel_context(cols, rel)
+    date_choice = None
+    try:
+        from ..governance.metrics import date_default
+        dd = date_default(table_name)
+        if dd and dd in cols and cols[dd].role == "date":
+            cols = {dd: cols[dd], **{k: v for k, v in cols.items() if k != dd}}
+            date_choice = dd
+    except Exception:
+        pass
     return ActiveDataset(id=ds_id, name=name, table=table_name,
-                         kind="uploaded", columns=cols, rel=rel)
+                         kind="uploaded", columns=cols, rel=rel,
+                         date_choice=date_choice)
 
 
 def _apply_rel_context(cols: dict, rel) -> None:

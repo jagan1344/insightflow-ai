@@ -24,6 +24,7 @@ the new pipeline.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -124,6 +125,28 @@ def _legacy_intent_of(plan: AnalyticalPlan) -> str:
     return "aggregate"
 
 
+_LAST_SCHEMA: dict = {}
+
+
+def _schema_change_notes(ds) -> List[str]:
+    """Compare the anchor's schema with what was seen on the previous ask
+    and report what changed (columns/tables/relationships)."""
+    if ds.kind == "demo":
+        return []
+    try:
+        from .execution.executor import db_file_path
+        from .knowledge.relational import schema_snapshot, snapshot_diff
+        path = db_file_path()
+        snap = schema_snapshot(path, ds.table)
+    except Exception:
+        return []
+    old = _LAST_SCHEMA.get((path, ds.table))
+    _LAST_SCHEMA[(path, ds.table)] = snap
+    if old is None or old == snap:
+        return []
+    return ["schema_changed: " + snapshot_diff(old, snap)]
+
+
 class Orchestrator:
     def __init__(self, llm: Optional[LLMClient] = None,
                  memory: Optional[Memory] = None):
@@ -137,9 +160,23 @@ class Orchestrator:
         self._ctx = ConversationContext()
 
     # ==================================================================
-    def ask(self, question: str) -> InsightResponse:
-        ds = get_active_dataset()
+    def ask(self, question: str, *, _ds_override=None, _retry: bool = False,
+            _extra_notes: Optional[List[str]] = None) -> InsightResponse:
+        ds = _ds_override or get_active_dataset()
+        self._cur_ds = ds
+        self._extra_notes = list(_extra_notes or [])
         catalog = build_catalog(ds)
+        self._extra_notes += _schema_change_notes(ds)
+        if ds.kind != "demo" and not ds.columns:
+            _p = AnalyticalPlan(intent_kind=IntentKind.AMBIGUOUS,
+                                question=question, table=ds.table,
+                                notes=["dataset table missing"],
+                                unavailable=[f"table:{ds.table}"])
+            return self._unanswerable_response(
+                question, _p, ValidationReport(ok=False, fidelity=0.0, issues=[]),
+                reason=(f"The table '{ds.table}' for dataset '{ds.name}' no "
+                        f"longer exists (the schema changed). Re-upload or "
+                        f"select another dataset."))
 
         # -1. Follow-up rewrite (Phase 5). "Now by region", "and in July
         # 2026", "compare it to last month" are rewritten against the
@@ -199,6 +236,28 @@ class Orchestrator:
         validator = PlanValidator(ds, catalog)
         report = validator.validate(plan)
 
+        # 2b. Adaptive clarification: an ambiguity (date column / join
+        # path) is only worth a question if the candidate readings give
+        # different answers.
+        if ds.kind != "demo" and plan.unavailable and _ds_override is None:
+            try:
+                from .clarify.materiality import resolve as _resolve_amb
+                from .execution.executor import db_file_path
+                _res = _resolve_amb(question, plan.unavailable, ds, catalog,
+                                    db_file_path())
+            except Exception:
+                _res = None
+            if _res is not None and _res.kind == "equivalent":
+                return self.ask(
+                    original_question, _ds_override=_res.candidates[0].ds,
+                    _retry=_retry, _extra_notes=self._extra_notes + [
+                        "ambiguity_immaterial=" + _res.ambiguity + ": "
+                        + str(len(_res.candidates)) + " readings give identical results"])
+            if _res is not None and _res.kind == "clarify":
+                return self._unanswerable_response(
+                    question, plan, report, reason=_res.prompt,
+                    explanation=_res.prompt)
+
         # 3. Fall back to the legacy generator ONLY on the demo dataset,
         #    where 55 regression tests depend on its behaviour.
         #
@@ -247,9 +306,33 @@ class Orchestrator:
                 referenced_tables=list(sqlval.referenced_tables),
             )
 
+        # 5d. Cost pre-flight (cartesian joins / runaway scans are not run).
+        if sqlval.ok:
+            try:
+                from .config import settings as _cs
+                from .execution.cost_guard import analyze as _analyze_cost
+                from .execution.executor import db_file_path as _dbp
+                if _cs.database_url.startswith("sqlite"):
+                    _cost = _analyze_cost(_dbp(), sql, _cs.max_scan_cost)
+                    if _cost.blocked:
+                        return self._unanswerable_response(
+                            question, plan, report,
+                            reason="Query not run (too expensive or unsafe): "
+                                   + "; ".join(_cost.reasons))
+            except Exception:
+                pass
+
         # 6. Execute if valid.
         if sqlval.ok:
             result = run_sql(sql)
+            if (not result.ok and not _retry and re.search(
+                    r"no such (table|column)", result.error or "", re.I)):
+                # Schema changed under us: drop stale metadata, replan once.
+                from .knowledge.schema_agent import refresh_schema
+                refresh_schema()
+                return self.ask(original_question, _retry=True,
+                                _extra_notes=self._extra_notes +
+                                ["schema_refreshed_after_execution_error"])
         else:
             result = QueryResult(
                 error="SQL failed validation: " + "; ".join(sqlval.issues))
@@ -448,6 +531,20 @@ class Orchestrator:
                 _tn = unrepresented_table_nouns(question, sql, getattr(ds, "rel", None))
             except Exception:
                 _tn = []
+            try:
+                from .reliability.mention_coverage import unrepresented_column_mentions
+                _cm = unrepresented_column_mentions(question, sql, ds)
+            except Exception:
+                _cm = []
+            if _cm and not _miss and not _tn:
+                decision = Decision(
+                    CLARIFY,
+                    "the question mentions column(s) " +
+                    ", ".join(f"'{c}'" for c in _cm) +
+                    " that the generated query does not use, so it would "
+                    "ignore part of your question")
+                confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
             if _tn and not _miss:
                 decision = Decision(
                     CLARIFY,
@@ -468,6 +565,31 @@ class Orchestrator:
                 confidence.signals["mention_coverage"] = 0.0
                 confidence.score = min(confidence.score, 0.30)
 
+        # 11d. Independent verification + sensitivity diagnostics.
+        _caveats: List[str] = []
+        if decision.action in (ANSWER, WARN) and result.ok and sql:
+            try:
+                from .verification.answer_verifier import verify as _verify
+                from .execution.executor import db_file_path as _dbp2
+                _vrep = _verify(plan, sql, list(result.rows), ds, catalog,
+                                _dbp2())
+            except Exception:
+                _vrep = None
+            if _vrep is not None:
+                if _vrep.violations:
+                    decision = Decision(
+                        CLARIFY,
+                        "independent verification failed: "
+                        + "; ".join(f.detail for f in _vrep.violations))
+                    confidence.score = min(confidence.score, 0.30)
+                confidence.signals["verification_violations"] = float(
+                    len(_vrep.violations))
+                confidence.signals["sensitivity_flags"] = float(
+                    len(_vrep.diagnostics))
+                _caveats = [f"{f.name}: {f.detail}" for f in _vrep.diagnostics]
+                self._extra_notes += [f"{f.severity}:{f.name}:{f.detail}"
+                                      for f in _vrep.findings]
+
         # 12. Explain (evidence-first).
         if decision.action in (ANSWER, WARN):
             trace = plan_evidence_line(plan, catalog.table)
@@ -484,6 +606,8 @@ class Orchestrator:
                         f"I answered the first one. Ask the follow-up "
                         f"separately for a clean answer: {dropped!r}")
             explanation = f"{trace}\n\n{body}"
+            if _caveats:
+                explanation += "\n\nCaveats: " + "; ".join(_caveats)
             recommendation = (recommend(analysis)
                               if plan.intent_kind == IntentKind.CONTRIBUTION
                               else None)
@@ -499,7 +623,7 @@ class Orchestrator:
                  if decision.action in (ANSWER, WARN)
                  else {"kind": "none"})
 
-        notes: List[str] = []
+        notes: List[str] = list(self._extra_notes)
         notes.append(f"active_dataset={ds.id} table={ds.table}")
         notes.append(f"plan_kind={plan.intent_kind}")
         if report.issues:
@@ -682,12 +806,23 @@ class Orchestrator:
     # ==================================================================
     def _clarify_message_from_plan(self, plan: AnalyticalPlan,
                                     report: ValidationReport) -> str:
+        if plan.unavailable:
+            from .clarify.messages import targeted_message
+            _t0 = targeted_message(plan.unavailable,
+                                   getattr(self, "_cur_ds", None))
+            if _t0:
+                return _t0
         if plan.intent_kind == IntentKind.AMBIGUOUS:
             return ("This question is too open-ended to answer from the data "
                     "alone. Try naming a specific metric (e.g. revenue, "
                     "profit) and — optionally — a breakdown, time window "
                     "or comparison.")
         if plan.unavailable:
+            from .clarify.messages import targeted_message
+            _t = targeted_message(plan.unavailable,
+                                  getattr(self, "_cur_ds", None))
+            if _t:
+                return _t
             gaps = ", ".join(u.split(":", 1)[-1] for u in plan.unavailable)
             return (f"I can't answer this on the current dataset — it's "
                     f"missing: {gaps}. Load a dataset with those fields, "
@@ -752,7 +887,8 @@ class Orchestrator:
 
     # ==================================================================
     def _unanswerable_response(self, question: str, plan: AnalyticalPlan,
-                                report: ValidationReport, reason: str
+                                report: ValidationReport, reason: str,
+                                explanation: Optional[str] = None
                                 ) -> InsightResponse:
         empty = QueryResult()
         sqlval = ValidationResult(ok=False, score=0.0, issues=[reason])
@@ -767,7 +903,7 @@ class Orchestrator:
         decision = Decision(CLARIFY, reason)
         evidence = build_evidence(question, "", None, {}, empty)
         analysis = Analysis(summary=reason)
-        explanation = self._clarify_message_from_plan(plan, report)
+        explanation = explanation or self._clarify_message_from_plan(plan, report)
         failure = classify_failure(
             plan, report, "", ValidationResult(ok=False, score=0.0,
                                                  issues=[reason]),

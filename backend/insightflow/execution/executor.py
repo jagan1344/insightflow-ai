@@ -43,14 +43,41 @@ def reset_engine() -> None:
         engine.dispose()
 
 
+def _is_sqlite(engine: Engine) -> bool:
+    return engine.dialect.name == "sqlite"
+
+
 def run_sql(sql: str) -> QueryResult:
-    """Execute a SQL statement read-only, capping rows. Never raises."""
+    """Execute a SQL statement read-only, capping rows and wall time.
+    Never raises."""
+    raw = None
     try:
         engine = get_engine()
         with engine.connect() as conn:
+            if _is_sqlite(engine):
+                from .cost_guard import arm_timeout
+                raw = conn.connection.driver_connection
+                raw.execute("PRAGMA query_only=ON")   # defence in depth
+                arm_timeout(raw, settings.query_timeout_s)
             cur = conn.execute(text(sql))
             cols = list(cur.keys())
             rows = cur.fetchmany(settings.max_rows)
             return QueryResult(columns=cols, rows=[tuple(r) for r in rows])
     except Exception as e:
-        return QueryResult(error=str(e))
+        msg = str(e)
+        if "interrupted" in msg.lower():
+            msg = (f"query exceeded the {settings.query_timeout_s:g}s time "
+                   f"budget and was cancelled")
+        return QueryResult(error=msg)
+    finally:
+        if raw is not None:
+            try:
+                raw.set_progress_handler(None, 0)
+                raw.execute("PRAGMA query_only=OFF")
+            except Exception:
+                pass
+
+
+def db_file_path() -> str:
+    u = settings.database_url
+    return u.split(":///", 1)[1] if ":///" in u else u

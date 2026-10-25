@@ -133,3 +133,26 @@ def unrepresented_table_nouns(question: str, sql: str, rel) -> List[str]:
             out.append(noun)
             break
     return out
+
+
+def unrepresented_column_mentions(question: str, sql: str, ds) -> List[str]:
+    """Anchor columns named in the question (space-normalised, whole
+    phrase) that the SQL never touches, e.g. 'not including copay' answered
+    with SUM(fee). Dimension/date/measure columns alike."""
+    if ds is None or ds.kind == "demo" or not sql:
+        return []
+    ql = " " + re.sub(r"[^a-z0-9]+", " ", question.lower()) + " "
+    sql_l = sql.lower()
+    out = []
+    for c, info in ds.columns.items():
+        if info.role == "id":
+            continue
+        if getattr(ds, "rel", None) is not None and ds.rel.source(c) is not None:
+            continue                     # joined dims are covered elsewhere
+        phrase = " " + re.sub(r"[^a-z0-9]+", " ", c.lower()).strip() + " "
+        if len(phrase.strip()) < 3 or phrase not in ql:
+            continue
+        if c.lower() in sql_l:
+            continue
+        out.append(c)
+    return out

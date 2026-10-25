@@ -44,7 +44,8 @@ def _cartesian(sql: str) -> bool:
         if not re.search(r"\b(ON|USING)\b", seg, re.I):
             return True
     # "FROM a, b" comma joins with no WHERE linking them
-    if re.search(r"\bFROM\s+[\w\"`.]+(?:\s+(?:AS\s+)?\w+)?\s*,\s*[\w\"`]", s, re.I):
+    if re.search(r"\bFROM\s+[\w\"`.]+(?:\s+(?:AS\s+)?\w+)?\s*,\s*[\w\"`]", s, re.I) \
+            and not re.search(r"\bWHERE\b", s, re.I):
         return True
     return False
 
@@ -62,6 +63,11 @@ def analyze(db_path: str, sql: str,
         return rep
     try:
         plan = con.execute("EXPLAIN QUERY PLAN " + sql).fetchall()
+        alias_of = {}
+        for m in re.finditer(r'(?:FROM|JOIN|,)\s+"?(\w+)"?(?:\s+(?:AS\s+)?"?(\w+)"?)?', sql, re.I):
+            tbl, al = m.group(1), m.group(2)
+            if al and al.upper() not in ("ON", "WHERE", "JOIN", "LEFT", "INNER", "CROSS", "GROUP", "ORDER", "LIMIT", "USING", "UNION", "HAVING"):
+                alias_of[al] = tbl
         sizes = {}
         scans = []
         for row in plan:
@@ -69,6 +75,7 @@ def analyze(db_path: str, sql: str,
             m = re.match(r"SCAN\s+(?:TABLE\s+)?(\"?[\w]+\"?)", detail, re.I)
             if m and "USING" not in detail.upper().split("SCAN", 1)[-1][:60]:
                 t = m.group(1).strip('"')
+                t = alias_of.get(t, t)
                 if t not in sizes:
                     try:
                         sizes[t] = con.execute(

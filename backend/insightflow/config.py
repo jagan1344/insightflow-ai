@@ -58,6 +58,8 @@ class Settings:
     threshold_low:  float = field(default_factory=lambda: _envf("CONF_LOW",  0.40))
 
     max_rows: int = field(default_factory=lambda: _envi("MAX_ROWS", 1000))
+    query_timeout_s: float = field(default_factory=lambda: _envf("QUERY_TIMEOUT_S", 10.0))
+    max_scan_cost: int = field(default_factory=lambda: _envi("MAX_SCAN_COST", 20_000_000))
 
     confidence_weights: Dict[str, float] = field(default_factory=lambda: dict(DEFAULT_WEIGHTS))
 
