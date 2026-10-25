@@ -764,14 +764,24 @@ class Orchestrator:
         # 12b. Semantic layer: typed spec -> type check -> preservation
         # (spec vs executed SQL vs rows vs the written answer).
         _sem = None
+        _sem_err = None
         if decision.action in (ANSWER, WARN) and ds.kind != "demo" and result.ok and sql \
                 and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend", "ratio"):
             try:
                 from .semantics import verify_semantics
                 _sem = verify_semantics(question, plan, sql, result, explanation, ds, catalog)
-            except Exception as _e:               # a verifier bug must never fabricate an answer
+            except Exception as _e:               # fail closed: an unverified answer is not approved
                 _sem = None
+                _sem_err = f"{type(_e).__name__}: {str(_e)[:200]}"
                 self._extra_notes.append(f"semantic_verifier_error={type(_e).__name__}")
+                decision = Decision(
+                    CLARIFY,
+                    "the answer could not be checked against what you asked, "
+                    "so it is not being given as correct")
+                explanation = decision.reason[0].upper() + decision.reason[1:] + "."
+                recommendation = None
+                confidence.signals["semantic_verifier_error"] = 1.0
+                confidence.score = min(confidence.score, 0.30)
             if _sem is not None and _sem.violations:
                 decision = Decision(
                     CLARIFY,
@@ -816,6 +826,8 @@ class Orchestrator:
             failure=failure,
         )
 
+        if _sem_err:
+            diagnostics["semantic_verifier_error"] = _sem_err
         if _sem is not None:
             diagnostics["semantic_spec"] = _sem.spec.as_dict()
             diagnostics["semantic_findings"] = [
