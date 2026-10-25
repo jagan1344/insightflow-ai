@@ -39,6 +39,7 @@ class DimSource:
     via_fk: str = ""                  # role alias: the anchor FK column
     numeric: bool = False             # numeric attribute of a many-to-one parent
     date: bool = False                # date attribute of a many-to-one parent
+    flag: bool = False                # 0/1 attribute of a many-to-one parent
     alternatives: List[str] = field(default_factory=list)   # other safe paths NOT used
     alt_paths: tuple = ()             # the same, as JoinPath objects
 
@@ -173,14 +174,22 @@ def build_rel_context(db_path: str, anchor: str) -> Optional[RelContext]:
             if _is_numeric(ctype) and c not in keys:
                 num_by_name.setdefault(c, []).append((t, c))
     taken = set(anchor_cols) | set(ctx.sources)
+    _con2 = _sq.connect(f"file:{db_path}?mode=ro", uri=True)
     for name, tcs in num_by_name.items():
         if len(tcs) > 1 or name in taken:
             continue                       # clash: not exposed (never guessed)
         t, c = tcs[0]
         p = per_table[t].path
+        isflag = False
+        try:
+            isflag = {r[0] for r in _con2.execute(
+                f'SELECT DISTINCT "{c}" FROM "{t}" WHERE "{c}" IS NOT NULL LIMIT 4')} <= {0, 1}
+        except Exception:
+            pass
         ctx.sources[name] = DimSource(name, t, c, "safe", p.steps,
-                                      p.nullable, numeric=True)
+                                      p.nullable, numeric=not isflag, flag=isflag)
 
+    _con2.close()
     # --- role aliases: parent referenced by several anchor FK columns ----
     by_parent: Dict[str, List[Edge]] = {}
     for e in ctx.fk_columns.values():

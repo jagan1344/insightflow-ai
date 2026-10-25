@@ -1564,6 +1564,8 @@ def _find_negative_existence(question: str, ds: ActiveDataset) -> List[str]:
         return []
     if _find_child_existence(question, ds):
         return []           # "orders with no returns": a NOT EXISTS over a child table
+    if _find_date_state_filters(question, ds, False):
+        return []           # "invoices not paid": paid_on IS NULL
     # NULL-count questions ("employees with no bonus") are handled elsewhere
     if _find_null_target_column(question, ds):
         return []
@@ -1775,7 +1777,8 @@ def _find_date_state_filters(question: str, ds: ActiveDataset,
         for t in toks:
             stem = t[:max(4, len(t) - 2)]
             m = re.search(rf"\b(un)?({re.escape(stem)}\w*)", ql)
-            if not m or m.group(2) in anchor_toks or not m.group(2).endswith(("ed", "en", "t")):
+            if not m or m.group(2) in anchor_toks or not (
+                    m.group(2).endswith(("ed", "en", "t")) or m.group(2) in ("paid", "sold", "made", "begun")):
                 continue
             ctx = ql[max(0, m.start() - 30): m.start()] + (" un" if m.group(1) else "") + ql[m.end(): m.end() + 12]
             neg = bool(_NEG_STATE.search(ql[max(0, m.start() - 30): m.start()])) \
@@ -1802,7 +1805,8 @@ def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
             if not m:
                 continue
             before = ql[max(0, m.start() - 24): m.start()]
-            neg = bool(m.group(1)) or bool(re.search(r"\b(not|never|without|isn't|aren't|wasn't|weren't|no)\s+(?:\w+\s+){0,2}$", before))
+            neg = bool(m.group(1)) or bool(_NEG_BEFORE.search(ql[max(0, m.start() - 60): m.start()])) \
+                or bool(re.search(r"\b(not|never|without|isn't|aren't|wasn't|weren't|no)\s+(?:\w+\s+){0,2}$", before))
             out.append(FilterExpr(kind="eq", column=c, value=0 if neg else 1))
             break
     return out
@@ -2563,6 +2567,8 @@ class Planner:
         # below the median" / "customers with revenue above average AND
         # profit below average" — a relative-to-stat filter on entities.
         rel_spec = _detect_relative_to_stat(question, ds, catalog, bound_dims)
+        if rel_spec is not None and _find_numeric_filters(question, ds):
+            rel_spec = None          # "more than 100 acres" is a row condition, not "above average"
         if rel_spec is not None:
             kind = IntentKind.RELATIVE_TO_STAT
 

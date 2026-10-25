@@ -11,7 +11,7 @@ ABBREV = {
     "cd": "code", "stat": "status", "sts": "status", "tot": "total", "avg": "average", "bal": "balance",
     "pmt": "payment", "wo": "workorder", "po": "purchaseorder", "sku": "sku", "yr": "year", "mth": "month",
     "wk": "week", "cnt": "count", "ref": "reference", "src": "source", "dst": "destination", "dest": "destination",
-    "ctry": "country", "st": "state", "veh": "vehicle", "sup": "supplier", "vend": "vendor",
+    "ctry": "country", "st": "state", "veh": "vehicle", "temp": "temperature", "pax": "passenger", "apt": "airport", "carr": "carrier", "flt": "flight", "sup": "supplier", "vend": "vendor",
 }
 
 

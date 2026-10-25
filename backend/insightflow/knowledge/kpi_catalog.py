@@ -403,7 +403,7 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
         if info.role != "measure":
             continue
         from .abbrev import canon_tokens as _ct
-        _long = " ".join(_ct(name))
+        _long = " ".join(t for t in _ct(name) if len(t) > 1 and t not in ("usd", "eur", "gbp"))
         _exp = {_long} - {name.lower().replace("_", " ")} if _long else set()
         kid = f"avg_{name.lower()}"
         if kid in out:

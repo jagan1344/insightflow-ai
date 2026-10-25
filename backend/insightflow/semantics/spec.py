@@ -201,7 +201,8 @@ def build_spec(question: str, plan, ds, catalog=None) -> SemanticSpec:
         elif f.kind in ("eq", "in"):
             kind = "flag" if col in (getattr(ds, "flag_columns", ()) or ()) else "value"
             vals = list(f.value) if isinstance(f.value, (list, tuple)) else [f.value]
-            spec.filters.append(FilterSpec(kind, col, tbl, "include", "=" if len(vals) == 1 else "in", vals, org))
+            pol = "exclude" if kind == "flag" and vals == [0] else "include"   # flag = 0 means "not <flag>"
+            spec.filters.append(FilterSpec(kind, col, tbl, pol, "=" if len(vals) == 1 else "in", vals, org))
         elif f.kind == "not_in":
             spec.filters.append(FilterSpec("exclusion", col, tbl, "exclude", "not in", list(f.value), org))
         elif f.kind in ("cmp", "range"):

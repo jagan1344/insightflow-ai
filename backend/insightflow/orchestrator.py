@@ -765,7 +765,7 @@ class Orchestrator:
         # (spec vs executed SQL vs rows vs the written answer).
         _sem = None
         if decision.action in (ANSWER, WARN) and ds.kind != "demo" and result.ok and sql \
-                and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend"):
+                and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend", "ratio"):
             try:
                 from .semantics import verify_semantics
                 _sem = verify_semantics(question, plan, sql, result, explanation, ds, catalog)

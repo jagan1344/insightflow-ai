@@ -135,6 +135,9 @@ def unrepresented_table_nouns(question: str, sql: str, rel) -> List[str]:
             fk = fk_noun_column(rel, noun)
             if fk and fk.lower() in sql_l:
                 break
+            if any(e.parent_table == t and e.child_col.lower() in sql_l
+                   for e in rel.schema.edges):
+                break          # an intermediate hop: its key is used directly
             if fk and not re.search(
                     rf"\b(?:how\s+many|number\s+of|count\s+of|count)\s+"
                     rf"(?:distinct\s+|unique\s+|different\s+)?{re.escape(noun)}\b", ql):
@@ -232,7 +235,14 @@ def unrepresented_column_words(question: str, sql: str, ds) -> List[str]:
     rel = getattr(ds, "rel", None)
     if ds is None or ds.kind == "demo" or not sql or rel is None:
         return []          # table names are only trustworthy for registered relational data
-    ql = re.sub(r"[^a-z0-9]+", " ", question.lower())
+    qv = question.lower()
+    try:
+        from ..plan.planner import _value_index, _value_mentions
+        for lo, _c in _value_mentions(question, _value_index(ds)):
+            qv = qv.replace(lo, " ")
+    except Exception:
+        pass
+    ql = re.sub(r"[^a-z0-9]+", " ", qv)
     sql_l = sql.lower()
     skip = set()
     for t in re.split(r"[^a-z0-9]+", ds.table.lower()):
@@ -348,6 +358,7 @@ def unexplained_words(question: str, ds, catalog=None) -> tuple:
             continue
         if any(w == t or w[:5] == t[:5] and min(len(w), len(t)) >= 5
                or (len(t) >= 4 and w.startswith(t)) or (len(w) >= 4 and t.startswith(w))
+               or (len(t) == 3 and len(w) >= 5 and w.startswith(t))
                for t in toks):
             continue
         (soft if (re.search(r"ed$", w) or w in _IRREGULAR_PAST) else hard).append(w)

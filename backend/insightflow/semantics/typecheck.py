@@ -67,6 +67,32 @@ def typecheck(spec, question: str, ds) -> List[F]:
             out.append(F("date_role_mismatch",
                          f"the wording points at '{named}' but the time filter uses '{spec.time.column}'"))
 
+    # a stated exclusion must not become an inclusion (or the reverse)
+    from ..plan.planner import _NEG_BEFORE
+    for f in spec.filters:
+        if f.kind not in ("value", "flag") or f.polarity != "include":
+            continue
+        if f.kind == "value":
+            probes = [str(v).lower() for v in f.values]
+        else:
+            probes = [t[:max(4, len(t) - 2)] for t in re.split(r"[^a-z0-9]+", f.column.lower()) if len(t) >= 4]
+        for pr in probes:
+            mm = re.search(re.escape(pr), q)
+            if mm and _NEG_BEFORE.search(q[max(0, mm.start() - 60): mm.start()]):
+                out.append(F("polarity_inverted",
+                             f"the wording excludes '{pr}' but the query keeps only '{pr}'"))
+                break
+
+    # "X per <measure>" is a ratio of two measures; plain SUM + SUM is not one
+    mp = re.search(r"\bper\s+([a-z]+)", q)
+    if mp:
+        w = mp.group(1)
+        num_cols = [c for c, i in ds.columns.items() if getattr(i, "role", "") == "measure"]
+        hit = any(w[:max(3, len(w) - 2)] in c.lower() for c in num_cols)
+        if hit and not any(mt.aggregation in ("ratio", "derived") for mt in spec.metrics):
+            out.append(F("ratio_unsupported",
+                         f"'per {w}' asks for a ratio of two measures, which this query does not compute"))
+
     for d in spec.dims:
         if d.origin == "related" and rel is not None:
             s = rel.source(d.column)

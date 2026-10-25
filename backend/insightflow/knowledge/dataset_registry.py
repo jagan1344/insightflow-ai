@@ -366,6 +366,8 @@ def get_active_dataset() -> ActiveDataset:
             date_choice = dd
     except Exception:
         pass
+    if rel is not None:
+        flags = list(flags) + [f for f, s_ in rel.sources.items() if getattr(s_, "flag", False)]
     return ActiveDataset(id=ds_id, name=name, table=table_name,
                          kind="uploaded", columns=cols, rel=rel,
                          date_choice=date_choice, flag_columns=tuple(flags))
