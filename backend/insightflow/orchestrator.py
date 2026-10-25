@@ -786,7 +786,7 @@ class Orchestrator:
                 _sem = verify_semantics(question, plan, sql, result, explanation, ds, catalog)
             except Exception as _e:               # fail closed: an unverified answer is not approved
                 _sem = None
-                _sem_err = f"{type(_e).__name__}: {str(_e)[:200]}"
+                _sem_err = type(_e).__name__  # never expose exception messages in diagnostics
                 self._extra_notes.append(f"semantic_verifier_error={type(_e).__name__}")
                 decision = Decision(
                     CLARIFY,
