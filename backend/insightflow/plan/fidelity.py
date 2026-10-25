@@ -48,6 +48,15 @@ def _no_space(s: str) -> str:
     return re.sub(r"\s+", "", s.lower())
 
 
+def match_form(text: str) -> str:
+    """Comparison form for formulas/SQL: placeholders resolved to the bare
+    column, table qualifiers and quotes removed, case/space folded."""
+    t = re.sub(r"\{\{dim:([^}]+)\}\}", r"\1", text)
+    t = re.sub(r'"[^"]+"\.', "", t)
+    t = re.sub(r"\b[A-Za-z_]\w*\.(?=[A-Za-z_\"])", "", t)
+    return re.sub(r'["`\s]', "", t).lower()
+
+
 class FidelityValidator:
     """Static SQL-vs-plan checker. No execution, no DB access."""
 
@@ -82,7 +91,8 @@ class FidelityValidator:
             if not m.formula:
                 continue
             f_no_space = _no_space(m.formula)
-            passed = f_no_space in sn or f_no_space in sn_q
+            passed = (f_no_space in sn or f_no_space in sn_q
+                      or match_form(m.formula) in match_form(sql))
             # For contribution / average-at-grain the formula is embedded
             # inside a CTE, so the substring test is still valid.
             checks.append(FidelityCheck(

@@ -130,9 +130,12 @@ def _find_column_by_tokens(ds: ActiveDataset, tokens: Tuple[str, ...],
                             role: Optional[str] = None) -> Optional[str]:
     """First column whose name contains one of the tokens; role-filtered
     when `role` is provided."""
+    _rel = getattr(ds, "rel", None)
     for name, info in ds.columns.items():
         if role is not None and info.role != role:
             continue
+        if _rel is not None and _rel.source(name) is not None:
+            continue                       # related-table attribute, not the base measure
         lname = name.lower().replace(" ", "_").replace("-", "_")
         for tok in tokens:
             if tok in lname:
@@ -402,9 +405,11 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
         kid = f"avg_{name.lower()}"
         if kid in out:
             continue
+        _ref = ("{{dim:%s}}" % name) if (_rel is not None and _rel.source(name)
+                                          is not None) else _quote(name)
         out[kid] = KPIDefinition(
             kpi_id=kid, display_name=f"Average {name.title()}",
-            aggregation="avg", formula=f"AVG({_quote(name)})",
+            aggregation="avg", formula=f"AVG({_ref})",
             required_columns=[name], unit=info.sql_type.lower(),
             aliases=sorted(({f"average {_core_of[name]}", f"avg {_core_of[name]}",
                             f"mean {_core_of[name]}"} if name in _core_of else set()) | {f"average {name.lower()}", f"avg {name.lower()}",
@@ -419,7 +424,7 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
         if sid not in out:
             out[sid] = KPIDefinition(
                 kpi_id=sid, display_name=f"Total {name.title()}",
-                aggregation="sum", formula=f"SUM({_quote(name)})",
+                aggregation="sum", formula=f"SUM({_ref})",
                 required_columns=[name], unit="",
                 aliases=sorted(({f"total {_core_of[name]}", _core_of[name]}
                                if name in _core_of else set()) | {f"total {name.lower()}", name.lower(),

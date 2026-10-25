@@ -85,8 +85,13 @@ def resolve_followup(question: str,
         new_dim = m.group(1).strip()
         base = ctx.last_question
         # Strip the old " by <X>" if present.
-        base_no_dim = re.sub(r"\s+by\s+[a-z_]+(?:\s+[a-z_]+){0,2}\b",
-                              "", base, flags=re.IGNORECASE).strip(" ?.")
+        # Only a TRAILING grouping ("... by region" optionally followed by a
+        # time phrase) is replaced. A mid-sentence "by" ("taught by Prof. X",
+        # "paid by students") is part of the question, not a grouping.
+        base_no_dim = re.sub(
+            r"\s+by\s+[a-z_]+(?:\s+[a-z_]+){0,2}"
+            r"(?=(?:\s+(?:in|for|during|within)\s+[^?]*)?\s*[?.]?\s*$)",
+            "", base).strip(" ?.")
         return f"{base_no_dim} by {new_dim}"
 
     # Rewrite 2: "in July 2026" / "for Q2" → add/replace time filter

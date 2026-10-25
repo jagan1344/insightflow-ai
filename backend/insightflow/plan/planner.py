@@ -790,6 +790,65 @@ def _ambiguous_date_columns(question: str, ds: ActiveDataset,
     return [] if _mentioned_date_col(question, ds) else list(ds.dates)
 
 
+_YEAR_CACHE: dict = {}
+
+
+def _data_years(ds: ActiveDataset, date_col: str) -> List[int]:
+    """Distinct calendar years present in a date column (cached by row count)."""
+    import sqlite3
+    from ..config import settings
+    url = settings.database_url
+    if not url.startswith("sqlite") or not date_col:
+        return []
+    path = url.split(":///", 1)[1] if ":///" in url else url
+    try:
+        con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        try:
+            n = con.execute(f'SELECT COUNT(*) FROM "{ds.table}"').fetchone()[0]
+            key = (path, ds.table, date_col, n)
+            if key not in _YEAR_CACHE:
+                rows = con.execute(
+                    f'SELECT DISTINCT substr("{date_col}",1,4) FROM "{ds.table}" '
+                    f'WHERE "{date_col}" IS NOT NULL').fetchall()
+                if len(_YEAR_CACHE) > 64:
+                    _YEAR_CACHE.clear()
+                _YEAR_CACHE[key] = sorted(int(r[0]) for r in rows
+                                          if str(r[0]).isdigit())
+            return _YEAR_CACHE[key]
+        finally:
+            con.close()
+    except Exception:
+        return []
+
+
+def _default_year(ds: ActiveDataset, date_col: str) -> int:
+    """Year to use when the question names a month but no year: the
+    dataset's own year (latest if several). Demo keeps its fixed default."""
+    if ds.kind != "demo":
+        ys = _data_years(ds, date_col)
+        if ys:
+            return ys[-1]
+    return 2026
+
+
+def _year_ambiguity(question: str, ds: ActiveDataset) -> List[int]:
+    """Years in the data when the question names a month/quarter without a
+    year and the data spans several years."""
+    if ds.kind == "demo" or not ds.dates:
+        return []
+    ql = question.lower()
+    from ..reliability.mention_coverage import year_tokens
+    if year_tokens(ql):
+        return []
+    named = re.search(
+        r"\b(january|february|march|april|june|july|august|september|october|"
+        r"november|december)\b|\bq[1-4]\b|\b(?:in|of|during)\s+may\b", ql)
+    if not named:
+        return []
+    ys = _data_years(ds, ds.dates[0])
+    return ys if len(ys) > 1 else []
+
+
 def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     """Extract time-window filters from text and bind them to a date column.
 
@@ -838,7 +897,7 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         lo_m, hi_m, year_lo, year_hi = rng
         # If either year is missing, borrow from the other side or the
         # bare year token in the question, or default to 2026.
-        default_year = _find_year(question) or 2026
+        default_year = _find_year(question) or _default_year(ds, date_col)
         lo_year = year_lo if year_lo is not None else (
             year_hi if year_hi is not None else default_year)
         hi_year = year_hi if year_hi is not None else (
@@ -854,7 +913,7 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         ))
         return filters
 
-    year = _find_year(question) or 2026
+    year = _find_year(question) or _default_year(ds, date_col)
     month = _find_month_number(question)
 
     # 3. Explicit single month (unchanged behaviour)
@@ -894,7 +953,8 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     if ds.kind != "demo":          # digits inside a known value are not years
         for lo, _c in _value_mentions(question, _value_index(ds)):
             ql_nv = ql_nv.replace(lo, " ")
-    years = set(re.findall(r"(?<![\d.])((?:19|20)\d{2})(?![\d])", ql_nv))
+    from ..reliability.mention_coverage import year_tokens
+    years = set(year_tokens(ql_nv))
     if len(years) == 1 and not re.search(r"\b(vs|versus|compared)\b", ql):
         y = int(next(iter(years)))
         filters.append(FilterExpr(
@@ -1114,9 +1174,12 @@ def _bind_measure_phrase(text: str, ds: ActiveDataset) -> Optional[str]:
     `text` (word-bounded)."""
     t = _norm_words(text)
     best = None
+    _rel = getattr(ds, "rel", None)
     for cname, info in ds.columns.items():
         if info.role != "measure":
             continue
+        if _rel is not None and _rel.source(cname) is not None:
+            continue          # related-table attribute: not a base column
         n = _norm_words(cname)
         if re.search(rf"(?<![a-z0-9]){re.escape(n)}(?![a-z0-9])", t):
             if best is None or len(n) > len(_norm_words(best)):
@@ -1410,10 +1473,7 @@ def _find_negated_references(question: str, ds: ActiveDataset,
     for m in _NEG_CUE.finditer(ql):
         tail = ql[m.end(): m.end() + 60]
         hit = None
-        if ds.kind != "demo":
-            for lo, _c in _value_mentions(tail, _value_index(ds)):
-                hit = lo; break
-        if hit is None:
+        if True:
             for c in ds.columns:
                 ph = re.sub(r"[^a-z0-9]+", " ", c.lower()).strip()
                 if ph and re.search(rf"(?<![a-z0-9]){re.escape(ph)}(?![a-z0-9])", tail):
@@ -1479,6 +1539,104 @@ def _find_unknown_proper_nouns(question: str, ds: ActiveDataset,
     return out
 
 
+_NEG_BEFORE = re.compile(
+    r"(?:excluding|exclude|except(?:\s+for)?|without|other\s+than|apart\s+from|"
+    r"aside\s+from|besides|minus|not\s+including|not\s+counting|but\s+not|"
+    r"not\s+in|not\s+from|not\s+for|not\s+at|not\s+by|outside(?:\s+of)?)"
+    r"\s+(?:the\s+|those\s+|any\s+|all\s+)?"
+    r"(?:(?!and\b|or\b|but\b|for\b|in\b|by\b)[a-z_]+\s+){0,4}$")
+
+
+def _classified_mentions(question: str, ds: ActiveDataset) -> list:
+    """Known dimension values in the question with their polarity:
+    [(lower_value, candidates, negated)] in text order. A value is negated
+    after an exclusion cue ("except", "excluding", "not in"...), and the
+    negation carries over "and"/"or"/comma-joined values."""
+    idx = _value_index(ds)
+    ql = question.lower()
+    taken, found = [], []
+    for lo in sorted(idx, key=lambda v: (-len(v), v)):
+        for m in re.finditer(rf"(?<![a-z0-9]){re.escape(lo)}(?![a-z0-9])", ql):
+            span = (m.start(), m.end())
+            if any(span[0] < e and s < span[1] for s, e in taken):
+                continue
+            taken.append(span)
+            found.append((m.start(), m.end(), lo, idx[lo]))
+    found.sort()
+    out, prev_neg, prev_end = [], False, -1
+    for st, en, lo, cands in found:
+        before = ql[max(0, st - 60):st]
+        neg = bool(_NEG_BEFORE.search(before))
+        if not neg and prev_neg and re.fullmatch(
+                r"\s*(?:,|and|or|,\s*and|,\s*or)?\s*(?:the\s+)?(?:[a-z_]+\s+)?",
+                ql[prev_end:st]):
+            neg = True
+        out.append((lo, cands, neg))
+        prev_neg, prev_end = neg, en
+    return out
+
+
+def _find_conflicting_conditions(question: str, ds: ActiveDataset) -> List[str]:
+    if ds.kind == "demo":
+        return []
+    seen = {}
+    out = []
+    for lo, cands, neg in _classified_mentions(question, ds):
+        key = lo
+        if key in seen and seen[key] != neg:
+            out.append(f"conflicting_conditions:{lo}=included and excluded")
+        seen[key] = neg
+    return out
+
+
+_CMP = [(r"at\s+least|>=|no\s+less\s+than", ">="),
+        (r"at\s+most|<=|no\s+more\s+than", "<="),
+        (r"more\s+than|greater\s+than|over|above|exceeding|>", ">"),
+        (r"less\s+than|fewer\s+than|under|below|<", "<"),
+        (r"exactly|equal\s+to|equals?|=|of|is", "=")]
+_CMP_ALT = "|".join(f"(?:{p})" for p, _ in _CMP)
+
+
+def _cmp_op(word: str) -> str:
+    for p, op in _CMP:
+        if re.fullmatch(p, word.strip()):
+            return op
+    return "="
+
+
+def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
+    """Row-level numeric conditions on NUMERIC ATTRIBUTES OF RELATED TABLES
+    ("4 credit courses", "credits over 3"). Aggregate thresholds on the base
+    measure ("customers with revenue above 1000") are a different feature and
+    are not parsed here."""
+    rel = getattr(ds, "rel", None)
+    if rel is None:
+        return []
+    ql = question.lower()
+    for lo, _c in _value_mentions(question, _value_index(ds)):
+        ql = ql.replace(lo, " ")
+    out = []
+    for flat, src in rel.sources.items():
+        if not getattr(src, "numeric", False) or src.kind != "safe":
+            continue
+        words = [w for w in re.split(r"[^a-z0-9]+", flat.lower()) if w]
+        colpat = r"\s+".join(
+            rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}s?" for w in words)
+        num = r"(\d+(?:\.\d+)?)"
+        m1 = re.search(rf"(?:\b({_CMP_ALT})\s*)?(?<![\d.]){num}\s*-?\s*{colpat}\b", ql)
+        m2 = re.search(rf"\b{colpat}\s*(?:\b({_CMP_ALT})\b\s*)?(?<![\d.]){num}(?![\d])", ql)
+        m = m1 or m2
+        if not m:
+            continue
+        op_word, val = m.group(1), float(m.group(2))
+        if re.fullmatch(r"(?:19|20)\d{2}", m.group(2)):
+            continue                      # a year, not a quantity
+        out.append(FilterExpr(kind="cmp", column=flat,
+                              value=int(val) if val == int(val) else val,
+                              op=_cmp_op(op_word) if op_word else "="))
+    return out
+
+
 def _find_value_filters(question: str, ds: ActiveDataset
                           ) -> List[FilterExpr]:
     """Detect value-equality filters of the form "<value> <dim-noun>"
@@ -1501,27 +1659,29 @@ def _find_value_filters(question: str, ds: ActiveDataset
     """
     out: List[FilterExpr] = []
     if ds.kind != "demo":
-        for lo, cands in _value_mentions(question, _value_index(ds)):
+        inc: dict = {}
+        exc: dict = {}
+        _rel = getattr(ds, "rel", None)
+        for lo, cands, neg in _classified_mentions(question, ds):
             cols = {c for c, _ in cands}
             if len(cols) != 1:
                 continue   # ambiguous: handled by _find_ambiguous_values
             col, orig = cands[0]
-            _rel = getattr(ds, "rel", None)
             if _rel is not None and _rel.source(col) is not None \
                     and _rel.source(col).kind == "ambiguous":
                 continue
-            out.append(FilterExpr(kind="eq", column=col, value=orig))
-        # Several values of the SAME column ("Cardiology and Pediatrics")
-        # are alternatives (IN), never a conjunction that matches nothing.
-        merged: List[FilterExpr] = []
-        for f in out:
-            same = [g for g in out if g.column == f.column]
-            if len(same) == 1:
-                merged.append(f)
-            elif not any(m.column == f.column for m in merged):
-                merged.append(FilterExpr(kind="in", column=f.column,
-                                         value=[g.value for g in same]))
-        return merged
+            (exc if neg else inc).setdefault(col, [])
+            if orig not in (exc if neg else inc)[col]:
+                (exc if neg else inc)[col].append(orig)
+        for col, vals in inc.items():
+            if len(vals) == 1:
+                out.append(FilterExpr(kind="eq", column=col, value=vals[0]))
+            else:
+                # alternatives of the SAME column, never an empty conjunction
+                out.append(FilterExpr(kind="in", column=col, value=vals))
+        for col, vals in exc.items():
+            out.append(FilterExpr(kind="not_in", column=col, value=vals))
+        return out
     import sqlite3
     from ..config import settings
 
@@ -2219,11 +2379,19 @@ class Planner:
             return plan
 
         # ---------- build the plan by kind ----------
+        _nf_pre = _find_numeric_filters(question, ds)
+        if _nf_pre and len(kpis) > 1:
+            _fcols = {f.column for f in _nf_pre}
+            _keep = [k for k in kpis
+                     if not any("{{dim:%s}}" % c in k.formula for c in _fcols)]
+            if _keep:
+                kpis = _keep
         measures = [_mref(k) for k in kpis]
-        dims = [_dref(c, ds) for _, c in bound_dims]
+        dims = [_dref(c, ds) for c in [c for _, c in bound_dims]]
         # Phase 2 (2026-10-24): value-equality filters on dim values
         # ("in East region", "for Furniture category", "SMB segment").
-        value_filters = _find_value_filters(question, ds)
+        value_filters = _find_value_filters(question, ds) \
+            + _find_numeric_filters(question, ds)
         if ds.kind != "demo" and unbound_dims:
             _vtext = " ".join(str(f.value).lower() for f in value_filters)
             _vtext += " " + " ".join(
@@ -2244,6 +2412,10 @@ class Planner:
         _unknown_values += _find_ambiguous_values(question, ds)
         _unknown_values += _find_unknown_proper_nouns(question, ds, catalog)
         _unknown_values += _metric_conflicts
+        _unknown_values += _find_conflicting_conditions(question, ds)
+        _yamb = _year_ambiguity(question, ds)
+        if _yamb:
+            _unknown_values.append("ambiguous_year:" + "|".join(map(str, _yamb)))
         _unknown_values += _find_negated_references(question, ds, catalog)
         _rel = getattr(ds, "rel", None)
         if _rel is not None:
@@ -2277,6 +2449,8 @@ class Planner:
             }
             vf_dim_nouns: set = set()
             for f in value_filters:
+                if f.kind == "not_in":
+                    continue            # "by state excluding X" still groups
                 vf_dim_nouns |= _NOUNS.get(f.column, set())
                 if ds.kind != "demo":
                     _base = _norm_words(f.column)

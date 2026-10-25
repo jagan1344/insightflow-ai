@@ -182,6 +182,13 @@ class SQLCompiler:
                           f'"{a}"."{c}"', text)
         return text
 
+    def _resolve(self, formula: str) -> str:
+        if not self.rel or "{{dim:" not in formula:
+            return formula
+        return re.sub(r"\{\{dim:([^}]+)\}\}",
+                      lambda mm: self._rel_expr(mm.group(1)) or mm.group(1),
+                      formula)
+
     def _rel_alias(self, steps) -> str:
         return re.sub(r"\W", "_", "j_" + "_".join(s.edge.child_col for s in steps))
 
@@ -734,13 +741,10 @@ class SQLCompiler:
             # Synthetic measure (DISTINCT_COUNT / NULL_COUNT / EXTREMUM
             # etc.) — fall back to the measure's own baked formula.
             if m.formula:
-                f = re.sub(r"\{\{dim:([^}]+)\}\}",
-                           lambda mm: self._rel_expr(mm.group(1)) or mm.group(1),
-                           m.formula)
-                return self._qualify(f)
+                return self._qualify(self._resolve(m.formula))
             return "NULL"
         # Use catalog's canonical formula — that's the whole point.
-        return self._qualify(kpi.formula)
+        return self._qualify(self._resolve(kpi.formula))
 
     def _extra_where(self, plan: AnalyticalPlan) -> List[str]:
         parts: List[str] = []
@@ -761,6 +765,17 @@ class SQLCompiler:
                 parts.append(f"{self._colref(f.column)} IS NULL")
             elif f.kind == "not_null" and f.column:
                 parts.append(f"{self._colref(f.column)} IS NOT NULL")
+            elif f.kind == "cmp" and f.column and f.op in ("=", ">", ">=", "<", "<="):
+                parts.append(f"{self._colref(f.column)} {f.op} {_sql_escape(f.value)}")
+            elif f.kind == "not_in" and f.column and isinstance(f.value, (list, tuple)):
+                vs = ", ".join(_sql_escape(v) for v in f.value)
+                if self.rel is not None and self.rel.source(f.column) is not None \
+                        and self.rel.source(f.column).kind == "fanout":
+                    parts.append("NOT " + self._rel_exists(
+                        f.column, lambda x, vs=vs: f"{x} IN ({vs})"))
+                else:
+                    ref = self._colref(f.column)
+                    parts.append(f"({ref} IS NULL OR {ref} NOT IN ({vs}))")
             elif f.kind == "eq" and f.column and self.rel is not None \
                     and self.rel.source(f.column) is not None \
                     and self.rel.source(f.column).kind == "fanout":
@@ -793,19 +808,19 @@ class SQLCompiler:
             if f.kind == "metric_lt":
                 kpi = self.catalog.get(f.kpi_id)
                 if kpi:
-                    having.append(f"{kpi.formula} < {f.threshold}")
+                    having.append(f"{self._qualify(self._resolve(kpi.formula))} < {f.threshold}")
             elif f.kind == "metric_gt":
                 kpi = self.catalog.get(f.kpi_id)
                 if kpi:
-                    having.append(f"{kpi.formula} > {f.threshold}")
+                    having.append(f"{self._qualify(self._resolve(kpi.formula))} > {f.threshold}")
             elif f.kind == "metric_gt_grouped":
                 kpi = self.catalog.get(f.kpi_id)
                 if kpi:
-                    having.append(f"{kpi.formula} > {f.threshold}")
+                    having.append(f"{self._qualify(self._resolve(kpi.formula))} > {f.threshold}")
             elif f.kind == "metric_lt_grouped":
                 kpi = self.catalog.get(f.kpi_id)
                 if kpi:
-                    having.append(f"{kpi.formula} < {f.threshold}")
+                    having.append(f"{self._qualify(self._resolve(kpi.formula))} < {f.threshold}")
         return where, having
 
     def _colref(self, col: str) -> str:

@@ -58,6 +58,13 @@ def targeted_message(unavailable: List[str], ds) -> Optional[str]:
         elif kind == "unsupported_exclusion":
             parts.append(f"I can't apply an exclusion ('{rest}') yet. Ask for "
                          f"the values you want to include instead.")
+        elif kind == "ambiguous_year":
+            parts.append("The data covers " + " and ".join(rest.split("|")) +
+                         ". Which year do you mean?")
+        elif kind == "conflicting_conditions":
+            name, _, why = rest.partition("=")
+            parts.append(f"'{name}' is both included and excluded ({why}). "
+                         f"Which did you mean?")
         elif kind == "table":
             parts.append(f"The table '{rest}' no longer exists (the schema "
                          f"changed). Re-upload or select another dataset.")

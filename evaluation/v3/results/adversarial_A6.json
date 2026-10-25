@@ -1,0 +1,334 @@
+{
+  "summary": {
+    "n": 20,
+    "answerable": 15,
+    "correct": 15,
+    "answered_answerable": 15,
+    "silent_wrong": 0,
+    "abstained_answerable": 0,
+    "should_clarify": 5,
+    "correct_clarify": 5,
+    "errors": 0,
+    "mean_conf_silent_wrong": null,
+    "silent_wrong_conf_ge_0_7": 0
+  },
+  "by_family": {
+    "multi_value": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "unusual_value": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "misleading": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "unfamiliar_term": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "empty": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "nulls": {
+      "n": 4,
+      "correct": 4,
+      "silent_wrong": 0
+    },
+    "wording": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "complex": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "paraphrase": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "ambiguous": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "grain": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    }
+  },
+  "results": [
+    {
+      "db": "clinic",
+      "id": "X01",
+      "family": "multi_value",
+      "question": "Total fee for Cardiology doctors and Pediatrics doctors",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "144611.52",
+      "expected": "[(144611.52,)]",
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id WHERE j_doctor_id.specialty IN ('Cardiology', 'Pediatrics')"
+    },
+    {
+      "db": "logistics",
+      "id": "X02",
+      "family": "multi_value",
+      "question": "Total freight cost for Gold tier customers and Silver tier customers",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "312940.62",
+      "expected": "[(312940.62,)]",
+      "sql": "SELECT SUM(\"shipments\".\"freight_usd\") AS sum_freight_usd FROM \"shipments\" LEFT JOIN customers AS j_cust_ref ON j_cust_ref.cust_key = shipments.cust_ref WHERE j_cust_ref.tier IN ('Gold', 'Silver')"
+    },
+    {
+      "db": "clinic",
+      "id": "X03",
+      "family": "unusual_value",
+      "question": "Total fee for patients insured by Cigna'; DROP TABLE visits;--",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\""
+    },
+    {
+      "db": "clinic",
+      "id": "X04",
+      "family": "misleading",
+      "question": "What was the total fee not including copay?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee, SUM(\"visits\".\"copay\") AS sum_copay FROM \"visits\""
+    },
+    {
+      "db": "clinic",
+      "id": "X05",
+      "family": "unfamiliar_term",
+      "question": "What are the total charges?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "clinic",
+      "id": "X06",
+      "family": "empty",
+      "question": "Total fee for visits in June 2031",
+      "kind": "empty_ok",
+      "action": "WARN",
+      "confidence": 0.899,
+      "outcome": "correct",
+      "sys_value": "None",
+      "expected": "[(None,)]",
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\" WHERE \"visits\".\"visit_date\" >= '2031-06-01' AND \"visits\".\"visit_date\" < '2031-07-01'"
+    },
+    {
+      "db": "clinic",
+      "id": "X07",
+      "family": "nulls",
+      "question": "How many visits have no discharge date?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "107",
+      "expected": "[(107,)]",
+      "sql": "SELECT COUNT(*) AS null_discharge_date FROM \"visits\" WHERE \"visits\".\"discharge_date\" IS NULL"
+    },
+    {
+      "db": "clinic",
+      "id": "X08",
+      "family": "nulls",
+      "question": "What is the average copay for Cardiology doctors?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "90.06234375",
+      "expected": "[(90.06234375,)]",
+      "sql": "SELECT AVG(\"visits\".\"copay\") AS avg_copay FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id WHERE j_doctor_id.specialty = 'Cardiology'"
+    },
+    {
+      "db": "logistics",
+      "id": "X09",
+      "family": "nulls",
+      "question": "How many shipments have no insured value?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "147",
+      "expected": "[(147,)]",
+      "sql": "SELECT COUNT(*) AS null_insured_usd FROM \"shipments\" WHERE \"shipments\".\"insured_usd\" IS NULL"
+    },
+    {
+      "db": "clinic",
+      "id": "X10",
+      "family": "unusual_value",
+      "question": "Total fee for Dr. K. Okafor-11",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "29294.03",
+      "expected": "[(29294.03,)]",
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id WHERE j_doctor_id.full_name = 'Dr. K. Okafor-11'"
+    },
+    {
+      "db": "logistics",
+      "id": "X11",
+      "family": "unusual_value",
+      "question": "Total freight cost for carrier Sky Cargo (Intl)",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "85660.94",
+      "expected": "[(85660.94,)]",
+      "sql": "SELECT SUM(\"shipments\".\"freight_usd\") AS sum_freight_usd FROM \"shipments\" LEFT JOIN carriers AS j_carrier_ref ON j_carrier_ref.carrier_key = shipments.carrier_ref WHERE j_carrier_ref.carrier_label = 'Sky Cargo (Intl)'"
+    },
+    {
+      "db": "clinic",
+      "id": "X12",
+      "family": "wording",
+      "question": "TOTAL FEE FOR CARDIOLOGY DOCTORS",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "75453.58",
+      "expected": "[(75453.58,)]",
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id WHERE j_doctor_id.specialty = 'Cardiology'"
+    },
+    {
+      "db": "clinic",
+      "id": "X13",
+      "family": "wording",
+      "question": "total   fee   for   cardiology    doctors",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "75453.58",
+      "expected": "[(75453.58,)]",
+      "sql": "SELECT SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id WHERE j_doctor_id.specialty = 'Cardiology'"
+    },
+    {
+      "db": "clinic",
+      "id": "X14",
+      "family": "complex",
+      "question": "Top 3 specialties by total fee for visits in March 2025",
+      "kind": "ordered",
+      "action": "ANSWER",
+      "confidence": 0.993,
+      "outcome": "correct",
+      "sys_value": "[('General Practice', 8669.47), ('Pediatrics', 5037.32), ('Cardiology', 4804.25)]",
+      "expected": "[('General Practice', 8669.47), ('Pediatrics', 5037.32), ('Cardiology', 4804.25)]",
+      "sql": "SELECT j_doctor_id.specialty AS specialty, SUM(\"visits\".\"fee\") AS sum_fee FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id WHERE \"visits\".\"visit_date\" >= '2025-03-01' AND \"visits\".\"visit_date\" < '2025-04-01' GROUP BY j_doctor_id.specialty ORDER BY sum_fee DE"
+    },
+    {
+      "db": "clinic",
+      "id": "X15",
+      "family": "complex",
+      "question": "Average fee per visit by specialty",
+      "kind": "rowset",
+      "action": "ANSWER",
+      "confidence": 1.0,
+      "outcome": "correct",
+      "sys_value": "[('Pediatrics', 497.5391366906475), ('General Practice', 494.98006451612906), ('Cardiology', 483.67679487179487), ('Ear,",
+      "expected": "[('Cardiology', 483.67679487179487), ('Ear, Nose & Throat', 444.4774), ('General Practice', 494.98006451612906), ('Pedia",
+      "sql": "SELECT j_doctor_id.specialty AS specialty, AVG(\"visits\".\"fee\") AS avg_fee FROM \"visits\" LEFT JOIN doctors AS j_doctor_id ON j_doctor_id.doctor_id = visits.doctor_id GROUP BY j_doctor_id.specialty ORDER BY avg_fee DESC"
+    },
+    {
+      "db": "logistics",
+      "id": "X16",
+      "family": "complex",
+      "question": "Total freight cost for shipments delivered in June 2025",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "38485.73",
+      "expected": "[(38485.73,)]",
+      "sql": "SELECT SUM(\"shipments\".\"freight_usd\") AS sum_freight_usd FROM \"shipments\" WHERE \"shipments\".\"delivered_dt\" >= '2025-06-01' AND \"shipments\".\"delivered_dt\" < '2025-07-01'"
+    },
+    {
+      "db": "logistics",
+      "id": "X17",
+      "family": "paraphrase",
+      "question": "Total freight cost by destination hub",
+      "kind": "rowset",
+      "action": "ANSWER",
+      "confidence": 1.0,
+      "outcome": "correct",
+      "sys_value": "[(\"Chicago O'Hare Hub\", 93878.44), ('Hamburg Terminal', 78381.92), ('Lagos Depot', 76195.14), ('Los Angeles Gateway', 73",
+      "expected": "[(\"Chicago O'Hare Hub\", 93878.44), ('Hamburg Terminal', 78381.92), ('Lagos Depot', 76195.14), ('Los Angeles Gateway', 73",
+      "sql": "SELECT j_dest_hub.hub_label AS dest_hub, SUM(\"shipments\".\"freight_usd\") AS sum_freight_usd FROM \"shipments\" LEFT JOIN hubs AS j_dest_hub ON j_dest_hub.hub_key = shipments.dest_hub GROUP BY j_dest_hub.hub_label ORDER BY sum_freight_usd DESC"
+    },
+    {
+      "db": "logistics",
+      "id": "X18",
+      "family": "ambiguous",
+      "question": "Total freight cost for the Hamburg Terminal",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"shipments\".\"freight_usd\") AS sum_freight_usd FROM \"shipments\""
+    },
+    {
+      "db": "logistics",
+      "id": "X19",
+      "family": "grain",
+      "question": "How many parcels are there?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "logistics",
+      "id": "X20",
+      "family": "nulls",
+      "question": "What is the average weight?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "sys_value": "242.76979999999998",
+      "expected": "[(242.76979999999998,)]",
+      "sql": "SELECT AVG(\"shipments\".\"weight_kg\") AS avg_weight_kg FROM \"shipments\""
+    }
+  ]
+}

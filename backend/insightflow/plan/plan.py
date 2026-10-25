@@ -114,6 +114,9 @@ class FilterExpr:
     threshold: float = 0.0
     # For top_n_per_group: how many rows to keep inside each group.
     per_group_n: int = 0
+    # kind == "cmp": value compared with `op` ("=", ">", ">=", "<", "<=").
+    # kind == "not_in": value is a list of excluded values.
+    op: str = ""
 
 
 @dataclass

@@ -90,6 +90,10 @@ def _plan_fidelity(plan: Optional[AnalyticalPlan],
         f = (m.formula or "").lower().replace(" ", "")
         if not f:
             continue
+        from ..plan.fidelity import match_form
+        if match_form(m.formula) in match_form(sql):
+            hits += 1
+            continue
         # match either the exact expression or a mildly rewritten one
         if f in lo:
             hits += 1

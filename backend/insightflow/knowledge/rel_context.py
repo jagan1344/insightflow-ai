@@ -37,6 +37,7 @@ class DimSource:
     nullable: bool = False
     candidates: List[str] = field(default_factory=list)   # for ambiguous
     via_fk: str = ""                  # role alias: the anchor FK column
+    numeric: bool = False             # numeric attribute of a many-to-one parent
 
 
 @dataclass
@@ -49,6 +50,13 @@ class RelContext:
 
     def source(self, flat: str) -> Optional[DimSource]:
         return self.sources.get(flat)
+
+
+_NUM = ("INT", "REAL", "NUM", "DEC", "FLOA", "DOUB")
+
+
+def _is_numeric(t: str) -> bool:
+    return any(k in (t or "").upper() for k in _NUM)
 
 
 def _is_text(t: str) -> bool:
@@ -123,6 +131,26 @@ def build_rel_context(db_path: str, anchor: str) -> Optional[RelContext]:
                 ctx.sources[name] = DimSource(
                     name, t, c, "ambiguous", (), False,
                     [f"{t}.{c} via {v}" for v in via])
+
+    # --- numeric attributes of many-to-one parents (measures / filters) ---
+    num_by_name: Dict[str, List[Tuple[str, str]]] = {}
+    for t, res in per_table.items():
+        if res.kind != "unique":
+            continue
+        ti = schema.tables[t]
+        keys = set(ti.pk) | {e.child_col for e in schema.edges
+                             if e.child_table == t}
+        for c, ctype in ti.columns.items():
+            if _is_numeric(ctype) and c not in keys:
+                num_by_name.setdefault(c, []).append((t, c))
+    taken = set(anchor_cols) | set(ctx.sources)
+    for name, tcs in num_by_name.items():
+        if len(tcs) > 1 or name in taken:
+            continue                       # clash: not exposed (never guessed)
+        t, c = tcs[0]
+        p = per_table[t].path
+        ctx.sources[name] = DimSource(name, t, c, "safe", p.steps,
+                                      p.nullable, numeric=True)
 
     # --- role aliases: parent referenced by several anchor FK columns ----
     by_parent: Dict[str, List[Edge]] = {}

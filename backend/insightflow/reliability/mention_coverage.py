@@ -161,5 +161,51 @@ def unrepresented_column_mentions(question: str, sql: str, ds) -> List[str]:
 def unrepresented_years(question: str, sql: str) -> List[str]:
     """A four-digit year named in the question that the SQL never uses
     means the time constraint was silently dropped."""
-    ys = set(re.findall(r"(?<![\d.])((?:19|20)\d{2})(?![\d])", question))
+    ys = set(year_tokens(question))
     return sorted(y for y in ys if y not in sql)
+
+
+_CMP_BEFORE = re.compile(
+    r"(?:over|above|under|below|than|exceeding|exceeds?|least|most|exactly|"
+    r"equals?|[<>=]=?|about|around|approximately|worth|costing|priced)\s*$")
+
+
+def year_tokens(text: str) -> List[str]:
+    """Four-digit years, excluding quantities in a comparison ("over 2000")."""
+    out = []
+    t = text.lower()
+    for m in re.finditer(r"(?<![\d.,])((?:19|20)\d{2})(?![\d])", t):
+        if _CMP_BEFORE.search(t[max(0, m.start() - 16):m.start()]):
+            continue
+        out.append(m.group(1))
+    return out
+
+
+_NUM_EXEMPT = re.compile(
+    r"\b(?:top|bottom|first|last|past|previous|next|latest|recent|best|worst)"
+    r"\s+\d+|\bq[1-4]\b|\d+(?:st|nd|rd|th)\b|\d+\s*%|"
+    r"\b\d{4}-\d{2}(?:-\d{2})?\b",
+    re.I)
+
+
+def unrepresented_numbers(question: str, sql: str,
+                          value_texts: Optional[List[str]] = None) -> List[str]:
+    """Numeric literals in the question (thresholds, counts, quantities)
+    that never reach the SQL. Years, top-N / last-N, quarters, ordinals and
+    percentages have their own handling and are exempt; digits inside known
+    dimension values are masked."""
+    q = question.lower()
+    for v in (value_texts or []):
+        q = q.replace(v.lower(), " ")
+    for y in year_tokens(q):
+        q = q.replace(y, " ", 1)
+    q = _NUM_EXEMPT.sub(" ", q)
+    sql_n = re.sub(r"\s+", "", sql)
+    out = []
+    for m in re.finditer(r"(?<![\w.])(\d+(?:\.\d+)?)(?![\w])", q):
+        tok = m.group(1)
+        pats = {tok, tok.rstrip("0").rstrip(".") if "." in tok else tok}
+        if not any(re.search(rf"(?<![\d.]){re.escape(p)}(?:\.0+)?(?![\d])", sql_n)
+                   for p in pats):
+            out.append(tok)
+    return out

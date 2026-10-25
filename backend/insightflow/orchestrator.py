@@ -549,6 +549,22 @@ class Orchestrator:
                     "answer would cover all periods")
                 confidence.signals["mention_coverage"] = 0.0
                 confidence.score = min(confidence.score, 0.30)
+            try:
+                from .reliability.mention_coverage import unrepresented_numbers
+                from .plan.planner import _value_index, _value_mentions
+                _vt = ([lo for lo, _c in _value_mentions(question, _value_index(ds))]
+                       if ds.kind != "demo" else [])
+                _nums = unrepresented_numbers(question, sql, _vt)
+            except Exception:
+                _nums = []
+            if _nums and not _miss and not _tn and not _yr:
+                decision = Decision(
+                    CLARIFY,
+                    "the question contains the number(s) " + ", ".join(_nums) +
+                    " but the generated query does not use them, so a "
+                    "threshold or quantity would be ignored")
+                confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
             if _cm and not _miss and not _tn:
                 decision = Decision(
                     CLARIFY,
@@ -576,6 +592,21 @@ class Orchestrator:
                     "generated does not use it, so the answer would ignore "
                     "part of your question")
                 confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
+
+        # 11c2. Wording audit: does the executed query answer THIS question?
+        if decision.action in (ANSWER, WARN) and result.ok and sql:
+            try:
+                from .verification.intent_audit import audit as _audit
+                _af = _audit(question, sql, plan, catalog, len(result.rows))
+            except Exception:
+                _af = []
+            if _af:
+                decision = Decision(
+                    CLARIFY,
+                    "the query may answer a different question than the one "
+                    "asked: " + "; ".join(f.detail for f in _af))
+                confidence.signals["semantic_audit_violations"] = float(len(_af))
                 confidence.score = min(confidence.score, 0.30)
 
         # 11d. Independent verification + sensitivity diagnostics.

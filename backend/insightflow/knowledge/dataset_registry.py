@@ -379,8 +379,10 @@ def _apply_rel_context(cols: dict, rel) -> None:
     for flat, src in rel.sources.items():
         if flat in cols:
             continue
-        cols[flat] = ColumnInfo(name=flat, sql_type="TEXT", role="dimension",
-                                sample_values=[])
+        cols[flat] = ColumnInfo(
+            name=flat, sql_type=("REAL" if getattr(src, "numeric", False) else "TEXT"),
+            role=("measure" if getattr(src, "numeric", False) else "dimension"),
+            sample_values=[])
 
 
 def set_active(dataset_id: str) -> ActiveDataset:
