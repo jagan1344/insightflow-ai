@@ -1,0 +1,15 @@
+config,description,n,answerable,correct,answered_answerable,wrong_answers,wrong_on_answerable,answered_clarify_items,correct_clarify,clarify_items,unnecessary_clarify,coverage,accuracy_when_answered,latency_p50_ms,latency_p95_ms,mean_conf_correct,mean_conf_wrong
+A0,full pipeline,105,74,14,17,7,3,4,27,31,57,0.23,0.824,54.1,660.2,0.987,0.981
+A1,semantic layer off,105,74,14,18,8,4,4,27,31,56,0.243,0.778,58.4,700.4,0.987,0.981
+A2,confidence threshold gate off,105,74,14,17,7,3,4,27,31,57,0.23,0.824,66.1,656.2,0.987,0.981
+A3,result-consistency checks off,105,74,14,17,7,3,4,27,31,57,0.23,0.824,61.9,724.3,0.987,0.981
+A4,plan-SQL fidelity gate off,105,74,14,17,7,3,4,27,31,57,0.23,0.824,71.1,620.4,0.987,0.981
+A5,mention-coverage vetoes + wording audit off,105,74,17,38,28,21,7,24,31,36,0.514,0.447,54.8,516.7,0.988,0.982
+A6,answer verifier off,105,74,14,17,7,3,4,27,31,57,0.23,0.824,54.2,732.8,0.987,0.981
+A7,all six safeguards off,105,74,17,41,32,24,8,23,31,33,0.554,0.415,48.6,529.4,0.988,0.982
+B1,only semantic layer on,105,74,17,38,28,21,7,24,31,36,0.514,0.447,52.9,456.7,0.988,0.982
+B2,only confidence gate on,105,74,17,41,32,24,8,23,31,33,0.554,0.415,47.1,472.0,0.988,0.982
+B3,only result consistency on,105,74,17,41,32,24,8,23,31,33,0.554,0.415,62.8,479.9,0.988,0.982
+B4,only plan fidelity on,105,74,17,41,32,24,8,23,31,33,0.554,0.415,45.8,474.3,0.988,0.982
+B5,only mention coverage + wording audit on,105,74,14,18,8,4,4,27,31,56,0.243,0.778,51.7,648.1,0.987,0.981
+B6,only answer verifier on,105,74,17,41,32,24,8,23,31,33,0.554,0.415,45.3,350.8,0.988,0.982

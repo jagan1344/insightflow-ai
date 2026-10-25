@@ -1,0 +1,205 @@
+{
+ "A1": {
+  "counts": {
+   "no change": 104,
+   "A0:clarify_unnecessary -> A1:wrong": 1
+  },
+  "items": {
+   "A0:clarify_unnecessary -> A1:wrong": [
+    "EN12"
+   ]
+  }
+ },
+ "A2": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "A3": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "A4": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "A5": {
+  "counts": {
+   "A0:clarify_unnecessary -> A5:wrong": 18,
+   "no change": 81,
+   "A0:clarify_unnecessary -> A5:correct": 3,
+   "A0:clarify_ok -> A5:wrong": 3
+  },
+  "items": {
+   "A0:clarify_unnecessary -> A5:wrong": [
+    "HO01",
+    "HO12",
+    "HO15",
+    "HO19",
+    "IN06",
+    "IN07",
+    "IN10",
+    "IN17",
+    "EN02",
+    "EN08",
+    "EN13",
+    "EN14",
+    "EN24",
+    "RI04",
+    "RI08",
+    "RI10",
+    "RI11",
+    "RI14"
+   ],
+   "A0:clarify_unnecessary -> A5:correct": [
+    "HO03",
+    "HO16",
+    "EN04"
+   ],
+   "A0:clarify_ok -> A5:wrong": [
+    "IN27",
+    "EN16",
+    "RI06"
+   ]
+  }
+ },
+ "A6": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "A7": {
+  "counts": {
+   "A0:clarify_unnecessary -> A7:wrong": 21,
+   "no change": 77,
+   "A0:clarify_unnecessary -> A7:correct": 3,
+   "A0:clarify_ok -> A7:wrong": 4
+  },
+  "items": {
+   "A0:clarify_unnecessary -> A7:wrong": [
+    "HO01",
+    "HO12",
+    "HO15",
+    "HO19",
+    "IN06",
+    "IN07",
+    "IN10",
+    "IN17",
+    "EN02",
+    "EN08",
+    "EN09",
+    "EN10",
+    "EN12",
+    "EN13",
+    "EN14",
+    "EN24",
+    "RI04",
+    "RI08",
+    "RI10",
+    "RI11",
+    "RI14"
+   ],
+   "A0:clarify_unnecessary -> A7:correct": [
+    "HO03",
+    "HO16",
+    "EN04"
+   ],
+   "A0:clarify_ok -> A7:wrong": [
+    "IN27",
+    "EN16",
+    "RI06",
+    "RI19"
+   ]
+  }
+ },
+ "B1": {
+  "counts": {
+   "no change": 101,
+   "A7:wrong -> B1:clarify_unnecessary": 3,
+   "A7:wrong -> B1:clarify_ok": 1
+  },
+  "items": {
+   "A7:wrong -> B1:clarify_unnecessary": [
+    "EN09",
+    "EN10",
+    "EN12"
+   ],
+   "A7:wrong -> B1:clarify_ok": [
+    "RI19"
+   ]
+  }
+ },
+ "B2": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "B3": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "B4": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ },
+ "B5": {
+  "counts": {
+   "A7:wrong -> B5:clarify_unnecessary": 20,
+   "no change": 78,
+   "A7:correct -> B5:clarify_unnecessary": 3,
+   "A7:wrong -> B5:clarify_ok": 4
+  },
+  "items": {
+   "A7:wrong -> B5:clarify_unnecessary": [
+    "HO01",
+    "HO12",
+    "HO15",
+    "HO19",
+    "IN06",
+    "IN07",
+    "IN10",
+    "IN17",
+    "EN02",
+    "EN08",
+    "EN09",
+    "EN10",
+    "EN13",
+    "EN14",
+    "EN24",
+    "RI04",
+    "RI08",
+    "RI10",
+    "RI11",
+    "RI14"
+   ],
+   "A7:correct -> B5:clarify_unnecessary": [
+    "HO03",
+    "HO16",
+    "EN04"
+   ],
+   "A7:wrong -> B5:clarify_ok": [
+    "IN27",
+    "EN16",
+    "RI06",
+    "RI19"
+   ]
+  }
+ },
+ "B6": {
+  "counts": {
+   "no change": 105
+  },
+  "items": {}
+ }
+}

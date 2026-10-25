@@ -1,0 +1,312 @@
+{
+ "A0": {
+  "answered": 21,
+  "conf_correct": {
+   "n": 14,
+   "min": 0.979,
+   "median": 0.993,
+   "max": 1.0,
+   "mean": 0.9875
+  },
+  "conf_wrong": {
+   "n": 7,
+   "min": 0.979,
+   "median": 0.979,
+   "max": 0.9956,
+   "mean": 0.9814
+  },
+  "conf_refused": {
+   "n": 84,
+   "min": 0.05,
+   "median": 0.05,
+   "max": 0.3,
+   "mean": 0.1333
+  },
+  "high_conf_errors_ge_0_9": 7,
+  "high_conf_errors_ge_0_7": 7,
+  "ece_5bin": 0.319,
+  "reliability_bins": [
+   {
+    "lo": 0.8,
+    "hi": 1.0,
+    "n": 21,
+    "accuracy": 0.667,
+    "mean_conf": 0.985
+   }
+  ],
+  "auroc_correct_vs_wrong": 0.673,
+  "risk_coverage": [
+   {
+    "threshold": 0.0,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.4,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.7,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.9,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.95,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.97,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.979,
+    "answered": 21,
+    "correct": 14,
+    "wrong": 7,
+    "coverage_of_answerable": 0.189,
+    "risk": 0.333
+   },
+   {
+    "threshold": 0.98,
+    "answered": 8,
+    "correct": 7,
+    "wrong": 1,
+    "coverage_of_answerable": 0.095,
+    "risk": 0.125
+   },
+   {
+    "threshold": 0.985,
+    "answered": 8,
+    "correct": 7,
+    "wrong": 1,
+    "coverage_of_answerable": 0.095,
+    "risk": 0.125
+   },
+   {
+    "threshold": 0.99,
+    "answered": 8,
+    "correct": 7,
+    "wrong": 1,
+    "coverage_of_answerable": 0.095,
+    "risk": 0.125
+   },
+   {
+    "threshold": 0.993,
+    "answered": 8,
+    "correct": 7,
+    "wrong": 1,
+    "coverage_of_answerable": 0.095,
+    "risk": 0.125
+   },
+   {
+    "threshold": 0.995,
+    "answered": 4,
+    "correct": 3,
+    "wrong": 1,
+    "coverage_of_answerable": 0.041,
+    "risk": 0.25
+   },
+   {
+    "threshold": 0.9956,
+    "answered": 4,
+    "correct": 3,
+    "wrong": 1,
+    "coverage_of_answerable": 0.041,
+    "risk": 0.25
+   },
+   {
+    "threshold": 1.0,
+    "answered": 3,
+    "correct": 3,
+    "wrong": 0,
+    "coverage_of_answerable": 0.041,
+    "risk": 0.0
+   }
+  ]
+ },
+ "A7": {
+  "answered": 49,
+  "conf_correct": {
+   "n": 17,
+   "min": 0.979,
+   "median": 0.993,
+   "max": 1.0,
+   "mean": 0.9885
+  },
+  "conf_wrong": {
+   "n": 32,
+   "min": 0.979,
+   "median": 0.979,
+   "max": 1.0,
+   "mean": 0.9817
+  },
+  "conf_refused": {
+   "n": 56,
+   "min": 0.05,
+   "median": 0.05,
+   "max": 0.05,
+   "mean": 0.05
+  },
+  "high_conf_errors_ge_0_9": 32,
+  "high_conf_errors_ge_0_7": 32,
+  "ece_5bin": 0.637,
+  "reliability_bins": [
+   {
+    "lo": 0.8,
+    "hi": 1.0,
+    "n": 49,
+    "accuracy": 0.347,
+    "mean_conf": 0.984
+   }
+  ],
+  "auroc_correct_vs_wrong": 0.685,
+  "risk_coverage": [
+   {
+    "threshold": 0.0,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.4,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.7,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.9,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.95,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.97,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.979,
+    "answered": 49,
+    "correct": 17,
+    "wrong": 32,
+    "coverage_of_answerable": 0.23,
+    "risk": 0.653
+   },
+   {
+    "threshold": 0.98,
+    "answered": 14,
+    "correct": 9,
+    "wrong": 5,
+    "coverage_of_answerable": 0.122,
+    "risk": 0.357
+   },
+   {
+    "threshold": 0.985,
+    "answered": 14,
+    "correct": 9,
+    "wrong": 5,
+    "coverage_of_answerable": 0.122,
+    "risk": 0.357
+   },
+   {
+    "threshold": 0.986,
+    "answered": 14,
+    "correct": 9,
+    "wrong": 5,
+    "coverage_of_answerable": 0.122,
+    "risk": 0.357
+   },
+   {
+    "threshold": 0.99,
+    "answered": 13,
+    "correct": 9,
+    "wrong": 4,
+    "coverage_of_answerable": 0.122,
+    "risk": 0.308
+   },
+   {
+    "threshold": 0.993,
+    "answered": 13,
+    "correct": 9,
+    "wrong": 4,
+    "coverage_of_answerable": 0.122,
+    "risk": 0.308
+   },
+   {
+    "threshold": 0.995,
+    "answered": 9,
+    "correct": 5,
+    "wrong": 4,
+    "coverage_of_answerable": 0.068,
+    "risk": 0.444
+   },
+   {
+    "threshold": 0.9956,
+    "answered": 9,
+    "correct": 5,
+    "wrong": 4,
+    "coverage_of_answerable": 0.068,
+    "risk": 0.444
+   },
+   {
+    "threshold": 1.0,
+    "answered": 8,
+    "correct": 5,
+    "wrong": 3,
+    "coverage_of_answerable": 0.068,
+    "risk": 0.375
+   }
+  ]
+ }
+}
