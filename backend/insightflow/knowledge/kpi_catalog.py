@@ -371,12 +371,8 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
 
     # Generic AVG(col) for every numeric measure that isn't already the
     # subject of a specific KPI — enables "average X" for any column.
-    already_avged: set = set()
-    for k in out.values():
-        if k.aggregation in ("avg", "ratio"):
-            already_avged.update(k.required_columns)
     for name, info in ds.columns.items():
-        if info.role != "measure" or name in already_avged:
+        if info.role != "measure":
             continue
         kid = f"avg_{name.lower()}"
         if kid in out:
@@ -385,8 +381,11 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
             kpi_id=kid, display_name=f"Average {name.title()}",
             aggregation="avg", formula=f"AVG({_quote(name)})",
             required_columns=[name], unit=info.sql_type.lower(),
-            aliases=[f"average {name.lower()}", f"avg {name.lower()}",
-                     f"mean {name.lower()}"],
+            aliases=sorted({f"average {name.lower()}", f"avg {name.lower()}",
+                            f"mean {name.lower()}",
+                            f"average {name.lower().replace('_', ' ')}",
+                            f"avg {name.lower().replace('_', ' ')}",
+                            f"mean {name.lower().replace('_', ' ')}"}),
         )
         # And a plain SUM alias for the column too — safe fallback so
         # "what's the total <col>" works.
@@ -396,8 +395,11 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
                 kpi_id=sid, display_name=f"Total {name.title()}",
                 aggregation="sum", formula=f"SUM({_quote(name)})",
                 required_columns=[name], unit="",
-                aliases=[f"total {name.lower()}", name.lower(),
-                         f"sum of {name.lower()}"],
+                aliases=sorted({f"total {name.lower()}", name.lower(),
+                                f"sum of {name.lower()}",
+                                f"total {name.lower().replace('_', ' ')}",
+                                name.lower().replace('_', ' '),
+                                f"sum of {name.lower().replace('_', ' ')}"}),
             )
 
     return out

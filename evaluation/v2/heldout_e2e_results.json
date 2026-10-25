@@ -1,0 +1,348 @@
+{
+  "summary": {
+    "n_answerable": 23,
+    "n_abstain_expected": 5,
+    "n": 28,
+    "answered": 23,
+    "exec_correct": 23,
+    "abstain_correct": 5,
+    "exec_accuracy": 1.0
+  },
+  "results": [
+    {
+      "id": "H01",
+      "question": "What is the total revenue?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 670994.82,
+      "expected": 670994.82,
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 42,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H02",
+      "question": "How many sales were there?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 540,
+      "expected": 540,
+      "sql": "SELECT COUNT(*) AS row_count FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H03",
+      "question": "What is the total quantity?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 2979,
+      "expected": 2979,
+      "sql": "SELECT SUM(\"quantity\") AS sum_quantity FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H04",
+      "question": "What is the average gross amount?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 1242.5829999999999,
+      "expected": 1242.5829999999999,
+      "sql": "SELECT AVG(\"gross_amount\") AS avg_gross_amount FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 16,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H05",
+      "question": "What is the maximum gross amount?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 2490.82,
+      "expected": 2490.82,
+      "sql": "SELECT MAX(gross_amount) AS max_gross_amount FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H06",
+      "question": "What is the minimum gross amount?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 26.56,
+      "expected": 26.56,
+      "sql": "SELECT MIN(gross_amount) AS min_gross_amount FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H07",
+      "question": "Revenue in East Coast office",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 163582.51,
+      "expected": 163582.51,
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"office_name\" = 'East Coast'",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H08",
+      "question": "Revenue in R&D Hardware line",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 144728.7,
+      "expected": 144728.7,
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"line_name\" = 'R&D Hardware'",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H09",
+      "question": "Revenue in Men's Apparel line",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 129662.14,
+      "expected": 129662.14,
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"line_name\" = 'Men''s Apparel'",
+      "latency_ms": 19,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H10",
+      "question": "Revenue in North America territory",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 338480.5,
+      "expected": 338480.5,
+      "sql": "SELECT \"territory\" AS territory, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"territory\" = 'North America' GROUP BY \"territory\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H11",
+      "question": "Revenue for Platinum tier customers",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 307566.5,
+      "expected": 307566.5,
+      "sql": "SELECT \"tier\" AS tier, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"tier\" = 'Platinum' GROUP BY \"tier\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H12",
+      "question": "Revenue in Antarctica Research Station office",
+      "action": "CLARIFY",
+      "exec_ok": true,
+      "kind": "abstain_expected",
+      "sys_val": "CLARIFY",
+      "expected": "CLARIFY/ABSTAIN",
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 13,
+      "decision_reason": "plan requires items not in the dataset: value:office=antarctica research station"
+    },
+    {
+      "id": "H13",
+      "question": "How many sales have missing shipping cost?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 50,
+      "expected": 50,
+      "sql": "SELECT COUNT(*) AS null_shipping_cost FROM \"dataset_heldout_heldout_e2e\" WHERE \"shipping_cost\" IS NULL",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H14",
+      "question": "How many customers have missing tier?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 7,
+      "expected": 7,
+      "sql": "SELECT COUNT(DISTINCT \"customer_name\") AS null_tier FROM \"dataset_heldout_heldout_e2e\" WHERE \"tier\" IS NULL",
+      "latency_ms": 12,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H15",
+      "question": "How many distinct customers do we have?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 50,
+      "expected": 50,
+      "sql": "SELECT COUNT(DISTINCT customer_name) AS distinct_customer_name FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 12,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H16",
+      "question": "Revenue by office_name",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": {
+        "West Coast": 174897.99,
+        "EMEA Hub": 170262.54,
+        "East Coast": 163582.51,
+        "APAC HQ": 162251.78
+      },
+      "expected": {
+        "APAC HQ": 162251.78,
+        "EMEA Hub": 170262.54,
+        "East Coast": 163582.51,
+        "West Coast": 174897.99
+      },
+      "sql": "SELECT \"office_name\" AS office_name, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" GROUP BY \"office_name\" ORDER BY total_revenue DESC",
+      "latency_ms": 12,
+      "decision_reason": "confidence 1.00 \u2265 0.70"
+    },
+    {
+      "id": "H17",
+      "question": "Revenue in Mars office",
+      "action": "CLARIFY",
+      "exec_ok": true,
+      "kind": "abstain_expected",
+      "sys_val": "CLARIFY",
+      "expected": "CLARIFY/ABSTAIN",
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 12,
+      "decision_reason": "plan requires items not in the dataset: value:office=mars"
+    },
+    {
+      "id": "H18",
+      "question": "Revenue in East office",
+      "action": "CLARIFY",
+      "exec_ok": true,
+      "kind": "abstain_expected",
+      "sys_val": "CLARIFY",
+      "expected": "CLARIFY/ABSTAIN",
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 13,
+      "decision_reason": "plan requires items not in the dataset: value:office=east"
+    },
+    {
+      "id": "H19",
+      "question": "Revenue for Diamond tier customers",
+      "action": "CLARIFY",
+      "exec_ok": true,
+      "kind": "abstain_expected",
+      "sys_val": "CLARIFY",
+      "expected": "CLARIFY/ABSTAIN",
+      "sql": "SELECT \"tier\" AS tier, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" GROUP BY \"tier\" ORDER BY total_revenue DESC",
+      "latency_ms": 14,
+      "decision_reason": "plan requires items not in the dataset: value:tier=diamond"
+    },
+    {
+      "id": "H20",
+      "question": "Revenue in South Pole office",
+      "action": "CLARIFY",
+      "exec_ok": true,
+      "kind": "abstain_expected",
+      "sys_val": "CLARIFY",
+      "expected": "CLARIFY/ABSTAIN",
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\"",
+      "latency_ms": 13,
+      "decision_reason": "plan requires items not in the dataset: value:office=south pole"
+    },
+    {
+      "id": "H21",
+      "question": "Revenue in East Coast office in Men's Apparel line",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 23622.829999999998,
+      "expected": 23622.829999999998,
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"line_name\" = 'Men''s Apparel' AND \"office_name\" = 'East Coast'",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H22",
+      "question": "Revenue in East Coast office in R&D division for Platinum tier customers",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 18971.81,
+      "expected": 18971.81,
+      "sql": "SELECT \"division\" AS division, \"tier\" AS tier, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"office_name\" = 'East Coast' AND \"tier\" = 'Platinum' AND \"division\" = 'R&D' GROUP BY \"division\", \"tier\"",
+      "latency_ms": 12,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H23",
+      "question": "Revenue in Women's Apparel line",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 109323.1,
+      "expected": 109323.1,
+      "sql": "SELECT SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"line_name\" = 'Women''s Apparel'",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H24",
+      "question": "Revenue by line_name for APAC HQ office",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": {
+        "Enterprise Software": 50892.93,
+        "R&D Hardware": 33810.72,
+        "Accessories": 27960.87,
+        "Men's Apparel": 26416.54,
+        "Women's Apparel": 23170.72
+      },
+      "expected": {
+        "Accessories": 27960.87,
+        "Enterprise Software": 50892.93,
+        "Men's Apparel": 26416.54,
+        "R&D Hardware": 33810.72,
+        "Women's Apparel": 23170.72
+      },
+      "sql": "SELECT \"line_name\" AS line_name, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"office_name\" = 'APAC HQ' GROUP BY \"line_name\" ORDER BY total_revenue DESC",
+      "latency_ms": 13,
+      "decision_reason": "confidence 1.00 \u2265 0.70"
+    },
+    {
+      "id": "H25",
+      "question": "Revenue in North America territory in March 2026",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 41486.37,
+      "expected": 41486.37,
+      "sql": "SELECT \"territory\" AS territory, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"sale_date\" >= '2026-03-01' AND \"sale_date\" < '2026-04-01' AND \"territory\" = 'North America' GROUP BY \"territory\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H26",
+      "question": "Revenue in the Enterprise division",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 151942.69,
+      "expected": 151942.69,
+      "sql": "SELECT \"division\" AS division, SUM(\"gross_amount\") AS total_revenue FROM \"dataset_heldout_heldout_e2e\" WHERE \"division\" = 'Enterprise' GROUP BY \"division\"",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H27",
+      "question": "How many sales in EMEA Hub office?",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 138,
+      "expected": 138,
+      "sql": "SELECT COUNT(*) AS row_count FROM \"dataset_heldout_heldout_e2e\" WHERE \"office_name\" = 'EMEA Hub'",
+      "latency_ms": 14,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    },
+    {
+      "id": "H28",
+      "question": "Average gross amount in Accessories line",
+      "action": "ANSWER",
+      "exec_ok": true,
+      "sys_val": 1253.131388888889,
+      "expected": 1253.131388888889,
+      "sql": "SELECT AVG(\"gross_amount\") AS avg_gross_amount FROM \"dataset_heldout_heldout_e2e\" WHERE \"line_name\" = 'Accessories'",
+      "latency_ms": 13,
+      "decision_reason": "confidence 0.98 \u2265 0.70"
+    }
+  ]
+}

@@ -917,6 +917,23 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
         r"\bmissing\s+([a-z_]+)\b",
         r"\bnull\s+([a-z_]+)\b",
     )
+    if ds.kind != "demo":
+        m = re.search(r"\b(?:missing|null|empty|blank|unspecified)\s+"
+                      r"([a-z_ ]+?)\s*\??\s*$", ql) or \
+            re.search(r"\b(?:with|where)\s+(?:no|an?\s+)?"
+                      r"([a-z_ ]+?)\s+(?:is\s+)?(?:null|missing|empty|blank)"
+                      r"\b", ql)
+        if m:
+            phrase = _norm_words(m.group(1))
+            best = None
+            for cname in ds.columns:
+                n = _norm_words(cname)
+                if re.search(rf"(?<![a-z0-9]){re.escape(n)}(?![a-z0-9])",
+                             phrase) and (
+                        best is None or len(n) > len(_norm_words(best))):
+                    best = cname
+            if best:
+                return best
     for p in patterns:
         m = re.search(p, ql)
         if not m:
@@ -980,7 +997,23 @@ _EXTREMUM_WORDS = {
 }
 
 
-def _find_extremum(question: str, catalog: KPICatalog
+def _bind_measure_phrase(text: str, ds: ActiveDataset) -> Optional[str]:
+    """Longest measure column whose space-normalised name appears in
+    `text` (word-bounded)."""
+    t = _norm_words(text)
+    best = None
+    for cname, info in ds.columns.items():
+        if info.role != "measure":
+            continue
+        n = _norm_words(cname)
+        if re.search(rf"(?<![a-z0-9]){re.escape(n)}(?![a-z0-9])", t):
+            if best is None or len(n) > len(_norm_words(best)):
+                best = cname
+    return best
+
+
+def _find_extremum(question: str, catalog: KPICatalog,
+                    ds: Optional[ActiveDataset] = None
                     ) -> Optional[Tuple[str, str, str]]:
     """Detect 'minimum/maximum order <metric>' / 'largest order value'.
     Returns (sql_fn, display_name, column_expr) or None.
@@ -989,6 +1022,16 @@ def _find_extremum(question: str, catalog: KPICatalog
     which is a filtered sum).
     """
     ql = question.lower()
+    if ds is not None and ds.kind != "demo" \
+            and not re.search(r"^\s*which\b", ql):
+        for word, (fn, label) in _EXTREMUM_WORDS.items():
+            m = re.search(rf"\b{word}\s+(?:single\s+|individual\s+)?"
+                          rf"(?:order\s+|row\s+|transaction\s+)?"
+                          rf"([a-z_ ]+?)\s*\??\s*$", ql)
+            if m:
+                col = _bind_measure_phrase(m.group(1), ds)
+                if col:
+                    return (fn, label, col)
     # Column alias → physical column on the orders table.
     _COL = {
         "revenue": "revenue", "value": "revenue", "amount": "revenue",
@@ -1133,6 +1176,95 @@ def _find_threshold_grouped(question: str, ds: ActiveDataset,
     return None
 
 
+_VALUE_STOPWORDS = {
+    "the", "and", "for", "all", "any", "each", "every", "per", "other",
+    "total", "average", "none", "null", "unknown", "yes", "no", "true",
+    "false", "new", "top", "last", "this", "next", "year", "month",
+    "week", "day", "which", "what", "how", "many", "much",
+}
+_MAX_DISTINCT_PER_DIM = 5000
+
+
+def _norm_words(s: str) -> str:
+    return re.sub(r"[\s_]+", " ", s.strip().lower())
+
+
+def _value_index(ds: ActiveDataset) -> dict:
+    """Schema-grounded index: lowercased distinct value -> [(column,
+    original value)], built from every dimension column of an uploaded
+    dataset. Columns with very high cardinality are skipped (they are
+    identifiers, not filterable categories)."""
+    import sqlite3
+    from ..config import settings
+    idx: dict = {}
+    db_url = settings.database_url
+    db_path = db_url.split(":///", 1)[1] if ":///" in db_url else db_url
+    try:
+        with sqlite3.connect(db_path) as c:
+            for cname, info in ds.columns.items():
+                if info.role != "dimension":
+                    continue
+                rows = c.execute(
+                    f'SELECT DISTINCT "{cname}" FROM "{ds.table}" '
+                    f'WHERE "{cname}" IS NOT NULL LIMIT '
+                    f'{_MAX_DISTINCT_PER_DIM + 1}').fetchall()
+                if len(rows) > _MAX_DISTINCT_PER_DIM:
+                    continue
+                for (v,) in rows:
+                    lo = str(v).strip().lower()
+                    if len(lo) < 2 or lo in _VALUE_STOPWORDS:
+                        continue
+                    if re.fullmatch(r"[\d\W_]+", lo):
+                        continue
+                    idx.setdefault(lo, []).append((cname, v))
+    except Exception:
+        return {}
+    return idx
+
+
+def _value_mentions(question: str, idx: dict) -> list:
+    """Non-overlapping, longest-first mentions of known dim values.
+    Returns [(lower_value, [(col, orig), ...])]. A value present in
+    more than one column has >1 candidates (ambiguous)."""
+    ql = question.lower()
+    taken: list = []
+    out: list = []
+    for lo in sorted(idx, key=lambda v: (-len(v), v)):
+        for m in re.finditer(
+                rf"(?<![a-z0-9]){re.escape(lo)}(?![a-z0-9])", ql):
+            span = (m.start(), m.end())
+            if any(span[0] < e and s < span[1] for s, e in taken):
+                continue
+            taken.append(span)
+            out.append((lo, idx[lo]))
+            break
+    return out
+
+
+def _uploaded_dim_nouns(ds: ActiveDataset) -> dict:
+    """noun phrase -> column, from the dataset's own dimension names."""
+    nouns: dict = {}
+    for cname, info in ds.columns.items():
+        if info.role != "dimension":
+            continue
+        full = _norm_words(cname)
+        nouns[full] = cname
+        first = full.split(" ")[0]
+        nouns.setdefault(first, cname)
+    return nouns
+
+
+def _find_ambiguous_values(question: str, ds: ActiveDataset) -> List[str]:
+    if ds.kind == "demo":
+        return []
+    out = []
+    for lo, cands in _value_mentions(question, _value_index(ds)):
+        cols = sorted({c for c, _ in cands})
+        if len(cols) > 1:
+            out.append(f"ambiguous_value:{lo}=" + "|".join(cols))
+    return out
+
+
 def _find_value_filters(question: str, ds: ActiveDataset
                           ) -> List[FilterExpr]:
     """Detect value-equality filters of the form "<value> <dim-noun>"
@@ -1153,11 +1285,19 @@ def _find_value_filters(question: str, ds: ActiveDataset
       "revenue by region" (grouping, not filter)
       "which region had the highest revenue" (question about dim)
     """
+    out: List[FilterExpr] = []
+    if ds.kind != "demo":
+        for lo, cands in _value_mentions(question, _value_index(ds)):
+            cols = {c for c, _ in cands}
+            if len(cols) != 1:
+                continue   # ambiguous: handled by _find_ambiguous_values
+            col, orig = cands[0]
+            out.append(FilterExpr(kind="eq", column=col, value=orig))
+        return out
     import sqlite3
     from ..config import settings
-    out: List[FilterExpr] = []
 
-    # Map of dim-noun → (physical column, candidate SQL for distinct values)
+    # Map of dim-noun -> (physical column, candidate SQL for distinct values)
     _DIM_MAP = []
     if ds.kind == "demo":
         _DIM_MAP = [
@@ -1228,7 +1368,37 @@ def _find_unknown_dim_values(question: str, ds: ActiveDataset
     import sqlite3
     from ..config import settings
     if ds.kind != "demo":
-        return []
+        idx = _value_index(ds)
+        nouns = _uploaded_dim_nouns(ds)
+        if not nouns:
+            return []
+        per_col: dict = {}
+        for lo, cands in idx.items():
+            for c, _ in cands:
+                per_col.setdefault(c, set()).add(lo)
+        ql = " " + question.lower() + " "
+        noun_alt = "|".join(sorted((re.escape(n) for n in nouns),
+                                    key=len, reverse=True))
+        unk: List[str] = []
+        for m in re.finditer(
+                rf"\b(?:in|for|within|from|at)\s+(?:the\s+)?"
+                rf"([a-z0-9][a-z0-9&'\-\. ]{{0,40}}?)\s+({noun_alt})\b",
+                ql):
+            value = m.group(1).strip()
+            noun = m.group(2)
+            if not value or value.split()[0] in _VALUE_STOPWORDS or \
+                    value in ("a", "an", "each", "every", "any", "all"):
+                continue
+            if value in idx:        # known value (possibly other column)
+                continue
+            if re.fullmatch(r"[\d\W_]+", value):
+                continue
+            # value with a known-value substring is handled by the filter
+            if any(re.search(rf"(?<![a-z0-9]){re.escape(v)}(?![a-z0-9])",
+                             value) for v in idx):
+                continue
+            unk.append(f"value:{noun}={value}")
+        return unk
     unknowns: List[str] = []
     db_url = settings.database_url
     db_path = db_url.split(":///", 1)[1] if ":///" in db_url else db_url
@@ -1309,7 +1479,7 @@ def _detect_intent_kind(
             return IntentKind.DISTINCT_COUNT
     if _find_rolling_window(question) is not None:
         return IntentKind.ROLLING_AVG
-    if catalog is not None and _find_extremum(question, catalog):
+    if catalog is not None and _find_extremum(question, catalog, ds):
         return IntentKind.EXTREMUM
     if ds is not None and catalog is not None \
             and _find_top_per_group(question, ds, catalog):
@@ -1685,6 +1855,19 @@ class Planner:
             if k and not any(m.kpi_id == k.kpi_id for m in kpis):
                 kpis = [k] + kpis
 
+        # "How many sales ..." asks for a count of records, even though
+        # "sales" is also a revenue alias. A monetary/sum KPI bound only
+        # through the counted noun is replaced by the row count.
+        _hm = re.search(r"\b(?:how\s+many|number\s+of)\s+([a-z_]+)", ql_lo)
+        if _hm and len(kpis) == 1 and kpis[0].aggregation in (
+                "sum", "derived") and catalog.get("row_count") is not None \
+                and not re.search(r"\b(distinct|unique)\b", ql_lo) \
+                and re.search(rf"\b{re.escape(_hm.group(1))}\b",
+                              " ".join(kpis[0].aliases).lower()) \
+                and not re.search(r"\b(?:total|sum|amount|value|revenue)\b",
+                                  ql_lo[_hm.end():]):
+            kpis = [catalog.get("row_count")]
+
         kind = _detect_intent_kind(question, kpis, bound_dims,
                                     time_unit, two_months,
                                     ds=ds, catalog=catalog)
@@ -1744,6 +1927,18 @@ class Planner:
 
         # Fallback KPIs when the user didn't name one but the question is
         # answerable-shaped (breakdown / trend / top-N / share).
+        _AGG_CUE = re.compile(
+            r"\b(average|avg|mean|median|maximum|minimum|max|min|"
+            r"how\s+many|number\s+of|count)\b")
+        _count_cue = re.search(r"\b(how\s+many|number\s+of|count)\b", ql_lo)
+        if not kpis and _count_cue and kind == IntentKind.DIRECT_KPI \
+                and catalog.get("row_count") is not None:
+            kpis = [catalog.get("row_count")]
+        elif not kpis and kind == IntentKind.DIRECT_KPI \
+                and _AGG_CUE.search(ql_lo):
+            # An explicit aggregate was requested but no measure binds:
+            # never fall back to revenue silently.
+            kind = IntentKind.AMBIGUOUS
         if not kpis and kind not in (IntentKind.UNSUPPORTED,
                                       IntentKind.AMBIGUOUS):
             fallback = catalog.get("total_revenue") or catalog.get("row_count")
@@ -1778,6 +1973,7 @@ class Planner:
         # path fires instead of silently answering with the all-dim
         # total.
         _unknown_values: List[str] = _find_unknown_dim_values(question, ds)
+        _unknown_values += _find_ambiguous_values(question, ds)
         # When a value filter is present for a given dim AND that
         # same dim was bound as a grouping, remove the grouping (user
         # asked for a filtered single row, not a breakdown).
@@ -1795,6 +1991,10 @@ class Planner:
             vf_dim_nouns: set = set()
             for f in value_filters:
                 vf_dim_nouns |= _NOUNS.get(f.column, set())
+                if ds.kind != "demo":
+                    _base = _norm_words(f.column)
+                    vf_dim_nouns |= {f.column, f.column.lower(), _base,
+                                     _base.split(" ")[0]}
             _old_bound = list(bound_dims)
             bound_dims = [(n, c) for n, c in bound_dims
                            if not (n in vf_dim_nouns
@@ -1966,16 +2166,30 @@ class Planner:
         elif kind == IntentKind.NULL_COUNT:
             null_col = _find_null_target_column(question, ds)
             if null_col:
+                _formula, _label = "COUNT(*)", f"Rows with missing {null_col}"
+                _agg = "count"
+                _em = re.search(r"\bhow\s+many\s+([a-z_]+)", ql_lo)
+                if _em and ds.kind != "demo":
+                    _noun = _em.group(1)
+                    _ecol = (_bind_dim_column(ds, _noun) or
+                             (_bind_dim_column(ds, _noun[:-1])
+                              if _noun.endswith("s") else None))
+                    if _ecol and _ecol != null_col and \
+                            _ecol in ds.columns:
+                        _formula = f'COUNT(DISTINCT "{_ecol}")'
+                        _label = (f"Distinct {_ecol} with missing "
+                                  f"{null_col}")
+                        _agg = "count_distinct"
                 measures = [MeasureRef(
                     kpi_id=f"null_{null_col}",
-                    display_name=f"Rows with missing {null_col}",
-                    formula="COUNT(*)",
-                    aggregation="count", unit="count")]
+                    display_name=_label,
+                    formula=_formula,
+                    aggregation=_agg, unit="count")]
                 dims = []
                 filters = [FilterExpr(kind="null", column=null_col)]
 
         elif kind == IntentKind.EXTREMUM:
-            hit = _find_extremum(question, catalog)
+            hit = _find_extremum(question, catalog, ds)
             if hit is not None:
                 fn, label, col = hit
                 measures = [MeasureRef(
