@@ -1,0 +1,541 @@
+sale_date,office_name,territory,line_name,division,customer_name,tier,quantity,gross_amount,shipping_cost
+2026-01-11,West Coast,North America,Accessories,Consumer,Customer-043,Gold,7,426.11,
+2026-01-16,West Coast,North America,Men's Apparel,Consumer,Customer-036,Silver,4,369.17,15.08
+2026-01-17,West Coast,North America,R&D Hardware,R&D,Customer-030,Platinum,1,1046.46,12.15
+2026-01-09,West Coast,North America,R&D Hardware,R&D,Customer-010,Gold,8,112.25,2.69
+2026-01-11,EMEA Hub,EMEA,Accessories,Consumer,Customer-003,Platinum,8,2176.77,36.57
+2026-01-24,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-018,,2,1946.4,79.34
+2026-01-17,East Coast,North America,Accessories,Consumer,Customer-025,,5,1606.2,61.21
+2026-01-26,West Coast,North America,Enterprise Software,Enterprise,Customer-018,,3,2121.34,48.66
+2026-01-26,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-006,Platinum,7,543.23,22.89
+2026-01-08,East Coast,North America,R&D Hardware,R&D,Customer-020,Platinum,8,174.91,2.26
+2026-01-14,West Coast,North America,Men's Apparel,Consumer,Customer-026,Gold,4,1765.1,52.99
+2026-01-27,APAC HQ,APAC,Women's Apparel,Consumer,Customer-033,Silver,7,444.98,9.82
+2026-01-27,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-010,Gold,8,2267.09,65.51
+2026-01-05,West Coast,North America,Men's Apparel,Consumer,Customer-040,,3,2314.11,29.6
+2026-01-11,West Coast,North America,Men's Apparel,Consumer,Customer-043,Gold,1,1599.32,25.48
+2026-01-07,East Coast,North America,Accessories,Consumer,Customer-026,Gold,6,525.73,13.27
+2026-01-28,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-041,Silver,5,1060.87,46.55
+2026-01-27,East Coast,North America,R&D Hardware,R&D,Customer-018,,7,1006.17,31.22
+2026-01-23,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-014,Silver,5,1793.43,21.7
+2026-01-27,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-050,Platinum,8,421.65,5.45
+2026-01-13,APAC HQ,APAC,Accessories,Consumer,Customer-044,Gold,8,472.09,7.69
+2026-01-19,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-023,Platinum,4,430.76,14.09
+2026-01-26,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-047,Platinum,8,1655.16,40.83
+2026-01-26,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-009,Silver,10,836.13,33.54
+2026-01-10,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-022,Platinum,10,2365.47,42.06
+2026-01-27,APAC HQ,APAC,Men's Apparel,Consumer,Customer-035,Platinum,10,517.96,24.12
+2026-01-15,APAC HQ,APAC,Men's Apparel,Consumer,Customer-049,Platinum,9,1477.18,63.47
+2026-01-09,APAC HQ,APAC,Women's Apparel,Consumer,Customer-002,Platinum,7,103.01,5.04
+2026-01-22,West Coast,North America,R&D Hardware,R&D,Customer-034,Silver,6,1092.04,13.93
+2026-01-25,APAC HQ,APAC,R&D Hardware,R&D,Customer-045,,8,2274.66,68.64
+2026-01-21,East Coast,North America,Enterprise Software,Enterprise,Customer-022,Platinum,10,581.72,21.76
+2026-01-22,West Coast,North America,Enterprise Software,Enterprise,Customer-040,,10,179.9,7.84
+2026-01-23,West Coast,North America,Enterprise Software,Enterprise,Customer-049,Platinum,9,1731.46,75.41
+2026-01-05,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-024,Silver,2,2325.01,86.11
+2026-01-02,East Coast,North America,R&D Hardware,R&D,Customer-015,Silver,10,2009.52,95.62
+2026-01-23,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-032,Platinum,1,84.3,3.64
+2026-01-14,APAC HQ,APAC,Women's Apparel,Consumer,Customer-032,Platinum,4,1735.74,77.36
+2026-01-12,APAC HQ,APAC,Accessories,Consumer,Customer-012,Platinum,2,1602.17,28.61
+2026-01-20,West Coast,North America,Enterprise Software,Enterprise,Customer-009,Silver,5,1631.6,
+2026-01-20,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-039,Silver,6,728.13,18.0
+2026-01-10,East Coast,North America,R&D Hardware,R&D,Customer-038,Platinum,5,309.98,13.83
+2026-01-18,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-012,Platinum,6,739.38,15.46
+2026-01-23,West Coast,North America,Accessories,Consumer,Customer-011,Platinum,1,2418.2,63.71
+2026-01-07,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-047,Platinum,3,891.12,37.91
+2026-01-14,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-038,Platinum,8,2071.9,80.74
+2026-01-26,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-007,Platinum,9,2127.2,32.08
+2026-01-26,EMEA Hub,EMEA,Accessories,Consumer,Customer-007,Platinum,9,1398.72,28.3
+2026-01-23,East Coast,North America,R&D Hardware,R&D,Customer-026,Gold,5,1781.64,56.87
+2026-01-07,EMEA Hub,EMEA,Accessories,Consumer,Customer-021,Gold,8,2296.58,97.6
+2026-01-15,East Coast,North America,Men's Apparel,Consumer,Customer-013,Platinum,3,1523.18,38.25
+2026-01-23,West Coast,North America,R&D Hardware,R&D,Customer-002,Platinum,3,2427.37,33.96
+2026-01-02,APAC HQ,APAC,Accessories,Consumer,Customer-021,Gold,6,776.73,21.24
+2026-01-19,West Coast,North America,Accessories,Consumer,Customer-026,Gold,1,729.84,15.58
+2026-01-27,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-016,,3,2104.16,72.39
+2026-01-20,EMEA Hub,EMEA,Accessories,Consumer,Customer-033,Silver,6,1312.53,35.97
+2026-01-09,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-016,,5,402.93,10.65
+2026-01-02,West Coast,North America,Enterprise Software,Enterprise,Customer-035,Platinum,6,1574.16,73.54
+2026-01-01,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-046,Silver,2,186.33,6.68
+2026-01-23,EMEA Hub,EMEA,Accessories,Consumer,Customer-050,Platinum,4,1734.31,40.05
+2026-01-27,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-020,Platinum,1,2001.21,31.44
+2026-02-13,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-034,Silver,3,2315.05,
+2026-02-18,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-009,Silver,5,2171.47,59.15
+2026-02-24,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-021,Gold,3,174.16,4.82
+2026-02-25,East Coast,North America,R&D Hardware,R&D,Customer-010,Gold,9,692.73,34.16
+2026-02-07,West Coast,North America,Women's Apparel,Consumer,Customer-022,Platinum,10,1038.79,
+2026-02-12,West Coast,North America,Women's Apparel,Consumer,Customer-036,Silver,1,53.96,1.49
+2026-02-22,East Coast,North America,Accessories,Consumer,Customer-028,Silver,8,1060.08,38.1
+2026-02-17,West Coast,North America,Enterprise Software,Enterprise,Customer-050,Platinum,10,1953.16,43.4
+2026-02-19,East Coast,North America,Men's Apparel,Consumer,Customer-019,Gold,10,317.3,10.43
+2026-02-25,West Coast,North America,Accessories,Consumer,Customer-027,Platinum,4,114.83,5.55
+2026-02-06,West Coast,North America,Enterprise Software,Enterprise,Customer-005,Silver,6,1969.27,37.78
+2026-02-03,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-009,Silver,5,1690.36,
+2026-02-17,East Coast,North America,R&D Hardware,R&D,Customer-047,Platinum,9,54.03,
+2026-02-16,East Coast,North America,R&D Hardware,R&D,Customer-012,Platinum,4,2131.61,26.58
+2026-02-10,West Coast,North America,Accessories,Consumer,Customer-030,Platinum,3,665.74,26.4
+2026-02-17,East Coast,North America,R&D Hardware,R&D,Customer-042,Silver,6,2387.18,111.03
+2026-02-23,East Coast,North America,R&D Hardware,R&D,Customer-041,Silver,10,1254.26,
+2026-02-06,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-040,,5,2174.83,28.71
+2026-02-19,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-022,Platinum,9,1773.22,
+2026-02-26,EMEA Hub,EMEA,Accessories,Consumer,Customer-034,Silver,3,1020.57,31.33
+2026-02-21,West Coast,North America,Enterprise Software,Enterprise,Customer-007,Platinum,7,233.55,3.51
+2026-02-28,East Coast,North America,R&D Hardware,R&D,Customer-047,Platinum,10,1210.0,49.38
+2026-02-03,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-001,,6,100.49,1.44
+2026-02-22,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-012,Platinum,10,113.32,4.19
+2026-02-19,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-038,Platinum,10,90.4,2.12
+2026-02-18,APAC HQ,APAC,Women's Apparel,Consumer,Customer-006,Platinum,9,1928.68,79.15
+2026-02-01,East Coast,North America,Men's Apparel,Consumer,Customer-002,Platinum,5,1398.37,52.05
+2026-02-27,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-050,Platinum,1,983.28,
+2026-02-03,APAC HQ,APAC,R&D Hardware,R&D,Customer-023,Platinum,7,894.1,
+2026-02-05,West Coast,North America,Accessories,Consumer,Customer-023,Platinum,3,250.11,4.09
+2026-02-20,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-040,,8,1499.66,71.88
+2026-02-14,APAC HQ,APAC,Men's Apparel,Consumer,Customer-027,Platinum,6,488.03,21.65
+2026-02-08,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-041,Silver,7,1755.51,44.19
+2026-02-22,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-025,,5,1429.23,34.75
+2026-02-23,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-020,Platinum,4,745.27,26.31
+2026-02-24,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-017,Silver,7,928.07,
+2026-02-12,East Coast,North America,Enterprise Software,Enterprise,Customer-003,Platinum,4,1538.48,66.16
+2026-02-13,APAC HQ,APAC,R&D Hardware,R&D,Customer-036,Silver,7,1044.99,29.08
+2026-02-17,East Coast,North America,Enterprise Software,Enterprise,Customer-041,Silver,10,842.95,40.41
+2026-02-11,East Coast,North America,Accessories,Consumer,Customer-040,,6,917.86,39.42
+2026-02-14,APAC HQ,APAC,R&D Hardware,R&D,Customer-046,Silver,10,432.06,7.79
+2026-02-23,West Coast,North America,Men's Apparel,Consumer,Customer-025,,10,1141.04,49.47
+2026-02-25,West Coast,North America,Women's Apparel,Consumer,Customer-025,,5,2313.91,79.52
+2026-02-09,West Coast,North America,R&D Hardware,R&D,Customer-036,Silver,8,2222.89,33.24
+2026-02-24,West Coast,North America,Enterprise Software,Enterprise,Customer-017,Silver,3,1016.98,21.43
+2026-02-03,West Coast,North America,Enterprise Software,Enterprise,Customer-030,Platinum,8,2189.0,26.08
+2026-02-21,APAC HQ,APAC,Women's Apparel,Consumer,Customer-025,,3,1033.89,13.28
+2026-02-05,APAC HQ,APAC,R&D Hardware,R&D,Customer-019,Gold,3,1452.72,41.82
+2026-02-08,EMEA Hub,EMEA,Accessories,Consumer,Customer-007,Platinum,3,2432.0,35.5
+2026-02-05,West Coast,North America,Men's Apparel,Consumer,Customer-031,Silver,6,2166.95,23.49
+2026-02-25,West Coast,North America,Women's Apparel,Consumer,Customer-021,Gold,7,648.39,17.48
+2026-02-26,APAC HQ,APAC,R&D Hardware,R&D,Customer-029,,4,168.89,
+2026-02-23,APAC HQ,APAC,Accessories,Consumer,Customer-034,Silver,6,2461.1,96.73
+2026-02-09,West Coast,North America,Women's Apparel,Consumer,Customer-021,Gold,10,61.93,2.55
+2026-02-11,APAC HQ,APAC,Accessories,Consumer,Customer-049,Platinum,2,1098.97,23.95
+2026-02-14,East Coast,North America,R&D Hardware,R&D,Customer-009,Silver,7,678.26,17.0
+2026-02-14,East Coast,North America,Women's Apparel,Consumer,Customer-045,,9,1414.76,17.74
+2026-02-03,APAC HQ,APAC,R&D Hardware,R&D,Customer-046,Silver,8,111.76,
+2026-02-22,East Coast,North America,Enterprise Software,Enterprise,Customer-035,Platinum,4,2162.82,32.04
+2026-02-09,West Coast,North America,R&D Hardware,R&D,Customer-020,Platinum,2,198.42,4.63
+2026-03-28,APAC HQ,APAC,Accessories,Consumer,Customer-031,Silver,1,1146.25,26.39
+2026-03-28,West Coast,North America,Women's Apparel,Consumer,Customer-047,Platinum,4,1965.67,
+2026-03-14,East Coast,North America,Accessories,Consumer,Customer-001,,5,1088.61,
+2026-03-19,East Coast,North America,Enterprise Software,Enterprise,Customer-039,Silver,7,1061.15,29.59
+2026-03-08,East Coast,North America,Women's Apparel,Consumer,Customer-041,Silver,2,663.46,22.72
+2026-03-13,East Coast,North America,Women's Apparel,Consumer,Customer-042,Silver,3,1833.97,86.24
+2026-03-28,East Coast,North America,Men's Apparel,Consumer,Customer-008,Platinum,8,2152.41,77.03
+2026-03-25,West Coast,North America,R&D Hardware,R&D,Customer-043,Gold,10,2057.77,25.64
+2026-03-14,EMEA Hub,EMEA,Accessories,Consumer,Customer-043,Gold,4,1117.09,41.2
+2026-03-17,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-041,Silver,10,1660.19,82.9
+2026-03-10,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-033,Silver,5,1230.9,28.29
+2026-03-04,West Coast,North America,Women's Apparel,Consumer,Customer-007,Platinum,5,1032.01,45.6
+2026-03-15,APAC HQ,APAC,R&D Hardware,R&D,Customer-006,Platinum,9,1450.57,42.27
+2026-03-11,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-050,Platinum,2,2369.2,
+2026-03-02,West Coast,North America,Men's Apparel,Consumer,Customer-007,Platinum,7,2028.5,78.48
+2026-03-28,East Coast,North America,R&D Hardware,R&D,Customer-046,Silver,4,1489.67,47.26
+2026-03-05,APAC HQ,APAC,R&D Hardware,R&D,Customer-018,,9,2212.98,68.8
+2026-03-02,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-013,Platinum,2,1632.55,33.54
+2026-03-23,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-011,Platinum,5,1236.76,
+2026-03-28,East Coast,North America,Women's Apparel,Consumer,Customer-022,Platinum,8,249.31,7.37
+2026-03-16,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-019,Gold,2,1054.69,32.46
+2026-03-17,APAC HQ,APAC,Women's Apparel,Consumer,Customer-032,Platinum,5,1250.59,58.77
+2026-03-08,West Coast,North America,Accessories,Consumer,Customer-034,Silver,9,2337.17,34.41
+2026-03-25,West Coast,North America,Men's Apparel,Consumer,Customer-043,Gold,10,1750.4,45.34
+2026-03-25,West Coast,North America,Women's Apparel,Consumer,Customer-013,Platinum,3,624.6,28.07
+2026-03-25,APAC HQ,APAC,R&D Hardware,R&D,Customer-034,Silver,4,333.77,7.29
+2026-03-11,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-011,Platinum,3,1367.54,21.0
+2026-03-11,West Coast,North America,Women's Apparel,Consumer,Customer-032,Platinum,8,833.98,15.32
+2026-03-09,APAC HQ,APAC,Accessories,Consumer,Customer-041,Silver,5,526.73,13.51
+2026-03-12,EMEA Hub,EMEA,Accessories,Consumer,Customer-025,,4,489.57,21.48
+2026-03-06,West Coast,North America,Enterprise Software,Enterprise,Customer-009,Silver,7,2414.06,68.27
+2026-03-14,West Coast,North America,Accessories,Consumer,Customer-026,Gold,2,183.77,6.27
+2026-03-02,East Coast,North America,Men's Apparel,Consumer,Customer-045,,1,179.33,3.44
+2026-03-06,East Coast,North America,Enterprise Software,Enterprise,Customer-005,Silver,2,1880.77,62.7
+2026-03-12,APAC HQ,APAC,Women's Apparel,Consumer,Customer-030,Platinum,8,1428.06,38.54
+2026-03-04,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-029,,9,1754.17,56.95
+2026-03-01,West Coast,North America,Enterprise Software,Enterprise,Customer-050,Platinum,4,1539.27,
+2026-03-12,APAC HQ,APAC,Women's Apparel,Consumer,Customer-001,,4,123.25,5.31
+2026-03-23,West Coast,North America,Men's Apparel,Consumer,Customer-020,Platinum,6,1842.57,45.0
+2026-03-09,APAC HQ,APAC,R&D Hardware,R&D,Customer-025,,3,215.63,4.31
+2026-03-02,West Coast,North America,Men's Apparel,Consumer,Customer-028,Silver,8,1310.93,43.46
+2026-03-27,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-004,Platinum,7,2437.48,91.25
+2026-03-24,West Coast,North America,Men's Apparel,Consumer,Customer-036,Silver,6,1496.35,
+2026-03-28,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-028,Silver,8,2316.6,86.15
+2026-03-24,East Coast,North America,Enterprise Software,Enterprise,Customer-014,Silver,7,2483.4,90.53
+2026-03-09,East Coast,North America,R&D Hardware,R&D,Customer-027,Platinum,6,2231.32,62.77
+2026-03-10,East Coast,North America,Accessories,Consumer,Customer-047,Platinum,2,1540.56,57.09
+2026-03-12,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-049,Platinum,4,2353.47,28.59
+2026-03-23,APAC HQ,APAC,R&D Hardware,R&D,Customer-003,Platinum,6,2116.75,75.05
+2026-03-28,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-030,Platinum,1,1761.77,52.79
+2026-03-19,APAC HQ,APAC,Men's Apparel,Consumer,Customer-044,Gold,4,655.1,11.53
+2026-03-23,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-050,Platinum,5,929.87,40.92
+2026-03-11,West Coast,North America,Women's Apparel,Consumer,Customer-027,Platinum,1,672.57,15.0
+2026-03-19,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-049,Platinum,5,1359.8,52.99
+2026-03-06,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-045,,9,410.74,19.9
+2026-03-01,East Coast,North America,R&D Hardware,R&D,Customer-021,Gold,10,1300.23,
+2026-03-10,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-041,Silver,6,2054.3,85.37
+2026-03-02,West Coast,North America,Accessories,Consumer,Customer-026,Gold,9,1041.03,49.73
+2026-03-22,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-008,Platinum,7,470.64,10.1
+2026-03-25,East Coast,North America,Enterprise Software,Enterprise,Customer-040,,8,201.53,9.66
+2026-04-06,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-045,,3,1926.55,69.81
+2026-04-23,EMEA Hub,EMEA,Accessories,Consumer,Customer-042,Silver,1,125.84,2.98
+2026-04-02,APAC HQ,APAC,R&D Hardware,R&D,Customer-015,Silver,2,999.89,15.63
+2026-04-14,West Coast,North America,Accessories,Consumer,Customer-040,,8,670.47,28.75
+2026-04-06,East Coast,North America,Accessories,Consumer,Customer-005,Silver,8,2469.39,89.82
+2026-04-08,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-016,,7,815.9,15.0
+2026-04-05,West Coast,North America,R&D Hardware,R&D,Customer-034,Silver,5,1663.91,41.53
+2026-04-18,West Coast,North America,R&D Hardware,R&D,Customer-004,Platinum,10,1995.16,
+2026-04-19,West Coast,North America,Men's Apparel,Consumer,Customer-002,Platinum,1,873.73,9.57
+2026-04-28,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-042,Silver,6,396.18,14.87
+2026-04-09,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-023,Platinum,8,1770.75,26.36
+2026-04-15,APAC HQ,APAC,Men's Apparel,Consumer,Customer-015,Silver,8,2389.69,49.23
+2026-04-02,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-017,Silver,10,595.81,12.53
+2026-04-10,East Coast,North America,Enterprise Software,Enterprise,Customer-033,Silver,3,1514.33,21.58
+2026-04-11,East Coast,North America,Accessories,Consumer,Customer-038,Platinum,6,665.87,32.73
+2026-04-07,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-004,Platinum,8,905.9,28.14
+2026-04-06,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-009,Silver,2,1402.11,19.29
+2026-04-20,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-032,Platinum,3,2288.96,49.18
+2026-04-28,APAC HQ,APAC,Women's Apparel,Consumer,Customer-011,Platinum,3,350.31,4.4
+2026-04-24,East Coast,North America,Accessories,Consumer,Customer-028,Silver,4,2046.63,55.15
+2026-04-03,West Coast,North America,R&D Hardware,R&D,Customer-044,Gold,9,857.16,13.89
+2026-04-14,East Coast,North America,R&D Hardware,R&D,Customer-033,Silver,9,2321.61,84.53
+2026-04-18,West Coast,North America,Accessories,Consumer,Customer-013,Platinum,5,955.59,41.38
+2026-04-15,West Coast,North America,Accessories,Consumer,Customer-008,Platinum,7,272.09,10.75
+2026-04-26,West Coast,North America,Men's Apparel,Consumer,Customer-044,Gold,3,1962.46,39.49
+2026-04-22,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-013,Platinum,7,96.31,3.44
+2026-04-03,EMEA Hub,EMEA,Accessories,Consumer,Customer-028,Silver,5,1054.23,35.0
+2026-04-06,West Coast,North America,R&D Hardware,R&D,Customer-020,Platinum,4,1320.77,54.37
+2026-04-20,APAC HQ,APAC,Men's Apparel,Consumer,Customer-008,Platinum,10,641.9,16.55
+2026-04-14,East Coast,North America,R&D Hardware,R&D,Customer-019,Gold,5,374.89,4.34
+2026-04-21,East Coast,North America,Enterprise Software,Enterprise,Customer-003,Platinum,1,2321.81,40.5
+2026-04-12,APAC HQ,APAC,Men's Apparel,Consumer,Customer-007,Platinum,1,1416.38,56.66
+2026-04-28,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-019,Gold,7,1450.87,48.48
+2026-04-07,East Coast,North America,Women's Apparel,Consumer,Customer-009,Silver,9,2158.95,65.23
+2026-04-17,West Coast,North America,Men's Apparel,Consumer,Customer-042,Silver,6,1091.89,34.28
+2026-04-23,EMEA Hub,EMEA,Accessories,Consumer,Customer-031,Silver,1,169.75,5.99
+2026-04-04,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-017,Silver,10,2258.27,64.17
+2026-04-24,East Coast,North America,Enterprise Software,Enterprise,Customer-020,Platinum,2,2169.73,108.29
+2026-04-17,East Coast,North America,R&D Hardware,R&D,Customer-005,Silver,1,59.27,1.31
+2026-04-26,East Coast,North America,Men's Apparel,Consumer,Customer-049,Platinum,8,936.1,44.54
+2026-04-11,West Coast,North America,Men's Apparel,Consumer,Customer-004,Platinum,8,245.53,5.18
+2026-04-26,West Coast,North America,R&D Hardware,R&D,Customer-002,Platinum,1,1147.55,14.72
+2026-04-07,East Coast,North America,Accessories,Consumer,Customer-049,Platinum,1,2005.15,57.19
+2026-04-11,West Coast,North America,Enterprise Software,Enterprise,Customer-047,Platinum,3,499.86,17.85
+2026-04-05,APAC HQ,APAC,R&D Hardware,R&D,Customer-031,Silver,7,1312.67,34.05
+2026-04-05,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-037,Silver,5,1608.68,28.35
+2026-04-24,West Coast,North America,Accessories,Consumer,Customer-038,Platinum,4,688.91,25.61
+2026-04-08,West Coast,North America,R&D Hardware,R&D,Customer-018,,4,1263.03,52.01
+2026-04-25,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-005,Silver,4,1076.09,36.91
+2026-04-12,West Coast,North America,Accessories,Consumer,Customer-048,Silver,9,1443.45,53.71
+2026-04-10,East Coast,North America,R&D Hardware,R&D,Customer-004,Platinum,3,1433.02,68.6
+2026-04-07,West Coast,North America,R&D Hardware,R&D,Customer-030,Platinum,6,2280.34,43.29
+2026-04-23,East Coast,North America,Accessories,Consumer,Customer-038,Platinum,9,2260.43,91.62
+2026-04-04,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-002,Platinum,9,1106.05,23.23
+2026-04-09,APAC HQ,APAC,Men's Apparel,Consumer,Customer-013,Platinum,6,941.49,41.02
+2026-04-27,EMEA Hub,EMEA,Accessories,Consumer,Customer-004,Platinum,4,1115.51,
+2026-04-07,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-027,Platinum,2,214.01,8.53
+2026-04-26,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-004,Platinum,4,1324.76,35.27
+2026-04-25,West Coast,North America,Women's Apparel,Consumer,Customer-007,Platinum,6,594.63,8.79
+2026-04-09,West Coast,North America,Women's Apparel,Consumer,Customer-046,Silver,7,1415.21,19.98
+2026-05-21,East Coast,North America,Accessories,Consumer,Customer-037,Silver,3,1396.42,31.19
+2026-05-25,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-038,Platinum,10,2379.4,53.95
+2026-05-25,East Coast,North America,Men's Apparel,Consumer,Customer-027,Platinum,5,1086.33,38.67
+2026-05-09,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-035,Platinum,8,336.01,14.02
+2026-05-10,APAC HQ,APAC,R&D Hardware,R&D,Customer-019,Gold,6,366.91,6.67
+2026-05-23,East Coast,North America,Men's Apparel,Consumer,Customer-049,Platinum,8,962.36,32.54
+2026-05-21,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-012,Platinum,8,1572.42,28.18
+2026-05-05,APAC HQ,APAC,Accessories,Consumer,Customer-006,Platinum,7,2319.5,110.22
+2026-05-18,West Coast,North America,Accessories,Consumer,Customer-034,Silver,2,423.12,7.31
+2026-05-25,East Coast,North America,R&D Hardware,R&D,Customer-045,,1,1111.47,18.5
+2026-05-27,West Coast,North America,Men's Apparel,Consumer,Customer-010,Gold,9,940.3,31.49
+2026-05-24,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-021,Gold,2,1220.07,60.59
+2026-05-18,APAC HQ,APAC,Women's Apparel,Consumer,Customer-038,Platinum,1,2378.06,28.1
+2026-05-04,East Coast,North America,Women's Apparel,Consumer,Customer-024,Silver,4,1629.02,67.91
+2026-05-11,East Coast,North America,Enterprise Software,Enterprise,Customer-036,Silver,3,2291.17,86.01
+2026-05-27,APAC HQ,APAC,Men's Apparel,Consumer,Customer-030,Platinum,9,1499.96,34.31
+2026-05-27,East Coast,North America,R&D Hardware,R&D,Customer-027,Platinum,1,690.25,29.49
+2026-05-10,West Coast,North America,Enterprise Software,Enterprise,Customer-043,Gold,8,347.98,
+2026-05-24,East Coast,North America,R&D Hardware,R&D,Customer-016,,7,686.83,24.32
+2026-05-23,West Coast,North America,Men's Apparel,Consumer,Customer-009,Silver,1,1091.2,12.67
+2026-05-07,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-005,Silver,2,345.91,9.39
+2026-05-08,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-048,Silver,8,2178.2,40.14
+2026-05-09,APAC HQ,APAC,Men's Apparel,Consumer,Customer-047,Platinum,1,1898.86,
+2026-05-19,West Coast,North America,Accessories,Consumer,Customer-045,,5,2373.49,
+2026-05-22,APAC HQ,APAC,R&D Hardware,R&D,Customer-014,Silver,1,1834.65,
+2026-05-08,East Coast,North America,Men's Apparel,Consumer,Customer-029,,7,2355.18,105.57
+2026-05-11,East Coast,North America,Women's Apparel,Consumer,Customer-039,Silver,6,306.55,5.2
+2026-05-28,APAC HQ,APAC,Women's Apparel,Consumer,Customer-040,,1,2214.89,58.21
+2026-05-07,APAC HQ,APAC,Men's Apparel,Consumer,Customer-001,,3,1999.32,59.55
+2026-05-22,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-016,,9,930.11,25.8
+2026-05-23,East Coast,North America,Accessories,Consumer,Customer-016,,7,464.17,20.2
+2026-05-14,West Coast,North America,Men's Apparel,Consumer,Customer-027,Platinum,6,825.57,10.54
+2026-05-24,APAC HQ,APAC,Men's Apparel,Consumer,Customer-042,Silver,6,424.77,17.48
+2026-05-09,West Coast,North America,Men's Apparel,Consumer,Customer-007,Platinum,10,2232.65,25.56
+2026-05-28,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-029,,9,128.99,3.65
+2026-05-28,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-037,Silver,4,128.06,2.06
+2026-05-04,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-050,Platinum,5,2075.57,82.56
+2026-05-21,APAC HQ,APAC,Accessories,Consumer,Customer-048,Silver,10,1113.3,30.59
+2026-05-15,East Coast,North America,Men's Apparel,Consumer,Customer-049,Platinum,8,1346.07,19.75
+2026-05-20,West Coast,North America,R&D Hardware,R&D,Customer-027,Platinum,8,795.34,
+2026-05-18,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-037,Silver,7,2156.19,60.54
+2026-05-02,West Coast,North America,R&D Hardware,R&D,Customer-044,Gold,8,2374.24,28.24
+2026-05-21,West Coast,North America,Women's Apparel,Consumer,Customer-050,Platinum,9,2012.54,91.06
+2026-05-06,West Coast,North America,Men's Apparel,Consumer,Customer-042,Silver,7,2294.06,93.22
+2026-05-19,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-007,Platinum,1,1839.42,70.09
+2026-05-05,APAC HQ,APAC,Women's Apparel,Consumer,Customer-036,Silver,3,2027.89,49.89
+2026-05-06,East Coast,North America,Accessories,Consumer,Customer-037,Silver,10,549.0,12.32
+2026-05-06,APAC HQ,APAC,R&D Hardware,R&D,Customer-043,Gold,3,125.58,2.32
+2026-05-07,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-025,,6,328.03,10.44
+2026-05-03,West Coast,North America,Women's Apparel,Consumer,Customer-046,Silver,10,1825.11,78.6
+2026-05-24,East Coast,North America,Enterprise Software,Enterprise,Customer-038,Platinum,6,601.66,22.23
+2026-05-17,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-023,Platinum,10,1951.86,65.28
+2026-05-16,West Coast,North America,Accessories,Consumer,Customer-013,Platinum,3,1157.57,19.94
+2026-05-03,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-012,Platinum,5,133.55,2.43
+2026-05-03,West Coast,North America,Men's Apparel,Consumer,Customer-045,,9,1066.45,34.49
+2026-05-28,East Coast,North America,Accessories,Consumer,Customer-032,Platinum,10,1208.54,
+2026-05-19,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-039,Silver,10,1786.0,39.2
+2026-05-16,East Coast,North America,Accessories,Consumer,Customer-003,Platinum,2,1617.52,69.49
+2026-05-04,East Coast,North America,Accessories,Consumer,Customer-046,Silver,9,1846.66,90.5
+2026-05-14,APAC HQ,APAC,R&D Hardware,R&D,Customer-026,Gold,9,1387.53,45.04
+2026-06-24,EMEA Hub,EMEA,Accessories,Consumer,Customer-046,Silver,7,409.94,
+2026-06-22,East Coast,North America,Men's Apparel,Consumer,Customer-003,Platinum,5,1259.95,29.83
+2026-06-06,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-038,Platinum,5,2484.51,49.41
+2026-06-27,East Coast,North America,Accessories,Consumer,Customer-047,Platinum,2,761.26,23.34
+2026-06-08,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-006,Platinum,10,713.41,21.9
+2026-06-11,West Coast,North America,Accessories,Consumer,Customer-039,Silver,9,955.06,
+2026-06-02,East Coast,North America,Enterprise Software,Enterprise,Customer-043,Gold,3,336.24,9.57
+2026-06-25,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-022,Platinum,2,2466.28,50.1
+2026-06-09,APAC HQ,APAC,R&D Hardware,R&D,Customer-018,,8,2279.02,70.69
+2026-06-14,West Coast,North America,Enterprise Software,Enterprise,Customer-028,Silver,9,752.84,25.11
+2026-06-18,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-049,Platinum,9,955.48,25.89
+2026-06-18,West Coast,North America,Enterprise Software,Enterprise,Customer-021,Gold,1,71.35,3.4
+2026-06-09,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-024,Silver,8,1233.84,23.68
+2026-06-16,West Coast,North America,Women's Apparel,Consumer,Customer-002,Platinum,7,1422.24,38.79
+2026-06-03,APAC HQ,APAC,Women's Apparel,Consumer,Customer-007,Platinum,1,1837.45,82.54
+2026-06-07,East Coast,North America,Women's Apparel,Consumer,Customer-028,Silver,7,542.06,17.27
+2026-06-19,APAC HQ,APAC,Accessories,Consumer,Customer-043,Gold,8,1458.89,63.54
+2026-06-01,West Coast,North America,R&D Hardware,R&D,Customer-044,Gold,10,1956.25,22.13
+2026-06-01,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-007,Platinum,3,1300.87,
+2026-06-24,APAC HQ,APAC,R&D Hardware,R&D,Customer-005,Silver,8,202.17,3.28
+2026-06-04,East Coast,North America,Enterprise Software,Enterprise,Customer-010,Gold,5,234.11,
+2026-06-16,EMEA Hub,EMEA,Accessories,Consumer,Customer-009,Silver,6,2242.6,107.62
+2026-06-03,East Coast,North America,R&D Hardware,R&D,Customer-049,Platinum,3,2486.74,62.06
+2026-06-26,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-036,Silver,2,629.64,8.16
+2026-06-01,West Coast,North America,Enterprise Software,Enterprise,Customer-035,Platinum,4,1899.39,59.03
+2026-06-09,East Coast,North America,Women's Apparel,Consumer,Customer-013,Platinum,9,1222.69,56.7
+2026-06-25,East Coast,North America,Men's Apparel,Consumer,Customer-043,Gold,6,1518.06,49.55
+2026-06-19,West Coast,North America,R&D Hardware,R&D,Customer-042,Silver,10,2212.17,100.23
+2026-06-10,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-050,Platinum,8,864.32,25.74
+2026-06-23,East Coast,North America,R&D Hardware,R&D,Customer-007,Platinum,9,1988.33,65.89
+2026-06-07,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-006,Platinum,6,2404.98,53.01
+2026-06-24,APAC HQ,APAC,Women's Apparel,Consumer,Customer-042,Silver,1,1386.4,45.16
+2026-06-13,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-015,Silver,8,1619.69,47.75
+2026-06-27,East Coast,North America,Accessories,Consumer,Customer-027,Platinum,2,1335.54,54.27
+2026-06-06,East Coast,North America,Accessories,Consumer,Customer-021,Gold,6,1305.16,62.88
+2026-06-28,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-036,Silver,10,1072.09,53.41
+2026-06-14,West Coast,North America,Enterprise Software,Enterprise,Customer-022,Platinum,5,2209.65,23.91
+2026-06-13,West Coast,North America,Accessories,Consumer,Customer-041,Silver,1,452.42,7.96
+2026-06-22,West Coast,North America,R&D Hardware,R&D,Customer-030,Platinum,8,1625.71,68.17
+2026-06-14,East Coast,North America,Women's Apparel,Consumer,Customer-010,Gold,7,863.76,31.97
+2026-06-19,APAC HQ,APAC,Accessories,Consumer,Customer-026,Gold,3,1688.87,58.7
+2026-06-15,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-005,Silver,5,658.35,27.39
+2026-06-28,West Coast,North America,Men's Apparel,Consumer,Customer-021,Gold,5,1190.5,31.28
+2026-06-24,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-004,Platinum,9,367.66,9.64
+2026-06-11,EMEA Hub,EMEA,Accessories,Consumer,Customer-008,Platinum,4,1348.26,21.88
+2026-06-12,EMEA Hub,EMEA,Accessories,Consumer,Customer-017,Silver,9,1715.11,55.58
+2026-06-22,APAC HQ,APAC,R&D Hardware,R&D,Customer-013,Platinum,7,1416.18,36.62
+2026-06-16,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-012,Platinum,1,538.69,24.79
+2026-06-19,East Coast,North America,Women's Apparel,Consumer,Customer-032,Platinum,2,169.29,
+2026-06-14,East Coast,North America,Accessories,Consumer,Customer-040,,10,1277.2,46.38
+2026-06-10,East Coast,North America,Men's Apparel,Consumer,Customer-007,Platinum,1,353.44,13.61
+2026-06-18,West Coast,North America,Enterprise Software,Enterprise,Customer-032,Platinum,4,394.77,10.79
+2026-06-16,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-036,Silver,10,458.91,5.09
+2026-06-23,West Coast,North America,Accessories,Consumer,Customer-034,Silver,9,875.36,14.6
+2026-06-11,East Coast,North America,Accessories,Consumer,Customer-016,,5,2045.58,100.03
+2026-06-12,East Coast,North America,Enterprise Software,Enterprise,Customer-044,Gold,7,2181.43,68.48
+2026-06-05,EMEA Hub,EMEA,Accessories,Consumer,Customer-024,Silver,2,1198.53,59.9
+2026-06-03,APAC HQ,APAC,Accessories,Consumer,Customer-009,Silver,5,329.69,3.74
+2026-06-05,West Coast,North America,Enterprise Software,Enterprise,Customer-041,Silver,7,1536.71,26.72
+2026-06-21,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-047,Platinum,10,1352.67,18.36
+2026-07-24,APAC HQ,APAC,R&D Hardware,R&D,Customer-018,,3,1235.88,34.73
+2026-07-17,East Coast,North America,Women's Apparel,Consumer,Customer-006,Platinum,9,1605.05,73.87
+2026-07-23,East Coast,North America,Men's Apparel,Consumer,Customer-038,Platinum,3,2153.19,79.21
+2026-07-03,APAC HQ,APAC,Men's Apparel,Consumer,Customer-040,,9,117.98,5.69
+2026-07-17,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-026,Gold,3,987.07,25.82
+2026-07-24,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-018,,5,1075.75,27.29
+2026-07-20,APAC HQ,APAC,Women's Apparel,Consumer,Customer-044,Gold,4,326.25,10.87
+2026-07-06,East Coast,North America,Women's Apparel,Consumer,Customer-012,Platinum,7,2360.38,113.27
+2026-07-05,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-021,Gold,10,187.71,7.53
+2026-07-12,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-002,Platinum,6,600.87,14.74
+2026-07-23,East Coast,North America,Accessories,Consumer,Customer-044,Gold,2,1086.02,52.22
+2026-07-15,West Coast,North America,Enterprise Software,Enterprise,Customer-042,Silver,10,689.65,27.5
+2026-07-11,APAC HQ,APAC,R&D Hardware,R&D,Customer-008,Platinum,3,893.65,20.09
+2026-07-16,APAC HQ,APAC,Accessories,Consumer,Customer-014,Silver,5,2198.88,54.67
+2026-07-11,West Coast,North America,Men's Apparel,Consumer,Customer-005,Silver,1,26.56,
+2026-07-18,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-001,,10,510.94,8.28
+2026-07-18,West Coast,North America,Accessories,Consumer,Customer-010,Gold,10,2213.41,102.06
+2026-07-18,East Coast,North America,Women's Apparel,Consumer,Customer-045,,10,1284.59,48.63
+2026-07-11,APAC HQ,APAC,Women's Apparel,Consumer,Customer-031,Silver,1,1867.27,
+2026-07-11,APAC HQ,APAC,Women's Apparel,Consumer,Customer-008,Platinum,5,352.72,11.66
+2026-07-10,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-029,,2,1400.27,28.03
+2026-07-01,APAC HQ,APAC,Accessories,Consumer,Customer-035,Platinum,5,665.7,25.6
+2026-07-27,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-039,Silver,2,1596.81,42.7
+2026-07-07,APAC HQ,APAC,R&D Hardware,R&D,Customer-007,Platinum,3,1870.53,
+2026-07-15,West Coast,North America,Women's Apparel,Consumer,Customer-012,Platinum,5,1732.69,63.27
+2026-07-27,APAC HQ,APAC,Men's Apparel,Consumer,Customer-045,,4,2276.23,87.6
+2026-07-24,West Coast,North America,R&D Hardware,R&D,Customer-021,Gold,9,1780.66,46.6
+2026-07-04,APAC HQ,APAC,R&D Hardware,R&D,Customer-036,Silver,2,264.2,5.81
+2026-07-20,East Coast,North America,R&D Hardware,R&D,Customer-046,Silver,2,1636.33,21.59
+2026-07-27,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-003,Platinum,7,938.51,26.99
+2026-07-14,East Coast,North America,Accessories,Consumer,Customer-007,Platinum,2,297.62,9.68
+2026-07-05,West Coast,North America,Women's Apparel,Consumer,Customer-014,Silver,7,646.65,
+2026-07-20,EMEA Hub,EMEA,Accessories,Consumer,Customer-013,Platinum,4,1144.87,36.5
+2026-07-15,West Coast,North America,Accessories,Consumer,Customer-011,Platinum,2,315.34,5.34
+2026-07-19,East Coast,North America,Enterprise Software,Enterprise,Customer-012,Platinum,4,1152.41,25.75
+2026-07-20,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-039,Silver,9,824.45,38.14
+2026-07-05,APAC HQ,APAC,Accessories,Consumer,Customer-039,Silver,8,1518.36,53.7
+2026-07-18,APAC HQ,APAC,Women's Apparel,Consumer,Customer-047,Platinum,1,1093.67,37.84
+2026-07-15,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-019,Gold,8,1821.58,81.09
+2026-07-14,APAC HQ,APAC,Accessories,Consumer,Customer-036,Silver,4,62.79,2.79
+2026-07-05,East Coast,North America,Men's Apparel,Consumer,Customer-007,Platinum,5,2366.99,34.48
+2026-07-05,East Coast,North America,Women's Apparel,Consumer,Customer-002,Platinum,7,2198.49,36.13
+2026-07-11,East Coast,North America,Women's Apparel,Consumer,Customer-018,,1,733.67,35.23
+2026-07-12,APAC HQ,APAC,Accessories,Consumer,Customer-004,Platinum,8,1951.86,90.2
+2026-07-02,East Coast,North America,R&D Hardware,R&D,Customer-016,,6,1252.55,
+2026-07-21,West Coast,North America,Women's Apparel,Consumer,Customer-018,,3,2289.84,
+2026-07-07,APAC HQ,APAC,Accessories,Consumer,Customer-030,Platinum,3,2443.88,56.54
+2026-07-04,APAC HQ,APAC,Men's Apparel,Consumer,Customer-032,Platinum,8,2368.11,33.86
+2026-07-09,APAC HQ,APAC,Women's Apparel,Consumer,Customer-023,Platinum,1,420.67,13.59
+2026-07-25,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-046,Silver,1,696.22,26.53
+2026-07-04,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-046,Silver,10,2153.75,80.0
+2026-07-12,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-034,Silver,4,170.26,1.91
+2026-07-20,West Coast,North America,R&D Hardware,R&D,Customer-006,Platinum,10,1084.35,50.47
+2026-07-03,West Coast,North America,Enterprise Software,Enterprise,Customer-048,Silver,6,2165.75,53.5
+2026-07-20,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-014,Silver,1,1308.99,
+2026-07-06,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-029,,7,2039.28,91.42
+2026-07-20,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-005,Silver,8,1162.88,30.63
+2026-07-25,APAC HQ,APAC,Men's Apparel,Consumer,Customer-012,Platinum,6,308.05,5.35
+2026-07-24,West Coast,North America,Accessories,Consumer,Customer-019,Gold,6,1751.66,28.5
+2026-07-15,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-002,Platinum,3,1720.07,83.12
+2026-08-27,EMEA Hub,EMEA,Accessories,Consumer,Customer-013,Platinum,7,2245.74,31.76
+2026-08-19,West Coast,North America,Women's Apparel,Consumer,Customer-033,Silver,7,1145.59,19.71
+2026-08-03,West Coast,North America,Women's Apparel,Consumer,Customer-009,Silver,3,1356.78,58.04
+2026-08-10,West Coast,North America,Women's Apparel,Consumer,Customer-033,Silver,7,722.01,26.15
+2026-08-11,West Coast,North America,Men's Apparel,Consumer,Customer-007,Platinum,10,308.22,5.09
+2026-08-19,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-003,Platinum,10,1922.15,76.7
+2026-08-01,East Coast,North America,Women's Apparel,Consumer,Customer-046,Silver,2,1034.71,34.29
+2026-08-03,APAC HQ,APAC,Men's Apparel,Consumer,Customer-007,Platinum,1,1170.43,11.89
+2026-08-18,West Coast,North America,Women's Apparel,Consumer,Customer-004,Platinum,9,2382.43,57.14
+2026-08-06,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-024,Silver,8,2189.02,74.54
+2026-08-09,East Coast,North America,Accessories,Consumer,Customer-038,Platinum,2,1366.15,53.94
+2026-08-17,West Coast,North America,Women's Apparel,Consumer,Customer-010,Gold,6,475.78,21.18
+2026-08-07,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-027,Platinum,1,1522.82,64.67
+2026-08-01,East Coast,North America,Enterprise Software,Enterprise,Customer-005,Silver,3,2160.28,73.48
+2026-08-08,APAC HQ,APAC,Men's Apparel,Consumer,Customer-015,Silver,1,2054.31,
+2026-08-28,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-015,Silver,5,2269.08,
+2026-08-19,APAC HQ,APAC,Men's Apparel,Consumer,Customer-027,Platinum,4,589.4,26.3
+2026-08-25,West Coast,North America,Enterprise Software,Enterprise,Customer-034,Silver,5,1770.74,74.85
+2026-08-26,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-002,Platinum,6,362.42,12.1
+2026-08-24,EMEA Hub,EMEA,Accessories,Consumer,Customer-004,Platinum,7,1793.31,47.76
+2026-08-09,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-024,Silver,4,265.37,
+2026-08-16,EMEA Hub,EMEA,Accessories,Consumer,Customer-029,,2,2006.91,32.3
+2026-08-11,APAC HQ,APAC,R&D Hardware,R&D,Customer-050,Platinum,7,1217.61,50.83
+2026-08-01,APAC HQ,APAC,R&D Hardware,R&D,Customer-033,Silver,7,87.93,3.57
+2026-08-20,West Coast,North America,R&D Hardware,R&D,Customer-012,Platinum,6,202.7,10.08
+2026-08-17,East Coast,North America,R&D Hardware,R&D,Customer-041,Silver,4,1739.26,75.83
+2026-08-15,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-022,Platinum,7,697.56,12.5
+2026-08-13,APAC HQ,APAC,Accessories,Consumer,Customer-019,Gold,4,2122.19,71.79
+2026-08-23,West Coast,North America,Men's Apparel,Consumer,Customer-035,Platinum,2,1380.36,14.15
+2026-08-23,West Coast,North America,Men's Apparel,Consumer,Customer-043,Gold,2,350.22,16.48
+2026-08-19,West Coast,North America,Men's Apparel,Consumer,Customer-003,Platinum,3,1829.57,66.74
+2026-08-19,APAC HQ,APAC,R&D Hardware,R&D,Customer-031,Silver,5,521.78,21.6
+2026-08-26,West Coast,North America,Enterprise Software,Enterprise,Customer-015,Silver,3,608.3,6.84
+2026-08-23,East Coast,North America,Women's Apparel,Consumer,Customer-031,Silver,2,326.47,13.78
+2026-08-12,APAC HQ,APAC,Accessories,Consumer,Customer-039,Silver,1,263.78,7.37
+2026-08-08,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-007,Platinum,9,328.29,10.62
+2026-08-26,East Coast,North America,Women's Apparel,Consumer,Customer-017,Silver,4,2386.25,93.69
+2026-08-24,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-018,,5,1619.95,
+2026-08-03,West Coast,North America,R&D Hardware,R&D,Customer-021,Gold,2,1559.21,62.71
+2026-08-21,West Coast,North America,Accessories,Consumer,Customer-013,Platinum,1,1854.1,73.57
+2026-08-05,East Coast,North America,R&D Hardware,R&D,Customer-001,,2,1588.23,39.52
+2026-08-24,East Coast,North America,Women's Apparel,Consumer,Customer-037,Silver,5,215.96,3.96
+2026-08-04,East Coast,North America,Accessories,Consumer,Customer-043,Gold,4,1745.15,
+2026-08-03,East Coast,North America,Accessories,Consumer,Customer-009,Silver,9,1488.82,41.76
+2026-08-03,APAC HQ,APAC,Women's Apparel,Consumer,Customer-037,Silver,2,866.94,
+2026-08-08,East Coast,North America,Accessories,Consumer,Customer-041,Silver,5,256.6,7.0
+2026-08-05,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-028,Silver,8,2485.44,61.02
+2026-08-21,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-033,Silver,7,331.68,12.3
+2026-08-04,West Coast,North America,Men's Apparel,Consumer,Customer-024,Silver,2,124.9,2.17
+2026-08-21,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-037,Silver,10,1097.12,35.76
+2026-08-26,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-005,Silver,8,971.59,12.59
+2026-08-17,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-021,Gold,5,800.76,32.49
+2026-08-08,West Coast,North America,Enterprise Software,Enterprise,Customer-003,Platinum,2,49.16,1.77
+2026-08-17,EMEA Hub,EMEA,Accessories,Consumer,Customer-047,Platinum,2,2126.68,56.88
+2026-08-04,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-026,Gold,4,1454.14,53.42
+2026-08-01,West Coast,North America,Men's Apparel,Consumer,Customer-011,Platinum,1,1142.22,23.24
+2026-08-06,East Coast,North America,R&D Hardware,R&D,Customer-038,Platinum,2,1157.0,51.89
+2026-08-23,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-038,Platinum,1,1530.65,50.37
+2026-08-20,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-041,Silver,5,457.97,6.58
+2026-08-08,West Coast,North America,R&D Hardware,R&D,Customer-039,Silver,4,28.49,
+2026-09-18,APAC HQ,APAC,Enterprise Software,Enterprise,Customer-030,Platinum,3,2094.64,
+2026-09-08,East Coast,North America,R&D Hardware,R&D,Customer-002,Platinum,4,2468.38,80.12
+2026-09-27,APAC HQ,APAC,R&D Hardware,R&D,Customer-047,Platinum,10,406.78,4.89
+2026-09-11,APAC HQ,APAC,Men's Apparel,Consumer,Customer-022,Platinum,3,809.59,31.8
+2026-09-19,East Coast,North America,Accessories,Consumer,Customer-013,Platinum,8,1380.68,66.48
+2026-09-03,West Coast,North America,Enterprise Software,Enterprise,Customer-004,Platinum,6,1051.25,22.95
+2026-09-27,West Coast,North America,Women's Apparel,Consumer,Customer-022,Platinum,4,1169.54,21.72
+2026-09-24,West Coast,North America,Enterprise Software,Enterprise,Customer-043,Gold,1,1185.83,38.43
+2026-09-03,West Coast,North America,Men's Apparel,Consumer,Customer-047,Platinum,8,784.86,31.35
+2026-09-08,West Coast,North America,Men's Apparel,Consumer,Customer-050,Platinum,6,2410.39,
+2026-09-10,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-017,Silver,2,90.89,2.15
+2026-09-04,East Coast,North America,Accessories,Consumer,Customer-013,Platinum,1,2334.91,88.94
+2026-09-27,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-045,,8,2299.38,26.91
+2026-09-08,East Coast,North America,Accessories,Consumer,Customer-031,Silver,1,542.49,25.91
+2026-09-01,West Coast,North America,Enterprise Software,Enterprise,Customer-027,Platinum,9,362.23,15.91
+2026-09-06,West Coast,North America,Women's Apparel,Consumer,Customer-012,Platinum,2,1018.84,40.9
+2026-09-22,East Coast,North America,Enterprise Software,Enterprise,Customer-031,Silver,1,2104.29,60.85
+2026-09-01,EMEA Hub,EMEA,Accessories,Consumer,Customer-018,,5,1407.24,55.11
+2026-09-25,East Coast,North America,Men's Apparel,Consumer,Customer-027,Platinum,1,2328.4,48.39
+2026-09-02,West Coast,North America,Enterprise Software,Enterprise,Customer-044,Gold,9,1565.84,49.55
+2026-09-23,APAC HQ,APAC,R&D Hardware,R&D,Customer-046,Silver,10,644.66,20.34
+2026-09-14,West Coast,North America,R&D Hardware,R&D,Customer-015,Silver,6,1694.4,80.22
+2026-09-21,West Coast,North America,Men's Apparel,Consumer,Customer-002,Platinum,1,1796.4,24.45
+2026-09-28,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-017,Silver,3,726.51,16.01
+2026-09-13,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-050,Platinum,7,929.68,41.28
+2026-09-11,APAC HQ,APAC,Men's Apparel,Consumer,Customer-041,Silver,10,1837.31,41.06
+2026-09-21,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-011,Platinum,9,1049.4,28.66
+2026-09-11,EMEA Hub,EMEA,Enterprise Software,Enterprise,Customer-015,Silver,6,941.02,32.8
+2026-09-10,APAC HQ,APAC,R&D Hardware,R&D,Customer-008,Platinum,8,1313.97,27.45
+2026-09-28,West Coast,North America,Women's Apparel,Consumer,Customer-009,Silver,8,211.99,7.17
+2026-09-17,West Coast,North America,Men's Apparel,Consumer,Customer-004,Platinum,9,2490.82,105.07
+2026-09-17,East Coast,North America,Men's Apparel,Consumer,Customer-043,Gold,8,1386.17,37.0
+2026-09-14,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-042,Silver,9,355.18,9.44
+2026-09-04,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-002,Platinum,6,1484.63,70.07
+2026-09-08,EMEA Hub,EMEA,R&D Hardware,R&D,Customer-009,Silver,2,579.03,15.27
+2026-09-09,APAC HQ,APAC,R&D Hardware,R&D,Customer-048,Silver,3,2124.56,40.68
+2026-09-16,East Coast,North America,Enterprise Software,Enterprise,Customer-035,Platinum,10,1143.82,18.4
+2026-09-28,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-006,Platinum,2,2239.0,86.44
+2026-09-08,West Coast,North America,Accessories,Consumer,Customer-015,Silver,7,409.38,9.25
+2026-09-15,West Coast,North America,R&D Hardware,R&D,Customer-047,Platinum,8,1649.4,74.71
+2026-09-28,APAC HQ,APAC,R&D Hardware,R&D,Customer-048,Silver,2,324.89,6.85
+2026-09-20,West Coast,North America,Enterprise Software,Enterprise,Customer-010,Gold,2,1817.01,61.27
+2026-09-19,East Coast,North America,Accessories,Consumer,Customer-014,Silver,9,1832.69,74.64
+2026-09-14,EMEA Hub,EMEA,Accessories,Consumer,Customer-007,Platinum,1,1390.72,59.65
+2026-09-05,East Coast,North America,Accessories,Consumer,Customer-039,Silver,6,263.32,3.4
+2026-09-25,East Coast,North America,Enterprise Software,Enterprise,Customer-022,Platinum,6,803.8,37.12
+2026-09-12,EMEA Hub,EMEA,Women's Apparel,Consumer,Customer-048,Silver,9,1780.52,
+2026-09-15,East Coast,North America,R&D Hardware,R&D,Customer-002,Platinum,2,379.79,11.87
+2026-09-20,EMEA Hub,EMEA,Accessories,Consumer,Customer-037,Silver,5,739.73,20.31
+2026-09-10,APAC HQ,APAC,Men's Apparel,Consumer,Customer-007,Platinum,7,534.49,20.44
+2026-09-08,EMEA Hub,EMEA,Accessories,Consumer,Customer-006,Platinum,5,487.66,14.08
+2026-09-02,EMEA Hub,EMEA,Men's Apparel,Consumer,Customer-013,Platinum,2,1208.17,16.86
+2026-09-02,West Coast,North America,R&D Hardware,R&D,Customer-023,Platinum,10,351.66,12.65
+2026-09-02,West Coast,North America,Women's Apparel,Consumer,Customer-017,Silver,3,429.18,8.55
+2026-09-05,APAC HQ,APAC,R&D Hardware,R&D,Customer-010,Gold,9,193.66,2.63
+2026-09-03,APAC HQ,APAC,R&D Hardware,R&D,Customer-042,Silver,8,77.14,2.86
+2026-09-14,APAC HQ,APAC,Accessories,Consumer,Customer-002,Platinum,7,1739.14,57.73
+2026-09-14,West Coast,North America,Accessories,Consumer,Customer-047,Platinum,7,1047.85,39.16
+2026-09-20,East Coast,North America,Accessories,Consumer,Customer-038,Platinum,4,2062.47,54.62
+2026-09-16,East Coast,North America,R&D Hardware,R&D,Customer-008,Platinum,1,2256.45,89.86
