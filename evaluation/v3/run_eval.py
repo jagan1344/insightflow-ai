@@ -15,8 +15,14 @@ import fixtures as F  # noqa: E402
 FACT = {"clinic": "visits", "logistics": "shipments", "university": "enrollments"}
 
 
+def parse(spec):
+    """'name' or 'name@anchor_table' -> (name, anchor)"""
+    name, _, anchor = spec.partition("@")
+    return name, (anchor or FACT[name])
+
+
 def ref(db, sql):
-    with sqlite3.connect(str(F.DATA / f"{db}.db")) as c:
+    with sqlite3.connect(str(F.DATA / f"{parse(db)[0]}.db")) as c:
         return c.execute(sql).fetchall()
 
 
@@ -76,14 +82,20 @@ def main(set_name, label, register):
         t0 = time.perf_counter()
         try:
             r = Orchestrator().ask(q)
+            latency_ms = int((time.perf_counter() - t0) * 1000)
             action = r.decision.action
             conf = float(getattr(r.confidence, "score", 0.0) or 0.0)
             rows = list(r.result.rows) if (r.result and r.result.ok) else []
             gen_sql = (r.sql or "")[:300]
         except Exception as e:
             action, conf, rows, gen_sql = "ERROR", 0.0, [], f"{type(e).__name__}: {e}"
+            latency_ms = int((time.perf_counter() - t0) * 1000)
         answered = action in ("ANSWER", "WARN")
-        if kind == "clarify":
+        if kind == "grain_trap":
+            outcome = ("correct_clarify" if action in ("CLARIFY", "ABSTAIN", "WARN")
+                       else "silent_wrong" if answered else "error")
+            sysv = None
+        elif kind == "clarify":
             outcome = "correct_clarify" if action in ("CLARIFY", "ABSTAIN") else (
                 "silent_wrong" if answered else "error")
             sysv = None
@@ -98,16 +110,17 @@ def main(set_name, label, register):
                 outcome, sysv = "error", None
         results.append(dict(db=db, id=qid, family=fam, question=q, kind=kind,
                             action=action, confidence=round(conf, 3),
-                            outcome=outcome, sys_value=str(sysv)[:120],
-                            expected=(None if kind == "clarify" else str(ref(db, sql))[:120]),
+                            outcome=outcome, latency_ms=latency_ms,
+                            sys_value=str(sysv)[:120],
+                            expected=(None if kind in ("clarify", "grain_trap") else str(ref(db, sql))[:120]),
                             sql=gen_sql))
     write(set_name, label, results)
 
 
 def write(set_name, label, results):
     def cnt(f): return sum(1 for r in results if f(r))
-    ans = [r for r in results if r["kind"] != "clarify"]
-    cl = [r for r in results if r["kind"] == "clarify"]
+    ans = [r for r in results if r["kind"] not in ("clarify", "grain_trap")]
+    cl = [r for r in results if r["kind"] in ("clarify", "grain_trap")]
     summ = {
         "n": len(results), "answerable": len(ans),
         "correct": cnt(lambda r: r["outcome"] == "correct"),
@@ -121,6 +134,17 @@ def write(set_name, label, results):
     wrong = [r for r in results if r["outcome"] == "silent_wrong"]
     summ["mean_conf_silent_wrong"] = (round(sum(r["confidence"] for r in wrong) / len(wrong), 3) if wrong else None)
     summ["silent_wrong_conf_ge_0_7"] = cnt(lambda r: r["outcome"] == "silent_wrong" and r["confidence"] >= 0.7)
+    lat = sorted(r["latency_ms"] for r in results)
+    summ["latency_ms_p50"] = lat[len(lat) // 2] if lat else None
+    summ["latency_ms_p95"] = lat[min(len(lat) - 1, int(len(lat) * 0.95))] if lat else None
+    bands = {"[0,0.3)": (0, 0.3), "[0.3,0.7)": (0.3, 0.7), "[0.7,0.9)": (0.7, 0.9), "[0.9,1.0]": (0.9, 1.01)}
+    cal = {}
+    for b, (lo_, hi_) in bands.items():
+        inb = [r for r in results if r["action"] in ("ANSWER", "WARN") and lo_ <= r["confidence"] < hi_]
+        cal[b] = {"answered": len(inb),
+                  "correct": sum(r["outcome"] == "correct" for r in inb),
+                  "silent_wrong": sum(r["outcome"] == "silent_wrong" for r in inb)}
+    summ["calibration_by_confidence_band"] = cal
     fams = {}
     for r in results:
         f = fams.setdefault(r["family"], {"n": 0, "correct": 0, "silent_wrong": 0})

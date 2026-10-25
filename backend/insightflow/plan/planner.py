@@ -545,6 +545,15 @@ def _looks_like_measure(noun: str, ds: ActiveDataset,
     return False
 
 
+def _is_anchor_noun(noun: str, ds: ActiveDataset) -> bool:
+    toks = [t for t in re.split(r"[^a-z0-9]+", ds.table.lower()) if t]
+    forms = set()
+    for t in toks:
+        forms |= {t, t.rstrip("s"), t + "s"}
+    forms.add(" ".join(toks))
+    return noun.lower() in forms
+
+
 def _find_dim_mentions(question: str, ds: ActiveDataset,
                          catalog: Optional[KPICatalog] = None
                          ) -> List[Tuple[str, str]]:
@@ -598,6 +607,9 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
                 noun = words[0]
                 if noun in _STOPWORDS_AFTER_BY:
                     continue
+                if ds.kind != "demo" and _is_anchor_noun(noun, ds) \
+                        and not _bind_dim_column(ds, noun):
+                    continue            # "hours per assignment": the row, not a grouping
                 if noun in _TIME_UNIT_WORDS:
                     continue
                 if noun in seen_nouns:
@@ -748,7 +760,7 @@ def _mentioned_date_col(question: str, ds: ActiveDataset) -> Optional[str]:
     tnouns = set()
     for t in re.split(r"[^a-z0-9]+", ds.table.lower()):
         if t:
-            tnouns |= {t, t.rstrip("s")}
+            tnouns |= {t, t.rstrip("s"), t.rstrip("s") + "s"}
     specific, noun_only = [], []
     for d in ds.dates:
         toks = [t for t in re.split(r"[^a-z0-9]+", d.lower())
@@ -780,6 +792,11 @@ def _ambiguous_date_columns(question: str, ds: ActiveDataset,
     """>1 date column and a time-based question that does not say which."""
     if len(ds.dates) < 2 or getattr(ds, "date_choice", None):
         return []
+    _rel0 = getattr(ds, "rel", None)
+    if _rel0 is not None:
+        own = [d for d in ds.dates if _rel0.source(d) is None]
+        if len(own) == 1 and not _mentioned_date_col(question, ds):
+            return []                  # the base table's single date is the default
     ql = _norm(question)
     timey = bool(time_unit) or bool(re.search(
         r"\b(20\d\d|january|february|march|april|may|june|july|august|"
@@ -1075,7 +1092,7 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
     if ds.kind != "demo":
         m = re.search(r"\b(?:missing|null|empty|blank|unspecified)\s+"
                       r"([a-z_ ]+?)\s*\??\s*$", ql) or \
-            re.search(r"\b(?:have|has|with|where|having)\s+no\s+"
+            re.search(r"\b(?:have|has|had|with|where|having)\s+no\s+"
                       r"([a-z_ ]+?)\s*\??\s*$", ql) or \
             re.search(r"\b(?:with|where)\s+(?:no|an?\s+)?"
                       r"([a-z_ ]+?)\s+(?:is\s+)?(?:null|missing|empty|blank)"
@@ -1084,7 +1101,8 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
             phrase = _norm_words(m.group(1))
             best = None
             _UNIT = {"usd", "eur", "gbp", "amt", "amount", "value", "val",
-                     "kg", "lb", "pct", "num", "cnt", "total"}
+                     "kg", "lb", "pct", "num", "cnt", "total", "id", "key",
+                     "code", "no", "number"}
             _pt = set(phrase.split())
             core_hits = []
             for cname in ds.columns:
@@ -1347,6 +1365,8 @@ def _find_threshold_grouped(question: str, ds: ActiveDataset,
             kpi = catalog.get("total_revenue")
         if not kpi:
             continue
+        if "{{dim:" in kpi.formula:
+            continue      # an attribute of a related table is a row filter, not an aggregate
         return (dim_col, kpi.kpi_id, threshold, op)
     return None
 
@@ -1454,6 +1474,54 @@ _NOT_ENTITY = {"january", "february", "march", "april", "may", "june", "july",
                "monday", "tuesday", "wednesday", "thursday", "friday",
                "saturday", "sunday", "top", "bottom", "show", "what",
                "which", "how", "why", "compare", "list", "give", "total"}
+
+
+_NEG_EXIST = re.compile(
+    r"\b(?:(?:had|have|has|having|with|without|having)\s+(?:no|zero|not\s+any)|"
+    r"never|did\s+not|didn't|do\s+not|don't|haven't|hasn't|without\s+any|"
+    r"not\s+(?:been|ordered|placed|sold|bought))\b")
+_HIER_TOKENS = {"manager", "supervisor", "parent", "boss", "mentor", "referrer",
+                "referred", "reports", "superior", "lead"}
+
+
+def _find_negative_existence(question: str, ds: ActiveDataset) -> List[str]:
+    """'Which stores had no sales?' needs an anti-join over a dimension; it is
+    not implemented, and answering it as a plain breakdown is wrong."""
+    ql = question.lower()
+    m = _NEG_EXIST.search(ql)
+    if not m:
+        return []
+    # NULL-count questions ("employees with no bonus") are handled elsewhere
+    if _find_null_target_column(question, ds):
+        return []
+    # exclusion of a known value ("without Texas") is a filter, not an anti-join
+    tail = ql[m.end(): m.end() + 40]
+    if ds.kind != "demo" and _value_mentions(tail, _value_index(ds)):
+        return []
+    return [f"unsupported_negative_existence:{m.group(0)}"]
+
+
+def _find_hierarchy_refs(question: str, ds: ActiveDataset) -> List[str]:
+    """Self-referencing columns (manager_id -> same table's key) are never
+    joined implicitly; questions that use them are refused, not guessed."""
+    rel = getattr(ds, "rel", None)
+    if rel is None:
+        return []
+    ql = question.lower()
+    t = rel.schema.tables.get(rel.anchor)
+    if t is None:
+        return []
+    out = []
+    import sqlite3
+    from ..config import settings
+    for c in t.columns:
+        toks = set(re.split(r"[^a-z0-9]+", c.lower()))
+        if not (toks & _HIER_TOKENS) or c in t.pk:
+            continue
+        key = (toks & _HIER_TOKENS).pop()
+        if re.search(rf"\b{key}s?\b|\breport(?:s|ing)?\s+to\b|\bdirect\s+reports?\b|\bsubordinates?\b", ql):
+            out.append(f"unsupported_hierarchy:{c}")
+    return out
 
 
 _NEG_CUE = re.compile(
@@ -1616,9 +1684,29 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     for lo, _c in _value_mentions(question, _value_index(ds)):
         ql = ql.replace(lo, " ")
     out = []
-    for flat, src in rel.sources.items():
-        if not getattr(src, "numeric", False) or src.kind != "safe":
-            continue
+    cand = [(f, s_) for f, s_ in rel.sources.items()
+            if getattr(s_, "numeric", False) and s_.kind == "safe"]
+    # Row-level condition on a numeric column of the BASE table, only in the
+    # explicit form "with/where/whose <col> <cmp> N" and with no grouping
+    # cue, so aggregate thresholds ("customers with revenue above 1000") keep
+    # their own path.
+    if not re.search(r"\b(by|per|each|which|top|bottom|rank)\b", ql):
+        anchor_ti = rel.schema.tables[rel.anchor]
+        keys = set(anchor_ti.pk) | set(rel.fk_columns)
+        for c, ctype in anchor_ti.columns.items():
+            if c in keys or not any(k in (ctype or "").upper()
+                                    for k in ("INT", "REAL", "NUM", "DEC", "FLOA", "DOUB")):
+                continue
+            w = [x for x in re.split(r"[^a-z0-9]+", c.lower()) if x]
+            cp = r"\s+".join(re.escape(x) for x in w)
+            m_a = re.search(rf"\b(?:with|where|whose|having)\s+(?:an?\s+|the\s+)?{cp}\s*"
+                            rf"(?:\b({_CMP_ALT})\b\s*)?(?<![\d.])(\d+(?:\.\d+)?)(?![\d])", ql)
+            if m_a and m_a.group(1):
+                v = float(m_a.group(2))
+                out.append(FilterExpr(kind="cmp", column=c,
+                                      value=int(v) if v == int(v) else v,
+                                      op=_cmp_op(m_a.group(1))))
+    for flat, src in cand:
         words = [w for w in re.split(r"[^a-z0-9]+", flat.lower()) if w]
         colpat = r"\s+".join(
             rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}s?" for w in words)
@@ -2379,11 +2467,26 @@ class Planner:
             return plan
 
         # ---------- build the plan by kind ----------
+        _count_cue = re.search(r"\b(how\s+many|number\s+of|count|counts)\b", ql_lo)
+        _cnt = [k for k in kpis if k.aggregation in ("count", "count_distinct")]
+        if _count_cue and len(_cnt) > 1:
+            def _pos(k):
+                ps = [m.start() for a in k.aliases
+                      for m in re.finditer(rf"(?<![a-z0-9]){re.escape(a.lower())}(?![a-z0-9])", ql_lo)
+                      if m.start() >= _count_cue.start()]
+                return min(ps) if ps else 10 ** 6
+            _best = min(_cnt, key=lambda k: (_pos(k), -len(k.aliases[0]) if k.aliases else 0))
+            kpis = [k for k in kpis if k not in _cnt or k is _best]
+        if len(kpis) > 1 and not _count_cue:
+            _nc = [k for k in kpis if k.aggregation != "count"]
+            if _nc:
+                kpis = _nc          # "for orders placed in June" names an entity, not a count
         _nf_pre = _find_numeric_filters(question, ds)
         if _nf_pre and len(kpis) > 1:
             _fcols = {f.column for f in _nf_pre}
             _keep = [k for k in kpis
-                     if not any("{{dim:%s}}" % c in k.formula for c in _fcols)]
+                     if not any(("{{dim:%s}}" % c in k.formula
+                                 or '"%s"' % c in k.formula) for c in _fcols)]
             if _keep:
                 kpis = _keep
         measures = [_mref(k) for k in kpis]
@@ -2413,6 +2516,8 @@ class Planner:
         _unknown_values += _find_unknown_proper_nouns(question, ds, catalog)
         _unknown_values += _metric_conflicts
         _unknown_values += _find_conflicting_conditions(question, ds)
+        _unknown_values += _find_negative_existence(question, ds)
+        _unknown_values += _find_hierarchy_refs(question, ds)
         _yamb = _year_ambiguity(question, ds)
         if _yamb:
             _unknown_values.append("ambiguous_year:" + "|".join(map(str, _yamb)))

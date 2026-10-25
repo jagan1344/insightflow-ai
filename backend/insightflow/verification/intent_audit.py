@@ -121,6 +121,16 @@ def audit(question: str, sql: str, plan, catalog, n_rows: int,
                     f"assumed"))
                 break
 
+    # ---- more figures than were asked for ---------------------------------
+    if catalog is not None and len(plan.measures) > 1:
+        cnt_kpis = [m for m in plan.measures
+                    if (catalog.get(m.kpi_id) is not None
+                        and catalog.get(m.kpi_id).aggregation == "count")]
+        if cnt_kpis and not cnt_cue and len(cnt_kpis) < len(plan.measures):
+            out.append(AuditFinding(
+                "extra_measure",
+                "a count was added that the question did not ask for"))
+
     # ---- month / quarter named but not applied ---------------------------
     for i, mname in enumerate(_MONTHS, 1):
         pat = rf"\b{mname}\b"

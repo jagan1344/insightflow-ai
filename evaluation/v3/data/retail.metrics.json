@@ -1,0 +1,1 @@
+{"tables": {"order_lines": {"metrics": [{"id": "gross_sales", "name": "Gross Sales", "expression": "SUM(qty * unit_price)", "synonyms": ["gross revenue"], "unit": "currency"}, {"id": "net_sales", "name": "Net Sales", "expression": "SUM(qty * unit_price * (1 - COALESCE(discount, 0)))", "synonyms": ["net revenue"], "unit": "currency"}]}}}

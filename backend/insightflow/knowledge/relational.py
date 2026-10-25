@@ -127,11 +127,13 @@ def _stems(word: str) -> Set[str]:
 
 
 def _table_stems(table: str) -> Set[str]:
+    """Stems naming the ENTITY a table holds: its head noun (last token) or
+    the whole name. A modifier is not the entity: in `order_lines` the
+    entity is a line, so a column `order_id` does not refer to it."""
     toks = [t for t in _tokens(table) if t not in _STOP_TOKENS]
     out: Set[str] = set()
-    for t in toks:
-        out |= _stems(t)
     if toks:
+        out |= _stems(toks[-1])
         out |= _stems("".join(toks))
     return out
 
@@ -237,6 +239,15 @@ class RelationalSchema:
                             continue
                         if _contained(con, t, c, p, pc):
                             cands.append((p, pc))
+                # Reject the reverse-FK illusion: this column is the child's
+                # own single-column PK, and the "parent" actually holds a
+                # column of the same name that points back at this table.
+                if len(ti.pk) == 1 and c == ti.pk[0]:
+                    cands = [(p, pc) for p, pc in cands
+                             if not any(
+                                 e2c == c and _contained(con, p, e2c, t, c)
+                                 for e2c in tables[p].columns
+                                 if e2c not in tables[p].pk)]
                 if len(cands) > 1:
                     # A declared key (PK/UNIQUE) is stronger evidence than a
                     # column that merely happens to be duplicate-free today.
@@ -375,7 +386,11 @@ def foreign_tables(db_path: str, anchor: str) -> Set[str]:
     the physical database; they are not part of the anchor's schema."""
     con = sqlite3.connect(db_path)
     try:
-        rows = con.execute("SELECT table_name FROM _datasets").fetchall()
+        # Only FLAT uploads are foreign. Other relational anchors are part of
+        # the same schema, and the demo registry row names a table ("orders")
+        # that may be an unrelated user table of the same name.
+        rows = con.execute(
+            "SELECT table_name FROM _datasets WHERE kind = 'uploaded'").fetchall()
         return {r[0] for r in rows if r[0] != anchor} | {"_datasets"}
     except sqlite3.Error:
         return set()

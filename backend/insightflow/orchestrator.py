@@ -634,6 +634,25 @@ class Orchestrator:
                 self._extra_notes += [f"{f.severity}:{f.name}:{f.detail}"
                                       for f in _vrep.findings]
 
+        # 11e. Standing caveats that must not be silent: grain of related
+        # measures and joins that rest on an inferred (undeclared) FK.
+        _rel_ctx = getattr(ds, "rel", None)
+        if decision.action in (ANSWER, WARN) and sql and _rel_ctx is not None:
+            if any("{{dim:" in (m.formula or "") for m in plan.measures):
+                _caveats.append(
+                    f"a measure stored on a related table is counted once per "
+                    f"'{ds.table}' row, so a value shared by several rows is "
+                    f"counted several times")
+            _weak = [f"{e.child_table}.{e.child_col}->{e.parent_table}.{e.parent_col}"
+                     for e in _rel_ctx.schema.edges if e.status == "inferred"
+                     and re.search(rf"\b{re.escape(e.parent_table)}\b", sql)
+                     and e.child_col in sql]
+            if _weak:
+                _caveats.append("relationship inferred from names and values, "
+                                "not declared: " + ", ".join(_weak))
+            if _caveats and decision.action == ANSWER:
+                decision = Decision(WARN, "answer rests on: " + "; ".join(_caveats))
+
         # 12. Explain (evidence-first).
         if decision.action in (ANSWER, WARN):
             trace = plan_evidence_line(plan, catalog.table)

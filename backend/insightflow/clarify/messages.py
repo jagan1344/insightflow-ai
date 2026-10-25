@@ -65,6 +65,14 @@ def targeted_message(unavailable: List[str], ds) -> Optional[str]:
             name, _, why = rest.partition("=")
             parts.append(f"'{name}' is both included and excluded ({why}). "
                          f"Which did you mean?")
+        elif kind == "unsupported_negative_existence":
+            parts.append("Finding things that have NO matching records (\""
+                         + rest + "\") needs an anti-join, which isn't "
+                         "supported yet. Ask for a breakdown or total instead.")
+        elif kind == "unsupported_hierarchy":
+            parts.append(f"'{rest}' links rows of the same table to each other "
+                         f"(a hierarchy); questions about reporting lines "
+                         f"aren't supported yet.")
         elif kind == "table":
             parts.append(f"The table '{rest}' no longer exists (the schema "
                          f"changed). Re-upload or select another dataset.")

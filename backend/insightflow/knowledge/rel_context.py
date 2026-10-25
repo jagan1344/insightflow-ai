@@ -38,6 +38,7 @@ class DimSource:
     candidates: List[str] = field(default_factory=list)   # for ambiguous
     via_fk: str = ""                  # role alias: the anchor FK column
     numeric: bool = False             # numeric attribute of a many-to-one parent
+    date: bool = False                # date attribute of a many-to-one parent
 
 
 @dataclass
@@ -100,6 +101,19 @@ def build_rel_context(db_path: str, anchor: str) -> Optional[RelContext]:
         if res.kind != "none":
             per_table[t] = res
 
+    from .dataset_registry import _infer_role
+    import sqlite3 as _sq
+    _con = _sq.connect(f"file:{db_path}?mode=ro", uri=True)
+
+    def _is_date_col(t: str, c: str, ctype: str) -> bool:
+        try:
+            smp = [r[0] for r in _con.execute(
+                f'SELECT "{c}" FROM "{t}" WHERE "{c}" IS NOT NULL LIMIT 20')]
+        except _sq.Error:
+            return False
+        return _infer_role(c, ctype, smp) == "date"
+
+    date_srcs: Dict[str, List[Tuple[str, str]]] = {}
     cand_by_name: Dict[str, List[Tuple[str, str]]] = {}
     for t, res in per_table.items():
         ti = schema.tables[t]
@@ -107,8 +121,19 @@ def build_rel_context(db_path: str, anchor: str) -> Optional[RelContext]:
                              if e.child_table == t}
         for c, ctype in ti.columns.items():
             if _is_text(ctype) and c not in keys:
-                cand_by_name.setdefault(c, []).append((t, c))
+                if res.kind == "unique" and _is_date_col(t, c, ctype):
+                    date_srcs.setdefault(c, []).append((t, c))
+                else:
+                    cand_by_name.setdefault(c, []).append((t, c))
+    _con.close()
     anchor_cols = set(schema.tables[anchor].columns)
+    for name, tcs in date_srcs.items():
+        if len(tcs) > 1 or name in anchor_cols:
+            continue                       # clash: not exposed
+        t, c = tcs[0]
+        p = per_table[t].path
+        ctx.sources[name] = DimSource(name, t, c, "safe", p.steps, p.nullable,
+                                      date=True)
 
     for name, tcs in cand_by_name.items():
         clash = len(tcs) > 1 or name in anchor_cols

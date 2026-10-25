@@ -117,6 +117,11 @@ def unrepresented_table_nouns(question: str, sql: str, rel) -> List[str]:
         return []
     from ..knowledge.rel_context import fk_noun_column, parent_nouns
     ql = question.lower()
+    # the base table's own noun phrase ("order lines") is not a reference to
+    # another table ("orders")
+    for n in sorted({rel.anchor.replace("_", " "),
+                     rel.anchor.replace("_", " ").rstrip("s")}, key=len, reverse=True):
+        ql = ql.replace(n, " ")
     sql_l = re.sub(r"\s+", " ", sql.lower())
     out = []
     for t in rel.schema.tables:

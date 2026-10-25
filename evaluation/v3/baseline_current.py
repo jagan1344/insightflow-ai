@@ -10,16 +10,23 @@ import fixtures as F, run_eval as R
 TMP = pathlib.Path(tempfile.mkdtemp(prefix="v3base_"))
 
 
-def register(db):
+def register(spec):
+    import os, json
+    db, anchor = R.parse(spec)
     from insightflow.config import settings
     from insightflow.execution.executor import reset_engine
     from insightflow.knowledge.dataset_registry import register_relational as register_uploaded, set_active, bootstrap
     from insightflow.knowledge.schema_agent import refresh_schema
-    dst = TMP / f"{db}.db"
+    dst = TMP / f"{db}__{anchor}.db"
     shutil.copy(F.DATA / f"{db}.db", dst)
     settings.database_url = f"sqlite:///{dst}"
     reset_engine(); bootstrap()
-    ds_id = register_uploaded(db, R.FACT[db])
+    cfg = F.DATA / f"{db}.metrics.json"
+    if cfg.exists():
+        os.environ["INSIGHTFLOW_METRICS_FILE"] = str(cfg)
+    else:
+        os.environ.pop("INSIGHTFLOW_METRICS_FILE", None)
+    ds_id = register_uploaded(spec, anchor)
     reset_engine(); refresh_schema(); set_active(ds_id)
 
 

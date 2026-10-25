@@ -381,7 +381,8 @@ def _apply_rel_context(cols: dict, rel) -> None:
             continue
         cols[flat] = ColumnInfo(
             name=flat, sql_type=("REAL" if getattr(src, "numeric", False) else "TEXT"),
-            role=("measure" if getattr(src, "numeric", False) else "dimension"),
+            role=("measure" if getattr(src, "numeric", False)
+                  else "date" if getattr(src, "date", False) else "dimension"),
             sample_values=[])
 
 

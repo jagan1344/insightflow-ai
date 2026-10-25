@@ -732,6 +732,8 @@ class SQLCompiler:
         return (qc, qc, "", alias)
 
     def _time_bucket(self, col: str, unit: str) -> str:
+        if self.rel is not None and self.rel.source(col) is not None:
+            return _time_bucket_expr(self._rel_expr(col), unit, quoted=False)
         return self._qualify(
             _time_bucket_expr(col, unit, quoted=(self.kind == "uploaded")))
 
@@ -749,7 +751,15 @@ class SQLCompiler:
     def _extra_where(self, plan: AnalyticalPlan) -> List[str]:
         parts: List[str] = []
         for f in plan.filters:
-            if f.kind == "time_range" and f.column:
+            if f.kind == "time_range" and f.column and self.rel is not None \
+                    and self.rel.source(f.column) is not None:
+                ex = self._rel_expr(f.column)
+                lo, hi = str(f.lo), str(f.hi)
+                if len(lo) >= 10 and len(hi) >= 10:
+                    parts.append(f"{ex} >= '{lo}' AND {ex} < '{hi}'")
+                else:
+                    parts.append(_period_range_predicate(ex, lo, hi, quoted=False))
+            elif f.kind == "time_range" and f.column:
                 lo = str(f.lo); hi = str(f.hi)
                 # If lo/hi look like full ISO dates (YYYY-MM-DD) rather
                 # than months (YYYY-MM), emit a day-level filter — this
