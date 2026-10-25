@@ -119,7 +119,8 @@ def _find_time_unit(q: str) -> Optional[str]:
     """
     ql = _norm(q)
     _REL_PREFIXES = ("last", "this", "previous", "current", "next",
-                      "upcoming", "coming")
+                      "upcoming", "coming", "first", "second", "third",
+                      "fourth", "1st", "2nd", "3rd", "4th")
     for phrase, unit in _TIME_UNIT_WORDS.items():
         if f" {phrase} " not in ql and f" {phrase}?" not in ql:
             continue
@@ -908,6 +909,40 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         ))
         return filters
 
+    # 1c. An exact ISO date ("on 2025-03-15"): that day only.
+    miso = re.search(r"(?<![\d-])((?:19|20)\d{2})-(\d{2})-(\d{2})(?![\d-])", ql)
+    if miso:
+        import datetime as _d
+        try:
+            d0 = _d.date(int(miso.group(1)), int(miso.group(2)), int(miso.group(3)))
+        except ValueError:
+            d0 = None
+        if d0 is not None:
+            filters.append(FilterExpr(
+                kind="time_range", column=date_col, lo=d0.isoformat(),
+                hi=(d0 + _d.timedelta(days=1)).isoformat()))
+            return filters
+
+    # 1d. Halves and spelled-out quarters ("first half of 2025", "H2",
+    # "third quarter"). Without this the year alone silently widened them.
+    _ORD = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3,
+            "fourth": 4, "4th": 4, "last": 4}
+    mh = re.search(r"\b(first|1st|second|2nd)\s+half\b", ql) or \
+        re.search(r"\bh([12])\b", ql)
+    mq = re.search(r"\b(first|1st|second|2nd|third|3rd|fourth|4th)\s+quarter\b", ql)
+    if mh or mq:
+        yy = _find_year(question) or _default_year(ds, date_col)
+        if mh:
+            hv = mh.group(1)
+            half = int(hv) if hv.isdigit() else _ORD[hv]
+            lo_m, hi_m = (1, 6) if half == 1 else (7, 12)
+        else:
+            lo_m, hi_m = _QUARTERS[f"q{_ORD[mq.group(1)]}"]
+        filters.append(FilterExpr(kind="time_range", column=date_col,
+                                  lo=_period_string(yy, lo_m),
+                                  hi=_period_string(yy, hi_m)))
+        return filters
+
     # 2. Month range (Defect A)
     rng = _find_month_range(question)
     if rng is not None:
@@ -1635,6 +1670,7 @@ def _find_unknown_proper_nouns(question: str, ds: ActiveDataset,
 
 _NEG_BEFORE = re.compile(
     r"(?:excluding|exclude|except(?:\s+for)?|without|other\s+than|apart\s+from|"
+    r"and\s+not|or\s+not|but\s+not|(?<![a-z])not|isn't|aren't|"
     r"aside\s+from|besides|minus|not\s+including|not\s+counting|but\s+not|"
     r"not\s+in|not\s+from|not\s+for|not\s+at|not\s+by|outside(?:\s+of)?)"
     r"\s+(?:the\s+|those\s+|any\s+|all\s+)?"
@@ -1696,6 +1732,38 @@ def _cmp_op(word: str) -> str:
         if re.fullmatch(p, word.strip()):
             return op
     return "="
+
+
+_NEG_STATE = re.compile(r"\b(?:not|never|yet|haven't|hasn't|isn't|aren't|wasn't|weren't|didn't|no)\b|\bun[a-z]")
+
+
+def _find_date_state_filters(question: str, ds: ActiveDataset,
+                             has_time_filter: bool) -> List[FilterExpr]:
+    """'How many orders were shipped?' -> ship_date IS NOT NULL;
+    'loans not returned' -> returned_date IS NULL. Only when a nullable date
+    column is named by a participle (shipped / returned / delivered) and no
+    time window was given for it."""
+    if ds.kind == "demo" or has_time_filter or not ds.dates:
+        return []
+    ql = question.lower()
+    anchor_toks = set()
+    for t in re.split(r"[^a-z0-9]+", ds.table.lower()):
+        anchor_toks |= {t, t.rstrip("s"), t.rstrip("s") + "s"}
+    out = []
+    for d in ds.dates:
+        toks = [t for t in re.split(r"[^a-z0-9]+", d.lower())
+                if len(t) >= 4 and t not in ("date", "time")]
+        for t in toks:
+            stem = t[:max(4, len(t) - 2)]
+            m = re.search(rf"\b(un)?({re.escape(stem)}\w*)", ql)
+            if not m or m.group(2) in anchor_toks or not m.group(2).endswith(("ed", "en", "t")):
+                continue
+            ctx = ql[max(0, m.start() - 30): m.start()] + (" un" if m.group(1) else "") + ql[m.end(): m.end() + 12]
+            neg = bool(_NEG_STATE.search(ql[max(0, m.start() - 30): m.start()])) \
+                or bool(m.group(1)) or bool(re.match(r"\s*(?:yet|still)\b", ql[m.end():]))
+            out.append(FilterExpr(kind="null" if neg else "not_null", column=d))
+            break
+    return out
 
 
 def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
@@ -2390,6 +2458,15 @@ class Planner:
             if k and not any(m.kpi_id == k.kpi_id for m in kpis):
                 kpis = [k] + kpis
 
+        if not kpis and ds.kind != "demo" and catalog.get("row_count") is not None \
+                and re.search(r"\b(?:how\s+many|number\s+of|count\s+of)\s+(?:[a-z\-]+\s+){0,3}"
+                              r"(?:" + "|".join(re.escape(x) for x in
+                                  {ds.table.lower().replace("_", " "),
+                                   ds.table.lower().replace("_", " ").rstrip("s"),
+                                   *[t for t in re.split(r"[^a-z0-9]+", ds.table.lower()) if t],
+                                   *[t.rstrip("s") for t in re.split(r"[^a-z0-9]+", ds.table.lower()) if t]})
+                              + r")s?\b", ql_lo):
+            kpis = [catalog.get("row_count")]
         # "How many sales ..." asks for a count of records, even though
         # "sales" is also a revenue alias. A monetary/sum KPI bound only
         # through the counted noun is replaced by the row count.
@@ -2519,8 +2596,10 @@ class Planner:
         dims = [_dref(c, ds) for c in [c for _, c in bound_dims]]
         # Phase 2 (2026-10-24): value-equality filters on dim values
         # ("in East region", "for Furniture category", "SMB segment").
+        _has_tf = bool(_bind_time_filter(question, ds))
         value_filters = _find_value_filters(question, ds) \
-            + _find_numeric_filters(question, ds)
+            + _find_numeric_filters(question, ds) \
+            + _find_date_state_filters(question, ds, _has_tf)
         if ds.kind != "demo" and unbound_dims:
             _vtext = " ".join(str(f.value).lower() for f in value_filters)
             _vtext += " " + " ".join(

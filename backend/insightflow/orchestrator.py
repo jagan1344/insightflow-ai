@@ -561,6 +561,11 @@ class Orchestrator:
                 _yr = unrepresented_years(question, sql)
             except Exception:
                 _yr = []
+            try:
+                from .reliability.mention_coverage import unrepresented_iso_dates
+                _yr = _yr + unrepresented_iso_dates(question, sql)
+            except Exception:
+                pass
             if _yr and not _miss and not _tn:
                 decision = Decision(
                     CLARIFY,
@@ -583,6 +588,24 @@ class Orchestrator:
                     "the question contains the number(s) " + ", ".join(_nums) +
                     " but the generated query does not use them, so a "
                     "threshold or quantity would be ignored")
+                confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
+            try:
+                from .reliability.mention_coverage import unexplained_words
+                _uh, _us = unexplained_words(question, ds, catalog)
+                if plan.intent_kind in ("null_count", "distinct_count", "extremum",
+                                        "threshold_grouped", "relative_to_stat") \
+                        or any(m.aggregation == "count_distinct" for m in plan.measures):
+                    _uh, _us = [], []      # operator words ("missing", "distinct") are consumed by the plan
+            except Exception:
+                _uh, _us = [], []
+            self._unexplained_soft = _us
+            if _uh and not _miss and not _tn and not _yr and not _nums:
+                decision = Decision(
+                    CLARIFY,
+                    "I don't know how " + ", ".join(f"'{w}'" for w in _uh) +
+                    " maps to this data, so the answer could ignore part of "
+                    "your question")
                 confidence.signals["mention_coverage"] = 0.0
                 confidence.score = min(confidence.score, 0.30)
             if _cm and not _miss and not _tn:
@@ -654,9 +677,14 @@ class Orchestrator:
                 self._extra_notes += [f"{f.severity}:{f.name}:{f.detail}"
                                       for f in _vrep.findings]
 
+        for _w in getattr(self, "_unexplained_soft", []):
+            _caveats.append(f"'{_w}' was not mapped to any column or value and was not applied")
+        self._unexplained_soft = []
         # 11e. Standing caveats that must not be silent: grain of related
         # measures and joins that rest on an inferred (undeclared) FK.
         _rel_ctx = getattr(ds, "rel", None)
+        if _caveats and decision.action == ANSWER and _rel_ctx is None:
+            decision = Decision(WARN, "answer rests on: " + "; ".join(_caveats))
         if decision.action in (ANSWER, WARN) and sql and _rel_ctx is not None:
             if any("{{dim:" in (m.formula or "") for m in plan.measures):
                 _caveats.append(
@@ -707,7 +735,9 @@ class Orchestrator:
                               if plan.intent_kind == IntentKind.CONTRIBUTION
                               else None)
         elif decision.action == CLARIFY:
-            explanation = self._clarify_message_from_plan(plan, report)
+            explanation = (self._clarify_message_from_plan(plan, report)
+                           if plan.unavailable or not decision.reason
+                           else decision.reason[0].upper() + decision.reason[1:] + ".")
             recommendation = None
         else:  # ABSTAIN
             explanation = ("I'm abstaining because the query did not pass "

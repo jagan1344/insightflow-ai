@@ -177,10 +177,12 @@ def resolve(question: str, unavailable: List[str], ds, catalog,
 def _brief(rows: List[tuple]) -> str:
     if not rows:
         return "no rows"
-    if len(rows) == 1:
-        v = rows[0][-1]
+    def f(v):
         return f"{v:,.2f}" if isinstance(v, float) else str(v)
-    return f"{len(rows)} rows (first: {rows[0]})"
+    if len(rows) == 1:
+        return f(rows[0][-1])
+    shown = ", ".join(f"{f(r[0])}: {f(r[-1])}" for r in rows[:6])
+    return f"{len(rows)} groups ({shown}{', ...' if len(rows) > 6 else ''})"
 
 
 def _flat_from(amb: str, ds) -> Optional[str]:

@@ -123,10 +123,12 @@ class TestVerification:
     def test_boundary_sensitivity_diagnostic(self, live):
         from insightflow.verification.answer_verifier import verify
         path = live("clinic")
+        with sqlite3.connect(str(path)) as c:      # a big row on the day after the window
+            c.execute("INSERT INTO visits VALUES (9999,'2025-06-20',NULL,1,1,500000.0,NULL)")
         plan, sql, ds, cat = plan_sql("Total fee for visits in June 2025")
         for f in plan.filters:
             if f.kind == "time_range":
-                f.lo, f.hi = "2025-06-10", "2025-06-11"
+                f.lo, f.hi = "2025-06-10", "2025-06-20"
         from insightflow.plan.compiler import SQLCompiler
         sql = SQLCompiler(ds, cat).compile(plan)
         rep = verify(plan, sql, self._rows(path, sql), ds, cat, str(path))

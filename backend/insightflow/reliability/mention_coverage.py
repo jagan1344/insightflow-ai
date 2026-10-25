@@ -207,6 +207,7 @@ def unrepresented_numbers(question: str, sql: str,
     q = question.lower()
     for v in (value_texts or []):
         q = q.replace(v.lower(), " ")
+    q = re.sub(r"(?<![\d-])(?:19|20)\d{2}-\d{2}-\d{2}(?![\d-])", " ", q)
     for y in year_tokens(q):
         q = q.replace(y, " ", 1)
     q = _NUM_EXEMPT.sub(" ", q)
@@ -263,3 +264,91 @@ def unrepresented_column_words(question: str, sql: str, ds) -> List[str]:
                 out.append(f"{w} ({c})")
                 break
     return out
+
+
+def unrepresented_iso_dates(question: str, sql: str) -> List[str]:
+    ds_ = re.findall(r"(?<![\d-])((?:19|20)\d{2}-\d{2}-\d{2})(?![\d-])", question)
+    return [d for d in ds_ if d not in sql and not _next_day_in(d, sql)]
+
+
+def _next_day_in(d: str, sql: str) -> bool:
+    import datetime
+    try:
+        nd = (datetime.date.fromisoformat(d) + datetime.timedelta(days=1)).isoformat()
+    except ValueError:
+        return False
+    return nd in sql
+
+
+_FUNCTION_WORDS = set("""
+about above after again against along also always among and another any anyone anything are around because been before
+being below between both but cannot could currently did does doing done down during each either else enough even ever
+every everything few for from further get give given gives going had has have having here how however into its itself
+just keep let like made make makes many more most much must need never next none nor not nothing now off often once only
+other others otherwise our ours out over own per please rather really same shall should show shows since some something
+sometimes still such tell than that the their theirs them then there these they thing things this those though through
+thus till together too toward towards under until upon very want wants was were what whatever when whenever where whether
+which while who whom whose why will with within without would yet you your yours list find count give display provide
+report calculate compute compare summarize rank sort group order total sum average avg mean median maximum minimum max min
+number amount value values figure figures overall all both highest lowest largest smallest biggest greatest best worst top
+bottom first second third fourth last previous recent latest earlier later year years month months week weeks day days
+quarter quarters half halves date dates time period periods monthly weekly daily yearly annual quarterly percent
+percentage proportion share ratio rate times daily january february march april june july august september october
+november december monday tuesday wednesday thursday friday saturday sunday excluding exclude except including include
+included between versus against among each every one two three four five six seven eight nine ten hundred thousand
+million records record rows row entries entry items item data dataset table column columns field fields
+cost costs revenue revenues sales profit profits margin margins income spend spending expense expenses price prices
+change changed changes decline declined declines increase increased increases decrease decreased decreases drop dropped
+growth grew rise rose fall fell trend trends contribution contributed driver drivers reason reasons cause caused
+affect affected impact vary varies compared comparison difference differences relative against breakdown
+across using used via regarding concerning throughout beyond inside outside near behind beside plus whether neither
+overall entire whole combined altogether summed calculated computed based according
+""".split())
+
+
+_IRREGULAR_PAST = set("""sold bought paid made taught sent held took got gave kept left lost won ran began wrote
+spent brought thought found built saw met put set read led""".split())
+
+
+def unexplained_words(question: str, ds, catalog=None) -> tuple:
+    """Content words that map to nothing: not a function word, schema term
+    (table / column / related column / FK parent noun), KPI alias word, or
+    known data value. Returns (hard, soft): `soft` are verb-like (-ed / -ing)
+    words, which usually just describe the rows ("placed", "borrowed") and
+    are reported as a caveat; `hard` (adjectives / nouns such as "overdue",
+    "outstanding") change the meaning and must be asked about."""
+    if ds is None or ds.kind == "demo" or getattr(ds, "rel", None) is None:
+        return [], []      # flat uploads rely on legacy phrase rules the vocabulary check would fight
+    from ..plan.planner import _value_index, _value_mentions
+    ql = question.lower()
+    for lo, _c in _value_mentions(question, _value_index(ds)):
+        ql = ql.replace(lo, " ")
+    known = set(_FUNCTION_WORDS)
+    toks = set()
+    for c in ds.columns:
+        toks |= set(re.split(r"[^a-z0-9]+", c.lower()))
+    toks |= set(re.split(r"[^a-z0-9]+", ds.table.lower()))
+    rel = getattr(ds, "rel", None)
+    if rel is not None:
+        from ..knowledge.rel_context import parent_nouns
+        for t in rel.schema.tables:
+            toks |= set(re.split(r"[^a-z0-9]+", t.lower()))
+            for n in parent_nouns(t):
+                toks |= set(n.split())
+            for c in rel.schema.tables[t].columns:
+                toks |= set(re.split(r"[^a-z0-9]+", c.lower()))
+    if catalog is not None:
+        for k in catalog.kpis.values():
+            for a in k.aliases + [k.display_name]:
+                toks |= set(re.split(r"[^a-z0-9]+", a.lower()))
+    toks = {t for t in toks if len(t) >= 3}
+    hard, soft = [], []
+    for w in re.findall(r"[a-z]{4,}", ql):
+        if w in known:
+            continue
+        if any(w == t or w[:5] == t[:5] and min(len(w), len(t)) >= 5
+               or (len(t) >= 4 and w.startswith(t)) or (len(w) >= 4 and t.startswith(w))
+               for t in toks):
+            continue
+        (soft if (re.search(r"ed$", w) or w in _IRREGULAR_PAST) else hard).append(w)
+    return list(dict.fromkeys(hard)), list(dict.fromkeys(soft))

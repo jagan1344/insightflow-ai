@@ -270,6 +270,12 @@ def _boundary_sensitivity(rep, plan, rows, comp, con) -> None:
     if not tf:
         return
     import datetime as dt
+    try:                      # a deliberately narrow window (a single day) is not "sensitive"
+        if any((dt.date.fromisoformat(str(f.hi)[:10]) -
+                dt.date.fromisoformat(str(f.lo)[:10])).days <= 7 for f in tf):
+            return
+    except ValueError:
+        return
     p2 = copy.deepcopy(plan)
     for f in p2.filters:
         if f.kind == "time_range" and len(str(f.hi)) >= 10:

@@ -1,0 +1,174 @@
+{
+ "F08": {
+  "question": "How many loans by branch?",
+  "action": "ANSWER",
+  "reason": "confidence 0.99 \u2265 0.70",
+  "confidence": 0.993,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 0.9,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT j_branch_id.branch_name AS branch_name, COUNT(*) AS row_count FROM \"loans\" LEFT JOIN branches AS j_branch_id ON j_branch_id.branch_id = loans.branch_id GROUP BY j_branch_id.branch_name ORDER BY row_count DESC",
+  "rows": [
+   [
+    "Riverside Branch",
+    170
+   ],
+   [
+    "Hilltop Annex",
+    170
+   ],
+   [
+    "Central Library",
+    160
+   ]
+  ],
+  "n_rows": 3,
+  "notes": [
+   "pass:breakdown_reconciles:groups sum 500 == total 500",
+   "plan_kind=breakdown"
+  ],
+  "explanation": "KPI: row_count \u2261 COUNT(*) \u00b7 Grouped by: branch_name \u00b7 Dataset: loans\n\nRow Count across 3 branch_name values \u2014 leader: Riverside Branch (170)."
+ },
+ "F09": {
+  "question": "Total late fee for Springfield",
+  "action": "WARN",
+  "reason": "answer rests on: null_measure_share: 265/500 rows have no 'late_fee'; SUM ignores them",
+  "confidence": 0.979,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 0.7,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 1.0
+  },
+  "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN branches AS j_branch_id ON j_branch_id.branch_id = loans.branch_id WHERE j_branch_id.city = 'Springfield'",
+  "rows": [
+   [
+    745.71
+   ]
+  ],
+  "n_rows": 1,
+  "notes": [
+   "pass:semijoin_equivalence:join result == semi-join result",
+   "diagnostic:null_measure_share:265/500 rows have no 'late_fee'; SUM ignores them",
+   "plan_kind=direct_kpi"
+  ],
+  "explanation": "KPI: sum_late_fee \u2261 SUM(\"late_fee\") \u00b7 Filters: city = Springfield \u00b7 Dataset: loans\n\nTotal Late_Fee is 745.71.\n\nCaveats: null_measure_share: 265/500 rows have no 'late_fee'; SUM ignores them"
+ },
+ "F17": {
+  "question": "How many distinct books were borrowed in 2025?",
+  "action": "ANSWER",
+  "reason": "confidence 0.98 \u2265 0.70",
+  "confidence": 0.979,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 0.7,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT COUNT(DISTINCT \"loans\".\"book_id\") AS distinct_book_id FROM \"loans\" WHERE \"loans\".\"loan_date\" >= '2025-01-01' AND \"loans\".\"loan_date\" < '2026-01-01'",
+  "rows": [
+   [
+    9
+   ]
+  ],
+  "n_rows": 1,
+  "notes": [
+   "ambiguity_immaterial=ambiguous_date_column:loan_date|due_date|returned_date|joined_on: 4 readings give identical results",
+   "plan_kind=direct_kpi"
+  ],
+  "explanation": "KPI: distinct_book_id \u2261 COUNT(DISTINCT \"book_id\") \u00b7 Filters: time \u2208 [2025-01, 2025-12] \u00b7 Dataset: loans\n\nDistinct Book_Id for month 01/2026 is 9."
+ },
+ "F24": {
+  "question": "Top 3 genres by number of loans",
+  "action": "WARN",
+  "reason": "answer rests on: relationship inferred from names and values, not declared: book_authors.book_id->books.book_id",
+  "confidence": 0.9796666666666667,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 0.8333333333333334,
+   "evidence_strength": 0.9,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT j_book_id_genre_id.genre_name AS genre_name, COUNT(*) AS row_count FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id GROUP BY j_book_id_genre_id.genre_name ORDER BY row_count DESC LIMIT 3",
+  "rows": [
+   [
+    "Sci-Fi & Fantasy",
+    225
+   ],
+   [
+    "Non-Fiction (History)",
+    118
+   ],
+   [
+    null,
+    56
+   ]
+  ],
+  "n_rows": 3,
+  "notes": [
+   "plan_kind=top_n"
+  ],
+  "explanation": "KPI: row_count \u2261 COUNT(*) \u00b7 Grouped by: genre_name \u00b7 Top-N: 3 \u00b7 Dataset: loans\n\nRow Count across 3 genre_name values \u2014 leader: Sci-Fi & Fantasy (225).\n\nCaveats: relationship inferred from names and values, not declared: book_authors.book_id->books.book_id"
+ },
+ "F32": {
+  "question": "How many loans were returned late?",
+  "action": "ANSWER",
+  "reason": "confidence 0.98 \u2265 0.70",
+  "confidence": 0.979,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 0.7,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT COUNT(*) AS row_count FROM \"loans\"",
+  "rows": [
+   [
+    500
+   ]
+  ],
+  "n_rows": 1,
+  "notes": [
+   "plan_kind=direct_kpi"
+  ],
+  "explanation": "KPI: row_count \u2261 COUNT(*) \u00b7 Dataset: loans\n\nRow Count is 500."
+ }
+}

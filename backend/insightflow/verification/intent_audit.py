@@ -95,6 +95,29 @@ def audit(question: str, sql: str, plan, catalog, n_rows: int,
         out.append(AuditFinding("aggregation_cue",
                                 "question asks for a minimum; query has no MIN"))
 
+    # ---- ratio / percentage wording --------------------------------------
+    if re.search(r"\b(percent|percentage|proportion|fraction|ratio|share\s+of)\b", q):
+        ok = (getattr(plan, "share_of_total", False)
+              or "ratio" in kinds_agg or "derived" in kinds_agg
+              or re.search(r"[a-z)]\s*/\s*[a-z(]", s) is not None
+              or (catalog is not None and any(
+                  (catalog.get(m.kpi_id) is not None and any(
+                      re.search(rf"\b{w}\b", a.lower()) for a in catalog.get(m.kpi_id).aliases
+                      for w in ("percent", "percentage", "proportion", "ratio", "rate", "share")))
+                  for m in plan.measures)))
+        if not ok:
+            out.append(AuditFinding(
+                "ratio_cue", "the question asks for a percentage/share/ratio but "
+                "the query returns a plain total or count"))
+
+    # ---- top / bottom N wording ------------------------------------------
+    mt = re.search(r"\b(top|bottom)\s+(\d+)\b", q)
+    if mt and not plan.top_n and "limit" not in s \
+            and "row_number" not in s:
+        out.append(AuditFinding(
+            "top_n_not_applied",
+            f"'{mt.group(0)}' is in the question but the query does not rank or limit"))
+
     # ---- result shape ----------------------------------------------------
     grouped = re.search(r"\bgroup by\b", s) is not None
     if grouped and _SCALAR_CUE.search(q) and not _GROUP_CUE.search(q_cues) \
