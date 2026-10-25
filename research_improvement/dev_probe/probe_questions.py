@@ -1,0 +1,40 @@
+"""Development capability probe (NOT held-out: round-6 schemas were used for tuning).
+(category, db, question, expected) with expected = reference SQL (answerable) or "CLARIFY"."""
+A, S, R, H = "airline@flights", "saas@invoices", "farm@readings", "farm@harvests"
+_SI = "FROM invoices i JOIN subscriptions s ON s.sub_id=i.sub_id"
+_RF = "FROM readings r JOIN fields f ON f.field_id=r.field_id"
+PROBE = [
+ ("01 direct_kpi", A, "What is the total fare?", "SELECT SUM(fare_amt) FROM flights"),
+ ("01 direct_kpi", R, "What is the average moisture?", "SELECT AVG(moisture) FROM readings"),
+ ("02 breakdown", A, "Total fare by carrier", "SELECT c.carr_nm, SUM(f.fare_amt) FROM flights f JOIN carriers c ON c.carr_cd=f.carr_cd GROUP BY 1"),
+ ("02 breakdown", S, "Total usd by country", f"SELECT a.country, SUM(i.total_usd) {_SI} JOIN accounts a ON a.acct_id=s.acct_id GROUP BY 1"),
+ ("03 top_n", A, "Top 3 carriers by total fare", "ORDERED:SELECT c.carr_nm, SUM(f.fare_amt) t FROM flights f JOIN carriers c ON c.carr_cd=f.carr_cd GROUP BY 1 ORDER BY t DESC LIMIT 3"),
+ ("04 trend", S, "Monthly total usd by issue date", "SELECT substr(issued_on,1,7), SUM(total_usd) FROM invoices GROUP BY 1"),
+ ("05 multi_table_join", S, "Total usd for the Software industry", f"SELECT SUM(i.total_usd) {_SI} JOIN accounts a ON a.acct_id=s.acct_id WHERE a.industry='Software'"),
+ ("06 related_numeric_threshold", R, "Average moisture for fields larger than 120 acres", f"SELECT AVG(r.moisture) {_RF} WHERE f.acres>120"),
+ ("06 related_numeric_threshold", R, "Average moisture for fields with at least 120 acres", f"SELECT AVG(r.moisture) {_RF} WHERE f.acres>=120"),
+ ("07 fk_inference", A, "Total fare by destination airport", "SELECT a.apt_nm, SUM(f.fare_amt) FROM flights f JOIN airports a ON a.apt_cd=f.dest_cd GROUP BY 1"),
+ ("08 abbreviation", A, "Total passengers", "SELECT SUM(pax_cnt) FROM flights"),
+ ("08 abbreviation", R, "What is the average temperature?", "SELECT AVG(temp_c) FROM readings"),
+ ("09 negation_exclusion", A, "Total fare excluding delayed flights", "SELECT SUM(fare_amt) FROM flights WHERE is_delayed=0"),
+ ("09 negation_exclusion", R, "Average moisture excluding Corn", f"SELECT AVG(r.moisture) {_RF} WHERE f.crop<>'Corn'"),
+ ("10 boolean_flag", A, "How many flights were delayed?", "SELECT COUNT(*) FROM flights WHERE is_delayed=1"),
+ ("10 boolean_flag", R, "How many readings had a faulty sensor?", "SELECT COUNT(*) FROM readings WHERE sensor_ok=0"),
+ ("11 null_condition", R, "How many readings have no temperature?", "SELECT COUNT(*) FROM readings WHERE temp_c IS NULL"),
+ ("11 null_condition", S, "How many invoices have not been paid?", "SELECT COUNT(*) FROM invoices WHERE paid_on IS NULL"),
+ ("12 distinct_count", S, "How many distinct accounts were invoiced?", f"SELECT COUNT(DISTINCT s.acct_id) {_SI}"),
+ ("13 join_fanout", S, "Total usd by priority", "CLARIFY"),
+ ("13 join_fanout", S, "Total usd for accounts with High priority tickets", f"SELECT SUM(i.total_usd) {_SI} WHERE EXISTS (SELECT 1 FROM support_tickets t WHERE t.acct_id=s.acct_id AND t.priority='High')"),
+ ("14 date_role_ambiguity", S, "Total usd in March 2025", "CLARIFY"),
+ ("14 date_role_ambiguity", S, "Total usd for invoices issued in March 2025", "SELECT SUM(total_usd) FROM invoices WHERE issued_on>='2025-03-01' AND issued_on<'2025-04-01'"),
+ ("15 period_comparison", S, "Compare total usd for invoices issued in March 2025 vs April 2025", "CLARIFY_OR:SELECT 1"),
+ ("16 ratio", H, "Total yield tons per acre", "CLARIFY"),
+ ("17 share_of_total", A, "What share of total fare comes from each carrier?", "CLARIFY_OR:SELECT 1"),
+ ("18 many_to_many", S, "Total usd by ticket status", "CLARIFY"),
+ ("19 anti_join", S, "Which accounts have no tickets?", "CLARIFY"),
+ ("20 ambiguous", A, "How are we doing?", "CLARIFY"),
+ ("20 ambiguous", A, "Total fare by airport", "CLARIFY"),
+ ("21 unsupported_metric", A, "What is the total profit?", "CLARIFY"),
+ ("21 unsupported_metric", A, "Predict next month's bookings", "CLARIFY"),
+ ("21 unsupported_metric", A, "How many passengers were there?", "CLARIFY_OR:SELECT SUM(pax_cnt) FROM flights"),
+]

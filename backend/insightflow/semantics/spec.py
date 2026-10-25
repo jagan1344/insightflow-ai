@@ -46,6 +46,12 @@ def requested_shape(question: str, ds=None) -> str:
             pass
     q = _AGENT.sub(" ", q)
     q = re.sub(r"\bacross\s+(?:all|the\s+whole|every)\b", " ", q)
+    # "average X per <base-table row>" is the plain per-row mean, not a grouping
+    tbl = str(getattr(ds, "table", "") or "").lower() if ds is not None else ""
+    if tbl:
+        stems = {tbl, tbl[:-1] if tbl.endswith("s") else tbl}
+        rx = "|".join(re.escape(x) for x in sorted(stems, key=len, reverse=True))
+        q = re.sub(rf"\b((?:average|avg|mean)\b[^.?]*?)\bper\s+(?:{rx})\b", r"\1 ", q)
     if _CMP_Q.search(q):
         return "comparison"
     if _TREND_Q.search(q):

@@ -47,6 +47,22 @@ def typecheck(spec, question: str, ds) -> List[F]:
                          f"'how many {noun}' asks about {noun}, but the query counts "
                          f"{ds.table} rows"))
 
+    # 'how many passengers' where passengers is a measure column (pax_cnt), not
+    # a table: counting base rows answers a different question
+    if m and not m.group(1):
+        from ..knowledge.abbrev import canon_tokens
+        from ..plan.planner import _is_anchor_noun
+        noun = m.group(2)
+        sing = noun[:-1] if noun.endswith("s") and len(noun) > 3 else noun
+        meas = [c for c, i in ds.columns.items() if getattr(i, "role", "") == "measure"
+                and sing in {t for t in canon_tokens(c)} | {t.rstrip("s") for t in re.split(r"[^a-z0-9]+", c.lower())}]
+        counts_rows = any(mt.aggregation == "count" and not [g for g in mt.columns if g.origin != "synthetic"]
+                          for mt in spec.metrics)
+        if meas and counts_rows and not _is_anchor_noun(noun, ds):
+            out.append(F("count_of_measure_noun",
+                         f"'how many {noun}' refers to the quantity column '{meas[0]}', "
+                         f"but the query counts {ds.table} rows"))
+
     rs, sh = spec.requested_shape, spec.shape
     if rs == "scalar" and sh in ("grouped", "ranking", "trend"):
         out.append(F("shape_scalar_expected",

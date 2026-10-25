@@ -50,6 +50,7 @@ from .plan import (
     PlanValidator, SQLCompiler, ValidationReport, classify_failure,
 )
 from .reliability.confidence import Confidence, score_confidence
+from .config import ablated as _ablated
 from .reliability.decision import (
     ANSWER, WARN, CLARIFY, ABSTAIN, Decision, decide,
 )
@@ -489,13 +490,14 @@ class Orchestrator:
         decision = decide(confidence, sql_ok=sqlval.ok, exec_ok=result.ok,
                           ambiguous=False, query_intent=None,
                           plan=plan, plan_report=report,
-                          demanded_breakdown=demanded,
-                          fidelity_ok=fidelity.ok,
-                          result_ok=result_report.ok)
+                          demanded_breakdown=(False if _ablated("plan_fidelity") else demanded),
+                          fidelity_ok=(True if _ablated("plan_fidelity") else fidelity.ok),
+                          result_ok=(True if _ablated("result_consistency") else result_report.ok))
 
         # 11a. Semantic-fulfilment gate (overrides a would-be ANSWER
         # when the executed result failed to match the planned intent).
-        if (not fulfilment.ok) and decision.action in (ANSWER, WARN):
+        if (not fulfilment.ok) and decision.action in (ANSWER, WARN) \
+                and not _ablated("result_consistency"):
             decision = Decision(
                 WARN if fulfilment.score >= 0.4 else CLARIFY,
                 "semantic fulfilment check failed: "
@@ -532,7 +534,8 @@ class Orchestrator:
         rel_note = next((n for n in (plan.notes or [])
                           if n.startswith("relative_period=")), None)
         if (rel_note is not None and _is_data_empty(result)
-                and decision.action in (ANSWER, WARN)):
+                and decision.action in (ANSWER, WARN)
+                and not _ablated("result_consistency")):
             _rel_kind = rel_note.split("=", 1)[1].split(":", 1)[0]
             _rel_range = rel_note.split(":", 1)[1] if ":" in rel_note else ""
             decision = Decision(
@@ -546,7 +549,7 @@ class Orchestrator:
         # question that appears nowhere in the executed SQL means part of
         # the question was dropped. Plan/SQL fidelity cannot see this
         # because both come from the same (lossy) reading of the question.
-        if decision.action in (ANSWER, WARN) and sql:
+        if decision.action in (ANSWER, WARN) and sql and not _ablated("mention_coverage"):
             try:
                 from .config import settings as _st
                 from .reliability.mention_coverage import unrepresented_mentions
@@ -609,6 +612,9 @@ class Orchestrator:
                                         "threshold_grouped", "relative_to_stat") \
                         or any(m.aggregation == "count_distinct" for m in plan.measures):
                     _uh, _us = [], []      # operator words ("missing", "distinct") are consumed by the plan
+                from .reliability.mention_coverage import words_consumed_by_plan
+                _used = words_consumed_by_plan(question, plan)
+                _uh = [w for w in _uh if w not in _used]
             except Exception:
                 _uh, _us = [], []
             self._unexplained_soft = _us
@@ -650,7 +656,8 @@ class Orchestrator:
                 confidence.score = min(confidence.score, 0.30)
 
         # 11c2. Wording audit: does the executed query answer THIS question?
-        if decision.action in (ANSWER, WARN) and result.ok and sql:
+        if decision.action in (ANSWER, WARN) and result.ok and sql \
+                and not _ablated("mention_coverage"):
             try:
                 from .verification.intent_audit import audit as _audit
                 _af = _audit(question, sql, plan, catalog, len(result.rows))
@@ -666,7 +673,8 @@ class Orchestrator:
 
         # 11d. Independent verification + sensitivity diagnostics.
         _caveats: List[str] = []
-        if decision.action in (ANSWER, WARN) and result.ok and sql:
+        if decision.action in (ANSWER, WARN) and result.ok and sql \
+                and not _ablated("answer_verifier"):
             try:
                 from .verification.answer_verifier import verify as _verify
                 from .execution.executor import db_file_path as _dbp2
@@ -766,6 +774,7 @@ class Orchestrator:
         _sem = None
         _sem_err = None
         if decision.action in (ANSWER, WARN) and ds.kind != "demo" and result.ok and sql \
+                and not _ablated("semantic") \
                 and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend", "ratio"):
             try:
                 from .semantics import verify_semantics

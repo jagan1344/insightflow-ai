@@ -105,6 +105,9 @@ def decide(confidence: Confidence,
         )
 
     score = confidence.score
+    from ..config import ablated
+    if ablated("confidence_gate"):
+        return Decision(ANSWER, f"confidence gate disabled (score {score:.2f})")
     if score >= settings.threshold_high:
         return Decision(ANSWER,
                         f"confidence {score:.2f} ≥ {settings.threshold_high:.2f}")

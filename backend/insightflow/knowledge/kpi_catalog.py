@@ -405,6 +405,10 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
         from .abbrev import canon_tokens as _ct
         _long = " ".join(t for t in _ct(name) if len(t) > 1 and t not in ("usd", "eur", "gbp"))
         _exp = {_long} - {name.lower().replace("_", " ")} if _long else set()
+        if name in _core_of:              # 'pax_cnt' -> core 'pax' -> 'passenger(s)'
+            _cl = " ".join(_ct(_core_of[name]))
+            if _cl and _cl != _core_of[name]:
+                _exp |= {_cl, _cl + "s"}
         kid = f"avg_{name.lower()}"
         if kid in out:
             continue

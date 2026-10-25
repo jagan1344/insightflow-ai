@@ -1742,8 +1742,8 @@ def _find_conflicting_conditions(question: str, ds: ActiveDataset) -> List[str]:
 
 _CMP = [(r"at\s+least|>=|no\s+less\s+than", ">="),
         (r"at\s+most|<=|no\s+more\s+than", "<="),
-        (r"more\s+than|greater\s+than|over|above|exceeding|>", ">"),
-        (r"less\s+than|fewer\s+than|under|below|<", "<"),
+        (r"(?:more|greater|larger|bigger|higher)\s+than|over|above|exceeding|>", ">"),
+        (r"(?:less|fewer|smaller|lower)\s+than|under|below|<", "<"),
         (r"exactly|equal\s+to|equals?|=|of|is", "=")]
 _CMP_ALT = "|".join(f"(?:{p})" for p, _ in _CMP)
 
@@ -1788,6 +1788,12 @@ def _find_date_state_filters(question: str, ds: ActiveDataset,
     return out
 
 
+# Flag names whose last word states the "good" state; their antonyms select 0.
+_FLAG_POLARITY = {"ok", "good", "valid", "working", "healthy", "passed", "success", "successful"}
+_FLAG_ANTONYMS = ("faulty|broken|bad|invalid|failed|failing|failure|defective|malfunctioning|"
+                  "unhealthy|not\\s+ok|not\\s+working|not\\s+valid")
+
+
 def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     """0/1 columns ('refunded') are conditions, not quantities: 'refunded' ->
     col = 1; 'not refunded' -> col = 0."""
@@ -1797,9 +1803,26 @@ def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     ql = question.lower()
     out = []
     for c in flags:
-        toks = [t for t in re.split(r"[^a-z0-9]+", c.lower())
+        parts = [t for t in re.split(r"[^a-z0-9]+", c.lower()) if t]
+        pol = [t for t in parts if t in _FLAG_POLARITY]
+        if pol:
+            # 'sensor_ok': the noun alone ('sensor') does not say which value is
+            # meant; the question must state the polarity word or an antonym.
+            subj = [t for t in parts if t not in pol and len(t) >= 3]
+            near = rf"(?:\b{'|'.join(map(re.escape, subj))}\w*)" if subj else None
+            anti = re.search(rf"\b(?:{_FLAG_ANTONYMS})\b", ql)
+            word = re.search(rf"\b(?:{'|'.join(map(re.escape, pol))})\b", ql)
+            if anti and (near is None or re.search(near, ql)):
+                neg = bool(_NEG_BEFORE.search(ql[max(0, anti.start() - 60): anti.start()])) \
+                    or bool(re.search(r"\b(?:without|no|never)\s+(?:an?\s+|any\s+)?$", ql[:anti.start()]))
+                out.append(FilterExpr(kind="eq", column=c, value=1 if neg else 0))
+            elif word and (near is None or re.search(near, ql)):
+                neg = bool(_NEG_BEFORE.search(ql[max(0, word.start() - 60): word.start()]))
+                out.append(FilterExpr(kind="eq", column=c, value=0 if neg else 1))
+            continue
+        toks = [t for t in parts
                 if len(t) >= 4 and t not in ("flag", "is", "has", "active")] or \
-               [t for t in re.split(r"[^a-z0-9]+", c.lower()) if len(t) >= 3]
+               [t for t in parts if len(t) >= 3]
         for t in toks:
             m = re.search(rf"\b(un|non-?)?{re.escape(t[:max(4, len(t) - 2)])}\w*", ql)
             if not m:
@@ -1887,6 +1910,9 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         op_word, val = m.group(1), float(m.group(2))
         if re.fullmatch(r"(?:19|20)\d{2}", m.group(2)):
             continue                      # a year, not a quantity
+        if not op_word and re.search(r"\b(?:than|[a-z]+er)\s*$", ql[:m.start(2)]):
+            continue                      # unknown comparative: never read it as '='
+
         out.append(FilterExpr(kind="cmp", column=flat,
                               value=int(val) if val == int(val) else val,
                               op=_cmp_op(op_word) if op_word else "="))
@@ -2723,7 +2749,10 @@ class Planner:
                 if _src.kind == "ambiguous":
                     _unknown_values.append(
                         f"ambiguous_join_path:{_c}=" + " | ".join(_src.candidates))
-                elif _src.kind == "fanout":
+                elif _src.kind == "fanout" and not any(
+                        f.column == _c and f.kind != "not_in" for f in (value_filters or [])):
+                    # ('High priority tickets': the noun names the value's own
+                    # column, which is a semi-join filter, not a grouping)
                     _unknown_values.append(
                         f"fanout_dimension:{_c}=grouping by a one-to-many "
                         f"table would double-count the measure")

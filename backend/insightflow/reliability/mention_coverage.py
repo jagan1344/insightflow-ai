@@ -363,3 +363,25 @@ def unexplained_words(question: str, ds, catalog=None) -> tuple:
             continue
         (soft if (re.search(r"ed$", w) or w in _IRREGULAR_PAST) else hard).append(w)
     return list(dict.fromkeys(hard)), list(dict.fromkeys(soft))
+
+
+_COMPARATIVES = {"larger", "bigger", "higher", "greater", "smaller", "lower", "fewer"}
+
+
+def words_consumed_by_plan(question: str, plan) -> set:
+    """Words that only count as explained because the plan applied the filter
+    they describe: a comparative before 'than' needs a >/< comparison filter,
+    and an antonym of a polarity flag ('faulty' for sensor_ok) needs that flag
+    filtered to 0. Without the matching filter they stay unexplained."""
+    from ..plan.planner import _FLAG_ANTONYMS, _FLAG_POLARITY
+    ql = question.lower()
+    fs = list(getattr(plan, "filters", None) or [])
+    out = set()
+    if any(f.kind == "cmp" and getattr(f, "op", "") in (">", "<", ">=", "<=") for f in fs):
+        out |= {w for w in re.findall(r"\b([a-z]+)\s+than\b", ql) if w in _COMPARATIVES}
+    if any(f.kind == "cmp" and getattr(f, "op", "") in (">=", "<=") for f in fs):
+        out |= set(re.findall(r"\bat\s+(least|most)\b", ql))
+    if any(f.kind == "eq" and f.value == 0 and
+           set(re.split(r"[^a-z0-9]+", str(f.column).lower())) & _FLAG_POLARITY for f in fs):
+        out |= {m.group(0) for m in re.finditer(rf"\b(?:{_FLAG_ANTONYMS})\b", ql)}
+    return out

@@ -65,3 +65,14 @@ class Settings:
 
 
 settings = Settings()
+
+
+# Research-only ablation switches (evaluation of individual safeguards).
+# Unset in normal use; the default pipeline never reads a non-empty value.
+ABLATION_COMPONENTS = ("semantic", "confidence_gate", "result_consistency",
+                       "plan_fidelity", "mention_coverage", "answer_verifier")
+
+
+def ablated(name: str) -> bool:
+    raw = os.environ.get("INSIGHTFLOW_ABLATE", "")
+    return name in {x.strip() for x in raw.split(",") if x.strip()}

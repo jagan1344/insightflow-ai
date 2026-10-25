@@ -240,6 +240,8 @@ class RelationalSchema:
                             continue
                         if _contained(con, t, c, p, pc):
                             cands.append((p, pc))
+                if not cands and not (len(ti.pk) == 1 and c == ti.pk[0]):
+                    cands = _suffix_candidates(con, tables, t, c, ctype)
                 # Reject the reverse-FK illusion: this column is the child's
                 # own single-column PK, and the "parent" actually holds a
                 # column of the same name that points back at this table.
@@ -371,6 +373,40 @@ def _contained(con: sqlite3.Connection, ct: str, cc: str,
         f'NOT EXISTS (SELECT 1 FROM "{pt}" p WHERE p."{pc}" = c."{cc}")'
     ).fetchone()[0]
     return miss == 0
+
+
+_KEY_SUFFIX = {"cd", "code", "id", "key", "no"}
+
+
+def _suffix_candidates(con, tables, t: str, c: str, ctype: str) -> List[Tuple[str, str]]:
+    """Weaker name evidence, tried only when no parent has direct name
+    evidence: a role-prefixed code column ('orig_cd', 'dest_cd') whose key
+    suffix matches a parent's declared TEXT key ('apt_cd'). Requires full
+    value containment and >= 3 distinct values; integer keys never qualify
+    (small integers are contained in nearly any id range)."""
+    toks = _tokens(c)
+    if len(toks) < 2 or toks[-1] not in _KEY_SUFFIX:
+        return []
+    if not any(k in (ctype or "").upper() for k in ("CHAR", "TEXT", "CLOB")):
+        return []
+    try:
+        if con.execute(f'SELECT COUNT(DISTINCT "{c}") FROM "{t}"').fetchone()[0] < 3:
+            return []
+    except sqlite3.Error:
+        return []
+    out = []
+    for p, pi in tables.items():
+        if p == t:
+            continue
+        for pc in pi.declared_keys:
+            pt = _tokens(pc)
+            if not pt or pt[-1] != toks[-1]:
+                continue
+            if not any(k in (pi.columns.get(pc) or "").upper() for k in ("CHAR", "TEXT", "CLOB")):
+                continue
+            if _contained(con, t, c, p, pc):
+                out.append((p, pc))
+    return out
 
 
 def _has_nulls(con: sqlite3.Connection, t: str, c: str) -> bool:
