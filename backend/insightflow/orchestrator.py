@@ -756,6 +756,27 @@ class Orchestrator:
                            "safety/validation or returned no reliable data.")
             recommendation = None
 
+        # 12b. Semantic layer: typed spec -> type check -> preservation
+        # (spec vs executed SQL vs rows vs the written answer).
+        _sem = None
+        if decision.action in (ANSWER, WARN) and ds.kind != "demo" and result.ok and sql \
+                and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend"):
+            try:
+                from .semantics import verify_semantics
+                _sem = verify_semantics(question, plan, sql, result, explanation, ds, catalog)
+            except Exception as _e:               # a verifier bug must never fabricate an answer
+                _sem = None
+                self._extra_notes.append(f"semantic_verifier_error={type(_e).__name__}")
+            if _sem is not None and _sem.violations:
+                decision = Decision(
+                    CLARIFY,
+                    "the answer may not mean what you asked: "
+                    + "; ".join(f.detail for f in _sem.violations[:3]))
+                explanation = decision.reason[0].upper() + decision.reason[1:] + "."
+                recommendation = None
+                confidence.signals["semantic_violations"] = float(len(_sem.violations))
+                confidence.score = min(confidence.score, 0.30)
+
         chart = (chart_spec(result, legacy_intent)
                  if decision.action in (ANSWER, WARN)
                  else {"kind": "none"})
@@ -789,6 +810,12 @@ class Orchestrator:
             kpival=kpival, confidence=confidence, decision=decision,
             failure=failure,
         )
+
+        if _sem is not None:
+            diagnostics["semantic_spec"] = _sem.spec.as_dict()
+            diagnostics["semantic_findings"] = [
+                {"rule": f.rule, "severity": f.severity, "detail": f.detail}
+                for f in _sem.findings]
 
         # Keep `.intent` as the LEGACY intent string so existing test
         # assertions that inspect `resp.intent == 'diagnostic'` still hold.

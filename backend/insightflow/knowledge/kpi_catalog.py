@@ -402,6 +402,9 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
     for name, info in ds.columns.items():
         if info.role != "measure":
             continue
+        from .abbrev import canon_tokens as _ct
+        _long = " ".join(_ct(name))
+        _exp = {_long} - {name.lower().replace("_", " ")} if _long else set()
         kid = f"avg_{name.lower()}"
         if kid in out:
             continue
@@ -411,7 +414,7 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
             kpi_id=kid, display_name=f"Average {name.title()}",
             aggregation="avg", formula=f"AVG({_ref})",
             required_columns=[name], unit=info.sql_type.lower(),
-            aliases=sorted(({f"average {_core_of[name]}", f"avg {_core_of[name]}",
+            aliases=sorted({f"average {x}" for x in _exp} | {f"avg {x}" for x in _exp} | ({f"average {_core_of[name]}", f"avg {_core_of[name]}",
                             f"mean {_core_of[name]}"} if name in _core_of else set()) | {f"average {name.lower()}", f"avg {name.lower()}",
                             f"mean {name.lower()}",
                             f"average {name.lower().replace('_', ' ')}",
@@ -426,7 +429,7 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
                 kpi_id=sid, display_name=f"Total {name.title()}",
                 aggregation="sum", formula=f"SUM({_ref})",
                 required_columns=[name], unit="",
-                aliases=sorted(({f"total {_core_of[name]}", _core_of[name]}
+                aliases=sorted({f"total {x}" for x in _exp} | _exp | ({f"total {_core_of[name]}", _core_of[name]}
                                if name in _core_of else set()) | {f"total {name.lower()}", name.lower(),
                                 f"sum of {name.lower()}",
                                 f"total {name.lower().replace('_', ' ')}",

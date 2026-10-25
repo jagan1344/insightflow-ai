@@ -513,6 +513,18 @@ def _bind_dim_column(ds: ActiveDataset, name: str) -> Optional[str]:
         hit = table_noun_dimension(rel, name)
         if hit:
             return hit
+    # the base table's own noun ("transactions") is the row, never a column
+    if ds.kind != "demo" and _is_anchor_noun(name, ds):
+        return None
+    # business abbreviations: "transaction type" ~ txn_type, "quantity" ~ qty
+    from ..knowledge.abbrev import canon_tokens
+    nset = canon_tokens(name)
+    if nset and ds.kind != "demo":
+        ahits = [cname for cname, info in ds.columns.items()
+                 if info.role == "dimension" and
+                 set(nset) <= set(canon_tokens(cname))]
+        if len(ahits) == 1:
+            return ahits[0]
     # abbreviation-tolerant token match ("destination" ~ "dest",
     # "cust" ~ "customer"): every noun token must match a column token
     # by equality or a >=4-char prefix, and the match must be unique.
@@ -610,7 +622,8 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
                 if noun in _STOPWORDS_AFTER_BY:
                     continue
                 if ds.kind != "demo" and _is_anchor_noun(noun, ds) \
-                        and not _bind_dim_column(ds, noun):
+                        and not any(_bind_dim_column(ds, " ".join(words[:k]))
+                                    for k in range(1, min(3, len(words)) + 1)):
                     continue            # "hours per assignment": the row, not a grouping
                 if noun in _TIME_UNIT_WORDS:
                     continue
