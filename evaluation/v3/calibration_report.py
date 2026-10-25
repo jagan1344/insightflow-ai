@@ -7,7 +7,6 @@ import json, pathlib
 R = pathlib.Path(__file__).resolve().parent / "results"
 FIRST = ["dev_M0_baseline", "adversarial_A0_first", "final_F1_first_and_only",
          "dev4_R0_first", "final4_G1_first_and_only"]
-         "dev4_R5", "adversarial_A9"]
 TUNED = ["dev_M9", "adversarial_A10", "final_F7_posthoc", "dev4_R6", "final4_G4_posthoc_not_heldout"]
 
 
