@@ -281,7 +281,9 @@ def _boundary_sensitivity(rep, plan, rows, comp, con) -> None:
         if f.kind == "time_range" and len(str(f.hi)) >= 10:
             try:
                 d = dt.date.fromisoformat(str(f.hi)[:10]) + dt.timedelta(days=1)
-            except ValueError:
+            except (ValueError, OverflowError):
+                # A maximum-date sentinel (e.g. 9999-12-31) cannot be
+                # shifted by one day; skip this optional sensitivity probe.
                 return
             f.hi = d.isoformat()
     sql2 = comp.compile(p2)
