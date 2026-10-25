@@ -576,6 +576,12 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
     ]:
         for m in re.finditer(pat, ql):
             phrase = m.group(1).strip().rstrip("?.")
+            # "paid BY students FROM California": an agent constraint, not a
+            # grouping request.
+            if re.match(r"^[a-z_\-]+(?:\s+[a-z_\-]+)?\s+"
+                        r"(?:from|with|who|whose|living|based|born|located)\b",
+                        phrase):
+                continue
             # "by region and category" or "by region, category, month" —
             # split on "and"/comma first and bind each part in ORDER.
             # Otherwise "by region and category" was binding to
@@ -881,6 +887,19 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
             lo=_period_string(year, lo_m),
             hi=_period_string(year, hi_m),
         ))
+        return filters
+    # 5. A bare year ("in 2025"): the whole calendar year. A single explicit
+    # year only - two years mean a comparison, which is handled elsewhere.
+    ql_nv = ql
+    if ds.kind != "demo":          # digits inside a known value are not years
+        for lo, _c in _value_mentions(question, _value_index(ds)):
+            ql_nv = ql_nv.replace(lo, " ")
+    years = set(re.findall(r"(?<![\d.])((?:19|20)\d{2})(?![\d])", ql_nv))
+    if len(years) == 1 and not re.search(r"\b(vs|versus|compared)\b", ql):
+        y = int(next(iter(years)))
+        filters.append(FilterExpr(
+            kind="time_range", column=date_col,
+            lo=_period_string(y, 1), hi=_period_string(y, 12)))
     return filters
 
 
@@ -1927,6 +1946,22 @@ def _detect_relative_to_stat(question: str, ds: ActiveDataset,
     return spec
 
 
+def _protect_value_commas(question: str, ds: ActiveDataset) -> str:
+    """A comma inside a known dimension value ("O'Neil, Sam") is not a
+    clause separator."""
+    if ds.kind == "demo" or "," not in question:
+        return question
+    ql = question.lower()
+    for lo in _value_index(ds):
+        if "," not in lo:
+            continue
+        for m in re.finditer(rf"(?<![a-z0-9]){re.escape(lo)}(?![a-z0-9])", ql):
+            seg = question[m.start():m.end()].replace(",", "\u2063")
+            question = question[:m.start()] + seg + question[m.end():]
+            ql = question.lower()
+    return question
+
+
 def _first_clause(question: str) -> str:
     """Split a compound question on ", " or " and " between independent
     clauses and return the first. Doesn't split short natural phrases
@@ -2050,9 +2085,10 @@ class Planner:
             ds.date_choice = _dm
             self.ds = ds
         original = question
-        question = _first_clause(question)
+        question = _protect_value_commas(question, ds)
+        question = _first_clause(question).replace("\u2063", ",")
         _dropped_suffix = ""
-        if question != original:
+        if question != original and original.startswith(question):
             _dropped_suffix = original[len(question):].lstrip(" ,.;")
         ql_lo = question.lower()
         kpis = _bind_kpis(question, catalog)

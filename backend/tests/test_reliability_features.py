@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "evaluation" / "v3"))
 import fixtures as F  # noqa: E402
 
-FACT = {"clinic": "visits", "logistics": "shipments"}
+FACT = {"clinic": "visits", "logistics": "shipments", "university": "enrollments"}
 
 
 @pytest.fixture()
@@ -27,7 +27,8 @@ def live(tmp_path):
     from insightflow.knowledge.schema_agent import refresh_schema
     old = settings.database_url
     src = {"clinic": F.build_a(tmp_path / "c_src.db"),
-           "logistics": F.build_b(tmp_path / "l_src.db")}
+           "logistics": F.build_b(tmp_path / "l_src.db"),
+           "university": F.build_c(tmp_path / "u_src.db")}
 
     def activate(db):
         dst = tmp_path / f"{db}_live.db"
@@ -335,3 +336,61 @@ class TestSchemaChange:
         got = {row[0]: row[-1] for row in r.result.rows}
         assert set(got) == set(exp) and all(abs(got[k] - exp[k]) < 1e-6 for k in exp)
         assert any("relationship added" in n or "table added" in n for n in r.notes)
+
+
+# ----------------------------------------- generic failures found on schema C
+class TestPostHocFixes:
+    """Failures first seen on the sealed schema-C run (F1). They are
+    generic planner defects, pinned here with independent oracles."""
+
+    def _val(self, r):
+        return (float(r.result.rows[0][-1]) if r.result.rows and r.result.rows[0][-1] is not None else None)
+
+    def test_bare_year_filters_the_year(self, live):
+        path = live("university")
+        r = ask("Total tuition paid for enrollments completed in 2025")
+        exp = sql1(path, "SELECT SUM(tuition_paid) FROM enrollments WHERE completed_on>='2025-01-01' AND completed_on<'2026-01-01'")[0][0]
+        total = sql1(path, "SELECT SUM(tuition_paid) FROM enrollments")[0][0]
+        assert exp != total                       # NULL completed_on rows differ
+        assert r.decision.action in ("ANSWER", "WARN")
+        assert abs(self._val(r) - exp) < 1e-6
+
+    def test_out_of_range_year_is_not_answered_with_the_total(self, live):
+        path = live("university")
+        r = ask("Total tuition paid for enrollments completed in 2031")
+        total = sql1(path, "SELECT SUM(tuition_paid) FROM enrollments")[0][0]
+        if r.decision.action in ("ANSWER", "WARN"):
+            v = self._val(r) if r.result.rows else None
+            assert v is None or v == 0
+            assert abs((v or 0) - total) > 1
+
+    def test_unrepresented_year_guard(self):
+        from insightflow.reliability.mention_coverage import unrepresented_years
+        assert unrepresented_years("revenue in 2031", "SELECT SUM(x) FROM t") == ["2031"]
+        assert unrepresented_years("revenue in 2025", "... >= '2025-01' ...") == []
+
+    def test_digits_inside_a_value_are_not_a_year(self, live):
+        path = live("university")
+        r = ask("Total tuition paid for Art History: 1800\u20131900")
+        exp = sql1(path, "SELECT SUM(e.tuition_paid) FROM enrollments e JOIN courses c ON c.course_id=e.course_id WHERE c.course_title='Art History: 1800\u20131900'")[0][0]
+        assert abs(self._val(r) - exp) < 1e-6
+
+    def test_comma_inside_value_is_not_a_clause_break(self, live):
+        path = live("university")
+        r = ask("Total tuition paid by O'Neil, Sam")
+        exp = sql1(path, "SELECT SUM(e.tuition_paid) FROM enrollments e JOIN students s ON s.student_id=e.student_id WHERE s.student_name=\"O'Neil, Sam\"")[0][0]
+        assert r.decision.action in ("ANSWER", "WARN")
+        assert len(r.result.rows) == 1 and abs(self._val(r) - exp) < 1e-6
+
+    def test_by_agent_phrase_is_a_filter_not_a_grouping(self, live):
+        path = live("university")
+        r = ask("Total tuition paid by students from Texas and Ohio")
+        exp = sql1(path, "SELECT SUM(e.tuition_paid) FROM enrollments e JOIN students s ON s.student_id=e.student_id WHERE s.home_state IN ('Texas','Ohio')")[0][0]
+        assert len(r.result.rows) == 1 and abs(self._val(r) - exp) < 1e-6
+
+    def test_bridge_path_preferred_over_shared_parent(self, live):
+        path = live("university")
+        r = ask("Total tuition paid for courses taught by Prof. Ngozi Eze-Bello")
+        exp = sql1(path, "SELECT SUM(tuition_paid) FROM enrollments WHERE EXISTS (SELECT 1 FROM teaching t JOIN instructors i ON i.instr_id=t.instr_id WHERE t.course_id=enrollments.course_id AND i.instr_name='Prof. Ngozi Eze-Bello')")[0][0]
+        assert r.decision.action in ("ANSWER", "WARN")
+        assert abs(self._val(r) - exp) < 1e-6

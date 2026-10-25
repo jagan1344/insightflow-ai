@@ -18,7 +18,6 @@ Checks (each only when applicable):
   semijoin_equivalence   (multi-table) the join-based total equals an
                          EXISTS/semi-join formulation (no fan-out)
   null_measure_share     diagnostic: share of rows with NULL measure
-  join_row_loss          diagnostic: measure share with no linked dimension
   boundary_sensitivity   diagnostic: result moves a lot if the end of a
                          day-level time filter shifts by one day
 """

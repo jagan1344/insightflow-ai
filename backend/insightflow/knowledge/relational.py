@@ -298,6 +298,17 @@ class RelationalSchema:
                     walk(nxt, visited | {nxt}, st)
 
         walk(src, {src}, [])
+        # An explicit bridge (many-to-many) table is the schema's own
+        # statement of an association; prefer paths through one over paths
+        # that merely meet at a shared parent ("zig-zag" via a dimension).
+        bridged = [p for p in found
+                   if any(self.role(st.from_table) == "bridge" or
+                          self.role(st.to_table) == "bridge" for st in p.steps)]
+        if bridged and len(bridged) < len(found):
+            m0 = min(len(p.steps) for p in found)
+            if any(len(p.steps) == m0 for p in bridged):
+                found = [p for p in found
+                         if p in bridged or len(p.steps) > m0]
         safe = [p for p in found if p.safe]
         if safe:
             m = min(len(p.steps) for p in safe)

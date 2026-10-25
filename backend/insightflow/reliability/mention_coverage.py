@@ -156,3 +156,10 @@ def unrepresented_column_mentions(question: str, sql: str, ds) -> List[str]:
             continue
         out.append(c)
     return out
+
+
+def unrepresented_years(question: str, sql: str) -> List[str]:
+    """A four-digit year named in the question that the SQL never uses
+    means the time constraint was silently dropped."""
+    ys = set(re.findall(r"(?<![\d.])((?:19|20)\d{2})(?![\d])", question))
+    return sorted(y for y in ys if y not in sql)

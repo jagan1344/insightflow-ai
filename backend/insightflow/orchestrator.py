@@ -536,6 +536,19 @@ class Orchestrator:
                 _cm = unrepresented_column_mentions(question, sql, ds)
             except Exception:
                 _cm = []
+            try:
+                from .reliability.mention_coverage import unrepresented_years
+                _yr = unrepresented_years(question, sql)
+            except Exception:
+                _yr = []
+            if _yr and not _miss and not _tn:
+                decision = Decision(
+                    CLARIFY,
+                    "the question names " + ", ".join(_yr) + " but the "
+                    "generated query has no such time constraint, so the "
+                    "answer would cover all periods")
+                confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
             if _cm and not _miss and not _tn:
                 decision = Decision(
                     CLARIFY,

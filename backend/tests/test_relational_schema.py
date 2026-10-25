@@ -103,7 +103,8 @@ def test_C_declared_key_beats_coincidentally_unique_column(C):
 
 def test_C_department_reachable_two_ways_is_ambiguous(C):
     assert C.resolve("enrollments", "departments").kind == "ambiguous"
-    assert C.resolve("enrollments", "instructors").kind in ("fanout", "ambiguous")   # never a plain join
+    r = C.resolve("enrollments", "instructors")
+    assert r.kind == "fanout" and "teaching" in r.paths[0].describe()   # via the bridge, not a shared department
 
 
 def test_inferred_edge_needs_name_evidence_AND_containment(tmp_path):
