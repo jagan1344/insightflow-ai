@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="209.7pt" height="197.352pt" viewBox="0 0 209.7 197.352" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-25T20:22:02.207933</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 197.352 
+L 209.7 197.352 
+L 209.7 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 15.012 34.890032 
+L 194.688 34.890032 
+Q 196.641 34.890032 196.641 33.406638 
+L 196.641 18.078227 
+Q 196.641 16.594832 194.688 16.594832 
+L 15.012 16.594832 
+Q 13.059 16.594832 13.059 18.078227 
+L 13.059 33.406638 
+Q 13.059 34.890032 15.012 34.890032 
+z
+" clip-path="url(#p326d0b10e9)" style="fill: #eeeeee; stroke: #333333; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 15.012 71.974897 
+L 194.688 71.974897 
+Q 196.641 71.974897 196.641 70.491503 
+L 196.641 46.509957 
+Q 196.641 45.026562 194.688 45.026562 
+L 15.012 45.026562 
+Q 13.059 45.026562 13.059 46.509957 
+L 13.059 70.491503 
+Q 13.059 71.974897 15.012 71.974897 
+z
+" clip-path="url(#p326d0b10e9)" style="fill: #dbe8f5; stroke: #333333; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 15.012 109.059762 
+L 194.688 109.059762 
+Q 196.641 109.059762 196.641 107.576368 
+L 196.641 83.594822 
+Q 196.641 82.111427 194.688 82.111427 
+L 15.012 82.111427 
+Q 13.059 82.111427 13.059 83.594822 
+L 13.059 107.576368 
+Q 13.059 109.059762 15.012 109.059762 
+z
+" clip-path="url(#p326d0b10e9)" style="fill: #fdf0d5; stroke: #333333; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 15.012 146.144627 
+L 194.688 146.144627 
+Q 196.641 146.144627 196.641 144.661232 
+L 196.641 120.679686 
+Q 196.641 119.196292 194.688 119.196292 
+L 15.012 119.196292 
+Q 13.059 119.196292 13.059 120.679686 
+L 13.059 144.661232 
+Q 13.059 146.144627 15.012 146.144627 
+z
+" clip-path="url(#p326d0b10e9)" style="fill: #fdf0d5; stroke: #333333; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 15.012 183.229492 
+L 194.688 183.229492 
+Q 196.641 183.229492 196.641 181.746097 
+L 196.641 157.764551 
+Q 196.641 156.281157 194.688 156.281157 
+L 15.012 156.281157 
+Q 13.059 156.281157 13.059 157.764551 
+L 13.059 181.746097 
+Q 13.059 183.229492 15.012 183.229492 
+z
+" clip-path="url(#p326d0b10e9)" style="fill: #f6dcdc; stroke: #333333; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'; text-anchor: middle" x="104.85" y="27.353221" transform="rotate(-0 104.85 27.353221)">Question + plan + SQL + rows + text</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(35.72775 52.669823)">Typed spec: metrics (agg, grounded column,</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(32.621938 60.111519)">semantic type), shape, dims, filters + polarity,</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(62.736984 67.553214)">date role, joins, unresolved</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 104.85 36.39739 
+Q 104.85 39.959083 104.85 42.849956 
+" style="fill: none; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 106.25 40.049956 
+L 104.85 42.849956 
+L 103.45 40.049956 
+z
+" style="fill: #333333; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(41.924359 89.754688)">Type check (before trusting the answer):</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(34.688766 97.196384)">flag/id as quantity, shape, guessed date role,</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(30.807953 104.638079)">unsafe join, polarity, ratio, measure-noun count</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 104.85 73.482255 
+Q 104.85 77.043948 104.85 79.934821 
+" style="fill: none; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 106.25 77.134821 
+L 104.85 79.934821 
+L 103.45 77.134821 
+z
+" style="fill: #333333; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(40.460094 126.839553)">Preservation: spec vs SQL vs rows vs text</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(47.253937 134.281249)">(time bounds, row shape, exclusions,</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(61.968281 141.722944)">numbers traceable to rows)</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 104.85 110.567119 
+Q 104.85 114.128813 104.85 117.019686 
+" style="fill: none; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 106.25 114.219686 
+L 104.85 117.019686 
+L 103.45 114.219686 
+z
+" style="fill: #333333; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(48.695922 163.924418)">Violation -&gt; CLARIFY (conf &lt;= 0.30)</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(44.962844 171.366113)">Note -&gt; WARN with stated assumption</text>
+    <text style="font-size: 6.2px; font-family: 'DejaVu Sans'" transform="translate(52.021641 178.807809)">Exception -&gt; CLARIFY (fail closed)</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 104.85 147.651984 
+Q 104.85 151.213678 104.85 154.104551 
+" style="fill: none; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+    <path d="M 106.25 151.304551 
+L 104.85 154.104551 
+L 103.45 151.304551 
+z
+" style="fill: #333333; stroke: #333333; stroke-width: 0.6; stroke-linecap: round"/>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p326d0b10e9">
+   <rect x="7.2" y="7.2" width="195.3" height="182.952"/>
+  </clipPath>
+ </defs>
+</svg>
