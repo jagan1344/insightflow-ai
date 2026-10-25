@@ -19,23 +19,24 @@ Scoring: *answerable* = reference SQL exists; *correct* = answered and equal to 
 ## Results
 | run | answerable correct | answered/answerable | silent wrong | abstained | correct clarifications |
 |---|---|---|---|---|---|
-| dev, before this work (fact table only, `M0_baseline`) | 2/25 | 4/25 | 4/32 | 21 | 4/7* |
+| dev, before this work (fact table only, `M0_baseline`) | 2/25 | 4/25 | 4/31 | 21 | 4/6 |
 | dev, after (`M3_integrated`) | 24/25 | 24/25 | 0/32 | 1 | 7/7 |
 | adversarial, first run (`A0_first`) | 10/15 | 13/15 | 4/20 | 2 | 4/5 |
 | adversarial, after generic fixes (`A5`) | 15/15 | 15/15 | 0/20 | 0 | 5/5 |
 | **FINAL, first and only held-out run (`F1`)** | **17/24** | **20/24** | **3/32** | **4** | **8/8** |
 | FINAL after post-hoc fixes (`F2`, NO LONGER HELD OUT) | 22/24 | 22/24 | 0/32 | 2 | 8/8 |
 
-\* M0 had 6 clarify-expected questions then; A15 was later reclassified as ambiguous (see git history of `dev_questions.py`).
+M0 ran on the 31-question version of the dev set; A15 was then reclassified from scalar to clarify and A17 added (32 questions) because two date columns make "in June 2025" ambiguous - a change made after seeing M0, so M0 and M3 differ by that one question.
 Dev and adversarial improvements were obtained while tuning on those sets and must not be read as
 generalization. **F1 is the only honest generalization number: 17/24 correct, 3 silent wrong (all at confidence >= 0.98).**
 
-Per-family F1 (correct/total): single 4/4, grouped 3/3, topn 3/3, join_filter 4/5(C05 wrong), unusual_value 2/3,
-distinct 1/1, nulls 2/2, zero_fact 1/1, time 1/1, ambiguous/unknown/grain/negation/fanout-dim clarifications 8/8,
-multi_value 0/1, fanout 0/1, foreign_measure 0/1, numeric_filter 0/1, empty 0/1.
+Per-family F1 (correct incl. correct clarification / total, from `final_F1_first_and_only.json`):
+single 3/3, nulls 3/3, grouped 2/2, topn 3/3, distinct 1/1, time 1/1, zero_fact 1/1, ambiguous 3/3, unknown 2/2,
+grain 1/1, negation 1/1, join_filter 1/2, unusual_value 2/3, fanout 1/2, multi_value 0/1, empty 0/1,
+foreign_measure 0/1, numeric_filter 0/1.
 
 ### F1 failures and root causes (generic, none question-specific)
-- C05, C24 (silent wrong): "paid **by** students **from** X" was parsed as GROUP BY student. Fixed: agent phrase is a filter.
+- C05, C24 (silent wrong; fanout family C09 abstained too): "paid **by** students **from** X" was parsed as GROUP BY student. Fixed: agent phrase is a filter.
 - C29 (silent wrong): "in 2031" - a bare year was ignored, answering with the all-time total. Fixed: year filter + a
   question->SQL guard that vetoes any year the SQL never uses.
 - C27 (abstained): the comma in "O'Neil, Sam" split the question as a compound. Fixed: commas inside known values are protected.
