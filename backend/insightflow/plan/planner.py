@@ -441,7 +441,7 @@ def _bind_kpis(question: str, catalog: KPICatalog) -> List[KPIDefinition]:
 # =============================================================================
 
 _STOPWORDS_AFTER_BY = {
-    "looking", "doing", "using", "the", "a", "an", "my", "our",
+    "all", "looking", "doing", "using", "the", "a", "an", "my", "our",
     "that", "which", "what", "some", "many", "how", "much",
     "each", "every", "any",
 }
@@ -506,6 +506,10 @@ def _bind_dim_column(ds: ActiveDataset, name: str) -> Optional[str]:
         for cname in ds.columns.keys():
             if cname == target:
                 return cname
+    rel = getattr(ds, "rel", None)
+    if rel is not None:
+        from ..knowledge.rel_context import table_noun_dimension
+        return table_noun_dimension(rel, name)
     return None
 
 
@@ -585,7 +589,8 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
                         bound_noun = cand
                         break
                 seen_nouns.add(noun)
-                if not col and _looks_like_measure(noun, ds, catalog):
+                if not col and any(_looks_like_measure(c, ds, catalog)
+                                   for c in candidates):
                     continue
                 if _already_bound(col):
                     continue
@@ -707,6 +712,26 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
 # =============================================================================
 # Filter binding
 # =============================================================================
+
+def _ambiguous_date_columns(question: str, ds: ActiveDataset,
+                             time_unit: Optional[str]) -> List[str]:
+    """>1 date column and a time-based question that does not say which."""
+    if len(ds.dates) < 2:
+        return []
+    ql = _norm(question)
+    timey = bool(time_unit) or bool(re.search(
+        r"\b(20\d\d|january|february|march|april|may|june|july|august|"
+        r"september|october|november|december|last|this|month|quarter|year)\b",
+        ql))
+    if not timey:
+        return []
+    for d in ds.dates:
+        toks = [t for t in re.split(r"[^a-z0-9]+", d.lower())
+                if t and t not in ("date", "dt", "on", "at")]
+        if any(re.search(rf"\b{re.escape(t)}", ql) for t in toks):
+            return []
+    return list(ds.dates)
+
 
 def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     """Extract time-window filters from text and bind them to a date column.
@@ -972,6 +997,11 @@ def _find_distinct_count_dim(question: str, ds: ActiveDataset
         if not m:
             continue
         noun = m.group(1)
+        rel = getattr(ds, "rel", None)
+        if rel is not None:
+            from ..knowledge.rel_context import fk_noun_column
+            if fk_noun_column(rel, noun):
+                return None          # counted via the anchor FK KPI
         col = _bind_dim_column(ds, noun)
         if col:
             return (noun, col)
@@ -1201,12 +1231,15 @@ def _value_index(ds: ActiveDataset) -> dict:
     db_path = db_url.split(":///", 1)[1] if ":///" in db_url else db_url
     try:
         with sqlite3.connect(db_path) as c:
+            rel = getattr(ds, "rel", None)
             for cname, info in ds.columns.items():
                 if info.role != "dimension":
                     continue
+                src = rel.source(cname) if rel is not None else None
+                ptab, pcol = (src.table, src.column) if src else (ds.table, cname)
                 rows = c.execute(
-                    f'SELECT DISTINCT "{cname}" FROM "{ds.table}" '
-                    f'WHERE "{cname}" IS NOT NULL LIMIT '
+                    f'SELECT DISTINCT "{pcol}" FROM "{ptab}" '
+                    f'WHERE "{pcol}" IS NOT NULL LIMIT '
                     f'{_MAX_DISTINCT_PER_DIM + 1}').fetchall()
                 if len(rows) > _MAX_DISTINCT_PER_DIM:
                     continue
@@ -1258,10 +1291,74 @@ def _find_ambiguous_values(question: str, ds: ActiveDataset) -> List[str]:
     if ds.kind == "demo":
         return []
     out = []
+    rel = getattr(ds, "rel", None)
     for lo, cands in _value_mentions(question, _value_index(ds)):
         cols = sorted({c for c, _ in cands})
         if len(cols) > 1:
             out.append(f"ambiguous_value:{lo}=" + "|".join(cols))
+        elif rel is not None and rel.source(cols[0]) is not None \
+                and rel.source(cols[0]).kind == "ambiguous":
+            src = rel.source(cols[0])
+            out.append(f"ambiguous_join_path:{lo}=" + " | ".join(src.candidates))
+    return out
+
+
+_TITLE = re.compile(r"[A-Z][\w'&\-]*[a-z][\w'&\-]*")
+_NOT_ENTITY = {"january", "february", "march", "april", "may", "june", "july",
+               "august", "september", "october", "november", "december",
+               "monday", "tuesday", "wednesday", "thursday", "friday",
+               "saturday", "sunday", "top", "bottom", "show", "what",
+               "which", "how", "why", "compare", "list", "give", "total"}
+
+
+def _find_unknown_proper_nouns(question: str, ds: ActiveDataset,
+                                catalog: Optional[KPICatalog]) -> List[str]:
+    """Capitalised phrases (not sentence-initial, not months) that match no
+    known value, column word, or KPI word are treated as references to
+    entities the data does not contain."""
+    if ds.kind == "demo":
+        return []
+    idx = _value_index(ds)
+    known = set()
+    for v in idx:
+        known |= set(re.findall(r"[a-z0-9']+", v))
+    for c in ds.columns:
+        known |= set(re.findall(r"[a-z0-9]+", c.lower()))
+    if catalog is not None:
+        for k in catalog.kpis.values():
+            for a in k.aliases:
+                known |= set(re.findall(r"[a-z0-9]+", a.lower()))
+            known |= set(re.findall(r"[a-z0-9]+", k.display_name.lower()))
+    toks = list(_TITLE.finditer(question))
+    phrases, cur = [], []
+    for i, m in enumerate(toks):
+        adj = cur and question[cur[-1].end():m.start()].strip() == ""
+        if cur and adj and question[cur[-1].end():m.start()] == " ":
+            cur.append(m)
+        else:
+            if cur:
+                phrases.append(cur)
+            cur = [m]
+    if cur:
+        phrases.append(cur)
+    out = []
+    for ph in phrases:
+        words = [m.group(0).lower() for m in ph]
+        if ph[0].start() == 0 and len(ph) == 1:
+            continue
+        if all(w in _NOT_ENTITY or w in known for w in words):
+            continue
+        if any(w in known for w in words):
+            continue
+        phrase = " ".join(words)
+        if phrase in idx:
+            continue
+        before = question[:ph[0].start()].lower()
+        if not re.search(r"\b(?:for|in|at|by|with|from|of|to|named|called|on|"
+                         r"about|vs|versus|and|or|than)\s+(?:the\s+)?"
+                         r"(?:[a-z_]+\s+)?$", before):
+            continue        # not introduced like an entity reference
+        out.append(f"value:unrecognised={phrase}")
     return out
 
 
@@ -1292,6 +1389,10 @@ def _find_value_filters(question: str, ds: ActiveDataset
             if len(cols) != 1:
                 continue   # ambiguous: handled by _find_ambiguous_values
             col, orig = cands[0]
+            _rel = getattr(ds, "rel", None)
+            if _rel is not None and _rel.source(col) is not None \
+                    and _rel.source(col).kind == "ambiguous":
+                continue
             out.append(FilterExpr(kind="eq", column=col, value=orig))
         return out
     import sqlite3
@@ -1962,6 +2063,12 @@ class Planner:
         # Phase 2 (2026-10-24): value-equality filters on dim values
         # ("in East region", "for Furniture category", "SMB segment").
         value_filters = _find_value_filters(question, ds)
+        if ds.kind != "demo" and unbound_dims:
+            _vtext = " ".join(str(f.value).lower() for f in value_filters)
+            _vtext += " " + " ".join(
+                lo for lo, _c in _value_mentions(question, _value_index(ds)))
+            unbound_dims = [n for n in unbound_dims
+                            if not re.search(rf"(?<![a-z0-9]){re.escape(n.lower())}(?![a-z0-9])", _vtext)]
         filters = _bind_time_filter(question, ds) + metric_filters \
                   + value_filters
         # Early notes list — populated by the value-filter / dim-dedup
@@ -1974,6 +2081,23 @@ class Planner:
         # total.
         _unknown_values: List[str] = _find_unknown_dim_values(question, ds)
         _unknown_values += _find_ambiguous_values(question, ds)
+        _unknown_values += _find_unknown_proper_nouns(question, ds, catalog)
+        _rel = getattr(ds, "rel", None)
+        if _rel is not None:
+            for _n, _c in bound_dims:
+                _src = _rel.source(_c)
+                if _src is None:
+                    continue
+                if _src.kind == "ambiguous":
+                    _unknown_values.append(
+                        f"ambiguous_join_path:{_c}=" + " | ".join(_src.candidates))
+                elif _src.kind == "fanout":
+                    _unknown_values.append(
+                        f"fanout_dimension:{_c}=grouping by a one-to-many "
+                        f"table would double-count the measure")
+        _date_amb = _ambiguous_date_columns(question, ds, time_unit)
+        if _date_amb:
+            _unknown_values.append("ambiguous_date_column:" + "|".join(_date_amb))
         # When a value filter is present for a given dim AND that
         # same dim was bound as a grouping, remove the grouping (user
         # asked for a filtered single row, not a breakdown).
@@ -2141,6 +2265,9 @@ class Planner:
                 _noun, dim_col = hit
                 # Use a synthetic measure whose formula is COUNT(DISTINCT ...).
                 sel = dim_col
+                if getattr(ds, "rel", None) is not None and \
+                        ds.rel.source(dim_col) is not None:
+                    sel = "{{dim:%s}}" % dim_col
                 if ds.kind == "demo":
                     # Translate common tokens to the correct joined-table col.
                     _joined = {

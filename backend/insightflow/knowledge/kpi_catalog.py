@@ -14,6 +14,8 @@ the KPI's canonical form, and `plan_fidelity` can check that.
 """
 from __future__ import annotations
 
+import re
+
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -228,6 +230,12 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
                                                   "record count",
                                                   "records"],
     )
+    _rel = getattr(ds, "rel", None)
+    if _rel is not None:
+        from .rel_context import parent_nouns
+        for n in _rel.anchor_nouns + [x for x in [_rel.anchor.replace("_", " ")]]:
+            out["row_count"].aliases += [f"how many {n}", f"number of {n}",
+                                          f"count of {n}", f"{n} count"]
     # Order count is the same expression when the dataset is order-shaped;
     # we still expose it under the "orders" aliases so users can ask
     # naturally. Which one wins is decided by longest-alias-match in the
@@ -360,6 +368,10 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
             aliases = [f"distinct {name.lower()}",
                        f"unique {name.lower()}",
                        f"number of {name.lower()}"]
+        if _rel is not None and name in _rel.fk_columns:
+            for pn in parent_nouns(_rel.fk_columns[name].parent_table):
+                aliases = list(aliases) + [f"distinct {pn}", f"unique {pn}",
+                                           f"number of {pn}"]
         if kid not in out:
             out[kid] = KPIDefinition(
                 kpi_id=kid, display_name=disp,
@@ -371,6 +383,17 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
 
     # Generic AVG(col) for every numeric measure that isn't already the
     # subject of a specific KPI — enables "average X" for any column.
+    _UNIT = {"usd", "eur", "gbp", "inr", "amt", "amount", "val", "value",
+             "kg", "lb", "pct", "num", "cnt", "total"}
+    _cores: Dict[str, List[str]] = {}
+    for name, info in ds.columns.items():
+        if info.role != "measure":
+            continue
+        toks = [t for t in re.split(r"[^a-z0-9]+", name.lower()) if t]
+        core = " ".join(t for t in toks if t not in _UNIT)
+        if core and core != " ".join(toks):
+            _cores.setdefault(core, []).append(name)
+    _core_of = {n[0]: c for c, n in _cores.items() if len(n) == 1}
     for name, info in ds.columns.items():
         if info.role != "measure":
             continue
@@ -381,7 +404,8 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
             kpi_id=kid, display_name=f"Average {name.title()}",
             aggregation="avg", formula=f"AVG({_quote(name)})",
             required_columns=[name], unit=info.sql_type.lower(),
-            aliases=sorted({f"average {name.lower()}", f"avg {name.lower()}",
+            aliases=sorted(({f"average {_core_of[name]}", f"avg {_core_of[name]}",
+                            f"mean {_core_of[name]}"} if name in _core_of else set()) | {f"average {name.lower()}", f"avg {name.lower()}",
                             f"mean {name.lower()}",
                             f"average {name.lower().replace('_', ' ')}",
                             f"avg {name.lower().replace('_', ' ')}",
@@ -395,7 +419,8 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
                 kpi_id=sid, display_name=f"Total {name.title()}",
                 aggregation="sum", formula=f"SUM({_quote(name)})",
                 required_columns=[name], unit="",
-                aliases=sorted({f"total {name.lower()}", name.lower(),
+                aliases=sorted(({f"total {_core_of[name]}", _core_of[name]}
+                               if name in _core_of else set()) | {f"total {name.lower()}", name.lower(),
                                 f"sum of {name.lower()}",
                                 f"total {name.lower().replace('_', ' ')}",
                                 name.lower().replace('_', ' '),

@@ -145,8 +145,31 @@ def _cte_join_is_one_to_one(sql: str, condition: str,
     return True
 
 
-def check_join_fidelity(sql: str) -> JoinFidelityReport:
-    """Check joins for known safe key relationships; unknown joins fail closed."""
+def _strip_exists(sql: str) -> str:
+    """Replace EXISTS (...) semi-join subqueries (balanced parens). They
+    cannot multiply the outer rows, so joins inside them are not fan-out."""
+    out, i = [], 0
+    pat = re.compile(r"\bEXISTS\s*\(", re.IGNORECASE)
+    while True:
+        m = pat.search(sql, i)
+        if not m:
+            out.append(sql[i:]); break
+        out.append(sql[i:m.start()] + "EXISTS_SEMIJOIN")
+        depth, j = 1, m.end()
+        while j < len(sql) and depth:
+            depth += (sql[j] == "(") - (sql[j] == ")")
+            j += 1
+        i = j
+    return "".join(out)
+
+
+def check_join_fidelity(sql: str, rel=None) -> JoinFidelityReport:
+    """Check joins for known safe key relationships; unknown joins fail closed.
+
+    `rel` (a RelContext) extends the known-safe set with the discovered
+    many-to-one relationships of the active multi-table schema."""
+    if rel is not None:
+        sql = _strip_exists(sql)
     if not sql or not re.search(r"\bJOIN\b", sql, re.IGNORECASE):
         return JoinFidelityReport(ok=True, checks=[
             JoinCheck("join_cardinality", True, "No JOIN clause; no join fan-out risk.")
@@ -195,6 +218,21 @@ def check_join_fidelity(sql: str) -> JoinFidelityReport:
                  if cte_safe else
                  f"Join to CTE {joined_table!r} has unverified cardinality; aggregate totals cannot be certified.")
             ))
+            continue
+
+        if rel is not None and joined_table in rel.schema.tables:
+            has_or_r = bool(re.search(r"\bOR\b", condition, re.IGNORECASE))
+            ok_edges = {
+                frozenset(((e.child_table, e.child_col),
+                           (e.parent_table, e.parent_col)))
+                for e in rel.schema.edges if e.parent_table == joined_table}
+            safe_r = (not has_or_r) and bool(relationships & ok_edges)
+            checks.append(JoinCheck(
+                f"join_{index}_cardinality", safe_r,
+                (f"Join to {joined_table!r} follows a discovered many-to-one "
+                 f"relationship (parent key)." if safe_r else
+                 f"Join to {joined_table!r} is not a discovered many-to-one "
+                 f"relationship; it may multiply fact rows.")))
             continue
 
         if joined_table not in _KNOWN_TABLES or not known_tables_in_condition.issubset(_KNOWN_TABLES):

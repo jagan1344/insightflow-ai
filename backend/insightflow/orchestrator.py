@@ -229,7 +229,7 @@ class Orchestrator:
 
         # 5a. Plan → SQL fidelity check (rejects "executes but doesn't
         # answer" SQL before we run it).
-        fidelity = FidelityValidator().check(plan, sql)
+        fidelity = FidelityValidator().check(plan, sql, getattr(ds, 'rel', None))
 
         # 5b. Structural SQL validation.
         sqlval = validate_sql(sql)
@@ -429,6 +429,44 @@ class Orchestrator:
                 f"{_rel_range} but the dataset has no rows in that "
                 f"range. Try a period inside the dataset's date range.",
             )
+
+        # 11c. Mention-coverage veto: a categorical value named in the
+        # question that appears nowhere in the executed SQL means part of
+        # the question was dropped. Plan/SQL fidelity cannot see this
+        # because both come from the same (lossy) reading of the question.
+        if decision.action in (ANSWER, WARN) and sql:
+            try:
+                from .config import settings as _st
+                from .reliability.mention_coverage import unrepresented_mentions
+                _url = _st.database_url
+                _dbp = _url.split(":///", 1)[1] if ":///" in _url else _url
+                _miss = unrepresented_mentions(question, sql, _dbp, ds.table)
+            except Exception:
+                _miss = []
+            try:
+                from .reliability.mention_coverage import unrepresented_table_nouns
+                _tn = unrepresented_table_nouns(question, sql, getattr(ds, "rel", None))
+            except Exception:
+                _tn = []
+            if _tn and not _miss:
+                decision = Decision(
+                    CLARIFY,
+                    "the question is about " + ", ".join(f"'{n}'" for n in _tn) +
+                    ", but the query's base table is '" + ds.table + "' and "
+                    "does not involve them, so it would answer at the wrong "
+                    "grain")
+                confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
+            if _miss:
+                _desc = "; ".join(f"'{m.value}' (in {', '.join(m.where)})"
+                                  for m in _miss)
+                decision = Decision(
+                    CLARIFY,
+                    "the question mentions " + _desc + " but the query I "
+                    "generated does not use it, so the answer would ignore "
+                    "part of your question")
+                confidence.signals["mention_coverage"] = 0.0
+                confidence.score = min(confidence.score, 0.30)
 
         # 12. Explain (evidence-first).
         if decision.action in (ANSWER, WARN):

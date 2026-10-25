@@ -16,6 +16,7 @@ string-escape.
 """
 from __future__ import annotations
 
+import re
 from typing import List, Optional, Tuple
 
 from ..knowledge.dataset_registry import ActiveDataset
@@ -147,17 +148,118 @@ def _demo_dim_target(col: str) -> Tuple[str, str, str, str]:
 # Compiler
 # ---------------------------------------------------------------------------
 
+def _id(x: str) -> str:
+    """Bare identifier when simple (keeps the static join checker able to
+    parse it), quoted otherwise."""
+    return x if re.fullmatch(r"[A-Za-z_]\w*", x) else '"' + x.replace('"', '""') + '"'
+
+
+class RelationalUnsafe(Exception):
+    """The plan needs a join the relationship graph cannot do safely."""
+
+
+_REL_FLAT_INTENTS = None   # filled lazily (IntentKind may import later)
+
+
 class SQLCompiler:
     def __init__(self, ds: ActiveDataset, catalog: KPICatalog):
         self.ds = ds
         self.catalog = catalog
         self.kind = ds.kind
+        self.rel = getattr(ds, "rel", None) if ds.kind == "uploaded" else None
+        self._joins: dict = {}
+        self._ex_n = 0
+
+    # ---- relational helpers ------------------------------------------
+    def _qualify(self, text: str) -> str:
+        """Qualify bare anchor-table columns so joined tables with the
+        same column name can never make a reference ambiguous."""
+        if not self.rel:
+            return text
+        a = self.rel.anchor
+        for c in self.rel.schema.tables[a].columns:
+            text = re.sub(rf'(?<![\w."])"{re.escape(c)}"(?![\w"])',
+                          f'"{a}"."{c}"', text)
+        return text
+
+    def _rel_alias(self, steps) -> str:
+        return re.sub(r"\W", "_", "j_" + "_".join(s.edge.child_col for s in steps))
+
+    def _rel_expr(self, flat: str) -> Optional[str]:
+        """Expression for a reachable dimension; registers its joins."""
+        src = self.rel.source(flat) if self.rel else None
+        if src is None:
+            return None
+        if src.kind != "safe":
+            raise RelationalUnsafe(f"{flat}: {src.kind}")
+        prev = _id(self.rel.anchor)
+        for i, st in enumerate(src.steps, 1):
+            alias = self._rel_alias(src.steps[:i])
+            e = st.edge
+            if alias not in self._joins:
+                self._joins[alias] = (
+                    f'LEFT JOIN {_id(e.parent_table)} AS {alias} ON '
+                    f'{alias}.{_id(e.parent_col)} = {prev}.{_id(e.child_col)}')
+            prev = alias
+        return f'{prev}.{_id(src.column)}'
+
+    def _rel_exists(self, flat: str, predicate) -> str:
+        """Semi-join (EXISTS) for a filter on a fan-out table: cannot
+        duplicate anchor rows, unlike a plain JOIN."""
+        src = self.rel.source(flat)
+        a = f'"{self.rel.anchor}"'
+        self._ex_n += 1
+        n = self._ex_n
+        steps = src.steps
+        first = steps[0]
+        # root of the subquery = far side of step 1, correlated to anchor
+        if first.direction == "down":
+            root_t, root_corr = first.edge.child_table, \
+                (f'"x{n}_0"."{first.edge.child_col}" = {a}."{first.edge.parent_col}"')
+        else:
+            root_t, root_corr = first.edge.parent_table, \
+                (f'"x{n}_0"."{first.edge.parent_col}" = {a}."{first.edge.child_col}"')
+        sql = f'SELECT 1 FROM "{root_t}" AS "x{n}_0"'
+        prev = f'"x{n}_0"'
+        for i, st in enumerate(steps[1:], 1):
+            al = f'"x{n}_{i}"'
+            e = st.edge
+            if st.direction == "down":
+                sql += (f' JOIN "{e.child_table}" AS {al} ON '
+                        f'{al}."{e.child_col}" = {prev}."{e.parent_col}"')
+            else:
+                sql += (f' JOIN "{e.parent_table}" AS {al} ON '
+                        f'{al}."{e.parent_col}" = {prev}."{e.child_col}"')
+            prev = al
+        sql += f' WHERE {root_corr} AND {predicate(prev + "." + chr(34) + src.column + chr(34))}'
+        return f"EXISTS ({sql})"
 
     # ------------------------------------------------------------------
     # Public entry
     def compile(self, plan: AnalyticalPlan) -> str:
         if plan.intent_kind in (IntentKind.AMBIGUOUS, IntentKind.UNSUPPORTED):
             return ""
+        self._joins = {}
+        self._ex_n = 0
+        if self.rel is not None:
+            try:
+                if plan.intent_kind not in (
+                        IntentKind.DIRECT_KPI, IntentKind.BREAKDOWN,
+                        IntentKind.TOP_N, IntentKind.DISTINCT_COUNT,
+                        IntentKind.NULL_COUNT, IntentKind.EXTREMUM,
+                        IntentKind.TREND) and self._plan_uses_rel(plan):
+                    return ""
+                return self._compile_dispatch(plan)
+            except RelationalUnsafe:
+                return ""
+        return self._compile_dispatch(plan)
+
+    def _plan_uses_rel(self, plan: AnalyticalPlan) -> bool:
+        cols = [d.column for d in plan.dims] + \
+               [f.column for f in plan.filters if f.column]
+        return any(self.rel.source(c) is not None for c in cols)
+
+    def _compile_dispatch(self, plan: AnalyticalPlan) -> str:
 
         # dispatch by intent kind
         ik = plan.intent_kind
@@ -335,6 +437,9 @@ class SQLCompiler:
 
         # WHERE / HAVING from filters
         where, having = self._filter_clauses(plan)
+        for j in self._joins.values():
+            if j not in joins_seen:
+                joins.append(j); joins_seen.add(j)
 
         # ORDER BY / LIMIT
         order_clause = self._order_clause(plan)
@@ -608,13 +713,20 @@ class SQLCompiler:
         physical column of this dataset."""
         if self.kind == "demo":
             return _demo_dim_target(col)
+        if self.rel is not None:
+            e = self._rel_expr(col)
+            if e is not None:
+                return (e, e, "", col.lower().replace(" ", "_"))
+            qc = f'"{self.rel.anchor}"."{col}"'
+            return (qc, qc, "", col.lower().replace(" ", "_").replace("-", "_"))
         # uploaded — single table, quoted column name
         qc = _q(col)
         alias = col.lower().replace(" ", "_").replace("-", "_")
         return (qc, qc, "", alias)
 
     def _time_bucket(self, col: str, unit: str) -> str:
-        return _time_bucket_expr(col, unit, quoted=(self.kind == "uploaded"))
+        return self._qualify(
+            _time_bucket_expr(col, unit, quoted=(self.kind == "uploaded")))
 
     def _measure_expr(self, m: MeasureRef) -> str:
         kpi = self.catalog.get(m.kpi_id)
@@ -622,10 +734,13 @@ class SQLCompiler:
             # Synthetic measure (DISTINCT_COUNT / NULL_COUNT / EXTREMUM
             # etc.) — fall back to the measure's own baked formula.
             if m.formula:
-                return m.formula
+                f = re.sub(r"\{\{dim:([^}]+)\}\}",
+                           lambda mm: self._rel_expr(mm.group(1)) or mm.group(1),
+                           m.formula)
+                return self._qualify(f)
             return "NULL"
         # Use catalog's canonical formula — that's the whole point.
-        return kpi.formula
+        return self._qualify(kpi.formula)
 
     def _extra_where(self, plan: AnalyticalPlan) -> List[str]:
         parts: List[str] = []
@@ -646,6 +761,11 @@ class SQLCompiler:
                 parts.append(f"{self._colref(f.column)} IS NULL")
             elif f.kind == "not_null" and f.column:
                 parts.append(f"{self._colref(f.column)} IS NOT NULL")
+            elif f.kind == "eq" and f.column and self.rel is not None \
+                    and self.rel.source(f.column) is not None \
+                    and self.rel.source(f.column).kind == "fanout":
+                parts.append(self._rel_exists(
+                    f.column, lambda x, v=f.value: f"{x} = {_sql_escape(v)}"))
             elif f.kind == "eq" and f.column:
                 parts.append(f'{self._colref(f.column)} = {_sql_escape(f.value)}')
             elif f.kind == "in" and f.column and isinstance(f.value, (list, tuple)):
@@ -655,6 +775,8 @@ class SQLCompiler:
                 parts.append(
                     f'{self._colref(f.column)} >= {_sql_escape(f.lo)} '
                     f'AND {self._colref(f.column)} <= {_sql_escape(f.hi)}')
+        if self.rel is not None:
+            parts = [self._qualify(p) for p in parts]
         return parts
 
     def _filter_clauses(self, plan: AnalyticalPlan) -> Tuple[List[str], List[str]]:
@@ -682,6 +804,9 @@ class SQLCompiler:
     def _colref(self, col: str) -> str:
         if self.kind == "demo":
             return col if "." in col else f"orders.{col}"
+        if self.rel is not None:
+            e = self._rel_expr(col)
+            return e if e is not None else f'"{self.rel.anchor}"."{col}"'
         return _q(col)
 
     def _date_col_for(self, col: str) -> str:

@@ -51,15 +51,20 @@ def _no_space(s: str) -> str:
 class FidelityValidator:
     """Static SQL-vs-plan checker. No execution, no DB access."""
 
-    def check(self, plan: AnalyticalPlan, sql: str) -> FidelityReport:
+    def check(self, plan: AnalyticalPlan, sql: str,
+              rel=None) -> FidelityReport:
         checks: List[FidelityCheck] = []
         if not sql:
             return FidelityReport(ok=False, score=0.0, checks=[
                 FidelityCheck("sql_present", False, "compiler produced no SQL"),
             ])
 
+        # Table-qualified column refs ("t"."c") are equivalent to bare "c"
+        # for formula presence; strip qualifiers on a copy.
+        sql_q = re.sub(r'"[^"]+"\.(?=")', "", sql)
         s = _norm(sql)
         sn = _no_space(sql)
+        sn_q = _no_space(sql_q)
 
         # 1) Table referenced (uploaded → dataset_slug; demo → orders).
         # Accept quoted, bare, or joined form and boundary tolerant.
@@ -77,7 +82,7 @@ class FidelityValidator:
             if not m.formula:
                 continue
             f_no_space = _no_space(m.formula)
-            passed = f_no_space in sn
+            passed = f_no_space in sn or f_no_space in sn_q
             # For contribution / average-at-grain the formula is embedded
             # inside a CTE, so the substring test is still valid.
             checks.append(FidelityCheck(
@@ -200,7 +205,7 @@ class FidelityValidator:
 
         # 11) Join-cardinality guard. This checks known FK/PK relationships
         # and marks unknown join schemas as unverified instead of assuming safe.
-        join_report = check_join_fidelity(sql)
+        join_report = check_join_fidelity(sql, rel)
         for jc in join_report.checks:
             checks.append(FidelityCheck(
                 f"join:{jc.name}", jc.passed, jc.detail,

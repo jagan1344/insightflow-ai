@@ -85,6 +85,9 @@ class ActiveDataset:
     # For the demo dataset only, join hints allow the analyzer to reach
     # region_name/customer_name/product_name via joins.
     join_hints: dict[str, str] = field(default_factory=dict)
+    # Relational context (multi-table schema around `table`); None for a
+    # flat table. Populated automatically when relationships are found.
+    rel: object = None
 
     # -- role queries ----------------------------------------------------
     @property
@@ -332,8 +335,40 @@ def get_active_dataset() -> ActiveDataset:
             },
         )
     cols = introspect_table(engine, table_name)
+    rel = None
+    try:
+        if kind != "relational":
+            raise LookupError("flat dataset: no relational context")
+        from ..config import settings as _st
+        _url = _st.database_url
+        if _url.startswith("sqlite"):
+            from .rel_context import build_rel_context
+            rel = build_rel_context(
+                _url.split(":///", 1)[1] if ":///" in _url else _url,
+                table_name)
+    except Exception:
+        rel = None
+    if rel is not None:
+        _apply_rel_context(cols, rel)
     return ActiveDataset(id=ds_id, name=name, table=table_name,
-                         kind="uploaded", columns=cols)
+                         kind="uploaded", columns=cols, rel=rel)
+
+
+def _apply_rel_context(cols: dict, rel) -> None:
+    """Expose reachable dimensions as first-class columns and stop foreign
+    keys / primary keys from being summed as if they were measures."""
+    pk = set(rel.schema.tables[rel.anchor].pk)
+    for c in list(cols):
+        if c in rel.fk_columns or c in pk:
+            if c in rel.sources:        # role alias: acts as a dimension
+                cols[c].role = "dimension"
+            else:
+                cols[c].role = "id"
+    for flat, src in rel.sources.items():
+        if flat in cols:
+            continue
+        cols[flat] = ColumnInfo(name=flat, sql_type="TEXT", role="dimension",
+                                sample_values=[])
 
 
 def set_active(dataset_id: str) -> ActiveDataset:
@@ -349,6 +384,19 @@ def set_active(dataset_id: str) -> ActiveDataset:
             f"UPDATE {_META_TABLE} SET is_active = "
             f"CASE WHEN id = :id THEN 1 ELSE 0 END"), {"id": dataset_id})
     return get_active_dataset()
+
+
+def register_relational(name: str, table_name: str) -> str:
+    """Register an anchor table of a multi-table database. Relationship
+    discovery (joins to the surrounding tables) is enabled only for datasets
+    registered this way, so flat uploads can never be linked to unrelated
+    tables that happen to share the physical database."""
+    ds_id = register_uploaded(name, table_name)
+    engine = get_engine()
+    with engine.begin() as conn:
+        conn.execute(text(f"UPDATE {_META_TABLE} SET kind='relational' WHERE id=:i"),
+                     {"i": ds_id})
+    return ds_id
 
 
 def register_uploaded(name: str, table_name: str) -> str:
@@ -388,7 +436,7 @@ def delete_uploaded(dataset_id: str) -> None:
         if not row:
             return
         table_name, kind = row
-        if kind == "uploaded":
+        if kind == "uploaded":      # never drop a relational anchor: it is the user's own table
             conn.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
         conn.execute(text(f"DELETE FROM {_META_TABLE} WHERE id = :id"),
                      {"id": dataset_id})

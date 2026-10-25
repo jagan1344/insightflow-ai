@@ -84,7 +84,7 @@ def _plan_fidelity(plan: Optional[AnalyticalPlan],
     if not plan.measures or not sql:
         return base
     # Post-compile check: is every measure formula present in the SQL?
-    lo = sql.lower().replace(" ", "")
+    lo = re.sub(r'"[^"]+"\.(?=")', "", sql).lower().replace(" ", "")
     hits = 0
     for m in plan.measures:
         f = (m.formula or "").lower().replace(" ", "")
