@@ -780,6 +780,9 @@ class SQLCompiler:
                 parts.append(f"{self._colref(f.column)} IS NULL")
             elif f.kind == "not_null" and f.column:
                 parts.append(f"{self._colref(f.column)} IS NOT NULL")
+            elif f.kind in ("has_related", "no_related") and f.column and self.rel is not None:
+                ex = self._rel_exists(f.column, lambda x: "1=1")
+                parts.append(ex if f.kind == "has_related" else "NOT " + ex)
             elif f.kind == "cmp" and f.column and f.op in ("=", ">", ">=", "<", "<="):
                 parts.append(f"{self._colref(f.column)} {f.op} {_sql_escape(f.value)}")
             elif f.kind == "not_in" and f.column and isinstance(f.value, (list, tuple)):

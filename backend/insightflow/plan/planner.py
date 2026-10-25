@@ -1161,7 +1161,7 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
             _pt = set(phrase.split())
             core_hits = []
             for cname in ds.columns:
-                ct = [t for t in _norm_words(cname).split() if t not in _UNIT]
+                ct = [t for t in _norm_words(cname).split() if t not in _UNIT and len(t) >= 3]
                 if ct and all(any(t == p_ or (min(len(t), len(p_)) >= 4 and
                                               (t.startswith(p_) or p_.startswith(t)))
                                   for p_ in _pt) for t in ct):
@@ -1499,8 +1499,9 @@ def _value_mentions(question: str, idx: dict) -> list:
 def _uploaded_dim_nouns(ds: ActiveDataset) -> dict:
     """noun phrase -> column, from the dataset's own dimension names."""
     nouns: dict = {}
+    flags = set(getattr(ds, "flag_columns", ()) or ())
     for cname, info in ds.columns.items():
-        if info.role != "dimension":
+        if info.role != "dimension" or cname in flags:
             continue
         full = _norm_words(cname)
         nouns[full] = cname
@@ -1548,6 +1549,8 @@ def _find_negative_existence(question: str, ds: ActiveDataset) -> List[str]:
     m = _NEG_EXIST.search(ql)
     if not m:
         return []
+    if _find_child_existence(question, ds):
+        return []           # "orders with no returns": a NOT EXISTS over a child table
     # NULL-count questions ("employees with no bonus") are handled elsewhere
     if _find_null_target_column(question, ds):
         return []
@@ -1598,6 +1601,8 @@ def _find_negated_references(question: str, ds: ActiveDataset,
     for m in _NEG_CUE.finditer(ql):
         tail = ql[m.end(): m.end() + 60]
         hit = None
+        if ds.kind != "demo" and _value_mentions(tail, _value_index(ds)):
+            continue            # exclusion of a known value is a supported filter
         if True:
             for c in ds.columns:
                 ph = re.sub(r"[^a-z0-9]+", " ", c.lower()).strip()
@@ -1764,6 +1769,57 @@ def _find_date_state_filters(question: str, ds: ActiveDataset,
                 or bool(m.group(1)) or bool(re.match(r"\s*(?:yet|still)\b", ql[m.end():]))
             out.append(FilterExpr(kind="null" if neg else "not_null", column=d))
             break
+    return out
+
+
+def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
+    """0/1 columns ('refunded') are conditions, not quantities: 'refunded' ->
+    col = 1; 'not refunded' -> col = 0."""
+    flags = getattr(ds, "flag_columns", None) or []
+    if not flags:
+        return []
+    ql = question.lower()
+    out = []
+    for c in flags:
+        toks = [t for t in re.split(r"[^a-z0-9]+", c.lower())
+                if len(t) >= 4 and t not in ("flag", "is", "has", "active")] or \
+               [t for t in re.split(r"[^a-z0-9]+", c.lower()) if len(t) >= 3]
+        for t in toks:
+            m = re.search(rf"\b(un|non-?)?{re.escape(t[:max(4, len(t) - 2)])}\w*", ql)
+            if not m:
+                continue
+            before = ql[max(0, m.start() - 24): m.start()]
+            neg = bool(m.group(1)) or bool(re.search(r"\b(not|never|without|isn't|aren't|wasn't|weren't|no)\s+(?:\w+\s+){0,2}$", before))
+            out.append(FilterExpr(kind="eq", column=c, value=0 if neg else 1))
+            break
+    return out
+
+
+def _find_child_existence(question: str, ds: ActiveDataset) -> List[FilterExpr]:
+    """'work orders that had a defect' / 'orders with no returns': existence
+    (or absence) of rows in a one-to-many child of the base table."""
+    rel = getattr(ds, "rel", None)
+    if rel is None:
+        return []
+    from ..knowledge.rel_context import parent_nouns
+    ql = question.lower()
+    out = []
+    for e in rel.schema.edges:
+        if e.parent_table != rel.anchor or e.child_table == rel.anchor:
+            continue
+        t = e.child_table
+        flat = next((f for f, s_ in rel.sources.items()
+                     if s_.table == t and s_.kind == "fanout" and not s_.numeric and not s_.date), None)
+        if flat is None:
+            continue
+        for noun in parent_nouns(t):
+            neg = re.search(rf"\b(?:with\s+no|without(?:\s+any)?|had\s+no|has\s+no|have\s+no|having\s+no|"
+                            rf"with\s+zero|never\s+had)\s+(?:an?\s+|any\s+)?{re.escape(noun)}s?\b", ql)
+            pos = re.search(rf"\b(?:with|had|has|have|having)\s+(?:an?\s+|any\s+|at\s+least\s+one\s+)?{re.escape(noun)}s?\b", ql)
+            if neg:
+                out.append(FilterExpr(kind="no_related", column=flat)); break
+            if pos:
+                out.append(FilterExpr(kind="has_related", column=flat)); break
     return out
 
 
@@ -2600,7 +2656,9 @@ class Planner:
         _has_tf = bool(_bind_time_filter(question, ds))
         value_filters = _find_value_filters(question, ds) \
             + _find_numeric_filters(question, ds) \
-            + _find_date_state_filters(question, ds, _has_tf)
+            + _find_date_state_filters(question, ds, _has_tf) \
+            + _find_flag_filters(question, ds) \
+            + _find_child_existence(question, ds)
         if ds.kind != "demo" and unbound_dims:
             _vtext = " ".join(str(f.value).lower() for f in value_filters)
             _vtext += " " + " ".join(

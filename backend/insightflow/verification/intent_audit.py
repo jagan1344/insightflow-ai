@@ -130,6 +130,31 @@ def audit(question: str, sql: str, plan, catalog, n_rows: int,
             f"'{me.group(0).strip()}' asks for one figure per item but the query "
             "returns a single figure"))
 
+    # ---- "by <something>" with no grouping at all ---------------------------
+    mb = re.search(r"\bby\s+(?!the\s+(?:end|way)\b)([a-z_]+(?:\s+[a-z_]+){0,2})", q_cues)
+    if mb and not grouped_sql_present(s) and not getattr(plan, "top_n", None) \
+            and plan.intent_kind in ("direct_kpi", "breakdown") \
+            and not re.search(r"\b(percent|%|\d)", mb.group(1)) \
+            and getattr(plan, "comparison", None) is None:
+        words = mb.group(1)
+        # a value ("paid by O'Neil, Sam") or a measure phrase is not a grouping
+        if not (catalog is not None and any(
+                re.search(rf"(?<![a-z0-9]){re.escape(a.lower())}(?![a-z0-9])", words)
+                for k in catalog.kpis.values() for a in k.aliases)) \
+                and f"'{words.split()[0]}" not in s:
+            out.append(AuditFinding(
+                "missing_grouping",
+                f"'by {words}' asks for a breakdown but the query returns a single figure"))
+
+    # ---- negated measure ("not refunded", "no discount") ------------------
+    for mn in re.finditer(r"\b(?:not|never|without)\s+([a-z]{4,})", q_cues):
+        w = mn.group(1)
+        if re.search(rf"(?:sum|avg|min|max)\s*\([^)]*{re.escape(w[:max(4, len(w) - 2)])}", s):
+            out.append(AuditFinding(
+                "negation_on_measure",
+                f"'not {w}' was answered by aggregating '{w}' instead of excluding it"))
+            break
+
     # ---- result shape ----------------------------------------------------
     grouped = re.search(r"\bgroup by\b", s) is not None
     if grouped and _SCALAR_CUE.search(q) and not _GROUP_CUE.search(q_cues) \

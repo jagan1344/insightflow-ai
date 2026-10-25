@@ -90,6 +90,8 @@ class ActiveDataset:
     rel: object = None
     # Date column the user (or governance config) fixed for time questions
     date_choice: Optional[str] = None
+    # integer columns holding only 0/1: conditions, not quantities
+    flag_columns: tuple = ()
 
     # -- role queries ----------------------------------------------------
     @property
@@ -352,6 +354,9 @@ def get_active_dataset() -> ActiveDataset:
         rel = None
     if rel is not None:
         _apply_rel_context(cols, rel)
+    flags = _flag_columns(engine, table_name, cols)
+    for fc in flags:
+        cols[fc].role = "dimension"
     date_choice = None
     try:
         from ..governance.metrics import date_default
@@ -363,7 +368,35 @@ def get_active_dataset() -> ActiveDataset:
         pass
     return ActiveDataset(id=ds_id, name=name, table=table_name,
                          kind="uploaded", columns=cols, rel=rel,
-                         date_choice=date_choice)
+                         date_choice=date_choice, flag_columns=tuple(flags))
+
+
+_FLAG_CACHE: dict = {}
+
+
+def _flag_columns(engine, table: str, cols: dict) -> list:
+    """Integer measure columns whose only values are 0/1 (cached by row count)."""
+    cand = [c for c, i in cols.items() if i.role == "measure"
+            and "INT" in (i.sql_type or "").upper()]
+    if not cand:
+        return []
+    try:
+        with engine.connect() as conn:
+            n = conn.execute(text(f'SELECT COUNT(*) FROM "{table}"')).scalar()
+            key = (str(engine.url), table, n, tuple(cand))
+            if key not in _FLAG_CACHE:
+                out = []
+                for c in cand:
+                    vals = {r[0] for r in conn.execute(text(
+                        f'SELECT DISTINCT "{c}" FROM "{table}" WHERE "{c}" IS NOT NULL LIMIT 4'))}
+                    if vals and vals <= {0, 1}:
+                        out.append(c)
+                if len(_FLAG_CACHE) > 64:
+                    _FLAG_CACHE.clear()
+                _FLAG_CACHE[key] = out
+            return list(_FLAG_CACHE[key])
+    except Exception:
+        return []
 
 
 def _apply_rel_context(cols: dict, rel) -> None:

@@ -28,6 +28,16 @@ CORR = {
         verdict="defective label (question is unambiguous; label encoded then-missing capability)",
         why="'excluding California students' has one reading; independent SQL gives "
             f"{C25:.2f}. The original label expected CLARIFY only because exclusion was unsupported."),
+    ("final5_H1_first_and_only", "H15"): dict(
+        new_kind="clarify", expected=None,
+        verdict="defective label (ambiguous wording: 'held' = ordinary verb or status value 'Held')",
+        why="independent SQL: 9274.14 without the status filter vs 5731.77 with status='Held'; the readings differ, "
+            "so by the stated policy a clarification is the correct response."),
+    ("final5_H1_first_and_only", "M14"): dict(
+        new_kind="clarify", expected=None,
+        verdict="defective label (two date columns on the base table; readings differ)",
+        why="independent SQL: units planned in June 2025 is 8320 by started_at and 8199 by finished_at; the question "
+            "names neither, so a clarification is the correct response."),
 }
 FIRST_VALUE = {  # first-run system values for corrected-label questions, from the reproduced diagnosis
     ("final4_G1_first_and_only", "F17"): ("ANSWER", 9),   # diagnosis_G1_silent_errors_reproduced_at_36878e7.json
@@ -42,7 +52,9 @@ def score(name, corrections):
         c = corrections.get((name, r["id"]))
         if c:
             kind = c["new_kind"]
-            if (name, r["id"]) in FIRST_VALUE:
+            if kind == "clarify":
+                outcome = "correct_clarify" if action in ("CLARIFY", "ABSTAIN") else "silent_wrong"
+            elif (name, r["id"]) in FIRST_VALUE:
                 a, v = FIRST_VALUE[(name, r["id"])]
                 outcome = "correct" if abs(float(v) - float(c["expected"])) < 1e-6 else "silent_wrong"
             else:
@@ -64,7 +76,7 @@ print("# Label review (round 5) - proposed corrections; sealed records unchanged
 for key, c in CORR.items():
     print(f"- **{key[1]}** ({key[0]}): {c['verdict']}. {c['why']}")
 print()
-for name in ("final4_G1_first_and_only", "final_F1_first_and_only"):
+for name in ("final4_G1_first_and_only", "final_F1_first_and_only", "final5_H1_first_and_only"):
     o, k = score(name, {}), score(name, {kk: v for kk, v in CORR.items() if kk[0] == name})
     print(f"\n### {name}\n")
     print("| | answerable | correct | answered | silent wrong | abstained (answerable) | clarifications correct |")

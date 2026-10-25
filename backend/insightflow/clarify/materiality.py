@@ -16,6 +16,7 @@ are produced by re-planning the SAME question with one choice fixed.
 from __future__ import annotations
 
 import copy
+import re
 import sqlite3
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
@@ -213,3 +214,36 @@ def ds_db_path() -> str:
     from ..config import settings
     u = settings.database_url
     return u.split(":///", 1)[1] if ":///" in u else u
+
+
+def weak_value_check(question: str, plan, ds, catalog, db_path: str):
+    """A categorical value that is also an ordinary participle/adjective
+    ("held" vs status='Held') written in lower case: run the question with
+    and without that filter; ask only if the answers differ."""
+    cands = []
+    for f in plan.filters:
+        if f.kind == "eq" and isinstance(f.value, str) and " " not in f.value.strip():
+            lo = f.value.lower()
+            from ..reliability.mention_coverage import _IRREGULAR_PAST, _FUNCTION_WORDS
+            if (re.search(r"(ed|ing)$", lo) or lo in _IRREGULAR_PAST or lo in _FUNCTION_WORDS) \
+                    and re.search(rf"\b{re.escape(lo)}\b", question) \
+                    and not re.search(rf"\b{re.escape(f.value)}\b", question):
+                cands.append(f)
+    if not cands:
+        return None
+    f0 = cands[0]
+    p2 = copy.deepcopy(plan)
+    p2.filters = [f for f in p2.filters if f is not f0 and not (f.kind == f0.kind and f.column == f0.column and f.value == f0.value)]
+    comp = SQLCompiler(ds, catalog)
+    sql1, sql2 = comp.compile(plan), SQLCompiler(ds, catalog).compile(p2)
+    if not sql1 or not sql2:
+        return None
+    r1, r2 = _run(db_path, sql1), _run(db_path, sql2)
+    if r1 is None or r2 is None or _same(r1, r2):
+        return None
+    return Resolution(
+        "clarify", [Candidate(f"'{f0.value}' as the value of {f0.column}", ds, sql1, r1),
+                    Candidate(f"'{f0.value.lower()}' as ordinary wording", ds, sql2, r2)],
+        ambiguity=f"weak_value:{f0.column}",
+        prompt=(f"'{f0.value.lower()}' could mean the value '{f0.value}' of {f0.column} "
+                f"-> {_brief(r1)}, or just ordinary wording -> {_brief(r2)}. Which did you mean?"))

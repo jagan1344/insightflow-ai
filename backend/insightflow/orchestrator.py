@@ -275,6 +275,18 @@ class Orchestrator:
                     question, plan, report, reason=_res.prompt,
                     explanation=_res.prompt)
 
+        if ds.kind != "demo" and _ds_override is None and plan.is_answerable():
+            try:
+                from .clarify.materiality import weak_value_check as _wv
+                from .execution.executor import db_file_path as _dbq
+                _wres = _wv(question, plan, ds, catalog, _dbq())
+            except Exception:
+                _wres = None
+            if _wres is not None:
+                return self._unanswerable_response(
+                    question, plan, report, reason=_wres.prompt,
+                    explanation=_wres.prompt)
+
         # 3. Fall back to the legacy generator ONLY on the demo dataset,
         #    where 55 regression tests depend on its behaviour.
         #
