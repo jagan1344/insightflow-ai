@@ -127,3 +127,15 @@ def test_count_with_adjective_binds_the_base_rows(lib):
     p = lib("hr", "employees")
     r = ask("How many active employees are in Engineering?")
     assert val(r) == sql1(p, "SELECT COUNT(*) FROM employees e JOIN departments d ON d.dept_id=e.dept_id WHERE d.dept_name='Engineering' AND e.status='Active'")[0][0]
+
+
+def test_each_x_means_one_row_per_x(lib):
+    p = lib("hr", "assignments")
+    r = ask("How many assignments does each project have?")
+    exp = dict(sql1(p, "SELECT pr.project_name, COUNT(*) FROM assignments a JOIN projects pr ON pr.project_id=a.project_id GROUP BY 1"))
+    assert {row[0]: row[-1] for row in r.result.rows} == exp
+
+
+def test_total_per_base_row_is_asked(lib):
+    lib("library", "loans")
+    assert ask("Total late fee per loan").decision.action == "CLARIFY"

@@ -583,6 +583,7 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
         r"\bfor\s+each\s+([a-z][a-z_\-\s]{1,30})",
         r"\bfrom\s+each\s+([a-z][a-z_\-\s]{1,30})",
         r"\bin\s+each\s+([a-z][a-z_\-\s]{1,30})",
+        r"(?<!for )(?<!from )(?<!in )\beach\s+([a-z][a-z_\-\s]{1,30})",
     ]:
         for m in re.finditer(pat, ql):
             phrase = m.group(1).strip().rstrip("?.")
@@ -2623,6 +2624,10 @@ class Planner:
         _unknown_values += _find_conflicting_conditions(question, ds)
         _unknown_values += _find_negative_existence(question, ds)
         _unknown_values += _find_hierarchy_refs(question, ds)
+        _mrow = re.search(r"\b(?:total|sum)\b[^?]*?\bper\s+([a-z_]+)", ql_lo)
+        if _mrow and ds.kind != "demo" and _is_anchor_noun(_mrow.group(1), ds) \
+                and not _bind_dim_column(ds, _mrow.group(1)):
+            _unknown_values.append(f"ambiguous_average_per:{_mrow.group(1)}")
         _mper = re.search(r"\b(?:average|avg|mean)\b[^?]*?\bper\s+([a-z_]+)", ql_lo)
         if _mper and ds.kind != "demo" and any(
                 n == _mper.group(1) or n.rstrip("s") == _mper.group(1).rstrip("s")

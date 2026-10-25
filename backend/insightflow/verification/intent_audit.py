@@ -45,6 +45,10 @@ class AuditFinding:
     detail: str
 
 
+def grouped_sql_present(s: str) -> bool:
+    return re.search(r"\bgroup by\b|\bover\s*\(", s) is not None
+
+
 def _has_agg(sql_l: str, fn: str) -> bool:
     return re.search(rf"\b{fn}\s*\(", sql_l) is not None
 
@@ -117,6 +121,14 @@ def audit(question: str, sql: str, plan, catalog, n_rows: int,
         out.append(AuditFinding(
             "top_n_not_applied",
             f"'{mt.group(0)}' is in the question but the query does not rank or limit"))
+
+    # ---- "each X" asks for one row per X --------------------------------
+    me = re.search(r"\b(?:for\s+|in\s+|from\s+|does\s+|do\s+|has\s+|have\s+)?each\s+[a-z_]+", q_cues)
+    if me and not grouped_sql_present(s) and not getattr(plan, "top_n", None):
+        out.append(AuditFinding(
+            "missing_grouping",
+            f"'{me.group(0).strip()}' asks for one figure per item but the query "
+            "returns a single figure"))
 
     # ---- result shape ----------------------------------------------------
     grouped = re.search(r"\bgroup by\b", s) is not None
