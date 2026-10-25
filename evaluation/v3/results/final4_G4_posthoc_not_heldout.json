@@ -1,0 +1,670 @@
+{
+  "summary": {
+    "n": 38,
+    "answerable": 27,
+    "correct": 25,
+    "answered_answerable": 25,
+    "silent_wrong": 1,
+    "abstained_answerable": 2,
+    "should_clarify": 11,
+    "correct_clarify": 10,
+    "errors": 0,
+    "mean_conf_silent_wrong": 0.979,
+    "silent_wrong_conf_ge_0_7": 1,
+    "latency_ms_p50": 12,
+    "latency_ms_p95": 50,
+    "calibration_by_confidence_band": {
+      "[0,0.3)": {
+        "answered": 0,
+        "correct": 0,
+        "silent_wrong": 0
+      },
+      "[0.3,0.7)": {
+        "answered": 0,
+        "correct": 0,
+        "silent_wrong": 0
+      },
+      "[0.7,0.9)": {
+        "answered": 1,
+        "correct": 1,
+        "silent_wrong": 0
+      },
+      "[0.9,1.0]": {
+        "answered": 25,
+        "correct": 24,
+        "silent_wrong": 1
+      }
+    }
+  },
+  "by_family": {
+    "single": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "nulls": {
+      "n": 4,
+      "correct": 4,
+      "silent_wrong": 0
+    },
+    "grouped": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "unusual_value": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "ambiguous": {
+      "n": 5,
+      "correct": 4,
+      "silent_wrong": 1
+    },
+    "join_filter": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "fanout": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "time": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "distinct": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "numeric_filter": {
+      "n": 5,
+      "correct": 4,
+      "silent_wrong": 0
+    },
+    "negation": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "zero_fact": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "unknown": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "topn": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "unsupported": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "out_of_scope": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "column_compare": {
+      "n": 1,
+      "correct": 0,
+      "silent_wrong": 0
+    },
+    "multi_value": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "combo": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    }
+  },
+  "results": [
+    {
+      "db": "library@loans",
+      "id": "F01",
+      "family": "single",
+      "question": "How many loans were there?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 49,
+      "sys_value": "500",
+      "expected": "[(500,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F02",
+      "family": "nulls",
+      "question": "What is the total late fee?",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "1111.03",
+      "expected": "[(1111.03,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F03",
+      "family": "nulls",
+      "question": "What is the average late fee?",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "4.727787234042553",
+      "expected": "[(4.727787234042553,)]",
+      "sql": "SELECT AVG(\"loans\".\"late_fee\") AS avg_late_fee FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F04",
+      "family": "nulls",
+      "question": "How many loans have no return date?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 12,
+      "sys_value": "101",
+      "expected": "[(101,)]",
+      "sql": "SELECT COUNT(*) AS null_returned_date FROM \"loans\" WHERE \"loans\".\"returned_date\" IS NULL"
+    },
+    {
+      "db": "library@loans",
+      "id": "F05",
+      "family": "grouped",
+      "question": "Total late fee by genre",
+      "kind": "rowset",
+      "action": "WARN",
+      "confidence": 0.992,
+      "outcome": "correct",
+      "latency_ms": 12,
+      "sys_value": "[('Sci-Fi & Fantasy', 454.51), ('Non-Fiction (History)', 260.8), (\"Children's\", 137.58), ('None', 133.48), ('Mystery', 1",
+      "expected": "[(None, 133.48), (\"Children's\", 137.58), ('Mystery', 124.66), ('Non-Fiction (History)', 260.8), ('Sci-Fi & Fantasy', 454",
+      "sql": "SELECT j_book_id_genre_id.genre_name AS genre_name, SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id GROUP BY j_book_id_genre_id.genre_name"
+    },
+    {
+      "db": "library@loans",
+      "id": "F06",
+      "family": "unusual_value",
+      "question": "How many loans of books in Sci-Fi & Fantasy?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 13,
+      "sys_value": "225",
+      "expected": "[(225,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id WHERE j_book_id_genre_id.genre_name = 'Sci-Fi & Fantasy'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F07",
+      "family": "unusual_value",
+      "question": "How many loans of Children's books?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "46",
+      "expected": "[(46,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id WHERE j_book_id_genre_id.genre_name = 'Children''s'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F08",
+      "family": "ambiguous",
+      "question": "How many loans by branch?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "correct_clarify",
+      "latency_ms": 50,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F09",
+      "family": "ambiguous",
+      "question": "Total late fee for Springfield",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "correct_clarify",
+      "latency_ms": 16,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F10",
+      "family": "join_filter",
+      "question": "How many loans by Gold tier members?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 11,
+      "sys_value": "135",
+      "expected": "[(135,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id WHERE j_member_id.tier = 'Gold'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F11",
+      "family": "fanout",
+      "question": "How many loans of books by Ursula K. Le Guin?",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 22,
+      "sys_value": "118",
+      "expected": "[(118,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" WHERE EXISTS (SELECT 1 FROM \"books\" AS \"x1_0\" JOIN \"book_authors\" AS \"x1_1\" ON \"x1_1\".\"book_id\" = \"x1_0\".\"book_id\" JOIN \"authors\" AS \"x1_2\" ON \"x1_2\".\"author_id\" = \"x1_1\".\"author_id\" WHERE \"x1_0\".\"book_id\" = \"loans\".\"book_id\" AND \"x1_2\".\"author_name\" = 'Ursu"
+    },
+    {
+      "db": "library@loans",
+      "id": "F12",
+      "family": "fanout",
+      "question": "Loans by author",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 13,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F13",
+      "family": "ambiguous",
+      "question": "Total late fee in March 2025",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 37,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F14",
+      "family": "time",
+      "question": "How many loans were made in March 2025?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 16,
+      "sys_value": "44",
+      "expected": "[(44,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" WHERE \"loans\".\"loan_date\" >= '2025-03-01' AND \"loans\".\"loan_date\" < '2025-04-01'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F15",
+      "family": "time",
+      "question": "How many loans were returned in April 2025?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 15,
+      "sys_value": "40",
+      "expected": "[(40,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" WHERE \"loans\".\"returned_date\" >= '2025-04-01' AND \"loans\".\"returned_date\" < '2025-05-01'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F16",
+      "family": "distinct",
+      "question": "How many distinct members borrowed books?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 18,
+      "sys_value": "50",
+      "expected": "[(50,)]",
+      "sql": "SELECT COUNT(DISTINCT \"loans\".\"member_id\") AS distinct_member_id FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F17",
+      "family": "ambiguous",
+      "question": "How many distinct books were borrowed in 2025?",
+      "kind": "clarify",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "silent_wrong",
+      "latency_ms": 57,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT COUNT(DISTINCT \"loans\".\"book_id\") AS distinct_book_id FROM \"loans\" WHERE \"loans\".\"loan_date\" >= '2025-01-01' AND \"loans\".\"loan_date\" < '2026-01-01'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F18",
+      "family": "numeric_filter",
+      "question": "Total late fee for books published after 2000",
+      "kind": "scalar",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "abstained",
+      "latency_ms": 25,
+      "sys_value": "None",
+      "expected": "[(349.07,)]",
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F19",
+      "family": "numeric_filter",
+      "question": "Total late fee for books priced over 20",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 16,
+      "sys_value": "125.71",
+      "expected": "[(125.71,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id WHERE j_book_id.price > 20"
+    },
+    {
+      "db": "library@loans",
+      "id": "F20",
+      "family": "numeric_filter",
+      "question": "Total late fee for books with price over 20",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 17,
+      "sys_value": "125.71",
+      "expected": "[(125.71,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id WHERE j_book_id.price > 20"
+    },
+    {
+      "db": "library@loans",
+      "id": "F21",
+      "family": "negation",
+      "question": "Total late fee excluding Poetry",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 16,
+      "sys_value": "1111.03",
+      "expected": "[(1111.03,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id WHERE (j_book_id_genre_id.genre_name IS NULL OR j_book_id_genre_id.genre_name NOT I"
+    },
+    {
+      "db": "library@loans",
+      "id": "F22",
+      "family": "zero_fact",
+      "question": "Total late fee for Poetry",
+      "kind": "empty_ok",
+      "action": "WARN",
+      "confidence": 0.899,
+      "outcome": "correct",
+      "latency_ms": 43,
+      "sys_value": "None",
+      "expected": "[(None,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id WHERE j_book_id_genre_id.genre_name = 'Poetry'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F23",
+      "family": "unknown",
+      "question": "Total late fee for Cooking",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 10,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F24",
+      "family": "topn",
+      "question": "Top 3 genres by number of loans",
+      "kind": "ordered",
+      "action": "ANSWER",
+      "confidence": 0.993,
+      "outcome": "correct",
+      "latency_ms": 13,
+      "sys_value": "[('Sci-Fi & Fantasy', 225.0), ('Non-Fiction (History)', 118.0), ('Mystery', 55.0)]",
+      "expected": "[('Sci-Fi & Fantasy', 225), ('Non-Fiction (History)', 118), ('Mystery', 55)]",
+      "sql": "SELECT j_book_id_genre_id.genre_name AS genre_name, COUNT(*) AS row_count FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id WHERE j_book_id_genre_id.genre_name IS NOT NULL GROUP BY"
+    },
+    {
+      "db": "library@loans",
+      "id": "F25",
+      "family": "unsupported",
+      "question": "Which members have never borrowed a book?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 10,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT j_member_id.member_name AS member_name, COUNT(*) AS row_count FROM \"loans\" LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id GROUP BY j_member_id.member_name ORDER BY row_count DESC"
+    },
+    {
+      "db": "library@loans",
+      "id": "F26",
+      "family": "out_of_scope",
+      "question": "What will late fees be next year?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 3,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F27",
+      "family": "out_of_scope",
+      "question": "Remove all overdue loans",
+      "kind": "clarify",
+      "action": "ABSTAIN",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 3,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F28",
+      "family": "nulls",
+      "question": "Average late fee by tier",
+      "kind": "rowset",
+      "action": "WARN",
+      "confidence": 0.98,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "[('Silver', 4.873777777777778), ('None', 4.651294117647059), ('Gold', 4.617166666666666)]",
+      "expected": "[(None, 4.651294117647059), ('Gold', 4.617166666666666), ('Silver', 4.873777777777778)]",
+      "sql": "SELECT j_member_id.tier AS tier, AVG(\"loans\".\"late_fee\") AS avg_late_fee FROM \"loans\" LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id GROUP BY j_member_id.tier ORDER BY avg_late_fee DESC"
+    },
+    {
+      "db": "library@loans",
+      "id": "F29",
+      "family": "numeric_filter",
+      "question": "How many loans had a late fee over 5?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "117",
+      "expected": "[(117,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" WHERE \"loans\".\"late_fee\" > 5"
+    },
+    {
+      "db": "library@loans",
+      "id": "F30",
+      "family": "numeric_filter",
+      "question": "Total late fee for loans with late fee over 5",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "787.35",
+      "expected": "[(787.35,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" WHERE \"loans\".\"late_fee\" > 5"
+    },
+    {
+      "db": "library@loans",
+      "id": "F31",
+      "family": "unknown",
+      "question": "How many loans of Tolkien's books?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 9,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F32",
+      "family": "column_compare",
+      "question": "How many loans were returned late?",
+      "kind": "scalar",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "abstained",
+      "latency_ms": 9,
+      "sys_value": "None",
+      "expected": "[(274,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F33",
+      "family": "ambiguous",
+      "question": "Average late fee for Gold tier members in 2025",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 32,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "library@loans",
+      "id": "F34",
+      "family": "join_filter",
+      "question": "Average late fee for Gold tier members",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 11,
+      "sys_value": "4.617166666666666",
+      "expected": "[(4.617166666666666,)]",
+      "sql": "SELECT AVG(\"loans\".\"late_fee\") AS avg_late_fee FROM \"loans\" LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id WHERE j_member_id.tier = 'Gold'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F35",
+      "family": "single",
+      "question": "What is the maximum late fee?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 10,
+      "sys_value": "8.96",
+      "expected": "[(8.96,)]",
+      "sql": "SELECT MAX(late_fee) AS max_late_fee FROM \"loans\""
+    },
+    {
+      "db": "library@loans",
+      "id": "F36",
+      "family": "multi_value",
+      "question": "Total late fee for Silver or Gold tier members",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 11,
+      "sys_value": "715.67",
+      "expected": "[(715.67,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id WHERE j_member_id.tier IN ('Silver', 'Gold')"
+    },
+    {
+      "db": "library@loans",
+      "id": "F37",
+      "family": "time",
+      "question": "Total late fee for members who joined in 2024",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 11,
+      "sys_value": "229.87",
+      "expected": "[(229.87,)]",
+      "sql": "SELECT SUM(\"loans\".\"late_fee\") AS sum_late_fee FROM \"loans\" LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id WHERE j_member_id.joined_on >= '2024-01-01' AND j_member_id.joined_on < '2025-01-01'"
+    },
+    {
+      "db": "library@loans",
+      "id": "F38",
+      "family": "combo",
+      "question": "How many loans of Sci-Fi & Fantasy books by Gold tier members?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 12,
+      "sys_value": "58",
+      "expected": "[(58,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"loans\" LEFT JOIN books AS j_book_id ON j_book_id.book_id = loans.book_id LEFT JOIN genres AS j_book_id_genre_id ON j_book_id_genre_id.genre_id = j_book_id.genre_id LEFT JOIN members AS j_member_id ON j_member_id.member_id = loans.member_id WHERE j_book_id_genre_id."
+    }
+  ]
+}

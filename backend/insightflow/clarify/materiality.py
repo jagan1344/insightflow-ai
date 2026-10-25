@@ -103,19 +103,45 @@ def _path_variants(ds, flat: str):
         yield "via " + p.describe(), d2
 
 
+def _alt_variants(ds, flat: str):
+    """The path the planner chose, plus each longer safe alternative."""
+    from ..knowledge.rel_context import DimSource
+    rel = ds.rel
+    src = rel.sources[flat]
+    yield "via " + " -> ".join(
+        f"{s.edge.child_table}.{s.edge.child_col}" for s in src.steps), ds
+    for alt in src.alt_paths:
+        rel2 = copy.copy(rel)
+        rel2.sources = dict(rel.sources)
+        for fl, s in rel.sources.items():
+            if s.table == src.table and s.kind == "safe":
+                rel2.sources[fl] = DimSource(
+                    fl, s.table, s.column, "safe", alt.steps, alt.nullable,
+                    numeric=s.numeric, date=s.date)
+        d2 = copy.copy(ds)
+        d2.rel = rel2
+        yield "via " + alt.describe(), d2
+
+
 def resolve(question: str, unavailable: List[str], ds, catalog,
             db_path: str) -> Resolution:
     amb = next((u for u in unavailable
                 if u.startswith(("ambiguous_date_column:",
-                                 "ambiguous_join_path:"))), None)
+                                 "ambiguous_join_path:",
+                                 "alternative_path:"))), None)
     if amb is None:
         return Resolution("none")
     others = [u for u in unavailable if u != amb and not u.startswith(
-        ("ambiguous_date_column:", "ambiguous_join_path:"))]
+        ("ambiguous_date_column:", "ambiguous_join_path:", "alternative_path:"))]
     if others:
         return Resolution("none")            # something else is unanswerable
     variants = []
-    if amb.startswith("ambiguous_date_column:"):
+    if amb.startswith("alternative_path:"):
+        flat = amb.split(":", 1)[1]
+        if getattr(ds, "rel", None) is None or flat not in ds.rel.sources:
+            return Resolution("none")
+        variants = list(_alt_variants(ds, flat))
+    elif amb.startswith("ambiguous_date_column:"):
         variants = list(_date_variants(ds, amb.split(":", 1)[1].split("|")))
     else:
         flat = _flat_from(amb, ds)
@@ -126,7 +152,8 @@ def resolve(question: str, unavailable: List[str], ds, catalog,
     for label, d2 in variants:
         plan = Planner(d2, catalog).plan(question)
         left = [u for u in plan.unavailable
-                if u.startswith(("ambiguous_date_column:", "ambiguous_join_path:"))]
+                if u.startswith(("ambiguous_date_column:", "ambiguous_join_path:",
+                                 "alternative_path:"))]
         if left or not plan.is_answerable():
             continue
         sql = SQLCompiler(d2, catalog).compile(plan)

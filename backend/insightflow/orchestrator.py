@@ -239,15 +239,32 @@ class Orchestrator:
         # 2b. Adaptive clarification: an ambiguity (date column / join
         # path) is only worth a question if the candidate readings give
         # different answers.
-        if ds.kind != "demo" and plan.unavailable and _ds_override is None:
+        _alt_items = []
+        _skip_alt_caveat = False
+        if ds.kind != "demo" and getattr(ds, "rel", None) is not None \
+                and plan.is_answerable():
+            for _c in ([d.column for d in plan.dims] +
+                       [f.column for f in plan.filters if f.column]):
+                _sr = ds.rel.source(_c)
+                if _sr is not None and _sr.kind == "safe" and _sr.alt_paths:
+                    _alt_items.append(f"alternative_path:{_c}")
+                    break
+        if ds.kind != "demo" and (plan.unavailable or _alt_items) \
+                and _ds_override is None:
             try:
                 from .clarify.materiality import resolve as _resolve_amb
                 from .execution.executor import db_file_path
-                _res = _resolve_amb(question, plan.unavailable, ds, catalog,
-                                    db_file_path())
+                _res = _resolve_amb(question, list(plan.unavailable) + _alt_items,
+                                    ds, catalog, db_file_path())
             except Exception:
                 _res = None
-            if _res is not None and _res.kind == "equivalent":
+            if _res is not None and _res.kind == "equivalent" \
+                    and _res.ambiguity.startswith("alternative_path:"):
+                self._extra_notes.append(
+                    "path_choice_immaterial=" + _res.ambiguity + ": "
+                    + str(len(_res.candidates)) + " join routes give identical results")
+                _skip_alt_caveat = True
+            elif _res is not None and _res.kind == "equivalent":
                 return self.ask(
                     original_question, _ds_override=_res.candidates[0].ds,
                     _retry=_retry, _extra_notes=self._extra_notes + [
@@ -534,6 +551,9 @@ class Orchestrator:
             try:
                 from .reliability.mention_coverage import unrepresented_column_mentions
                 _cm = unrepresented_column_mentions(question, sql, ds)
+                from .reliability.mention_coverage import unrepresented_column_words
+                _cm = _cm + [c for c in unrepresented_column_words(question, sql, ds)
+                             if c not in _cm]
             except Exception:
                 _cm = []
             try:
@@ -646,7 +666,19 @@ class Orchestrator:
             _weak = [f"{e.child_table}.{e.child_col}->{e.parent_table}.{e.parent_col}"
                      for e in _rel_ctx.schema.edges if e.status == "inferred"
                      and re.search(rf"\b{re.escape(e.parent_table)}\b", sql)
+                     and re.search(rf"\b{re.escape(e.child_table)}\b", sql)
                      and e.child_col in sql]
+            _alts = []
+            for _c in ([d.column for d in plan.dims] +
+                       [f.column for f in plan.filters if f.column]):
+                _sr = _rel_ctx.source(_c)
+                if _sr is not None and _sr.alternatives:
+                    _alts.append(f"'{_c}' is read through "
+                                 f"{_sr.steps[-1].edge.child_table}."
+                                 f"{_sr.steps[-1].edge.child_col}; it is also "
+                                 f"reachable via {_sr.alternatives[0]}")
+            if _alts and not _skip_alt_caveat:
+                _caveats.append("; ".join(_alts))
             if _weak:
                 _caveats.append("relationship inferred from names and values, "
                                 "not declared: " + ", ".join(_weak))

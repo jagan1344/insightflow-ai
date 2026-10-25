@@ -135,6 +135,10 @@ def unrepresented_table_nouns(question: str, sql: str, rel) -> List[str]:
             fk = fk_noun_column(rel, noun)
             if fk and fk.lower() in sql_l:
                 break
+            if fk and not re.search(
+                    rf"\b(?:how\s+many|number\s+of|count\s+of|count)\s+"
+                    rf"(?:distinct\s+|unique\s+|different\s+)?{re.escape(noun)}\b", ql):
+                break      # a many-to-one parent merely mentioned (the base rows already reference it)
             out.append(noun)
             break
     return out
@@ -167,7 +171,8 @@ def unrepresented_years(question: str, sql: str) -> List[str]:
     """A four-digit year named in the question that the SQL never uses
     means the time constraint was silently dropped."""
     ys = set(year_tokens(question))
-    return sorted(y for y in ys if y not in sql)
+    return sorted(y for y in ys if y not in sql and str(int(y) + 1) not in sql
+                  and str(int(y) - 1) not in sql)
 
 
 _CMP_BEFORE = re.compile(
@@ -213,4 +218,48 @@ def unrepresented_numbers(question: str, sql: str,
         if not any(re.search(rf"(?<![\d.]){re.escape(p)}(?:\.0+)?(?![\d])", sql_n)
                    for p in pats):
             out.append(tok)
+    return out
+
+
+_GENERIC_TOK = {"date", "name", "number", "code", "type", "amount", "total",
+                "value", "count", "time", "year", "month", "status", "id", "key"}
+
+
+def unrepresented_column_words(question: str, sql: str, ds) -> List[str]:
+    """A distinctive word of some column's name appears in the question
+    ("returned", "late") but that column is never used by the SQL."""
+    rel = getattr(ds, "rel", None)
+    if ds is None or ds.kind == "demo" or not sql or rel is None:
+        return []          # table names are only trustworthy for registered relational data
+    ql = re.sub(r"[^a-z0-9]+", " ", question.lower())
+    sql_l = sql.lower()
+    skip = set()
+    for t in re.split(r"[^a-z0-9]+", ds.table.lower()):
+        skip |= {t, t.rstrip("s"), t.rstrip("s") + "s"}
+    if rel is not None:
+        from ..knowledge.rel_context import parent_nouns
+        for t in rel.schema.tables:
+            for n in parent_nouns(t):
+                skip |= set(n.split())
+    anchor_toks = [t for t in re.split(r"[^a-z0-9]+", ds.table.lower()) if len(t) >= 5]
+    # a verb form of the base entity ("enrolled" for enrollments) is not a qualifier
+    words = [w for w in ql.split() if len(w) >= 4 and w not in skip
+             and not any(w[:5] == t[:5] for t in anchor_toks)]
+    out = []
+    for c, info in ds.columns.items():
+        if info.role == "id":
+            continue
+        toks = [t for t in re.split(r"[^a-z0-9]+", c.lower())
+                if len(t) >= 4 and t not in _GENERIC_TOK and t not in skip]
+        if not toks or c.lower() in sql_l:
+            continue
+        for w in words:
+            if any(w == t or w.startswith(t[:max(4, len(t) - 2)]) for t in toks):
+                # another referenced column carrying the same token satisfies it
+                if any(c2.lower() in sql_l and any(w.startswith(t2[:max(4, len(t2) - 2)])
+                       for t2 in re.split(r"[^a-z0-9]+", c2.lower()) if len(t2) >= 4)
+                       for c2 in ds.columns):
+                    continue
+                out.append(f"{w} ({c})")
+                break
     return out

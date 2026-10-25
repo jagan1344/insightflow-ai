@@ -39,6 +39,8 @@ class DimSource:
     via_fk: str = ""                  # role alias: the anchor FK column
     numeric: bool = False             # numeric attribute of a many-to-one parent
     date: bool = False                # date attribute of a many-to-one parent
+    alternatives: List[str] = field(default_factory=list)   # other safe paths NOT used
+    alt_paths: tuple = ()             # the same, as JoinPath objects
 
 
 @dataclass
@@ -147,7 +149,9 @@ def build_rel_context(db_path: str, anchor: str) -> Optional[RelContext]:
             if res.kind == "unique":
                 p = res.path
                 ctx.sources[name] = DimSource(
-                    name, t, c, "safe", p.steps, p.nullable)
+                    name, t, c, "safe", p.steps, p.nullable,
+                    alternatives=[a.describe() for a in res.alternatives],
+                    alt_paths=tuple(res.alternatives))
             elif res.kind == "fanout":
                 ctx.sources[name] = DimSource(
                     name, t, c, "fanout", res.path.steps)

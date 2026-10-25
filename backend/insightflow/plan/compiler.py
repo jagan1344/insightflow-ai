@@ -444,6 +444,11 @@ class SQLCompiler:
 
         # WHERE / HAVING from filters
         where, having = self._filter_clauses(plan)
+        if plan.top_n and self.kind == "uploaded":
+            # a ranking of "top N genres" must not rank the 'no genre' group
+            for d in plan.dims:
+                if not d.is_time:
+                    where.append(f"{self._dim_target(d.column)[1]} IS NOT NULL")
         for j in self._joins.values():
             if j not in joins_seen:
                 joins.append(j); joins_seen.add(j)

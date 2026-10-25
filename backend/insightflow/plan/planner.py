@@ -966,6 +966,25 @@ def _bind_time_filter(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         return filters
     # 5. A bare year ("in 2025"): the whole calendar year. A single explicit
     # year only - two years mean a comparison, which is handled elsewhere.
+    mb = re.search(r"\b(after|since|from|before|prior\s+to|until|through|up\s+to)\s+"
+                   r"(?:the\s+)?(?:year\s+)?((?:19|20)\d{2})\b(?!\s*-)", ql)
+    mbtw = re.search(r"\bbetween\s+((?:19|20)\d{2})\s+and\s+((?:19|20)\d{2})\b", ql)
+    if mbtw:
+        y1, y2 = sorted((int(mbtw.group(1)), int(mbtw.group(2))))
+        return filters + [FilterExpr(kind="time_range", column=date_col,
+                                     lo=f"{y1:04d}-01-01", hi=f"{y2 + 1:04d}-01-01")]
+    if mb and not re.search(r"\b(vs|versus|compared)\b", ql):
+        cue, y = mb.group(1), int(mb.group(2))
+        lo, hi = "0001-01-01", "9999-12-31"
+        if cue == "after":
+            lo = f"{y + 1:04d}-01-01"
+        elif cue in ("since", "from"):
+            lo = f"{y:04d}-01-01"
+        elif cue.startswith("before") or cue.startswith("prior"):
+            hi = f"{y:04d}-01-01"
+        else:                                  # until / through / up to: inclusive year
+            hi = f"{y + 1:04d}-01-01"
+        return filters + [FilterExpr(kind="time_range", column=date_col, lo=lo, hi=hi)]
     ql_nv = ql
     if ds.kind != "demo":          # digits inside a known value are not years
         for lo, _c in _value_mentions(question, _value_index(ds)):
@@ -1107,7 +1126,9 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
             core_hits = []
             for cname in ds.columns:
                 ct = [t for t in _norm_words(cname).split() if t not in _UNIT]
-                if ct and all(t in _pt for t in ct):
+                if ct and all(any(t == p_ or (min(len(t), len(p_)) >= 4 and
+                                              (t.startswith(p_) or p_.startswith(t)))
+                                  for p_ in _pt) for t in ct):
                     core_hits.append(cname)
             for cname in ds.columns:
                 n = _norm_words(cname)
@@ -1574,11 +1595,16 @@ def _find_unknown_proper_nouns(question: str, ds: ActiveDataset,
             for a in k.aliases:
                 known |= set(re.findall(r"[a-z0-9]+", a.lower()))
             known |= set(re.findall(r"[a-z0-9]+", k.display_name.lower()))
-    toks = list(_TITLE.finditer(question))
+    masked = question
+    for lo, _c in _value_mentions(question, idx):
+        for m in re.finditer(rf"(?<![a-z0-9]){re.escape(lo)}(?![a-z0-9])",
+                             masked.lower()):
+            masked = masked[:m.start()] + " " * (m.end() - m.start()) + masked[m.end():]
+    toks = list(_TITLE.finditer(masked))
     phrases, cur = [], []
     for i, m in enumerate(toks):
-        adj = cur and question[cur[-1].end():m.start()].strip() == ""
-        if cur and adj and question[cur[-1].end():m.start()] == " ":
+        adj = cur and masked[cur[-1].end():m.start()].strip() == ""
+        if cur and adj and masked[cur[-1].end():m.start()] == " ":
             cur.append(m)
         else:
             if cur:
@@ -1598,7 +1624,7 @@ def _find_unknown_proper_nouns(question: str, ds: ActiveDataset,
         phrase = " ".join(words)
         if phrase in idx:
             continue
-        before = question[:ph[0].start()].lower()
+        before = masked[:ph[0].start()].lower()
         if not re.search(r"\b(?:for|in|at|by|with|from|of|to|named|called|on|"
                          r"about|vs|versus|and|or|than)\s+(?:the\s+)?"
                          r"(?:[a-z_]+\s+)?$", before):
@@ -1699,7 +1725,7 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
                 continue
             w = [x for x in re.split(r"[^a-z0-9]+", c.lower()) if x]
             cp = r"\s+".join(re.escape(x) for x in w)
-            m_a = re.search(rf"\b(?:with|where|whose|having)\s+(?:an?\s+|the\s+)?{cp}\s*"
+            m_a = re.search(rf"\b(?:with|where|whose|having|had|has|have)\s+(?:an?\s+|the\s+)?{cp}\s*"
                             rf"(?:\b({_CMP_ALT})\b\s*)?(?<![\d.])(\d+(?:\.\d+)?)(?![\d])", ql)
             if m_a and m_a.group(1):
                 v = float(m_a.group(2))
@@ -1709,7 +1735,7 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
     for flat, src in cand:
         words = [w for w in re.split(r"[^a-z0-9]+", flat.lower()) if w]
         colpat = r"\s+".join(
-            rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}s?" for w in words)
+            rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}(?:s|d|ed)?" for w in words)
         num = r"(\d+(?:\.\d+)?)"
         m1 = re.search(rf"(?:\b({_CMP_ALT})\s*)?(?<![\d.]){num}\s*-?\s*{colpat}\b", ql)
         m2 = re.search(rf"\b{colpat}\s*(?:\b({_CMP_ALT})\b\s*)?(?<![\d.]){num}(?![\d])", ql)
@@ -2518,6 +2544,11 @@ class Planner:
         _unknown_values += _find_conflicting_conditions(question, ds)
         _unknown_values += _find_negative_existence(question, ds)
         _unknown_values += _find_hierarchy_refs(question, ds)
+        _mper = re.search(r"\b(?:average|avg|mean)\b[^?]*?\bper\s+([a-z_]+)", ql_lo)
+        if _mper and ds.kind != "demo" and any(
+                n == _mper.group(1) or n.rstrip("s") == _mper.group(1).rstrip("s")
+                for n, _c in bound_dims):
+            _unknown_values.append(f"ambiguous_average_per:{_mper.group(1)}")
         _yamb = _year_ambiguity(question, ds)
         if _yamb:
             _unknown_values.append("ambiguous_year:" + "|".join(map(str, _yamb)))

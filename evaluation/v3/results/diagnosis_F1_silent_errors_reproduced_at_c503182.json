@@ -1,0 +1,186 @@
+{
+ "C05": {
+  "question": "Total tuition paid by students from California",
+  "action": "ANSWER",
+  "confidence": 0.9999999999999999,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 1.0,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT j_student_id.student_name AS student_name, SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.home_state = 'California' GROUP BY j_student_id.student_name ORDER BY sum_tuition_paid DESC",
+  "n_rows": 7,
+  "plan": {
+   "intent_kind": "breakdown",
+   "table": "enrollments",
+   "measures": [
+    {
+     "kpi_id": "sum_tuition_paid",
+     "formula": "SUM(\"tuition_paid\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "student_name",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "home_state",
+     "value": "California",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "grain": null,
+   "comparison": null,
+   "contribution": null,
+   "relative_stat": null,
+   "top_n": null,
+   "share_of_total": false,
+   "order_by": "measure_desc",
+   "unavailable": [],
+   "notes": []
+  },
+  "fidelity_ok": true,
+  "fidelity_failed": [],
+  "notes": [
+   "pass:breakdown_reconciles:groups sum 51248.5 == total 51248.5",
+   "active_dataset=university table=enrollments",
+   "plan_kind=breakdown"
+  ]
+ },
+ "C24": {
+  "question": "Total tuition paid by students from Texas and Ohio",
+  "action": "ANSWER",
+  "confidence": 0.9999999999999999,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 1.0,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT j_student_id.student_name AS student_name, SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.home_state IN ('Texas', 'Ohio') GROUP BY j_student_id.student_name ORDER BY sum_tuition_paid DESC",
+  "n_rows": 36,
+  "plan": {
+   "intent_kind": "breakdown",
+   "table": "enrollments",
+   "measures": [
+    {
+     "kpi_id": "sum_tuition_paid",
+     "formula": "SUM(\"tuition_paid\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "student_name",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [
+    {
+     "kind": "in",
+     "column": "home_state",
+     "value": [
+      "Texas",
+      "Ohio"
+     ],
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "grain": null,
+   "comparison": null,
+   "contribution": null,
+   "relative_stat": null,
+   "top_n": null,
+   "share_of_total": false,
+   "order_by": "measure_desc",
+   "unavailable": [],
+   "notes": []
+  },
+  "fidelity_ok": true,
+  "fidelity_failed": [],
+  "notes": [
+   "pass:breakdown_reconciles:groups sum 399643 == total 399643",
+   "active_dataset=university table=enrollments",
+   "plan_kind=breakdown"
+  ]
+ },
+ "C29": {
+  "question": "Total tuition paid for enrollments completed in 2031",
+  "action": "ANSWER",
+  "confidence": 0.979,
+  "signals": {
+   "sql_validity": 1.0,
+   "schema_match": 1.0,
+   "kpi_match": 1.0,
+   "context_consistency": 1.0,
+   "data_completeness": 1.0,
+   "evidence_strength": 0.7,
+   "result_consistency": 1.0,
+   "intent_coverage": 1.0,
+   "plan_fidelity": 1.0,
+   "verification_violations": 0.0,
+   "sensitivity_flags": 0.0
+  },
+  "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\"",
+  "n_rows": 1,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "table": "enrollments",
+   "measures": [
+    {
+     "kpi_id": "sum_tuition_paid",
+     "formula": "SUM(\"tuition_paid\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "grain": null,
+   "comparison": null,
+   "contribution": null,
+   "relative_stat": null,
+   "top_n": null,
+   "share_of_total": false,
+   "order_by": "",
+   "unavailable": [],
+   "notes": []
+  },
+  "fidelity_ok": true,
+  "fidelity_failed": [],
+  "notes": [
+   "active_dataset=university table=enrollments",
+   "plan_kind=direct_kpi"
+  ]
+ }
+}

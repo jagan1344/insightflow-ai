@@ -87,6 +87,7 @@ class JoinPath:
 class PathResolution:
     kind: str              # "same" | "unique" | "ambiguous" | "fanout" | "none"
     paths: List[JoinPath] = field(default_factory=list)
+    alternatives: List[JoinPath] = field(default_factory=list)   # longer safe paths not used
 
     @property
     def path(self) -> Optional[JoinPath]:
@@ -325,7 +326,7 @@ class RelationalSchema:
             m = min(len(p.steps) for p in safe)
             best = [p for p in safe if len(p.steps) == m]
             return PathResolution("unique" if len(best) == 1 else "ambiguous",
-                                  best)
+                                  best, [p for p in safe if p not in best])
         if found:
             m = min(len(p.steps) for p in found)
             best = [p for p in found if len(p.steps) == m]

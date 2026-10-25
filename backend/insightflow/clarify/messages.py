@@ -65,6 +65,10 @@ def targeted_message(unavailable: List[str], ds) -> Optional[str]:
             name, _, why = rest.partition("=")
             parts.append(f"'{name}' is both included and excluded ({why}). "
                          f"Which did you mean?")
+        elif kind == "ambiguous_average_per":
+            parts.append(f"'average ... per {rest}' can mean the overall total "
+                         f"divided by the number of {rest}s (one figure), or a "
+                         f"separate average for each {rest}. Which do you want?")
         elif kind == "unsupported_negative_existence":
             parts.append("Finding things that have NO matching records (\""
                          + rest + "\") needs an anti-join, which isn't "
