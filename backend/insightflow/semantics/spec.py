@@ -40,10 +40,12 @@ def requested_shape(question: str, ds=None) -> str:
         try:
             from ..plan.planner import _value_index, _value_mentions
             for lo, _c in _value_mentions(question, _value_index(ds)):
+                q = re.sub(rf"\bby\s+{re.escape(lo)}(?:\s+(?!by\b|for\b|in\b)[a-z_]+)?", " ", q)   # agent / filter
                 q = q.replace(lo, " ")
         except Exception:
             pass
     q = _AGENT.sub(" ", q)
+    q = re.sub(r"\bacross\s+(?:all|the\s+whole|every)\b", " ", q)
     if _CMP_Q.search(q):
         return "comparison"
     if _TREND_Q.search(q):

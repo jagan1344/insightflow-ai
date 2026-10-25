@@ -692,6 +692,11 @@ class Orchestrator:
         for _w in getattr(self, "_unexplained_soft", []):
             _caveats.append(f"'{_w}' was not mapped to any column or value and was not applied")
         self._unexplained_soft = []
+        for _n in getattr(self, "_extra_notes", []):
+            if _n.startswith(("ambiguity_immaterial", "path_choice_immaterial")):
+                _caveats.append("the question could be read more than one way; every reading "
+                                "gave this same result")
+                break
         # 11e. Standing caveats that must not be silent: grain of related
         # measures and joins that rest on an inferred (undeclared) FK.
         _rel_ctx = getattr(ds, "rel", None)
