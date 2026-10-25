@@ -25,7 +25,8 @@ Everything here was produced on 2026-10-25 on branch `claude/insightflow-ai-buil
 ## Reproduce
     cd backend && python -m pytest -q                                   # 526 passed, 3 warnings
     cd ../evaluation/v5_provisional && python validate_v5.py            # ALL CHECKS PASSED
-    cd ../../research_improvement/eval && sha256sum -c V5_MANIFEST.sha256   # run from evaluation/v5_provisional (paths are relative to it)
+    sha256sum -c ../../research_improvement/eval/V5_MANIFEST.sha256     # from evaluation/v5_provisional (data/*.db are rebuilt byte-identically)
+    cd ../../research_improvement/eval
     python run_v5.py A0 <new_label>                                     # requires backend tree 00db6e2
     for c in A1 A2 A3 A4 A5 A6 A7; do python run_v5.py $c <label>; done
     for c in B1 B2 B3 B4 B5 B6; do python run_v5_leave_one_in.py $c <label>; done
