@@ -36,6 +36,10 @@ def requested_shape(question: str, ds=None) -> str:
     scalar | grouped | ranking | comparison | trend | unspecified. Known data values are
     masked first ("insured by Medicaid" is a filter, not a grouping)."""
     q = question.lower()
+    # "driven by drivers rated 4.8": a passive agent, not a grouping (grouping verbs and "by each" excepted)
+    from ..plan.planner import _is_passive_agent
+    q = re.sub(r"\b([a-z]+)\s+by\s+(?!each\b|every\b|all\b|by\b|per\b)([a-z_\-]+)",
+               lambda m: " " if _is_passive_agent(m.group(1), q[m.start(2):]) else m.group(0), q)
     if ds is not None and getattr(ds, "kind", "demo") != "demo":
         try:
             from ..plan.planner import _value_index, _value_mentions

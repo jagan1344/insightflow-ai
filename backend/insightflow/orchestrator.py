@@ -129,6 +129,36 @@ def _legacy_intent_of(plan: AnalyticalPlan) -> str:
 _LAST_SCHEMA: dict = {}
 
 
+def _qualifies_used_column(entry: str, question: str, sql: str) -> bool:
+    """'loss (loss_dt)' in "cause of loss": the word only qualifies another column ('cause') that the
+    SQL does use, so it is not an unused mention."""
+    m = re.match(r"(\w+) \(", entry)
+    if not m:
+        return False
+    w = re.escape(m.group(1))
+    q = re.search(r"\b(\w+)\s+of\s+(?:the\s+)?" + w + r"\b", question.lower())
+    return bool(q and len(q.group(1)) >= 3 and q.group(1) in (sql or "").lower())
+
+
+def _membership_date(entry: str, question: str, sql: str, ds) -> bool:
+    """'customers enrolled in Budget Billing': 'enrolled' names the date column of the very table the
+    SQL already filters through; with no time expression in the question it adds no condition."""
+    m = re.match(r"\w+ \((\w+)\)$", entry)
+    rel = getattr(ds, "rel", None)
+    if not m or rel is None:
+        return False
+    src = rel.source(m.group(1))
+    toks = set(re.split(r"[^a-z0-9]+", m.group(1).lower()))
+    if src is None or not (getattr(src, "date", False) or toks & {"dt", "date", "on", "at", "ts"}
+                           or (ds.columns.get(m.group(1)) is not None and ds.columns[m.group(1)].role == "date")):
+        return False
+    if re.search(r"\b(?:19|20)\d{2}\b|\b(?:january|february|march|april|may|june|july|august|september|"
+                 r"october|november|december|year|month|quarter|week|day|since|before|after|between)\b",
+                 question.lower()):
+        return False
+    return f'"{src.table}"' in (sql or "") or f" {src.table} " in (sql or "")
+
+
 def _schema_change_notes(ds) -> List[str]:
     """Compare the anchor's schema with what was seen on the previous ask
     and report what changed (columns/tables/relationships)."""
@@ -162,7 +192,7 @@ class Orchestrator:
 
     # ==================================================================
     def ask(self, question: str, *, _ds_override=None, _retry: bool = False,
-            _extra_notes: Optional[List[str]] = None) -> InsightResponse:
+            _extra_notes: Optional[List[str]] = None, _nested: bool = False) -> InsightResponse:
         ds = _ds_override or get_active_dataset()
         self._cur_ds = ds
         self._extra_notes = list(_extra_notes or [])
@@ -241,6 +271,18 @@ class Orchestrator:
             self._extra_notes.append(f"vocabulary_error={type(_e).__name__}")
         for _rw in self._vocab:
             self._extra_notes.append("vocabulary: " + _rw.describe())
+
+        # 0c. Composite questions whose formula the wording states (percentage of rows, share of a
+        # total, explicit ratio, ordered period difference): each part is answered by the full
+        # pipeline and the parts are combined only when both are single answered numbers.
+        if ds.kind != "demo" and not _nested:
+            from .composite import detect as _detect_composite
+            try:
+                _comp = _detect_composite(question, ds)
+            except Exception:
+                _comp = None
+            if _comp is not None:
+                return self._composite_response(_asked_q, _comp, ds)
 
         # 1. Plan the question against the active dataset.
         planner = Planner(ds, catalog)
@@ -582,6 +624,9 @@ class Orchestrator:
                 from .reliability.mention_coverage import unrepresented_column_words
                 _cm = _cm + [c for c in unrepresented_column_words(question, sql, ds)
                              if c not in _cm]
+                # "cause of loss": a word that only qualifies a column the SQL does use
+                _cm = [c for c in _cm if not _qualifies_used_column(c, question, sql)
+                       and not _membership_date(c, question, sql, ds)]
                 from .plan.planner import _flag_inclusion_columns
                 _inc = _flag_inclusion_columns(question, ds)
                 _cm = [c for c in _cm if not any(re.match(rf"\w+ \({re.escape(i)}\)$", c) or c == i
@@ -878,10 +923,61 @@ class Orchestrator:
         self.memory.add(question, decision.action, confidence.score)
         # Capture context for Phase 5 follow-ups ONLY when we actually
         # answered. CLARIFY/ABSTAIN leaves prior context intact.
-        if decision.action in (ANSWER, WARN):
+        if decision.action in (ANSWER, WARN) and not _nested:
             capture_context(question, self._ctx,
                              dataset_id=getattr(ds, "id", None))
         return response
+
+    # ==================================================================
+    def _composite_response(self, asked: str, comp, ds) -> InsightResponse:
+        import dataclasses
+        from .execution.executor import run_sql
+        parts = [Orchestrator(llm=self.llm).ask(comp.a, _nested=True),
+                 Orchestrator(llm=self.llm).ask(comp.b, _nested=True)]
+        base = parts[0]
+        notes = [f"composite={comp.kind}: {comp.describe}",
+                 f"composite_part_a={comp.a}", f"composite_part_b={comp.b}"]
+        for i, r in enumerate(parts):
+            notes += [f"part_{'ab'[i]}:{n}" for n in (r.notes or [])]
+        diag = {"composite": {"kind": comp.kind, "formula": comp.describe,
+                              "parts": [{"question": q, "action": r.decision.action,
+                                         "reason": r.decision.reason, "sql": r.sql,
+                                         "confidence": r.confidence.score}
+                                        for q, r in zip((comp.a, comp.b), parts)]}}
+        scalar = all(r.decision.action in (ANSWER, WARN) and r.result is not None and r.result.ok
+                     and len(r.result.rows) == 1 and len(r.result.rows[0]) == 1 and r.sql for r in parts)
+        if not scalar:
+            why = "; ".join(f"'{q}': {r.decision.reason}" for q, r in zip((comp.a, comp.b), parts)
+                            if r.decision.action not in (ANSWER, WARN)) or \
+                "a part did not produce a single number"
+            dec = Decision(CLARIFY, f"this is computed as {comp.describe}, but a part could not be "
+                                    f"answered safely ({why})")
+            conf = dataclasses.replace(base.confidence, score=min(0.30, base.confidence.score))
+            return dataclasses.replace(base, question=asked, decision=dec, confidence=conf,
+                                       explanation=dec.reason[0].upper() + dec.reason[1:] + ".",
+                                       recommendation=None, chart={"kind": "none"},
+                                       notes=notes, diagnostics={**(base.diagnostics or {}), **diag})
+        sql = comp.formula.format(A=parts[0].sql.rstrip("; "), B=parts[1].sql.rstrip("; "))
+        res = run_sql(sql)
+        if not res.ok or not res.rows or res.rows[0][0] is None:
+            dec = Decision(CLARIFY, f"this is computed as {comp.describe}, but the combination could not "
+                                    f"be evaluated (for example, division by zero)")
+            conf = dataclasses.replace(base.confidence, score=min(0.30, base.confidence.score))
+            return dataclasses.replace(base, question=asked, sql=sql, decision=dec, confidence=conf,
+                                       explanation=dec.reason[0].upper() + dec.reason[1:] + ".",
+                                       recommendation=None, chart={"kind": "none"}, notes=notes,
+                                       diagnostics={**(base.diagnostics or {}), **diag})
+        val = res.rows[0][0]
+        dec = Decision(WARN, f"answer rests on: computed as {comp.describe}")
+        conf = dataclasses.replace(base.confidence,
+                                   score=min(r.confidence.score for r in parts),
+                                   signals={**base.confidence.signals, "composite_parts": 2.0})
+        expl = (f"{val:,.4g} — computed as {comp.describe}. Part A ({comp.a}): "
+                f"{parts[0].result.rows[0][0]}; part B ({comp.b}): {parts[1].result.rows[0][0]}.")
+        return dataclasses.replace(base, question=asked, sql=sql, decision=dec, confidence=conf,
+                                   result=res, explanation=expl, recommendation=None,
+                                   chart={"kind": "none"}, notes=notes,
+                                   diagnostics={**(base.diagnostics or {}), **diag})
 
     # ==================================================================
     def _contribution_summary(self, plan, result, kpi) -> Analysis:

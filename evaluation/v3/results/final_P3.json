@@ -1,0 +1,581 @@
+{
+  "summary": {
+    "n": 32,
+    "answerable": 24,
+    "correct": 22,
+    "answered_answerable": 22,
+    "silent_wrong": 1,
+    "abstained_answerable": 2,
+    "should_clarify": 8,
+    "correct_clarify": 7,
+    "errors": 0,
+    "mean_conf_silent_wrong": 0.979,
+    "silent_wrong_conf_ge_0_7": 1,
+    "latency_ms_p50": 103,
+    "latency_ms_p95": 169,
+    "calibration_by_confidence_band": {
+      "[0,0.3)": {
+        "answered": 0,
+        "correct": 0,
+        "silent_wrong": 0
+      },
+      "[0.3,0.7)": {
+        "answered": 0,
+        "correct": 0,
+        "silent_wrong": 0
+      },
+      "[0.7,0.9)": {
+        "answered": 2,
+        "correct": 2,
+        "silent_wrong": 0
+      },
+      "[0.9,1.0]": {
+        "answered": 21,
+        "correct": 20,
+        "silent_wrong": 1
+      }
+    }
+  },
+  "by_family": {
+    "single": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "nulls": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "grouped": {
+      "n": 2,
+      "correct": 0,
+      "silent_wrong": 0
+    },
+    "join_filter": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "unusual_value": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "fanout": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "distinct": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "topn": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "ambiguous": {
+      "n": 3,
+      "correct": 3,
+      "silent_wrong": 0
+    },
+    "zero_fact": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "unknown": {
+      "n": 2,
+      "correct": 2,
+      "silent_wrong": 0
+    },
+    "time": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "grain": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "foreign_measure": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "numeric_filter": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "multi_value": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    },
+    "negation": {
+      "n": 1,
+      "correct": 0,
+      "silent_wrong": 1
+    },
+    "empty": {
+      "n": 1,
+      "correct": 1,
+      "silent_wrong": 0
+    }
+  },
+  "results": [
+    {
+      "db": "university",
+      "id": "C01",
+      "family": "single",
+      "question": "What is the total tuition paid?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 119,
+      "sys_value": "698600.43",
+      "expected": "[(698600.43,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C02",
+      "family": "single",
+      "question": "How many enrollments were there?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 126,
+      "sys_value": "500",
+      "expected": "[(500,)]",
+      "sql": "SELECT COUNT(*) AS row_count FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C03",
+      "family": "nulls",
+      "question": "What is the average grade points?",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 169,
+      "sys_value": "1.8898356807511738",
+      "expected": "[(1.8898356807511738,)]",
+      "sql": "SELECT AVG(\"enrollments\".\"grade_points\") AS avg_grade_points FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C04",
+      "family": "grouped",
+      "question": "Total tuition paid by home state",
+      "kind": "rowset",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "abstained",
+      "latency_ms": 103,
+      "sys_value": "None",
+      "expected": "[('California', 51248.51), ('New York', 247708.47), ('Ohio', 240032.96), ('Texas', 159610.49)]",
+      "sql": "SELECT j_student_id.home_state AS home_state, SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id GROUP BY j_student_id.home_state ORDER BY sum_tuition_paid DESC"
+    },
+    {
+      "db": "university",
+      "id": "C05",
+      "family": "join_filter",
+      "question": "Total tuition paid by students from California",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 102,
+      "sys_value": "51248.51",
+      "expected": "[(51248.51,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.home_state = 'California'"
+    },
+    {
+      "db": "university",
+      "id": "C06",
+      "family": "join_filter",
+      "question": "Total tuition paid for the course Calculus I",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 102,
+      "sys_value": "94550.17",
+      "expected": "[(94550.17,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE j_course_id.course_title = 'Calculus I'"
+    },
+    {
+      "db": "university",
+      "id": "C07",
+      "family": "unusual_value",
+      "question": "Total tuition paid for Art History: 1800\u20131900",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 130,
+      "sys_value": "90870.81",
+      "expected": "[(90870.81,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE j_course_id.course_title = 'Art History: 1800\u20131900'"
+    },
+    {
+      "db": "university",
+      "id": "C08",
+      "family": "unusual_value",
+      "question": "Total tuition paid for Women's Studies",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 114,
+      "sys_value": "83769.19",
+      "expected": "[(83769.19,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE j_course_id.course_title = 'Women''s Studies'"
+    },
+    {
+      "db": "university",
+      "id": "C09",
+      "family": "fanout",
+      "question": "Total tuition paid for courses taught by Prof. Ngozi Eze-Bello",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 123,
+      "sys_value": "169295.89",
+      "expected": "[(169295.89,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" WHERE EXISTS (SELECT 1 FROM \"courses\" AS \"x1_0\" JOIN \"teaching\" AS \"x1_1\" ON \"x1_1\".\"course_id\" = \"x1_0\".\"course_id\" JOIN \"instructors\" AS \"x1_2\" ON \"x1_2\".\"instr_id\" = \"x1_1\".\"instr_id\" WHERE \"x1_0\".\"course_id\" = \"enrol"
+    },
+    {
+      "db": "university",
+      "id": "C10",
+      "family": "distinct",
+      "question": "How many distinct students enrolled in Calculus I?",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 120,
+      "sys_value": "43",
+      "expected": "[(43,)]",
+      "sql": "SELECT COUNT(DISTINCT \"enrollments\".\"student_id\") AS distinct_student_id FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE j_course_id.course_title = 'Calculus I' AND \"enrollments\".\"enrolled_on\" IS NOT NULL"
+    },
+    {
+      "db": "university",
+      "id": "C11",
+      "family": "topn",
+      "question": "Top 3 home states by total tuition paid",
+      "kind": "ordered",
+      "action": "ANSWER",
+      "confidence": 0.993,
+      "outcome": "correct",
+      "latency_ms": 165,
+      "sys_value": "[('New York', 247708.47), ('Ohio', 240032.96), ('Texas', 159610.49)]",
+      "expected": "[('New York', 247708.47), ('Ohio', 240032.96), ('Texas', 159610.49)]",
+      "sql": "SELECT j_student_id.home_state AS home_state, SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.home_state IS NOT NULL GROUP BY j_student_id.home_state ORDER BY sum_tuitio"
+    },
+    {
+      "db": "university",
+      "id": "C12",
+      "family": "ambiguous",
+      "question": "Total tuition paid by department",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "correct_clarify",
+      "latency_ms": 156,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C13",
+      "family": "ambiguous",
+      "question": "Total tuition paid for Computer Science",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 104,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "university",
+      "id": "C14",
+      "family": "zero_fact",
+      "question": "Total tuition paid for Classics",
+      "kind": "empty_ok",
+      "action": "WARN",
+      "confidence": 0.899,
+      "outcome": "correct",
+      "latency_ms": 239,
+      "sys_value": "None",
+      "expected": "[(None,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id LEFT JOIN departments AS j_student_id_major_code ON j_student_id_major_code.dept_code = j_student_id.major_code WHERE j_student_id_ma"
+    },
+    {
+      "db": "university",
+      "id": "C15",
+      "family": "unknown",
+      "question": "Total tuition paid for Linguistics",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 104,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C16",
+      "family": "ambiguous",
+      "question": "Total tuition paid in March 2025",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 99,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "university",
+      "id": "C17",
+      "family": "time",
+      "question": "Total tuition paid for enrollments completed in May 2025",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 97,
+      "sys_value": "60194.29",
+      "expected": "[(60194.29,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" WHERE \"enrollments\".\"completed_on\" >= '2025-05-01' AND \"enrollments\".\"completed_on\" < '2025-06-01'"
+    },
+    {
+      "db": "university",
+      "id": "C18",
+      "family": "nulls",
+      "question": "Average grade points by home state",
+      "kind": "rowset",
+      "action": "WARN",
+      "confidence": 1.0,
+      "outcome": "correct",
+      "latency_ms": 102,
+      "sys_value": "[('New York', 1.944342105263158), ('Ohio', 1.9093288590604027), ('Texas', 1.874090909090909), ('California', 1.624864864",
+      "expected": "[('California', 1.6248648648648647), ('New York', 1.944342105263158), ('Ohio', 1.9093288590604027), ('Texas', 1.87409090",
+      "sql": "SELECT j_student_id.home_state AS home_state, AVG(\"enrollments\".\"grade_points\") AS avg_grade_points FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id GROUP BY j_student_id.home_state ORDER BY avg_grade_points DESC"
+    },
+    {
+      "db": "university",
+      "id": "C19",
+      "family": "nulls",
+      "question": "How many enrollments have no grade points?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 95,
+      "sys_value": "74",
+      "expected": "[(74,)]",
+      "sql": "SELECT COUNT(*) AS null_grade_points FROM \"enrollments\" WHERE \"enrollments\".\"grade_points\" IS NULL"
+    },
+    {
+      "db": "university",
+      "id": "C20",
+      "family": "grain",
+      "question": "How many students are there?",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 71,
+      "sys_value": "None",
+      "expected": null,
+      "sql": ""
+    },
+    {
+      "db": "university",
+      "id": "C21",
+      "family": "foreign_measure",
+      "question": "Total credits enrolled",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 33,
+      "sys_value": "1749",
+      "expected": "[(1749,)]",
+      "sql": "SELECT SUM(j_course_id.credits) AS sum_credits FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE \"enrollments\".\"enrolled_on\" IS NOT NULL"
+    },
+    {
+      "db": "university",
+      "id": "C22",
+      "family": "numeric_filter",
+      "question": "Total tuition paid for 4 credit courses",
+      "kind": "scalar",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 120,
+      "sys_value": "353158.36",
+      "expected": "[(353158.36,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE j_course_id.credits = 4"
+    },
+    {
+      "db": "university",
+      "id": "C23",
+      "family": "grouped",
+      "question": "Average tuition paid by home state",
+      "kind": "rowset",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "abstained",
+      "latency_ms": 100,
+      "sys_value": "None",
+      "expected": "[('California', 1220.202619047619), ('New York', 1440.165523255814), ('Ohio', 1348.4997752808988), ('Texas', 1477.874907",
+      "sql": "SELECT j_student_id.home_state AS home_state, AVG(\"enrollments\".\"tuition_paid\") AS avg_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id GROUP BY j_student_id.home_state ORDER BY avg_tuition_paid DESC"
+    },
+    {
+      "db": "university",
+      "id": "C24",
+      "family": "multi_value",
+      "question": "Total tuition paid by students from Texas and Ohio",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 103,
+      "sys_value": "399643.45",
+      "expected": "[(399643.45,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.home_state IN ('Texas', 'Ohio')"
+    },
+    {
+      "db": "university",
+      "id": "C25",
+      "family": "negation",
+      "question": "Total tuition paid excluding California students",
+      "kind": "clarify",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "silent_wrong",
+      "latency_ms": 105,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE (j_student_id.home_state IS NULL OR j_student_id.home_state NOT IN ('California'))"
+    },
+    {
+      "db": "university",
+      "id": "C26",
+      "family": "single",
+      "question": "What is the maximum tuition paid?",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 90,
+      "sys_value": "2499.92",
+      "expected": "[(2499.92,)]",
+      "sql": "SELECT MAX(tuition_paid) AS max_tuition_paid FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C27",
+      "family": "unusual_value",
+      "question": "Total tuition paid by O'Neil, Sam",
+      "kind": "scalar",
+      "action": "ANSWER",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 103,
+      "sys_value": "15435.08",
+      "expected": "[(15435.08,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.student_name = 'O''Neil, Sam'"
+    },
+    {
+      "db": "university",
+      "id": "C28",
+      "family": "unknown",
+      "question": "Total tuition paid by students from Atlantis",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.05,
+      "outcome": "correct_clarify",
+      "latency_ms": 91,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C29",
+      "family": "empty",
+      "question": "Total tuition paid for enrollments completed in 2031",
+      "kind": "empty_ok",
+      "action": "WARN",
+      "confidence": 0.899,
+      "outcome": "correct",
+      "latency_ms": 97,
+      "sys_value": "None",
+      "expected": "[(None,)]",
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" WHERE \"enrollments\".\"completed_on\" >= '2031-01-01' AND \"enrollments\".\"completed_on\" < '2032-01-01'"
+    },
+    {
+      "db": "university",
+      "id": "C30",
+      "family": "fanout",
+      "question": "Total tuition paid by instructor",
+      "kind": "clarify",
+      "action": "CLARIFY",
+      "confidence": 0.3,
+      "outcome": "correct_clarify",
+      "latency_ms": 92,
+      "sys_value": "None",
+      "expected": null,
+      "sql": "SELECT SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\""
+    },
+    {
+      "db": "university",
+      "id": "C31",
+      "family": "topn",
+      "question": "Top 2 courses by total tuition paid",
+      "kind": "ordered",
+      "action": "WARN",
+      "confidence": 0.986,
+      "outcome": "correct",
+      "latency_ms": 102,
+      "sys_value": "[('World History', 96357.35), ('Calculus I', 94550.17)]",
+      "expected": "[('World History', 96357.35), ('Calculus I', 94550.17)]",
+      "sql": "SELECT j_course_id.course_title AS course_title, SUM(\"enrollments\".\"tuition_paid\") AS sum_tuition_paid FROM \"enrollments\" LEFT JOIN courses AS j_course_id ON j_course_id.course_id = enrollments.course_id WHERE j_course_id.course_title IS NOT NULL GROUP BY j_course_id.course_title ORDER BY sum_tuitio"
+    },
+    {
+      "db": "university",
+      "id": "C32",
+      "family": "topn",
+      "question": "Which home state has the highest average grade points?",
+      "kind": "ordered",
+      "action": "WARN",
+      "confidence": 0.979,
+      "outcome": "correct",
+      "latency_ms": 109,
+      "sys_value": "[('New York', 1.944342105263158)]",
+      "expected": "[('New York', 1.944342105263158)]",
+      "sql": "SELECT j_student_id.home_state AS home_state, AVG(\"enrollments\".\"grade_points\") AS avg_grade_points FROM \"enrollments\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = enrollments.student_id WHERE j_student_id.home_state IS NOT NULL GROUP BY j_student_id.home_state ORDER BY avg_grade_"
+    }
+  ]
+}

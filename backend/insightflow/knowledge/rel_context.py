@@ -120,8 +120,10 @@ def build_rel_context(db_path: str, anchor: str) -> Optional[RelContext]:
     cand_by_name: Dict[str, List[Tuple[str, str]]] = {}
     for t, res in per_table.items():
         ti = schema.tables[t]
-        keys = set(ti.pk) | {e.child_col for e in schema.edges
-                             if e.child_table == t}
+        # a member of a composite key that is not a foreign key ('lang' in (driver_id, lang)) is an
+        # attribute of the row, not its identifier
+        keys = (set(ti.pk) if len(ti.pk) == 1 else set()) | {e.child_col for e in schema.edges
+                                                             if e.child_table == t}
         for c, ctype in ti.columns.items():
             if _is_text(ctype) and c not in keys:
                 if res.kind == "unique" and _is_date_col(t, c, ctype):

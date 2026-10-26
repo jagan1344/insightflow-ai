@@ -389,13 +389,16 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
     # Generic AVG(col) for every numeric measure that isn't already the
     # subject of a specific KPI — enables "average X" for any column.
     _UNIT = {"usd", "eur", "gbp", "inr", "amt", "amount", "val", "value",
-             "kg", "lb", "pct", "num", "cnt", "total"}
+             "kg", "lb", "pct", "num", "cnt", "total", "km", "mi", "min", "mins", "hr", "hrs",
+             "sec", "secs", "ft", "m", "count"}
     _cores: Dict[str, List[str]] = {}
     for name, info in ds.columns.items():
         if info.role != "measure":
             continue
         toks = [t for t in re.split(r"[^a-z0-9]+", name.lower()) if t]
         core = " ".join(t for t in toks if t not in _UNIT)
+        if not core and len(toks) >= 2:
+            core = toks[0]            # 'mins_cnt': every token is a unit; the first names the quantity
         if core and core != " ".join(toks):
             _cores.setdefault(core, []).append(name)
     _core_of = {n[0]: c for c, n in _cores.items() if len(n) == 1}

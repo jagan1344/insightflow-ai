@@ -461,6 +461,21 @@ _GROUPING_VERBS = {"grouped", "split", "sorted", "ordered", "broken", "segmented
                    "categorised", "bucketed", "aggregated", "summarized", "summarised", "totaled",
                    "totalled", "organized", "organised", "arranged", "ranked", "divided", "classified"}
 
+_AGENT_QUALIFIER = re.compile(
+    r"^\s*[a-z_\-]+(?:\s+[a-z_\-]+)?\s+(?:rated|with|who|whose|that|which|having|aged|located|based|"
+    r"earning|speaking|scoring|holding|owning)\b")
+
+
+def _is_passive_agent(before: str, phrase: str) -> bool:
+    """'trips driven BY drivers rated 4.8': a past participle before 'by' and a restricting clause after
+    the noun make it an agent, not a grouping. 'tuition paid by home state' (no clause) still groups."""
+    pv = re.search(r"([a-z]+)\s*$", before)
+    return bool(pv and re.fullmatch(r"[a-z]+(?:ed|en|ld|id|ught|ade|one)", pv.group(1))
+                and pv.group(1) not in _GROUPING_VERBS
+                and not re.match(r"(?:each|every|all)\b", phrase)
+                and _AGENT_QUALIFIER.match(phrase))
+
+
 _STOPWORDS_AFTER_BY = {
     "all", "looking", "doing", "using", "the", "a", "an", "my", "our",
     "that", "which", "what", "some", "many", "how", "much",
@@ -627,9 +642,7 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
                 continue
             # "trips driven BY drivers rated 4.8": a passive agent, not a grouping
             # (grouping verbs and "by each X" still group)
-            _pv = re.search(r"([a-z]+)\s*$", ql[:m.start()])
-            if pat.startswith(r"\bby") and _pv and re.fullmatch(r"[a-z]+(?:ed|en|ld|id|ught|ade|one)", _pv.group(1)) \
-                    and _pv.group(1) not in _GROUPING_VERBS and not re.match(r"(?:each|every|all)\b", phrase):
+            if pat.startswith(r"\bby") and _is_passive_agent(ql[:m.start()], phrase):
                 continue
             # "by region and category" or "by region, category, month" —
             # split on "and"/comma first and bind each part in ORDER.
@@ -1264,6 +1277,8 @@ def _null_state_columns(ds: ActiveDataset) -> List[Tuple[str, List[str]]]:
     out = []
     from ..knowledge.abbrev import canon
     for c in ds.columns:
+        if getattr(ds.columns[c], "role", "") == "id":
+            continue                  # "members with no visits" is an anti-join, never "visit_id IS NULL"
         if rel is not None:
             src = rel.source(c)
             if src is not None and (src.kind != "safe" or src.nullable):
@@ -1605,7 +1620,28 @@ def _short_code_ok(question: str, start: int, end: int, cands) -> bool:
     return True
 
 
-def _value_mentions(question: str, idx: dict) -> list:
+def _role_resolved(ql: str, start: int, cands, ds) -> list:
+    """A value of a role-playing lookup ('Old Mill' as pickup or dropoff zone) is resolved to one role
+    when that role's own word stands right before it ('pickup in Old Mill'). Otherwise unchanged."""
+    rel = getattr(ds, "rel", None) if ds is not None else None
+    if rel is None or len({c for c, _ in cands}) < 2:
+        return cands
+    words = {}
+    for c, _o in cands:
+        src = rel.source(c)
+        if src is not None and src.via_fk:
+            words[c] = {t for t in re.split(r"[^a-z0-9]+", c.lower()) if len(t) >= 3}
+    if len(words) < 2:
+        return cands
+    common = set.intersection(*words.values())
+    before = " ".join(ql[max(0, start - 40):start].split()[-3:])
+    hit = [c for c, ws in words.items() if any(re.search(rf"\b{re.escape(w)}", before) for w in ws - common)]
+    if len(hit) == 1:
+        return [(c, o) for c, o in cands if c == hit[0]]
+    return cands
+
+
+def _value_mentions(question: str, idx: dict, ds=None) -> list:
     """Non-overlapping, longest-first mentions of known dim values.
     Returns [(lower_value, [(col, orig), ...])]. A value present in
     more than one column has >1 candidates (ambiguous)."""
@@ -1621,7 +1657,7 @@ def _value_mentions(question: str, idx: dict) -> list:
             if not _short_code_ok(question, m.start(), m.end(), idx[lo]):
                 continue
             taken.append(span)
-            out.append((lo, idx[lo]))
+            out.append((lo, _role_resolved(ql, m.start(), idx[lo], ds)))
             break
     return out
 
@@ -1645,7 +1681,7 @@ def _find_ambiguous_values(question: str, ds: ActiveDataset) -> List[str]:
         return []
     out = []
     rel = getattr(ds, "rel", None)
-    for lo, cands in _value_mentions(question, _value_index(ds)):
+    for lo, cands in _value_mentions(question, _value_index(ds), ds):
         cols = sorted({c for c, _ in cands})
         if len(cols) > 1:
             out.append(f"ambiguous_value:{lo}=" + "|".join(cols))
@@ -1835,7 +1871,7 @@ def _classified_mentions(question: str, ds: ActiveDataset) -> list:
             if not _short_code_ok(question, m.start(), m.end(), idx[lo]):
                 continue
             taken.append(span)
-            found.append((m.start(), m.end(), lo, idx[lo]))
+            found.append((m.start(), m.end(), lo, _role_resolved(ql, m.start(), idx[lo], ds)))
     found.sort()
     out, prev_neg, prev_end = [], False, -1
     for st, en, lo, cands in found:
@@ -1937,7 +1973,7 @@ _FLAG_ANTONYMS = ("faulty|broken|bad|invalid|failed|failing|failure|defective|ma
                   "not\\s+ok|not\\s+working|not\\s+valid")
 _FLAG_NEG_BEFORE = re.compile(r"\b(?:not|never|didn't|did\s+not|doesn't|does\s+not|wasn't|was\s+not|weren't|"
                               r"haven't|hasn't|isn't|aren't|no|without)\s+(?:[a-z']+\s+){0,2}$")
-_FLAG_INCLUDED = re.compile(r"^\s*(?:ones\s+|bookings\s+|rows\s+|records\s+)?(?:included|as\s+well|too)\b")
+_FLAG_INCLUDED = re.compile(r"^\s*(?:[a-z]+\s+)?(?:included|as\s+well|too)\b")
 _FLAG_INCLUDING = re.compile(r"\b(?:including|incl\.?|as\s+well\s+as|plus|even)\s+(?:the\s+|all\s+)?$")
 
 
@@ -2073,6 +2109,7 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
         words = [w for w in re.split(r"[^a-z0-9]+", flat.lower()) if w]
         colpat = r"\s+".join(
             (rf"{re.escape(w[:-3])}(?:ing|ed|e|es)" if w.endswith("ing") and len(w) > 5 else
+             rf"{re.escape(w)}[a-z]*" if 3 <= len(w) <= 4 else
              rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}(?:s|d|ed)?") for w in words)
         num = r"(\d+(?:\.\d+)?)"
         m1 = re.search(rf"(?:\b({_CMP_ALT})\s*)?(?<![\d.]){num}\s*-?\s*{colpat}\b", ql)
@@ -3047,6 +3084,9 @@ class Planner:
             if re.search(r"\bwhich\b", question.lower()) and top_n == 5 \
                     and not re.search(r"\btop\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower()):
                 top_n = 1
+            _wn = re.search(r"\bwhich\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower())
+            if _wn and not re.search(r"\btop\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower()):
+                top_n = int(_wn.group(1)) if _wn.group(1).isdigit() else _WORD_NUMBERS.get(_wn.group(1), top_n)
             order_by = "measure_desc"
             measures = _promote_by_measure(question, measures, catalog)
 
@@ -3055,6 +3095,9 @@ class Planner:
             if re.search(r"\bwhich\b", question.lower()) and top_n == 5 \
                     and not re.search(r"\bbottom\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower()):
                 top_n = 1
+            _wn = re.search(r"\bwhich\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower())
+            if _wn and not re.search(r"\bbottom\s+(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b", question.lower()):
+                top_n = int(_wn.group(1)) if _wn.group(1).isdigit() else _WORD_NUMBERS.get(_wn.group(1), top_n)
             order_by = "measure_asc"
             measures = _promote_by_measure(question, measures, catalog)
 

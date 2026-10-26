@@ -47,8 +47,6 @@ _UNITS: Dict[str, List[str]] = {
     "sq m": ["square metres", "square meters", "square metre", "square meter", "sqm", "m2"],
     "sq ft": ["square feet", "square foot", "sqft"],
     "kg": ["kilograms", "kilogram", "kilos"],
-    "dist": ["distance"], "dur": ["duration"], "prem": ["premium", "premiums"],
-    "rtg": ["rating", "ratings"], "pmt": ["payment", "payments"],
 }
 
 # groups of words that name the same business object; members are rewritten to the one the schema uses

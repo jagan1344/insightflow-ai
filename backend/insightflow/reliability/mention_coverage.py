@@ -254,7 +254,7 @@ def unrepresented_column_words(question: str, sql: str, ds) -> List[str]:
                 skip |= set(n.split())
     anchor_toks = [t for t in re.split(r"[^a-z0-9]+", ds.table.lower()) if len(t) >= 5]
     # a verb form of the base entity ("enrolled" for enrollments) is not a qualifier
-    words = [w for w in ql.split() if len(w) >= 4 and w not in skip
+    words = [w for w in ql.split() if len(w) >= 4 and w not in skip and w not in _FUNCTION_WORDS
              and not any(w[:5] == t[:5] for t in anchor_toks)]
     out = []
     for c, info in ds.columns.items():
@@ -307,7 +307,7 @@ come comes came coming go goes went gone going make makes made making get gets g
 bring brings brought happen happens happened break breakdown ones one included include includes including least most
 across altogether whole entire
 didn doesn don haven hasn wasn weren isn aren couldn shouldn wouldn won leave leaving left omit omitting ignoring
-zero opposed field fields
+zero opposed field fields counting
 percentage proportion share ratio rate times daily january february march april june july august september october
 november december monday tuesday wednesday thursday friday saturday sunday excluding exclude except including include
 included between versus against among each every one two three four five six seven eight nine ten hundred thousand
@@ -337,12 +337,14 @@ def unexplained_words(question: str, ds, catalog=None) -> tuple:
     from ..plan.planner import _value_index, _value_mentions
     ql = question.lower()
     for lo, _c in _value_mentions(question, _value_index(ds)):
-        ql = ql.replace(lo, " ")
+        # "Spanish-speaking": a word hyphenated onto a value only qualifies that value
+        ql = re.sub(rf"(?<![a-z0-9]){re.escape(lo)}(?:-[a-z]+)?", " ", ql)
     known = set(_FUNCTION_WORDS)
     toks = set()
     for c in ds.columns:
         toks |= set(re.split(r"[^a-z0-9]+", c.lower()))
     toks |= set(re.split(r"[^a-z0-9]+", ds.table.lower()))
+    toks |= set(re.split(r"[^a-z0-9]+", str(getattr(ds, "name", "") or "").lower()))   # the dataset's own domain name
     rel = getattr(ds, "rel", None)
     if rel is not None:
         from ..knowledge.rel_context import parent_nouns
@@ -393,6 +395,8 @@ def words_consumed_by_plan(question: str, plan) -> set:
            set(re.split(r"[^a-z0-9]+", str(f.column).lower())) & _FLAG_POLARITY for f in fs):
         from ..plan.planner import _FLAG_POSITIVE
         out |= {w for m in re.finditer(rf"\b(?:{_FLAG_POSITIVE}|{_FLAG_ANTONYMS})\b", ql) for w in m.group(0).split()}
+    if any(f.kind == "cmp" and getattr(f, "op", "") in (">", ">=", "<", "<=") for f in fs):
+        out |= set(re.findall(r"\b(?:or|and)\s+(higher|more|greater|above|over|up|lower|less|fewer|below|under)\b", ql))
     if any(f.kind in ("null", "not_null") for f in fs):
         out |= {"unknown", "missing", "blank", "empty", "null", "recorded", "unrecorded", "unset", "entered",
                 "known", "assigned", "unassigned", "allocated", "captured", "provided", "filled"}

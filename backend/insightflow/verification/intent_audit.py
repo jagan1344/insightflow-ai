@@ -45,6 +45,11 @@ class AuditFinding:
     detail: str
 
 
+
+def _passive_agent(q: str, mb) -> bool:
+    from ..plan.planner import _is_passive_agent
+    return _is_passive_agent(q[:mb.start()], q[mb.start(1):])
+
 def grouped_sql_present(s: str) -> bool:
     return re.search(r"\bgroup by\b|\bover\s*\(", s) is not None
 
@@ -73,6 +78,11 @@ def audit(question: str, sql: str, plan, catalog, n_rows: int,
     cnt_cue = re.search(r"\b(how\s+many|number\s+of|count\s+of|count)\b", q)
     max_cue = re.search(r"\b(maximum|max)\b", q)
     min_cue = re.search(r"\b(minimum|min)\b", q)
+    # a cue word that is part of a column the SQL uses ("max capacity" -> max_cap) is not an aggregation request
+    if max_cue and re.search(r"\bmax(?:imum)?_\w+|\w+_max(?:imum)?\b", s):
+        max_cue = None
+    if min_cue and re.search(r"\bmin(?:imum)?_\w+|\w+_min(?:imum)?\b", s):
+        min_cue = None
     if avg_cue and not (_has_agg(s, "avg") or "avg" in kinds_agg
                         or "ratio" in kinds_agg or "derived" in kinds_agg
                         or ("/" in s and _has_agg(s, "count"))):
@@ -131,11 +141,13 @@ def audit(question: str, sql: str, plan, catalog, n_rows: int,
             "returns a single figure"))
 
     # ---- "by <something>" with no grouping at all ---------------------------
+    # ("driven by drivers rated 4.8": a passive agent; see planner._find_dim_mentions)
     mb = re.search(r"\bby\s+(?!the\s+(?:end|way)\b)([a-z_]+(?:\s+[a-z_]+){0,2})", q_cues)
     if mb and not grouped_sql_present(s) and not getattr(plan, "top_n", None) \
             and plan.intent_kind in ("direct_kpi", "breakdown") \
             and not re.search(r"\b(percent|%|\d)", mb.group(1)) \
-            and getattr(plan, "comparison", None) is None:
+            and getattr(plan, "comparison", None) is None \
+            and not _passive_agent(q_cues, mb):
         words = mb.group(1)
         # a value ("paid by O'Neil, Sam") or a measure phrase is not a grouping
         if not (catalog is not None and any(
