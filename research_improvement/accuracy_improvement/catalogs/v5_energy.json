@@ -1,0 +1,948 @@
+{
+ "dataset": "energy@bills",
+ "anchor": "bills",
+ "tables": {
+  "bills": {
+   "columns": {
+    "bill_id": "INTEGER",
+    "meter_id": "TEXT",
+    "period_start": "TEXT",
+    "due_dt": "TEXT",
+    "paid_dt": "TEXT",
+    "kwh": "REAL",
+    "amt": "REAL",
+    "late_fee": "REAL",
+    "meter_ok": "INTEGER",
+    "is_estimated": "INTEGER"
+   },
+   "primary_key": [
+    "bill_id"
+   ],
+   "not_null": [
+    "amt",
+    "bill_id",
+    "due_dt",
+    "is_estimated",
+    "kwh",
+    "meter_id",
+    "meter_ok",
+    "period_start"
+   ]
+  },
+  "customer_programs": {
+   "columns": {
+    "cust_id": "INTEGER",
+    "program_nm": "TEXT",
+    "enrolled_dt": "TEXT"
+   },
+   "primary_key": [
+    "cust_id",
+    "program_nm"
+   ],
+   "not_null": [
+    "cust_id",
+    "program_nm"
+   ]
+  },
+  "customers": {
+   "columns": {
+    "cust_id": "INTEGER",
+    "cust_nm": "TEXT",
+    "segment": "TEXT",
+    "tariff_cd": "TEXT",
+    "city": "TEXT"
+   },
+   "primary_key": [
+    "cust_id"
+   ],
+   "not_null": [
+    "city",
+    "cust_id",
+    "cust_nm",
+    "tariff_cd"
+   ]
+  },
+  "meters": {
+   "columns": {
+    "meter_id": "TEXT",
+    "cust_id": "INTEGER",
+    "meter_type": "TEXT",
+    "install_dt": "TEXT"
+   },
+   "primary_key": [
+    "meter_id"
+   ],
+   "not_null": [
+    "cust_id",
+    "meter_id",
+    "meter_type"
+   ]
+  },
+  "tariffs": {
+   "columns": {
+    "tariff_cd": "TEXT",
+    "tariff_nm": "TEXT",
+    "rate_per_kwh": "REAL"
+   },
+   "primary_key": [
+    "tariff_cd"
+   ],
+   "not_null": [
+    "rate_per_kwh",
+    "tariff_cd",
+    "tariff_nm"
+   ]
+  }
+ },
+ "relationships": [
+  {
+   "child": "bills.meter_id",
+   "parent": "meters.meter_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "customer_programs.cust_id",
+   "parent": "customers.cust_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "meters.cust_id",
+   "parent": "customers.cust_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "customers.tariff_cd",
+   "parent": "tariffs.tariff_cd",
+   "status": "inferred",
+   "nullable": false
+  }
+ ],
+ "columns": {
+  "bill_id": {
+   "table": "bills",
+   "physical": "bill_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "bill",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "meter_id": {
+   "table": "bills",
+   "physical": "meter_id",
+   "role": "id",
+   "sql_type": "TEXT",
+   "semantic_type": "id",
+   "canonical_words": [
+    "meter",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "period_start": {
+   "table": "bills",
+   "physical": "period_start",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "period",
+    "start"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "due_dt": {
+   "table": "bills",
+   "physical": "due_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "due",
+    "date"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "paid_dt": {
+   "table": "bills",
+   "physical": "paid_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "paid",
+    "date"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "kwh": {
+   "table": "bills",
+   "physical": "kwh",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "kwh"
+   ],
+   "unit": "kwh",
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "amt": {
+   "table": "bills",
+   "physical": "amt",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "amount"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "late_fee": {
+   "table": "bills",
+   "physical": "late_fee",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "late",
+    "fee"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "meter_ok": {
+   "table": "bills",
+   "physical": "meter_ok",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "meter",
+    "ok"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "normal-condition name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "is_estimated": {
+   "table": "bills",
+   "physical": "is_estimated",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "is",
+    "estimated"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "positive name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "install_dt": {
+   "table": "meters",
+   "physical": "install_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "install",
+    "date"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "program_nm": {
+   "table": "customer_programs",
+   "physical": "program_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "program",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "fanout",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id",
+     "customer_programs.cust_id->customers.cust_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "enrolled_dt": {
+   "table": "customer_programs",
+   "physical": "enrolled_dt",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "enrolled",
+    "date"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "fanout",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id",
+     "customer_programs.cust_id->customers.cust_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "cust_nm": {
+   "table": "customers",
+   "physical": "cust_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "customer",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "segment": {
+   "table": "customers",
+   "physical": "segment",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "segment"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "city": {
+   "table": "customers",
+   "physical": "city",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "city"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "meter_type": {
+   "table": "meters",
+   "physical": "meter_type",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "meter",
+    "type"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "tariff_nm": {
+   "table": "tariffs",
+   "physical": "tariff_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "tariff",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id",
+     "customers.tariff_cd->tariffs.tariff_cd"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "rate_per_kwh": {
+   "table": "tariffs",
+   "physical": "rate_per_kwh",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "rate",
+    "per",
+    "kwh"
+   ],
+   "unit": "kwh",
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bills.meter_id->meters.meter_id",
+     "meters.cust_id->customers.cust_id",
+     "customers.tariff_cd->tariffs.tariff_cd"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  }
+ },
+ "metrics": {
+  "row_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "row count",
+    "number of rows",
+    "records",
+    "number of records",
+    "row_count",
+    "record count",
+    "records",
+    "how many bill",
+    "number of bill",
+    "count of bill",
+    "bill count",
+    "how many bills",
+    "number of bills",
+    "count of bills",
+    "bills count",
+    "how many bills",
+    "number of bills",
+    "count of bills",
+    "bills count"
+   ]
+  },
+  "order_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "orders",
+    "order count",
+    "number of orders",
+    "transactions",
+    "transaction count",
+    "order_count"
+   ]
+  },
+  "distinct_bill_id": {
+   "formula": "COUNT(DISTINCT \"bill_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct bill_id",
+    "unique bill_id",
+    "number of bill_id"
+   ]
+  },
+  "distinct_meter_id": {
+   "formula": "COUNT(DISTINCT \"meter_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct meter_id",
+    "unique meter_id",
+    "number of meter_id",
+    "distinct meter",
+    "unique meter",
+    "different meter",
+    "number of meter",
+    "distinct meters",
+    "unique meters",
+    "different meters",
+    "number of meters"
+   ]
+  },
+  "avg_kwh": {
+   "formula": "AVG(\"kwh\")",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average kwh",
+    "average kwhs",
+    "avg kwh",
+    "avg kwhs",
+    "mean kwh",
+    "mean kwhs"
+   ]
+  },
+  "sum_kwh": {
+   "formula": "SUM(\"kwh\")",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "kwh",
+    "kwhs",
+    "sum of kwh",
+    "sum of kwhs",
+    "total kwh",
+    "total kwhs"
+   ]
+  },
+  "avg_amt": {
+   "formula": "AVG(\"amt\")",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average amount",
+    "average amount billed",
+    "average amount billeds",
+    "average amounts",
+    "average amt",
+    "average amts",
+    "average bill amount",
+    "average bill amounts",
+    "average bill value",
+    "average bill values",
+    "average billed amount",
+    "average billed amounts",
+    "average total billed",
+    "average total billeds",
+    "avg amount",
+    "avg amount billed",
+    "avg amount billeds",
+    "avg amounts",
+    "avg amt",
+    "avg amts",
+    "avg bill amount",
+    "avg bill amounts",
+    "avg bill value",
+    "avg bill values",
+    "avg billed amount",
+    "avg billed amounts",
+    "avg total billed",
+    "avg total billeds",
+    "mean amt",
+    "mean amts"
+   ]
+  },
+  "sum_amt": {
+   "formula": "SUM(\"amt\")",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "amount",
+    "amount billed",
+    "amount billeds",
+    "amounts",
+    "amt",
+    "amts",
+    "bill amount",
+    "bill amounts",
+    "bill value",
+    "bill values",
+    "billed amount",
+    "billed amounts",
+    "sum of amt",
+    "sum of amts",
+    "total amount",
+    "total amount billed",
+    "total amount billeds",
+    "total amounts",
+    "total amt",
+    "total amts",
+    "total bill amount",
+    "total bill amounts",
+    "total bill value",
+    "total bill values",
+    "total billed",
+    "total billed amount",
+    "total billed amounts",
+    "total billeds",
+    "total total billed",
+    "total total billeds"
+   ]
+  },
+  "avg_late_fee": {
+   "formula": "AVG(\"late_fee\")",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average late fee",
+    "average late fees",
+    "average late_fee",
+    "avg late fee",
+    "avg late fees",
+    "avg late_fee",
+    "mean late fee",
+    "mean late fees",
+    "mean late_fee"
+   ]
+  },
+  "sum_late_fee": {
+   "formula": "SUM(\"late_fee\")",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "late fee",
+    "late fees",
+    "late_fee",
+    "sum of late fee",
+    "sum of late fees",
+    "sum of late_fee",
+    "total late fee",
+    "total late fees",
+    "total late_fee"
+   ]
+  },
+  "avg_rate_per_kwh": {
+   "formula": "AVG({{dim:rate_per_kwh}})",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average rate per kwh",
+    "average rate per kwhs",
+    "average rate_per_kwh",
+    "avg rate per kwh",
+    "avg rate per kwhs",
+    "avg rate_per_kwh",
+    "mean rate per kwh",
+    "mean rate per kwhs",
+    "mean rate_per_kwh"
+   ]
+  },
+  "sum_rate_per_kwh": {
+   "formula": "SUM({{dim:rate_per_kwh}})",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "rate per kwh",
+    "rate per kwhs",
+    "rate_per_kwh",
+    "sum of rate per kwh",
+    "sum of rate per kwhs",
+    "sum of rate_per_kwh",
+    "total rate per kwh",
+    "total rate per kwhs",
+    "total rate_per_kwh"
+   ]
+  }
+ },
+ "vocabulary": {
+  "abbreviations": {
+   "txn": "transaction",
+   "trx": "transaction",
+   "tran": "transaction",
+   "qty": "quantity",
+   "amt": "amount",
+   "cust": "customer",
+   "acct": "account",
+   "acc": "account",
+   "dept": "department",
+   "emp": "employee",
+   "prod": "product",
+   "prd": "product",
+   "addr": "address",
+   "num": "number",
+   "nbr": "number",
+   "pct": "percent",
+   "dt": "date",
+   "desc": "description",
+   "cat": "category",
+   "mgr": "manager",
+   "org": "organization",
+   "reg": "region",
+   "loc": "location",
+   "svc": "service",
+   "inv": "invoice",
+   "ord": "order",
+   "prc": "price",
+   "cd": "code",
+   "stat": "status",
+   "sts": "status",
+   "tot": "total",
+   "avg": "average",
+   "bal": "balance",
+   "pmt": "payment",
+   "wo": "workorder",
+   "po": "purchaseorder",
+   "sku": "sku",
+   "yr": "year",
+   "mth": "month",
+   "wk": "week",
+   "cnt": "count",
+   "ref": "reference",
+   "src": "source",
+   "dst": "destination",
+   "dest": "destination",
+   "ctry": "country",
+   "st": "state",
+   "veh": "vehicle",
+   "temp": "temperature",
+   "pax": "passenger",
+   "apt": "airport",
+   "carr": "carrier",
+   "flt": "flight",
+   "sup": "supplier",
+   "vend": "vendor",
+   "cls": "class",
+   "pay": "payment",
+   "rtg": "rating",
+   "lang": "language",
+   "rpt": "report",
+   "req": "request",
+   "dist": "distance",
+   "dur": "duration",
+   "prem": "premium",
+   "nts": "nights",
+   "hrs": "hours",
+   "mins": "minutes"
+  },
+  "units": {
+   "kwh": [
+    "kilowatt hours",
+    "kilowatt-hours",
+    "kilowatt hour",
+    "kilowatt-hour",
+    "kw h"
+   ],
+   "km": [
+    "kilometres",
+    "kilometers",
+    "kilometre",
+    "kilometer"
+   ],
+   "hrs": [
+    "hours"
+   ],
+   "hr": [
+    "hours",
+    "hour"
+   ],
+   "min": [
+    "minutes",
+    "minute"
+   ],
+   "nts": [
+    "room nights",
+    "room-nights",
+    "nights",
+    "night"
+   ],
+   "sq m": [
+    "square metres",
+    "square meters",
+    "square metre",
+    "square meter",
+    "sqm",
+    "m2"
+   ],
+   "sq ft": [
+    "square feet",
+    "square foot",
+    "sqft"
+   ],
+   "kg": [
+    "kilograms",
+    "kilogram",
+    "kilos"
+   ]
+  },
+  "synonym_groups": [
+   [
+    "booking",
+    "reservation"
+   ],
+   [
+    "client",
+    "customer"
+   ],
+   [
+    "journey",
+    "ride",
+    "trip"
+   ],
+   [
+    "order",
+    "purchase"
+   ],
+   [
+    "docs",
+    "documentation",
+    "documents",
+    "paperwork"
+   ],
+   [
+    "employee",
+    "staff",
+    "worker"
+   ],
+   [
+    "supplier",
+    "vendor"
+   ],
+   [
+    "item",
+    "product"
+   ],
+   [
+    "bill",
+    "invoice"
+   ],
+   [
+    "consignment",
+    "shipment"
+   ],
+   [
+    "learner",
+    "pupil",
+    "student"
+   ],
+   [
+    "case",
+    "ticket"
+   ],
+   [
+    "category",
+    "class"
+   ]
+  ],
+  "note": "rewrites apply only when the target exists in this schema; interpretive rewrites are stated in answers"
+ },
+ "descriptions": "none in the schema; no business definitions are invented"
+}

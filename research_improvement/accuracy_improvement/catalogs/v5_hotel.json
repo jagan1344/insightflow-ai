@@ -1,0 +1,1096 @@
+{
+ "dataset": "hotel@bookings",
+ "anchor": "bookings",
+ "tables": {
+  "booking_addons": {
+   "columns": {
+    "addon_id": "INTEGER",
+    "bk_id": "INTEGER",
+    "addon_type": "TEXT",
+    "addon_amt": "REAL"
+   },
+   "primary_key": [
+    "addon_id"
+   ],
+   "not_null": [
+    "addon_amt",
+    "addon_id",
+    "addon_type",
+    "bk_id"
+   ]
+  },
+  "bookings": {
+   "columns": {
+    "bk_id": "INTEGER",
+    "guest_id": "INTEGER",
+    "room_id": "INTEGER",
+    "booked_on": "TEXT",
+    "checkin_dt": "TEXT",
+    "nts_cnt": "INTEGER",
+    "amt": "REAL",
+    "channel": "TEXT",
+    "is_cancelled": "INTEGER",
+    "payment_ok": "INTEGER",
+    "special_req": "TEXT"
+   },
+   "primary_key": [
+    "bk_id"
+   ],
+   "not_null": [
+    "amt",
+    "bk_id",
+    "booked_on",
+    "guest_id",
+    "is_cancelled",
+    "nts_cnt",
+    "payment_ok",
+    "room_id"
+   ]
+  },
+  "guests": {
+   "columns": {
+    "guest_id": "INTEGER",
+    "guest_nm": "TEXT",
+    "country": "TEXT",
+    "loyalty_tier": "TEXT"
+   },
+   "primary_key": [
+    "guest_id"
+   ],
+   "not_null": [
+    "guest_id",
+    "guest_nm"
+   ]
+  },
+  "hotels": {
+   "columns": {
+    "hotel_id": "INTEGER",
+    "hotel_nm": "TEXT",
+    "city": "TEXT",
+    "star_rtg": "INTEGER"
+   },
+   "primary_key": [
+    "hotel_id"
+   ],
+   "not_null": [
+    "city",
+    "hotel_id",
+    "hotel_nm"
+   ]
+  },
+  "rooms": {
+   "columns": {
+    "room_id": "INTEGER",
+    "hotel_id": "INTEGER",
+    "room_no": "TEXT",
+    "room_type": "TEXT",
+    "sq_m": "REAL",
+    "base_rate": "REAL"
+   },
+   "primary_key": [
+    "room_id"
+   ],
+   "not_null": [
+    "base_rate",
+    "hotel_id",
+    "room_id",
+    "room_no",
+    "room_type",
+    "sq_m"
+   ]
+  }
+ },
+ "relationships": [
+  {
+   "child": "booking_addons.bk_id",
+   "parent": "bookings.bk_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "bookings.room_id",
+   "parent": "rooms.room_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "bookings.guest_id",
+   "parent": "guests.guest_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "rooms.hotel_id",
+   "parent": "hotels.hotel_id",
+   "status": "inferred",
+   "nullable": false
+  }
+ ],
+ "columns": {
+  "bk_id": {
+   "table": "bookings",
+   "physical": "bk_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "bk",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "guest_id": {
+   "table": "bookings",
+   "physical": "guest_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "guest",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "room_id": {
+   "table": "bookings",
+   "physical": "room_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "room",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "booked_on": {
+   "table": "bookings",
+   "physical": "booked_on",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "booked",
+    "on"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "checkin_dt": {
+   "table": "bookings",
+   "physical": "checkin_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "checkin",
+    "date"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "nts_cnt": {
+   "table": "bookings",
+   "physical": "nts_cnt",
+   "role": "measure",
+   "sql_type": "INTEGER",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "night",
+    "count"
+   ],
+   "unit": "cnt",
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "amt": {
+   "table": "bookings",
+   "physical": "amt",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "amount"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "channel": {
+   "table": "bookings",
+   "physical": "channel",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "channel"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "is_cancelled": {
+   "table": "bookings",
+   "physical": "is_cancelled",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "is",
+    "cancelled"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "positive name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "payment_ok": {
+   "table": "bookings",
+   "physical": "payment_ok",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "payment",
+    "ok"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "normal-condition name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "special_req": {
+   "table": "bookings",
+   "physical": "special_req",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "special",
+    "request"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "addon_type": {
+   "table": "booking_addons",
+   "physical": "addon_type",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "addon",
+    "type"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "fanout",
+    "nullable": false,
+    "path": [
+     "booking_addons.bk_id->bookings.bk_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "guest_nm": {
+   "table": "guests",
+   "physical": "guest_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "guest",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.guest_id->guests.guest_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "country": {
+   "table": "guests",
+   "physical": "country",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "country"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.guest_id->guests.guest_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "loyalty_tier": {
+   "table": "guests",
+   "physical": "loyalty_tier",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "loyalty",
+    "tier"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.guest_id->guests.guest_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "hotel_nm": {
+   "table": "hotels",
+   "physical": "hotel_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "hotel",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id",
+     "rooms.hotel_id->hotels.hotel_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "city": {
+   "table": "hotels",
+   "physical": "city",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "city"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id",
+     "rooms.hotel_id->hotels.hotel_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "room_no": {
+   "table": "rooms",
+   "physical": "room_no",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "room",
+    "no"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "room_type": {
+   "table": "rooms",
+   "physical": "room_type",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "room",
+    "type"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "star_rtg": {
+   "table": "hotels",
+   "physical": "star_rtg",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "star",
+    "rating"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id",
+     "rooms.hotel_id->hotels.hotel_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "sq_m": {
+   "table": "rooms",
+   "physical": "sq_m",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "sq",
+    "m"
+   ],
+   "unit": "sq",
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "base_rate": {
+   "table": "rooms",
+   "physical": "base_rate",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "base",
+    "rate"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "bookings.room_id->rooms.room_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  }
+ },
+ "metrics": {
+  "row_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "row count",
+    "number of rows",
+    "records",
+    "number of records",
+    "row_count",
+    "record count",
+    "records",
+    "how many booking",
+    "number of booking",
+    "count of booking",
+    "booking count",
+    "how many bookings",
+    "number of bookings",
+    "count of bookings",
+    "bookings count",
+    "how many bookings",
+    "number of bookings",
+    "count of bookings",
+    "bookings count"
+   ]
+  },
+  "order_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "orders",
+    "order count",
+    "number of orders",
+    "transactions",
+    "transaction count",
+    "order_count"
+   ]
+  },
+  "distinct_bk_id": {
+   "formula": "COUNT(DISTINCT \"bk_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct bk_id",
+    "unique bk_id",
+    "number of bk_id"
+   ]
+  },
+  "distinct_guest_id": {
+   "formula": "COUNT(DISTINCT \"guest_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct guest_id",
+    "unique guest_id",
+    "number of guest_id",
+    "distinct guest",
+    "unique guest",
+    "different guest",
+    "number of guest",
+    "distinct guests",
+    "unique guests",
+    "different guests",
+    "number of guests"
+   ]
+  },
+  "distinct_room_id": {
+   "formula": "COUNT(DISTINCT \"room_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct room_id",
+    "unique room_id",
+    "number of room_id",
+    "distinct room",
+    "unique room",
+    "different room",
+    "number of room",
+    "distinct rooms",
+    "unique rooms",
+    "different rooms",
+    "number of rooms"
+   ]
+  },
+  "avg_nts_cnt": {
+   "formula": "AVG(\"nts_cnt\")",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average night",
+    "average night count",
+    "average night counts",
+    "average nights",
+    "average nts",
+    "average nts cnt",
+    "average nts cnts",
+    "average nts_cnt",
+    "avg night",
+    "avg night count",
+    "avg night counts",
+    "avg nights",
+    "avg nts",
+    "avg nts cnt",
+    "avg nts cnts",
+    "avg nts_cnt",
+    "mean nts",
+    "mean nts cnt",
+    "mean nts cnts",
+    "mean nts_cnt"
+   ]
+  },
+  "sum_nts_cnt": {
+   "formula": "SUM(\"nts_cnt\")",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "night",
+    "night count",
+    "night counts",
+    "nights",
+    "nts",
+    "nts cnt",
+    "nts cnts",
+    "nts_cnt",
+    "sum of nts cnt",
+    "sum of nts cnts",
+    "sum of nts_cnt",
+    "total night",
+    "total night count",
+    "total night counts",
+    "total nights",
+    "total nts",
+    "total nts cnt",
+    "total nts cnts",
+    "total nts_cnt"
+   ]
+  },
+  "avg_amt": {
+   "formula": "AVG(\"amt\")",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average amount",
+    "average amount booked",
+    "average amount bookeds",
+    "average amounts",
+    "average amt",
+    "average amts",
+    "average booked amount",
+    "average booked amounts",
+    "average booking amount",
+    "average booking amounts",
+    "average booking value",
+    "average booking values",
+    "average total booked",
+    "average total bookeds",
+    "avg amount",
+    "avg amount booked",
+    "avg amount bookeds",
+    "avg amounts",
+    "avg amt",
+    "avg amts",
+    "avg booked amount",
+    "avg booked amounts",
+    "avg booking amount",
+    "avg booking amounts",
+    "avg booking value",
+    "avg booking values",
+    "avg total booked",
+    "avg total bookeds",
+    "mean amt",
+    "mean amts"
+   ]
+  },
+  "sum_amt": {
+   "formula": "SUM(\"amt\")",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "amount",
+    "amount booked",
+    "amount bookeds",
+    "amounts",
+    "amt",
+    "amts",
+    "booked amount",
+    "booked amounts",
+    "booking amount",
+    "booking amounts",
+    "booking value",
+    "booking values",
+    "sum of amt",
+    "sum of amts",
+    "total amount",
+    "total amount booked",
+    "total amount bookeds",
+    "total amounts",
+    "total amt",
+    "total amts",
+    "total booked",
+    "total booked amount",
+    "total booked amounts",
+    "total bookeds",
+    "total booking amount",
+    "total booking amounts",
+    "total booking value",
+    "total booking values",
+    "total total booked",
+    "total total bookeds"
+   ]
+  },
+  "avg_star_rtg": {
+   "formula": "AVG({{dim:star_rtg}})",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average star rating",
+    "average star ratings",
+    "average star rtg",
+    "average star rtgs",
+    "average star_rtg",
+    "avg star rating",
+    "avg star ratings",
+    "avg star rtg",
+    "avg star rtgs",
+    "avg star_rtg",
+    "mean star rtg",
+    "mean star rtgs",
+    "mean star_rtg"
+   ]
+  },
+  "sum_star_rtg": {
+   "formula": "SUM({{dim:star_rtg}})",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "star rating",
+    "star ratings",
+    "star rtg",
+    "star rtgs",
+    "star_rtg",
+    "sum of star rtg",
+    "sum of star rtgs",
+    "sum of star_rtg",
+    "total star rating",
+    "total star ratings",
+    "total star rtg",
+    "total star rtgs",
+    "total star_rtg"
+   ]
+  },
+  "avg_sq_m": {
+   "formula": "AVG({{dim:sq_m}})",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average sq",
+    "average sq m",
+    "average sq_m",
+    "avg sq",
+    "avg sq m",
+    "avg sq_m",
+    "mean sq",
+    "mean sq m",
+    "mean sq_m"
+   ]
+  },
+  "sum_sq_m": {
+   "formula": "SUM({{dim:sq_m}})",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "sq",
+    "sq m",
+    "sq_m",
+    "sum of sq m",
+    "sum of sq_m",
+    "total sq",
+    "total sq m",
+    "total sq_m"
+   ]
+  },
+  "avg_base_rate": {
+   "formula": "AVG({{dim:base_rate}})",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average base rate",
+    "average base rates",
+    "average base_rate",
+    "avg base rate",
+    "avg base rates",
+    "avg base_rate",
+    "mean base rate",
+    "mean base rates",
+    "mean base_rate"
+   ]
+  },
+  "sum_base_rate": {
+   "formula": "SUM({{dim:base_rate}})",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "base rate",
+    "base rates",
+    "base_rate",
+    "sum of base rate",
+    "sum of base rates",
+    "sum of base_rate",
+    "total base rate",
+    "total base rates",
+    "total base_rate"
+   ]
+  }
+ },
+ "vocabulary": {
+  "abbreviations": {
+   "txn": "transaction",
+   "trx": "transaction",
+   "tran": "transaction",
+   "qty": "quantity",
+   "amt": "amount",
+   "cust": "customer",
+   "acct": "account",
+   "acc": "account",
+   "dept": "department",
+   "emp": "employee",
+   "prod": "product",
+   "prd": "product",
+   "addr": "address",
+   "num": "number",
+   "nbr": "number",
+   "pct": "percent",
+   "dt": "date",
+   "desc": "description",
+   "cat": "category",
+   "mgr": "manager",
+   "org": "organization",
+   "reg": "region",
+   "loc": "location",
+   "svc": "service",
+   "inv": "invoice",
+   "ord": "order",
+   "prc": "price",
+   "cd": "code",
+   "stat": "status",
+   "sts": "status",
+   "tot": "total",
+   "avg": "average",
+   "bal": "balance",
+   "pmt": "payment",
+   "wo": "workorder",
+   "po": "purchaseorder",
+   "sku": "sku",
+   "yr": "year",
+   "mth": "month",
+   "wk": "week",
+   "cnt": "count",
+   "ref": "reference",
+   "src": "source",
+   "dst": "destination",
+   "dest": "destination",
+   "ctry": "country",
+   "st": "state",
+   "veh": "vehicle",
+   "temp": "temperature",
+   "pax": "passenger",
+   "apt": "airport",
+   "carr": "carrier",
+   "flt": "flight",
+   "sup": "supplier",
+   "vend": "vendor",
+   "cls": "class",
+   "pay": "payment",
+   "rtg": "rating",
+   "lang": "language",
+   "rpt": "report",
+   "req": "request",
+   "dist": "distance",
+   "dur": "duration",
+   "prem": "premium",
+   "nts": "nights",
+   "hrs": "hours",
+   "mins": "minutes"
+  },
+  "units": {
+   "kwh": [
+    "kilowatt hours",
+    "kilowatt-hours",
+    "kilowatt hour",
+    "kilowatt-hour",
+    "kw h"
+   ],
+   "km": [
+    "kilometres",
+    "kilometers",
+    "kilometre",
+    "kilometer"
+   ],
+   "hrs": [
+    "hours"
+   ],
+   "hr": [
+    "hours",
+    "hour"
+   ],
+   "min": [
+    "minutes",
+    "minute"
+   ],
+   "nts": [
+    "room nights",
+    "room-nights",
+    "nights",
+    "night"
+   ],
+   "sq m": [
+    "square metres",
+    "square meters",
+    "square metre",
+    "square meter",
+    "sqm",
+    "m2"
+   ],
+   "sq ft": [
+    "square feet",
+    "square foot",
+    "sqft"
+   ],
+   "kg": [
+    "kilograms",
+    "kilogram",
+    "kilos"
+   ]
+  },
+  "synonym_groups": [
+   [
+    "booking",
+    "reservation"
+   ],
+   [
+    "client",
+    "customer"
+   ],
+   [
+    "journey",
+    "ride",
+    "trip"
+   ],
+   [
+    "order",
+    "purchase"
+   ],
+   [
+    "docs",
+    "documentation",
+    "documents",
+    "paperwork"
+   ],
+   [
+    "employee",
+    "staff",
+    "worker"
+   ],
+   [
+    "supplier",
+    "vendor"
+   ],
+   [
+    "item",
+    "product"
+   ],
+   [
+    "bill",
+    "invoice"
+   ],
+   [
+    "consignment",
+    "shipment"
+   ],
+   [
+    "learner",
+    "pupil",
+    "student"
+   ],
+   [
+    "case",
+    "ticket"
+   ],
+   [
+    "category",
+    "class"
+   ]
+  ],
+  "note": "rewrites apply only when the target exists in this schema; interpretive rewrites are stated in answers"
+ },
+ "descriptions": "none in the schema; no business definitions are invented"
+}

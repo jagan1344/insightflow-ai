@@ -1,0 +1,937 @@
+{
+ "dataset": "insurance@claims",
+ "anchor": "claims",
+ "tables": {
+  "adjusters": {
+   "columns": {
+    "adj_id": "INTEGER",
+    "adj_nm": "TEXT",
+    "region": "TEXT"
+   },
+   "primary_key": [
+    "adj_id"
+   ],
+   "not_null": [
+    "adj_id",
+    "adj_nm",
+    "region"
+   ]
+  },
+  "claim_payments": {
+   "columns": {
+    "pmt_id": "INTEGER",
+    "claim_id": "INTEGER",
+    "pmt_dt": "TEXT",
+    "pmt_amt": "REAL"
+   },
+   "primary_key": [
+    "pmt_id"
+   ],
+   "not_null": [
+    "claim_id",
+    "pmt_amt",
+    "pmt_dt",
+    "pmt_id"
+   ]
+  },
+  "claims": {
+   "columns": {
+    "claim_id": "INTEGER",
+    "policy_no": "TEXT",
+    "adj_id": "INTEGER",
+    "loss_dt": "TEXT",
+    "rpt_dt": "TEXT",
+    "closed_dt": "TEXT",
+    "claim_amt": "REAL",
+    "status": "TEXT",
+    "cause": "TEXT",
+    "is_fraud_susp": "INTEGER",
+    "docs_ok": "INTEGER"
+   },
+   "primary_key": [
+    "claim_id"
+   ],
+   "not_null": [
+    "claim_amt",
+    "claim_id",
+    "docs_ok",
+    "is_fraud_susp",
+    "loss_dt",
+    "policy_no",
+    "rpt_dt",
+    "status"
+   ]
+  },
+  "policies": {
+   "columns": {
+    "policy_no": "TEXT",
+    "holder_nm": "TEXT",
+    "product_cd": "TEXT",
+    "prem_amt": "REAL",
+    "deductible": "REAL",
+    "start_dt": "TEXT",
+    "region": "TEXT"
+   },
+   "primary_key": [
+    "policy_no"
+   ],
+   "not_null": [
+    "deductible",
+    "holder_nm",
+    "policy_no",
+    "prem_amt",
+    "product_cd",
+    "start_dt"
+   ]
+  },
+  "products": {
+   "columns": {
+    "product_cd": "TEXT",
+    "product_nm": "TEXT",
+    "line_of_bus": "TEXT"
+   },
+   "primary_key": [
+    "product_cd"
+   ],
+   "not_null": [
+    "line_of_bus",
+    "product_cd",
+    "product_nm"
+   ]
+  }
+ },
+ "relationships": [
+  {
+   "child": "claim_payments.claim_id",
+   "parent": "claims.claim_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "claims.policy_no",
+   "parent": "policies.policy_no",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "policies.product_cd",
+   "parent": "products.product_cd",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "claims.adj_id",
+   "parent": "adjusters.adj_id",
+   "status": "inferred",
+   "nullable": true
+  }
+ ],
+ "columns": {
+  "claim_id": {
+   "table": "claims",
+   "physical": "claim_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "claim",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "policy_no": {
+   "table": "claims",
+   "physical": "policy_no",
+   "role": "id",
+   "sql_type": "TEXT",
+   "semantic_type": "id",
+   "canonical_words": [
+    "policy",
+    "no"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "adj_id": {
+   "table": "claims",
+   "physical": "adj_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "adj",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "loss_dt": {
+   "table": "claims",
+   "physical": "loss_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "loss",
+    "date"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "rpt_dt": {
+   "table": "claims",
+   "physical": "rpt_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "report",
+    "date"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "closed_dt": {
+   "table": "claims",
+   "physical": "closed_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "closed",
+    "date"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "claim_amt": {
+   "table": "claims",
+   "physical": "claim_amt",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "claim",
+    "amount"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "status": {
+   "table": "claims",
+   "physical": "status",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "statu"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "cause": {
+   "table": "claims",
+   "physical": "cause",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "cause"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "is_fraud_susp": {
+   "table": "claims",
+   "physical": "is_fraud_susp",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "is",
+    "fraud",
+    "susp"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "positive name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "docs_ok": {
+   "table": "claims",
+   "physical": "docs_ok",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "doc",
+    "ok"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "normal-condition name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "start_dt": {
+   "table": "policies",
+   "physical": "start_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "start",
+    "date"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "claims.policy_no->policies.policy_no"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "adj_nm": {
+   "table": "adjusters",
+   "physical": "adj_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "adj",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": true,
+    "path": [
+     "claims.adj_id->adjusters.adj_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "region": {
+   "table": "policies",
+   "physical": "region",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "region"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "ambiguous",
+    "nullable": false,
+    "path": []
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "pmt_dt": {
+   "table": "claim_payments",
+   "physical": "pmt_dt",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "payment",
+    "date"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "fanout",
+    "nullable": false,
+    "path": [
+     "claim_payments.claim_id->claims.claim_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "holder_nm": {
+   "table": "policies",
+   "physical": "holder_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "holder",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "claims.policy_no->policies.policy_no"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "product_nm": {
+   "table": "products",
+   "physical": "product_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "product",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "claims.policy_no->policies.policy_no",
+     "policies.product_cd->products.product_cd"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "line_of_bus": {
+   "table": "products",
+   "physical": "line_of_bus",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "line",
+    "of",
+    "bus"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "claims.policy_no->policies.policy_no",
+     "policies.product_cd->products.product_cd"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "prem_amt": {
+   "table": "policies",
+   "physical": "prem_amt",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "premium",
+    "amount"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "claims.policy_no->policies.policy_no"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "deductible": {
+   "table": "policies",
+   "physical": "deductible",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "deductible"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "claims.policy_no->policies.policy_no"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  }
+ },
+ "metrics": {
+  "row_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "row count",
+    "number of rows",
+    "records",
+    "number of records",
+    "row_count",
+    "record count",
+    "records",
+    "how many claim",
+    "number of claim",
+    "count of claim",
+    "claim count",
+    "how many claims",
+    "number of claims",
+    "count of claims",
+    "claims count",
+    "how many claims",
+    "number of claims",
+    "count of claims",
+    "claims count"
+   ]
+  },
+  "order_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "orders",
+    "order count",
+    "number of orders",
+    "transactions",
+    "transaction count",
+    "order_count"
+   ]
+  },
+  "distinct_claim_id": {
+   "formula": "COUNT(DISTINCT \"claim_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct claim_id",
+    "unique claim_id",
+    "number of claim_id"
+   ]
+  },
+  "distinct_policy_no": {
+   "formula": "COUNT(DISTINCT \"policy_no\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct policy_no",
+    "unique policy_no",
+    "number of policy_no",
+    "distinct policies",
+    "unique policies",
+    "different policies",
+    "number of policies",
+    "distinct policy",
+    "unique policy",
+    "different policy",
+    "number of policy"
+   ]
+  },
+  "distinct_adj_id": {
+   "formula": "COUNT(DISTINCT \"adj_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct adj_id",
+    "unique adj_id",
+    "number of adj_id",
+    "distinct adjuster",
+    "unique adjuster",
+    "different adjuster",
+    "number of adjuster",
+    "distinct adjusters",
+    "unique adjusters",
+    "different adjusters",
+    "number of adjusters"
+   ]
+  },
+  "avg_claim_amt": {
+   "formula": "AVG(\"claim_amt\")",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average claim amount",
+    "average claim amounts",
+    "average claim amt",
+    "average claim amts",
+    "average claim_amt",
+    "avg claim amount",
+    "avg claim amounts",
+    "avg claim amt",
+    "avg claim amts",
+    "avg claim_amt",
+    "mean claim amt",
+    "mean claim amts",
+    "mean claim_amt"
+   ]
+  },
+  "sum_claim_amt": {
+   "formula": "SUM(\"claim_amt\")",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "claim amount",
+    "claim amounts",
+    "claim amt",
+    "claim amts",
+    "claim_amt",
+    "sum of claim amt",
+    "sum of claim amts",
+    "sum of claim_amt",
+    "total claim amount",
+    "total claim amounts",
+    "total claim amt",
+    "total claim amts",
+    "total claim_amt"
+   ]
+  },
+  "avg_prem_amt": {
+   "formula": "AVG({{dim:prem_amt}})",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average prem",
+    "average prem amt",
+    "average prem amts",
+    "average prem_amt",
+    "average premium",
+    "average premium amount",
+    "average premium amounts",
+    "average premiums",
+    "average prems",
+    "avg prem",
+    "avg prem amt",
+    "avg prem amts",
+    "avg prem_amt",
+    "avg premium",
+    "avg premium amount",
+    "avg premium amounts",
+    "avg premiums",
+    "avg prems",
+    "mean prem",
+    "mean prem amt",
+    "mean prem amts",
+    "mean prem_amt",
+    "mean prems"
+   ]
+  },
+  "sum_prem_amt": {
+   "formula": "SUM({{dim:prem_amt}})",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "prem",
+    "prem amt",
+    "prem amts",
+    "prem_amt",
+    "premium",
+    "premium amount",
+    "premium amounts",
+    "premiums",
+    "prems",
+    "sum of prem amt",
+    "sum of prem amts",
+    "sum of prem_amt",
+    "total prem",
+    "total prem amt",
+    "total prem amts",
+    "total prem_amt",
+    "total premium",
+    "total premium amount",
+    "total premium amounts",
+    "total premiums",
+    "total prems"
+   ]
+  },
+  "avg_deductible": {
+   "formula": "AVG({{dim:deductible}})",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average deductible",
+    "average deductibles",
+    "avg deductible",
+    "avg deductibles",
+    "mean deductible",
+    "mean deductibles"
+   ]
+  },
+  "sum_deductible": {
+   "formula": "SUM({{dim:deductible}})",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "deductible",
+    "deductibles",
+    "sum of deductible",
+    "sum of deductibles",
+    "total deductible",
+    "total deductibles"
+   ]
+  }
+ },
+ "vocabulary": {
+  "abbreviations": {
+   "txn": "transaction",
+   "trx": "transaction",
+   "tran": "transaction",
+   "qty": "quantity",
+   "amt": "amount",
+   "cust": "customer",
+   "acct": "account",
+   "acc": "account",
+   "dept": "department",
+   "emp": "employee",
+   "prod": "product",
+   "prd": "product",
+   "addr": "address",
+   "num": "number",
+   "nbr": "number",
+   "pct": "percent",
+   "dt": "date",
+   "desc": "description",
+   "cat": "category",
+   "mgr": "manager",
+   "org": "organization",
+   "reg": "region",
+   "loc": "location",
+   "svc": "service",
+   "inv": "invoice",
+   "ord": "order",
+   "prc": "price",
+   "cd": "code",
+   "stat": "status",
+   "sts": "status",
+   "tot": "total",
+   "avg": "average",
+   "bal": "balance",
+   "pmt": "payment",
+   "wo": "workorder",
+   "po": "purchaseorder",
+   "sku": "sku",
+   "yr": "year",
+   "mth": "month",
+   "wk": "week",
+   "cnt": "count",
+   "ref": "reference",
+   "src": "source",
+   "dst": "destination",
+   "dest": "destination",
+   "ctry": "country",
+   "st": "state",
+   "veh": "vehicle",
+   "temp": "temperature",
+   "pax": "passenger",
+   "apt": "airport",
+   "carr": "carrier",
+   "flt": "flight",
+   "sup": "supplier",
+   "vend": "vendor",
+   "cls": "class",
+   "pay": "payment",
+   "rtg": "rating",
+   "lang": "language",
+   "rpt": "report",
+   "req": "request",
+   "dist": "distance",
+   "dur": "duration",
+   "prem": "premium",
+   "nts": "nights",
+   "hrs": "hours",
+   "mins": "minutes"
+  },
+  "units": {
+   "kwh": [
+    "kilowatt hours",
+    "kilowatt-hours",
+    "kilowatt hour",
+    "kilowatt-hour",
+    "kw h"
+   ],
+   "km": [
+    "kilometres",
+    "kilometers",
+    "kilometre",
+    "kilometer"
+   ],
+   "hrs": [
+    "hours"
+   ],
+   "hr": [
+    "hours",
+    "hour"
+   ],
+   "min": [
+    "minutes",
+    "minute"
+   ],
+   "nts": [
+    "room nights",
+    "room-nights",
+    "nights",
+    "night"
+   ],
+   "sq m": [
+    "square metres",
+    "square meters",
+    "square metre",
+    "square meter",
+    "sqm",
+    "m2"
+   ],
+   "sq ft": [
+    "square feet",
+    "square foot",
+    "sqft"
+   ],
+   "kg": [
+    "kilograms",
+    "kilogram",
+    "kilos"
+   ]
+  },
+  "synonym_groups": [
+   [
+    "booking",
+    "reservation"
+   ],
+   [
+    "client",
+    "customer"
+   ],
+   [
+    "journey",
+    "ride",
+    "trip"
+   ],
+   [
+    "order",
+    "purchase"
+   ],
+   [
+    "docs",
+    "documentation",
+    "documents",
+    "paperwork"
+   ],
+   [
+    "employee",
+    "staff",
+    "worker"
+   ],
+   [
+    "supplier",
+    "vendor"
+   ],
+   [
+    "item",
+    "product"
+   ],
+   [
+    "bill",
+    "invoice"
+   ],
+   [
+    "consignment",
+    "shipment"
+   ],
+   [
+    "learner",
+    "pupil",
+    "student"
+   ],
+   [
+    "case",
+    "ticket"
+   ],
+   [
+    "category",
+    "class"
+   ]
+  ],
+  "note": "rewrites apply only when the target exists in this schema; interpretive rewrites are stated in answers"
+ },
+ "descriptions": "none in the schema; no business definitions are invented"
+}

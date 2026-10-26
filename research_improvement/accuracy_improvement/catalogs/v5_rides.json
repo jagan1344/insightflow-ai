@@ -1,0 +1,1118 @@
+{
+ "dataset": "rides@trips",
+ "anchor": "trips",
+ "tables": {
+  "driver_languages": {
+   "columns": {
+    "driver_id": "INTEGER",
+    "lang": "TEXT"
+   },
+   "primary_key": [
+    "driver_id",
+    "lang"
+   ],
+   "not_null": [
+    "driver_id",
+    "lang"
+   ]
+  },
+  "drivers": {
+   "columns": {
+    "driver_id": "INTEGER",
+    "driver_nm": "TEXT",
+    "vehicle_cls": "TEXT",
+    "rating": "REAL",
+    "join_dt": "TEXT"
+   },
+   "primary_key": [
+    "driver_id"
+   ],
+   "not_null": [
+    "driver_id",
+    "driver_nm",
+    "join_dt",
+    "rating",
+    "vehicle_cls"
+   ]
+  },
+  "riders": {
+   "columns": {
+    "rider_id": "INTEGER",
+    "signup_dt": "TEXT",
+    "rider_tier": "TEXT"
+   },
+   "primary_key": [
+    "rider_id"
+   ],
+   "not_null": [
+    "rider_id",
+    "signup_dt"
+   ]
+  },
+  "trips": {
+   "columns": {
+    "trip_id": "INTEGER",
+    "driver_id": "INTEGER",
+    "rider_id": "INTEGER",
+    "pickup_zone_cd": "TEXT",
+    "dropoff_zone_cd": "TEXT",
+    "req_ts": "TEXT",
+    "status": "TEXT",
+    "fare_amt": "REAL",
+    "tip_amt": "REAL",
+    "dist_km": "REAL",
+    "dur_min": "INTEGER",
+    "is_surge": "INTEGER",
+    "payment_ok": "INTEGER",
+    "pay_method": "TEXT"
+   },
+   "primary_key": [
+    "trip_id"
+   ],
+   "not_null": [
+    "dist_km",
+    "driver_id",
+    "dropoff_zone_cd",
+    "dur_min",
+    "fare_amt",
+    "is_surge",
+    "payment_ok",
+    "pickup_zone_cd",
+    "req_ts",
+    "rider_id",
+    "status",
+    "trip_id"
+   ]
+  },
+  "zones": {
+   "columns": {
+    "zone_cd": "TEXT",
+    "zone_nm": "TEXT",
+    "borough": "TEXT"
+   },
+   "primary_key": [
+    "zone_cd"
+   ],
+   "not_null": [
+    "borough",
+    "zone_cd",
+    "zone_nm"
+   ]
+  }
+ },
+ "relationships": [
+  {
+   "child": "driver_languages.driver_id",
+   "parent": "drivers.driver_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "trips.rider_id",
+   "parent": "riders.rider_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "trips.driver_id",
+   "parent": "drivers.driver_id",
+   "status": "declared",
+   "nullable": false
+  },
+  {
+   "child": "trips.pickup_zone_cd",
+   "parent": "zones.zone_cd",
+   "status": "inferred",
+   "nullable": false
+  },
+  {
+   "child": "trips.dropoff_zone_cd",
+   "parent": "zones.zone_cd",
+   "status": "inferred",
+   "nullable": false
+  }
+ ],
+ "columns": {
+  "trip_id": {
+   "table": "trips",
+   "physical": "trip_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "trip",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "driver_id": {
+   "table": "trips",
+   "physical": "driver_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "driver",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "rider_id": {
+   "table": "trips",
+   "physical": "rider_id",
+   "role": "id",
+   "sql_type": "INTEGER",
+   "semantic_type": "id",
+   "canonical_words": [
+    "rider",
+    "id"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "COUNT(DISTINCT)"
+   ]
+  },
+  "pickup_zone_cd": {
+   "table": "zones",
+   "physical": "zone_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "pickup",
+    "zone",
+    "code"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.pickup_zone_cd->zones.zone_cd"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "dropoff_zone_cd": {
+   "table": "zones",
+   "physical": "zone_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "dropoff",
+    "zone",
+    "code"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.dropoff_zone_cd->zones.zone_cd"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "req_ts": {
+   "table": "trips",
+   "physical": "req_ts",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "request",
+    "ts"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "status": {
+   "table": "trips",
+   "physical": "status",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "statu"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "fare_amt": {
+   "table": "trips",
+   "physical": "fare_amt",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "fare",
+    "amount"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "tip_amt": {
+   "table": "trips",
+   "physical": "tip_amt",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "money",
+   "canonical_words": [
+    "tip",
+    "amount"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "dist_km": {
+   "table": "trips",
+   "physical": "dist_km",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "distance",
+    "km"
+   ],
+   "unit": "km",
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "dur_min": {
+   "table": "trips",
+   "physical": "dur_min",
+   "role": "measure",
+   "sql_type": "INTEGER",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "duration",
+    "min"
+   ],
+   "unit": "min",
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  },
+  "is_surge": {
+   "table": "trips",
+   "physical": "is_surge",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "is",
+    "surge"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "positive name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "payment_ok": {
+   "table": "trips",
+   "physical": "payment_ok",
+   "role": "dimension",
+   "sql_type": "INTEGER",
+   "semantic_type": "flag",
+   "canonical_words": [
+    "payment",
+    "ok"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": "normal-condition name",
+   "aggregations": [
+    "filter = 0 / = 1 (never SUM/AVG)"
+   ]
+  },
+  "pay_method": {
+   "table": "trips",
+   "physical": "pay_method",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "payment",
+    "method"
+   ],
+   "unit": null,
+   "join": null,
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "join_dt": {
+   "table": "drivers",
+   "physical": "join_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "join",
+    "date"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.driver_id->drivers.driver_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "signup_dt": {
+   "table": "riders",
+   "physical": "signup_dt",
+   "role": "date",
+   "sql_type": "TEXT",
+   "semantic_type": "date",
+   "canonical_words": [
+    "signup",
+    "date"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.rider_id->riders.rider_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "lang": {
+   "table": "driver_languages",
+   "physical": "lang",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "language"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "fanout",
+    "nullable": false,
+    "path": [
+     "trips.driver_id->drivers.driver_id",
+     "driver_languages.driver_id->drivers.driver_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "driver_nm": {
+   "table": "drivers",
+   "physical": "driver_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "driver",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.driver_id->drivers.driver_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "vehicle_cls": {
+   "table": "drivers",
+   "physical": "vehicle_cls",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "vehicle",
+    "class"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.driver_id->drivers.driver_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "rider_tier": {
+   "table": "riders",
+   "physical": "rider_tier",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "rider",
+    "tier"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.rider_id->riders.rider_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "zone_nm": {
+   "table": "zones",
+   "physical": "zone_nm",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "zone",
+    "nm"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "ambiguous",
+    "nullable": false,
+    "path": []
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "borough": {
+   "table": "zones",
+   "physical": "borough",
+   "role": "dimension",
+   "sql_type": "TEXT",
+   "semantic_type": "category",
+   "canonical_words": [
+    "borough"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "ambiguous",
+    "nullable": false,
+    "path": []
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "GROUP BY",
+    "filter"
+   ]
+  },
+  "rating": {
+   "table": "drivers",
+   "physical": "rating",
+   "role": "measure",
+   "sql_type": "REAL",
+   "semantic_type": "quantity",
+   "canonical_words": [
+    "rating"
+   ],
+   "unit": null,
+   "join": {
+    "kind": "safe",
+    "nullable": false,
+    "path": [
+     "trips.driver_id->drivers.driver_id"
+    ]
+   },
+   "flag_polarity": null,
+   "aggregations": [
+    "SUM",
+    "AVG",
+    "MIN",
+    "MAX"
+   ]
+  }
+ },
+ "metrics": {
+  "row_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "row count",
+    "number of rows",
+    "records",
+    "number of records",
+    "row_count",
+    "record count",
+    "records",
+    "how many trip",
+    "number of trip",
+    "count of trip",
+    "trip count",
+    "how many trips",
+    "number of trips",
+    "count of trips",
+    "trips count",
+    "how many trips",
+    "number of trips",
+    "count of trips",
+    "trips count"
+   ]
+  },
+  "order_count": {
+   "formula": "COUNT(*)",
+   "aggregation": "count",
+   "money_like": false,
+   "aliases": [
+    "orders",
+    "order count",
+    "number of orders",
+    "transactions",
+    "transaction count",
+    "order_count"
+   ]
+  },
+  "distinct_trip_id": {
+   "formula": "COUNT(DISTINCT \"trip_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct trip_id",
+    "unique trip_id",
+    "number of trip_id"
+   ]
+  },
+  "distinct_driver_id": {
+   "formula": "COUNT(DISTINCT \"driver_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct driver_id",
+    "unique driver_id",
+    "number of driver_id",
+    "distinct driver",
+    "unique driver",
+    "different driver",
+    "number of driver",
+    "distinct drivers",
+    "unique drivers",
+    "different drivers",
+    "number of drivers"
+   ]
+  },
+  "distinct_rider_id": {
+   "formula": "COUNT(DISTINCT \"rider_id\")",
+   "aggregation": "count_distinct",
+   "money_like": false,
+   "aliases": [
+    "distinct rider_id",
+    "unique rider_id",
+    "number of rider_id",
+    "distinct rider",
+    "unique rider",
+    "different rider",
+    "number of rider",
+    "distinct riders",
+    "unique riders",
+    "different riders",
+    "number of riders"
+   ]
+  },
+  "avg_fare_amt": {
+   "formula": "AVG(\"fare_amt\")",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average fare",
+    "average fare amount",
+    "average fare amounts",
+    "average fare amt",
+    "average fare amts",
+    "average fare_amt",
+    "average fares",
+    "avg fare",
+    "avg fare amount",
+    "avg fare amounts",
+    "avg fare amt",
+    "avg fare amts",
+    "avg fare_amt",
+    "avg fares",
+    "mean fare",
+    "mean fare amt",
+    "mean fare amts",
+    "mean fare_amt",
+    "mean fares"
+   ]
+  },
+  "sum_fare_amt": {
+   "formula": "SUM(\"fare_amt\")",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "fare",
+    "fare amount",
+    "fare amounts",
+    "fare amt",
+    "fare amts",
+    "fare_amt",
+    "fares",
+    "sum of fare amt",
+    "sum of fare amts",
+    "sum of fare_amt",
+    "total fare",
+    "total fare amount",
+    "total fare amounts",
+    "total fare amt",
+    "total fare amts",
+    "total fare_amt",
+    "total fares"
+   ]
+  },
+  "avg_tip_amt": {
+   "formula": "AVG(\"tip_amt\")",
+   "aggregation": "avg",
+   "money_like": true,
+   "aliases": [
+    "average tip",
+    "average tip amount",
+    "average tip amounts",
+    "average tip amt",
+    "average tip amts",
+    "average tip_amt",
+    "average tips",
+    "avg tip",
+    "avg tip amount",
+    "avg tip amounts",
+    "avg tip amt",
+    "avg tip amts",
+    "avg tip_amt",
+    "avg tips",
+    "mean tip",
+    "mean tip amt",
+    "mean tip amts",
+    "mean tip_amt",
+    "mean tips"
+   ]
+  },
+  "sum_tip_amt": {
+   "formula": "SUM(\"tip_amt\")",
+   "aggregation": "sum",
+   "money_like": true,
+   "aliases": [
+    "sum of tip amt",
+    "sum of tip amts",
+    "sum of tip_amt",
+    "tip",
+    "tip amount",
+    "tip amounts",
+    "tip amt",
+    "tip amts",
+    "tip_amt",
+    "tips",
+    "total tip",
+    "total tip amount",
+    "total tip amounts",
+    "total tip amt",
+    "total tip amts",
+    "total tip_amt",
+    "total tips"
+   ]
+  },
+  "avg_dist_km": {
+   "formula": "AVG(\"dist_km\")",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average dist",
+    "average dist km",
+    "average dist_km",
+    "average distance",
+    "average distance km",
+    "average distances",
+    "average dists",
+    "avg dist",
+    "avg dist km",
+    "avg dist_km",
+    "avg distance",
+    "avg distance km",
+    "avg distances",
+    "avg dists",
+    "mean dist",
+    "mean dist km",
+    "mean dist_km",
+    "mean dists"
+   ]
+  },
+  "sum_dist_km": {
+   "formula": "SUM(\"dist_km\")",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "dist",
+    "dist km",
+    "dist_km",
+    "distance",
+    "distance km",
+    "distances",
+    "dists",
+    "sum of dist km",
+    "sum of dist_km",
+    "total dist",
+    "total dist km",
+    "total dist_km",
+    "total distance",
+    "total distance km",
+    "total distances",
+    "total dists"
+   ]
+  },
+  "avg_dur_min": {
+   "formula": "AVG(\"dur_min\")",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average dur",
+    "average dur min",
+    "average dur mins",
+    "average dur_min",
+    "average duration",
+    "average duration min",
+    "average duration mins",
+    "average durations",
+    "average durs",
+    "avg dur",
+    "avg dur min",
+    "avg dur mins",
+    "avg dur_min",
+    "avg duration",
+    "avg duration min",
+    "avg duration mins",
+    "avg durations",
+    "avg durs",
+    "mean dur",
+    "mean dur min",
+    "mean dur mins",
+    "mean dur_min",
+    "mean durs"
+   ]
+  },
+  "sum_dur_min": {
+   "formula": "SUM(\"dur_min\")",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "dur",
+    "dur min",
+    "dur mins",
+    "dur_min",
+    "duration",
+    "duration min",
+    "duration mins",
+    "durations",
+    "durs",
+    "sum of dur min",
+    "sum of dur mins",
+    "sum of dur_min",
+    "total dur",
+    "total dur min",
+    "total dur mins",
+    "total dur_min",
+    "total duration",
+    "total duration min",
+    "total duration mins",
+    "total durations",
+    "total durs"
+   ]
+  },
+  "avg_rating": {
+   "formula": "AVG({{dim:rating}})",
+   "aggregation": "avg",
+   "money_like": false,
+   "aliases": [
+    "average rating",
+    "average ratings",
+    "avg rating",
+    "avg ratings",
+    "mean rating",
+    "mean ratings"
+   ]
+  },
+  "sum_rating": {
+   "formula": "SUM({{dim:rating}})",
+   "aggregation": "sum",
+   "money_like": false,
+   "aliases": [
+    "rating",
+    "ratings",
+    "sum of rating",
+    "sum of ratings",
+    "total rating",
+    "total ratings"
+   ]
+  }
+ },
+ "vocabulary": {
+  "abbreviations": {
+   "txn": "transaction",
+   "trx": "transaction",
+   "tran": "transaction",
+   "qty": "quantity",
+   "amt": "amount",
+   "cust": "customer",
+   "acct": "account",
+   "acc": "account",
+   "dept": "department",
+   "emp": "employee",
+   "prod": "product",
+   "prd": "product",
+   "addr": "address",
+   "num": "number",
+   "nbr": "number",
+   "pct": "percent",
+   "dt": "date",
+   "desc": "description",
+   "cat": "category",
+   "mgr": "manager",
+   "org": "organization",
+   "reg": "region",
+   "loc": "location",
+   "svc": "service",
+   "inv": "invoice",
+   "ord": "order",
+   "prc": "price",
+   "cd": "code",
+   "stat": "status",
+   "sts": "status",
+   "tot": "total",
+   "avg": "average",
+   "bal": "balance",
+   "pmt": "payment",
+   "wo": "workorder",
+   "po": "purchaseorder",
+   "sku": "sku",
+   "yr": "year",
+   "mth": "month",
+   "wk": "week",
+   "cnt": "count",
+   "ref": "reference",
+   "src": "source",
+   "dst": "destination",
+   "dest": "destination",
+   "ctry": "country",
+   "st": "state",
+   "veh": "vehicle",
+   "temp": "temperature",
+   "pax": "passenger",
+   "apt": "airport",
+   "carr": "carrier",
+   "flt": "flight",
+   "sup": "supplier",
+   "vend": "vendor",
+   "cls": "class",
+   "pay": "payment",
+   "rtg": "rating",
+   "lang": "language",
+   "rpt": "report",
+   "req": "request",
+   "dist": "distance",
+   "dur": "duration",
+   "prem": "premium",
+   "nts": "nights",
+   "hrs": "hours",
+   "mins": "minutes"
+  },
+  "units": {
+   "kwh": [
+    "kilowatt hours",
+    "kilowatt-hours",
+    "kilowatt hour",
+    "kilowatt-hour",
+    "kw h"
+   ],
+   "km": [
+    "kilometres",
+    "kilometers",
+    "kilometre",
+    "kilometer"
+   ],
+   "hrs": [
+    "hours"
+   ],
+   "hr": [
+    "hours",
+    "hour"
+   ],
+   "min": [
+    "minutes",
+    "minute"
+   ],
+   "nts": [
+    "room nights",
+    "room-nights",
+    "nights",
+    "night"
+   ],
+   "sq m": [
+    "square metres",
+    "square meters",
+    "square metre",
+    "square meter",
+    "sqm",
+    "m2"
+   ],
+   "sq ft": [
+    "square feet",
+    "square foot",
+    "sqft"
+   ],
+   "kg": [
+    "kilograms",
+    "kilogram",
+    "kilos"
+   ]
+  },
+  "synonym_groups": [
+   [
+    "booking",
+    "reservation"
+   ],
+   [
+    "client",
+    "customer"
+   ],
+   [
+    "journey",
+    "ride",
+    "trip"
+   ],
+   [
+    "order",
+    "purchase"
+   ],
+   [
+    "docs",
+    "documentation",
+    "documents",
+    "paperwork"
+   ],
+   [
+    "employee",
+    "staff",
+    "worker"
+   ],
+   [
+    "supplier",
+    "vendor"
+   ],
+   [
+    "item",
+    "product"
+   ],
+   [
+    "bill",
+    "invoice"
+   ],
+   [
+    "consignment",
+    "shipment"
+   ],
+   [
+    "learner",
+    "pupil",
+    "student"
+   ],
+   [
+    "case",
+    "ticket"
+   ],
+   [
+    "category",
+    "class"
+   ]
+  ],
+  "note": "rewrites apply only when the target exists in this schema; interpretive rewrites are stated in answers"
+ },
+ "descriptions": "none in the schema; no business definitions are invented"
+}
