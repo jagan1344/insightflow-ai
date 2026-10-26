@@ -51,6 +51,7 @@ from .plan import (
 )
 from .reliability.confidence import Confidence, score_confidence
 from .config import ablated as _ablated
+from .config import settings
 from .reliability.decision import (
     ANSWER, WARN, CLARIFY, ABSTAIN, Decision, decide,
 )
@@ -258,6 +259,25 @@ class Orchestrator:
             empty_report = ValidationReport(ok=False, fidelity=0.0, issues=[])
             return self._unanswerable_response(question, empty_plan,
                                                 empty_report, safety.reason)
+
+        # 0a. Typed-IR engine: non-demo datasets are answered from a grounded, verified, typed plan
+        # compiled to parameterised read-only SQL; when grounding is incomplete or ambiguous it asks.
+        # (research_improvement/architecture_recovery). 'typed+legacy' falls back to the legacy
+        # planner only when the typed engine abstains; 'legacy' skips it.
+        from .config import engine_mode
+        if ds.kind != "demo" and not _nested and engine_mode() != "legacy":
+            _er = self._typed_engine_response(question, ds)
+            _tr = _er.plan_trace or {}
+            # the legacy planner may only try questions the typed engine could not word-ground; it never
+            # receives an ambiguity, an unsupported construct or a failed verification the engine found
+            _vocab_only = bool(_tr.get("unresolved")) and not (_tr.get("ambiguities") or _tr.get("unsupported")
+                                                                or _tr.get("violations"))
+            if _er.decision.action in (ANSWER, WARN) or engine_mode() == "typed" or not _vocab_only:
+                self.memory.add(question, _er.decision.action, _er.confidence.score)
+                if _er.decision.action in (ANSWER, WARN):
+                    capture_context(question, self._ctx, dataset_id=getattr(ds, "id", None))
+                return _er
+            self._extra_notes.append("typed_engine_abstained: " + _er.decision.reason)
 
         # 0b. Normalise wording to the schema's own vocabulary (units, compounds,
         # multi-word column names, synonyms, acronyms). Every rewrite is recorded;
@@ -978,6 +998,70 @@ class Orchestrator:
                                    result=res, explanation=expl, recommendation=None,
                                    chart={"kind": "none"}, notes=notes,
                                    diagnostics={**(base.diagnostics or {}), **diag})
+
+    # ==================================================================
+    def _typed_engine_response(self, question: str, ds) -> InsightResponse:
+        """Answer with the typed-IR engine. Its reliability components are reported separately and are not a
+        calibrated probability; the decision follows hard rules (complete grounding, verified plan, executed)."""
+        from .engine.engine import answer as _engine_answer
+        from .execution.executor import db_file_path
+        r = _engine_answer(question, db_file_path(), ds.table, timeout_s=settings.query_timeout_s,
+                           max_rows=settings.max_rows)
+        tr = r.trace()
+        q = r.query
+        result = QueryResult(columns=list(r.columns), rows=list(r.rows)) if r.status == "answer" \
+            else QueryResult(error=r.message or r.status)
+        rel = dict(r.reliability)
+        signals = {k: float(v) for k, v in rel.items() if isinstance(v, (int, float, bool)) and v is not None}
+        signals["uncalibrated"] = 1.0
+        if r.status == "answer":
+            assumptions = list(q.assumptions) if q else []
+            if rel.get("inferred_joins"):
+                assumptions.append("a join was inferred from column names and contents (not declared in the schema)")
+            if rel.get("empty_result"):
+                assumptions.append("no rows matched; the result is empty")
+            action = WARN if assumptions else ANSWER
+            reason = ("answer rests on: " + "; ".join(assumptions)) if assumptions else \
+                "every word was grounded, the plan passed verification and the query executed"
+            score = 0.6 if assumptions else 0.9      # coarse ordinal level, not a probability
+        else:
+            action = CLARIFY
+            reason = {"clarify": "I need a clarification: ", "unsupported": "I can't answer this safely: ",
+                      "error": "I couldn't plan this safely: "}.get(r.status, "") + (r.message or r.status)
+            score = 0.0
+        decision = Decision(action, reason)
+        confidence = Confidence(score=score, signals=signals)
+        if r.status == "answer":
+            if len(r.rows) == 1 and len(r.rows[0]) == 1:
+                v = r.rows[0][0]
+                summary = f"{v:,.4g}" if isinstance(v, (int, float)) else str(v)
+                headline = float(v) if isinstance(v, (int, float)) else None
+            else:
+                summary = f"{len(r.rows)} rows"
+                headline = None
+            analysis = Analysis(summary=summary, headline_value=headline)
+            steps = "; ".join(f"'{e['span']}' -> {e['grounded_to']}" for e in tr["evidence"] if e["span"])
+            explanation = f"{summary}. Grounding: {steps}." + (f" Note: {reason[len('answer rests on: '):]}."
+                                                               if action == WARN else "")
+            chart = chart_spec(result, "trend" if q is not None and q.time_bucket else "breakdown")
+        else:
+            analysis = Analysis(summary=reason)
+            explanation = reason[0].upper() + reason[1:] + "."
+            chart = {"kind": "none"}
+        failure = FailureCategory.NONE if r.status == "answer" else \
+            FailureCategory.AMBIGUITY if r.status == "clarify" else FailureCategory.UNSUPPORTED_DATA
+        evidence = build_evidence(question, r.display_sql, None, {}, result)
+        diagnostics = {"question": question, "engine": "typed", "dataset": {"id": ds.id, "table": ds.table},
+                       "sql": r.display_sql, "sql_params": [str(x) for x in r.params], "trace": tr,
+                       "latency_ms": r.ms,
+                       "decision": {"action": action, "reason": reason},
+                       "confidence": {"score": score, "signals": signals,
+                                      "note": "ordinal level from hard rules, not a calibrated probability"}}
+        notes = list(self._extra_notes) + [f"active_dataset={ds.id} table={ds.table}", "engine=typed"]
+        return InsightResponse(question=question, sql=r.display_sql, intent="typed",
+                               decision=decision, confidence=confidence, analysis=analysis, evidence=evidence,
+                               result=result, explanation=explanation, recommendation=None, chart=chart,
+                               notes=notes, plan_trace=tr, failure_category=failure, diagnostics=diagnostics)
 
     # ==================================================================
     def _contribution_summary(self, plan, result, kpi) -> Analysis:

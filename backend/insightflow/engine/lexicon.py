@@ -151,6 +151,9 @@ def build(m: SchemaModel) -> Lexicon:
                     continue
                 if set(core) <= set(table_words(fkp[c.name])):
                     continue           # the FK just names its entity: the entity noun stands for it
+                cols.append(ColEntry(t, c.name, p, list(c.words) + [w for w in table_words(fkp[c.name]) if w not in c.words],
+                                     core, c.kind, rw))   # "origin airport": the role word, then the entity noun
+                continue
             if c.name == disp and set(core) <= set(tw):
                 continue               # the entity's own name column: the entity noun stands for it
             cols.append(ColEntry(t, c.name, p, c.words, core, c.kind, rw))

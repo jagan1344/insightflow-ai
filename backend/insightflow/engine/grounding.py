@@ -50,7 +50,8 @@ BUCKET_CUES = [(r"\bmonthly\b|\bmonth[\s-]+by[\s-]+month\b|\b(?:by|per|each|ever
                (r"\bquarterly\b|\b(?:by|per|each|every|a)\s+quarter\b", "quarter"),
                (r"\byearly\b|\bannually\b|\b(?:by|per|each|every|a)\s+year\b|\byear\s+over\s+year\b", "year"),
                (r"\bweekly\b|\b(?:by|per|each|every|a)\s+week\b", "week"),
-               (r"\bdaily\b|\b(?:by|per|each|every|a)\s+day\b", "day")]
+               (r"\bdaily\b|\b(?:by|per|each|every|a)\s+day\b", "day"),
+               (r"\bover\s+time\b|\btrend(?:s|ed|ing)?\b", "month")]      # unit not stated: month, as an assumption
 COMPARE = r"\b(?:vs\.?|versus|compared?\s+(?:to|with)|compare|minus|difference|change[ds]?|more|fewer|less)\b"
 NUMWORD = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
 POLARITY = {"ok", "good", "valid", "success", "successful", "pass", "passed", "active", "standing", "complet", "clean", "met"}
@@ -956,11 +957,17 @@ class Grounder:
                     else:
                         Q.time_bucket = (role_col, unit)
                         self._ev(a, b, f"{unit} of {role_col.column}", "time series")
+                        if re.fullmatch(r"over\s+time|trend\w*", mt.group(0)):
+                            Q.assumptions.append("no time unit was stated; shown by month")
                     take(a, b, "time bucket")
                 break
         if self.limits:
             n, a, b, txt = self.limits[0]
             Q.limit = n
+            for g in Q.group_by:
+                if m.col(g.table, g.column).n_null or (g.path is not None and any(st[0].nullable for st in g.path.steps)):
+                    Q.filters.append(IsNull(g, True))
+                    Q.assumptions.append(f"rows with no {g.column} are not ranked")
             Q.order_desc = not re.search(RANK_ASC, txt)
             if not Q.group_by:
                 Q.unresolved.append(f"'{txt}' ranks something, but no group was grounded")

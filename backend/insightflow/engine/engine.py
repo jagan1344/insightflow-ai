@@ -50,7 +50,7 @@ def _lexicon(m: S.SchemaModel) -> L.Lexicon:
     return _LEX[id(m)]
 
 
-def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0) -> EngineResult:
+def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, max_rows: int = 10000) -> EngineResult:
     t0 = time.perf_counter()
     r = EngineResult("error", question)
     try:
@@ -76,7 +76,10 @@ def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0) ->
                 try:
                     cur = con.execute(r.sql, r.params)
                     r.columns = [d[0] for d in cur.description]
-                    r.rows = [tuple(x) for x in cur.fetchall()]
+                    r.rows = [tuple(x) for x in cur.fetchmany(max_rows + 1)]
+                    if len(r.rows) > max_rows:
+                        r.rows = r.rows[:max_rows]
+                        r.message = f"showing the first {max_rows} rows"
                 finally:
                     con.close()
                 r.status = "answer"

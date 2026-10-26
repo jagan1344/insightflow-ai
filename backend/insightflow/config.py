@@ -73,6 +73,13 @@ ABLATION_COMPONENTS = ("semantic", "confidence_gate", "result_consistency",
                        "plan_fidelity", "mention_coverage", "answer_verifier")
 
 
+def engine_mode() -> str:
+    """Question-answering path for non-demo datasets: 'typed' (typed-IR engine; it asks when unsure),
+    'typed+legacy' (typed engine, legacy planner only when the typed engine abstains) or 'legacy'."""
+    m = os.environ.get("INSIGHTFLOW_ENGINE", "typed").strip().lower()
+    return m if m in ("typed", "typed+legacy", "legacy") else "typed"
+
+
 def ablated(name: str) -> bool:
     raw = os.environ.get("INSIGHTFLOW_ABLATE", "")
     return name in {x.strip() for x in raw.split(",") if x.strip()}
