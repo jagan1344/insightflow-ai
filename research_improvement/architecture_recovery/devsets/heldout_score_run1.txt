@@ -1,0 +1,126 @@
+{
+ "n": 63,
+ "answerable": 53,
+ "correct": 32,
+ "wrong": 3,
+ "abstain": 18,
+ "unanswerable": 7,
+ "unanswerable_abstained": 7,
+ "either": 3,
+ "either_correct": 1,
+ "either_wrong": 0,
+ "answered": 36,
+ "wrong_among_answered": 3,
+ "counts": {
+  "correct": 33,
+  "abstain": 18,
+  "abstain_ok": 9,
+  "wrong": 3
+ },
+ "median_ms": 1.2,
+ "new_schemas": {
+  "n": 44,
+  "answerable": 36,
+  "correct": 23,
+  "wrong": 1,
+  "abstain": 12,
+  "unanswerable": 6,
+  "unanswerable_abstained": 6,
+  "either": 2,
+  "either_correct": 1,
+  "either_wrong": 0,
+  "answered": 25,
+  "wrong_among_answered": 1,
+  "counts": {
+   "correct": 24,
+   "abstain": 12,
+   "abstain_ok": 7,
+   "wrong": 1
+  },
+  "median_ms": 1.2
+ },
+ "dev_schemas_new_phrasing": {
+  "n": 19,
+  "answerable": 17,
+  "correct": 9,
+  "wrong": 2,
+  "abstain": 6,
+  "unanswerable": 1,
+  "unanswerable_abstained": 1,
+  "either": 1,
+  "either_correct": 0,
+  "either_wrong": 0,
+  "answered": 11,
+  "wrong_among_answered": 2,
+  "counts": {
+   "correct": 9,
+   "abstain": 6,
+   "wrong": 2,
+   "abstain_ok": 2
+  },
+  "median_ms": 1.1
+ }
+}
+LB07 abstain                How many loans were never renewed?
+    -> clarify: words not grounded: renewed; 'never' is not attached to any condition
+    
+LB11 abstain                Monthly loans
+    -> clarify: 'monthly' does not say which date: checkout_dt, due_dt, returned_dt
+    
+LB16 abstain                Number of members who borrowed
+    -> clarify: words not grounded: borrowed
+    
+LB17 abstain                Loans returned to Riverside
+    -> clarify: no measure could be grounded
+    
+LB20 abstain                Total late fees in the first half of 2025
+    -> clarify: the question gives a period but not which date: checkout_dt, due_dt, returned_dt
+    
+LB21 abstain                Late fees for loans with 2 or more renewals
+    -> clarify: no aggregation was stated for late_fee_amt, which is not additive; no measure could be grounded
+    
+CL04 abstain                How many appointments were no-shows?
+    -> clarify: 'no' is not attached to any condition
+    
+CL06 wrong                  Number of telehealth appointments by city
+    -> answer: 
+    SELECT j1."city" AS "city", COUNT(*) AS "row_count" FROM "appointments" AS t0 LEFT JOIN "clinics" AS j1 ON j1."clinic_id" = t0."clinic_id" WHERE (t0."no_show" = 1) AND (t0."is_telehealth" = 1) GROUP BY j1."city"
+CL07 abstain                Appointments seen by each staff member
+    -> clarify: words not grounded: member
+    
+CL14 abstain                How many appointments have no check-in time?
+    -> clarify: words not grounded: check; 'no' is not attached to any condition
+    
+CL15 abstain                Average wait for urgent visits
+    -> clarify: words not grounded: visits
+    
+CL17 abstain                Appointments with a wait over 45 minutes
+    -> clarify: no measure could be grounded
+    
+CL19 abstain                Percentage of appointments that were no-shows
+    -> clarify: the percentage has no condition for its numerator; 'no' is not attached to any condition
+    
+HB03 abstain                How many rentals had an unresolved issue?
+    -> clarify: words not grounded: unresolved, issue
+    
+HB04 abstain                Fare collected per start station
+    -> clarify: words not grounded: collected
+    
+HS01 wrong                  Number of retakes by course
+    -> answer: 
+    SELECT COUNT(DISTINCT t0."crs_cd") AS "distinct_crs_cd" FROM "exam_results" AS t0 WHERE (t0."is_retake" = 1)
+HS03 wrong                  How many exams were taken by students in homeroom B-2?
+    -> answer: 
+    SELECT j1."stu_nm" AS "stu_nm", COUNT(*) AS "row_count" FROM "exam_results" AS t0 LEFT JOIN "students" AS j1 ON j1."student_id" = t0."student_id" WHERE (j1."homeroom" IN ('B-2')) GROUP BY j1."stu_nm"
+HS04 abstain                Exams without a separate room accommodation
+    -> clarify: no measure could be grounded
+    
+HP04 abstain                How many unpaid gift orders?
+    -> clarify: words not grounded: unpaid
+    
+HP05 abstain                Orders returned as damaged
+    -> clarify: no measure could be grounded
+    
+HT03 abstain                Tickets tagged outage by month
+    -> clarify: no measure could be grounded
+    

@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from . import lexicon as L
 from .ir import Agg, Arith, BoolOp, Cmp, Col, Evidence, Exists, InSet, IsNull, Lit, Measure, Not, Query
 from .schema_model import Path, SchemaModel, ordinal
-from .words import FUNCTION, UNITS, canon, participle
+from .words import DERIV, FUNCTION, UNITS, canon, participle, table_words
 
 # ------------------------------------------------------------------ vocabulary of operations (language only)
 HEADLESS = {canon(w) for w in ("result", "record", "entry", "log", "detail", "info", "fact", "event", "history")}
@@ -143,6 +143,7 @@ class Grounder:
         q = re.sub(r"(?<=\d),(?=\d{3}\b)", "", q)
         q = re.sub(r"\b(\w+)n't\b", lambda m: {"wo": "will", "ca": "can", "sha": "shall"}.get(m.group(1).lower(), m.group(1)) + " not", q, flags=re.I)
         q = q.replace("%", " percent ")
+        q = re.sub(r"\b([A-Za-z]+)-(in|out|up|off|on)\b", r"\1\2", q)
         self.q, self.ql = q, q.lower()
         self.t = self._tok(q)
         self.used: Dict[int, str] = {}
@@ -284,8 +285,11 @@ class Grounder:
                 break
             c = self.t[j].can
             pre = [w for w in allowed if 3 <= len(w) <= 4 and len(self.t[j].low) > len(w) and self.t[j].low.startswith(w)]
-            if c in allowed or pre:
-                got.add(c if c in allowed else pre[0]); last = j
+            der = [w for w in allowed if len(c) >= 4 and any(w == c + sfx for sfx in DERIV)]
+            neg = j == i and self.t[j].low.startswith(("un", "non")) and canon(self.t[j].low[2:] if self.t[j].low.startswith("un") else self.t[j].low[3:]) in allowed
+            if c in allowed or pre or der or neg:
+                got.add(c if c in allowed else pre[0] if pre else der[0] if der else
+                        canon(self.t[j].low[2:] if self.t[j].low.startswith("un") else self.t[j].low[3:])); last = j
             elif c in ("of", "the") and last is not None and j + 1 < len(self.t):
                 pass
             else:
@@ -301,13 +305,16 @@ class Grounder:
             allowed = set(e.words) | set(e.role_words)
             kind = self.m.col(e.table, e.column).kind
             req = set(e.core)
-            if kind == "boolean" and req - POLARITY - LIGHT:
+            if kind == "boolean" and req - POLARITY - LIGHT - FUNCTION:
                 req = req - POLARITY - LIGHT          # helmet_used: "helmet"; sla_met: "SLA"
-            elif kind == "measure" and req - UNITS:
+            elif kind == "measure" and req - UNITS - FUNCTION:
                 req = req - UNITS                     # score_pct: "score"; dur_min: "duration"
             for i in range(len(self.t)):
-                if i in self.used or not (self.t[i].can in allowed or any(
-                        3 <= len(w) <= 4 and len(self.t[i].low) > len(w) and self.t[i].low.startswith(w) for w in allowed)):
+                lo = self.t[i].low
+                unneg = lo.startswith("un") and canon(lo[2:]) in allowed or lo.startswith("non") and canon(lo[3:]) in allowed
+                if i in self.used or not (self.t[i].can in allowed or unneg or any(
+                        3 <= len(w) <= 4 and len(lo) > len(w) and lo.startswith(w) for w in allowed) or any(
+                        len(self.t[i].can) >= 4 and w == self.t[i].can + sfx for w in allowed for sfx in DERIV)):
                     continue
                 r = self._match(allowed, req, i)
                 if r:
@@ -340,6 +347,9 @@ class Grounder:
                 continue
             mm = Mention(i, end, kind, [e], self._text(i, end))
             mm.score = sc
+            lo = self.t[i].low
+            mm.unneg = kind == "col" and lo.startswith(("un", "non")) and lo not in ("unit", "units", "union", "unique", "none") \
+                and self.t[i].can not in set(e.words)
             taken[key] = mm
             self._use(i, end, kind)
         self.G.mentions += list(taken.values())
@@ -467,6 +477,9 @@ class Grounder:
                 continue
             cm.e = e; cm.amb = None
             k = m.col(e.table, e.column).kind
+            if getattr(cm, "unneg", False) and k not in ("boolean", "date"):
+                Q.unresolved.append(f"'{cm.text}' negates {e.column}, which is not a yes/no or date column")
+                continue
             {"measure": measures_c, "date": dates_c, "boolean": bools_c, "id": ids_c}.get(k, dims_c).append(cm)
 
         # booleans -> conditions with polarity
@@ -479,7 +492,8 @@ class Grounder:
             ant = self._near(ANTONYM, bm.i0, bm.i1, before=3) or (re.search(ANTONYM, ql[self.t[bm.i1 - 1].e:self.t[min(len(self.t), bm.i1 + 2) - 1].e]) if bm.i1 < len(self.t) else None)
             if pol:
                 has_word = bool(words & POLARITY & {self.t[j].can for j in range(bm.i0, bm.i1)}) or \
-                    any(participle(self.t[j].low) and self.t[j].can in words for j in range(bm.i0, bm.i1))
+                    any(participle(self.t[j].low) and self.t[j].can in words for j in range(bm.i0, bm.i1)) or \
+                    bool(getattr(bm, "unneg", False))
                 posw = self._near(POSITIVE, bm.i0, bm.i1, before=3)
                 if ant:
                     v = 0
@@ -489,6 +503,8 @@ class Grounder:
             if neg:
                 v = 1 - v
                 self._use(*neg, "negation")
+            if getattr(bm, "unneg", False):
+                v = 1 - v                              # "unpaid", "unresolved"
             if ant:
                 for j in range(max(0, bm.i0 - 3), min(len(self.t), bm.i1 + 2)):
                     if re.fullmatch(ANTONYM.replace(r"\b", ""), self.t[j].low):
@@ -563,7 +579,7 @@ class Grounder:
             te = tes[0]
             pre = ql[self.t[max(0, tm.i0 - 3)].s:self.t[tm.i0].s]
             cue = re.search(r"\b(?:with|had|has|have|having|without|no|any|an?|least\s+one|one\s+or\s+more|some)\s+(?:any\s+|an?\s+)?$", pre)
-            verb = participle(self.t[tm.i0].low)
+            verb = any(participle(self.t[j].low) for j in range(tm.i0, tm.i1))
             if not (cue or verb):
                 continue
             if any(isinstance(p, Exists) and p.path == te.path for _pos, p in conds):
@@ -583,7 +599,7 @@ class Grounder:
             if e.path is not None and (e.path.fans_out or e.path.steps[-1][0].nullable):
                 continue
             col = m.col(e.table, e.column)
-            neg = self._neg_before(cm.i0, 4)
+            neg = self._neg_before(cm.i0, 4) or (getattr(cm, "unneg", False) and (cm.i0, cm.i0))
             nullable = col.n_null > 0 or not col.not_null
             if neg and nullable:
                 self._use(*neg, "negation")
@@ -690,9 +706,10 @@ class Grounder:
 
         def additive(e) -> bool:
             c = m.col(e.table, e.column)
-            ws = set(c.words)
-            return c.kind == "measure" and not (ws & {canon(x) for x in ("rating", "rate", "score", "percent", "pct", "ratio",
-                                                                         "temperature", "avg", "average", "age", "price", "lat", "lon")})
+            raw = set(re.split(r"[^a-z0-9]+", c.name.lower()))
+            return c.kind == "measure" and not ({canon(x) for x in raw} & {canon(x) for x in (
+                "rating", "rate", "score", "percent", "pct", "ratio", "temperature", "avg", "average", "age", "price")}
+                or raw & {"lat", "lon", "lng"})
 
         gtargets = self._group_targets()
         meas_free = [cm for cm in measures_c if not (getattr(cm, "cmp", False) or getattr(cm, "null", False)
@@ -806,9 +823,9 @@ class Grounder:
         if measure is None and (cue and cue[2] == "count" or (distinct and not meas_free)):
             target = None
             after_t = [x for x in tabs_m if (cue is None or x.i0 >= cue[1]) and not getattr(x, "null", False)
-                       and not getattr(x, "cond", False)]
+                       and not getattr(x, "cond", False) and id(x) not in self.group_claimed]
             after_c = [x for x in dims_c + ids_c if (cue is None or x.i0 >= cue[1]) and getattr(x, "e", None) is not None
-                       and not getattr(x, "null", False)]
+                       and not getattr(x, "null", False) and id(x) not in self.group_claimed]
             if distinct and (after_c or after_t):
                 nxt = sorted(after_c + after_t, key=lambda x: x.i0)[0]
                 if nxt.kind == "col":
@@ -850,8 +867,9 @@ class Grounder:
                 self._ev(cue[0] if cue else 0, cue[1] if cue else 0, measure.expr.func.upper(), "count")
         if measure is None and not Q.unsupported and not Q.ambiguities:
             # a bare anchor noun with a percentage / grouping and no measure ("share of orders by city")
-            if pct or re.search(GROUP_CUES, ql) or any(re.search(rx, ql) for rx, _u in BUCKET_CUES):
-                if any(x.cands[0].path is None for x in tabs_m):
+            if not meas_free and not aggs:
+                aw = set(table_words(m.anchor))
+                if any(x.cands[0].path is None or aw <= set(x.cands[0].words) for x in tabs_m):
                     measure = Measure("row_count", Agg("count"))
                     Q.assumptions.append(f"counting {m.anchor} rows")
         if measure is None and not Q.unsupported:
@@ -953,16 +971,23 @@ class Grounder:
                 take(a, b, "ranking")
         Q.shape = "ranked" if Q.limit else "series" if Q.time_bucket else "grouped" if Q.group_by else "scalar"
 
+    def _agentive(self, a: int, b: int) -> bool:
+        """'taken by students', 'opened by Ava': a participle before a bare 'by' names who did it, not a grouping."""
+        return b - a == 1 and self.t[a].low == "by" and a > 0 and participle(self.t[a - 1].low)
+
     def _group_targets(self) -> Set[int]:
         """Small-range integer columns named right after a grouping cue ('by grade level') when something else is
         being measured: they label groups and are not the measure."""
         out = set()
         has_cue = any(re.search(rx, self.ql) for rx, fn in AGG_CUES if fn == "count")
+        self.group_claimed = set()
         for mt in re.finditer(GROUP_CUES, self.ql):
             a, b = self._span(mt.start(), mt.end())
-            if a < 0 or not self._free(a, b):
+            if a < 0 or not self._free(a, b) or self._agentive(a, b):
                 continue
-            nxt = [x for x in self.G.mentions if b <= x.i0 <= b + 3 and x.kind in ("col", "table")]
+            nxt = [x for x in self.G.mentions if b <= x.i0 <= b + 3 and x.kind in ("col", "table") and not getattr(x, "ctx", False)]
+            if nxt:
+                self.group_claimed.add(id(nxt[0]))
             if not nxt or nxt[0].kind != "col" or getattr(nxt[0], "e", None) is None:
                 continue
             x = nxt[0]
@@ -986,7 +1011,7 @@ class Grounder:
         spans = []
         for mt in re.finditer(GROUP_CUES, ql):
             a, b = self._span(mt.start(), mt.end())
-            if a >= 0 and self._free(a, b):
+            if a >= 0 and self._free(a, b) and not self._agentive(a, b):
                 spans.append((a, b, 3))
         for _n, a, b, _txt in self.limits:      # "top 3 start stations": the ranked entity is the group
             spans.append((a, b, 0))

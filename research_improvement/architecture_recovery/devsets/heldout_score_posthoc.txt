@@ -1,0 +1,78 @@
+{
+ "n": 63,
+ "answerable": 53,
+ "correct": 47,
+ "wrong": 0,
+ "abstain": 6,
+ "unanswerable": 7,
+ "unanswerable_abstained": 7,
+ "either": 3,
+ "either_correct": 1,
+ "either_wrong": 0,
+ "answered": 48,
+ "wrong_among_answered": 0,
+ "counts": {
+  "correct": 48,
+  "abstain_ok": 9,
+  "abstain": 6
+ },
+ "median_ms": 1.6,
+ "new_schemas": {
+  "n": 44,
+  "answerable": 36,
+  "correct": 31,
+  "wrong": 0,
+  "abstain": 5,
+  "unanswerable": 6,
+  "unanswerable_abstained": 6,
+  "either": 2,
+  "either_correct": 1,
+  "either_wrong": 0,
+  "answered": 32,
+  "wrong_among_answered": 0,
+  "counts": {
+   "correct": 32,
+   "abstain_ok": 7,
+   "abstain": 5
+  },
+  "median_ms": 1.6
+ },
+ "dev_schemas_new_phrasing": {
+  "n": 19,
+  "answerable": 17,
+  "correct": 16,
+  "wrong": 0,
+  "abstain": 1,
+  "unanswerable": 1,
+  "unanswerable_abstained": 1,
+  "either": 1,
+  "either_correct": 0,
+  "either_wrong": 0,
+  "answered": 16,
+  "wrong_among_answered": 0,
+  "counts": {
+   "correct": 16,
+   "abstain": 1,
+   "abstain_ok": 2
+  },
+  "median_ms": 1.6
+ }
+}
+LB11 abstain                Monthly loans
+    -> clarify: 'monthly' does not say which date: checkout_dt, due_dt, returned_dt
+    
+LB16 abstain                Number of members who borrowed
+    -> clarify: words not grounded: borrowed
+    
+LB20 abstain                Total late fees in the first half of 2025
+    -> clarify: the question gives a period but not which date: checkout_dt, due_dt, returned_dt
+    
+CL07 abstain                Appointments seen by each staff member
+    -> clarify: words not grounded: member
+    
+CL15 abstain                Average wait for urgent visits
+    -> clarify: words not grounded: visits
+    
+HB04 abstain                Fare collected per start station
+    -> clarify: words not grounded: collected
+    

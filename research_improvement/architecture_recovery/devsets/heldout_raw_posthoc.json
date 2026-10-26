@@ -1,0 +1,3096 @@
+{
+ "commit": "d6b75596fe5df683654c8741c247baf47621c1f1",
+ "records": [
+  {
+   "id": "LB01",
+   "domain": "library",
+   "question": "How many loans were made?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0",
+   "rows": [
+    [
+     1200
+    ]
+   ],
+   "ms": 46.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB02",
+   "domain": "library",
+   "question": "Total late fees",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"loans\" AS t0",
+   "rows": [
+    [
+     906.5
+    ]
+   ],
+   "ms": 2.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"loans\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "late fees",
+      "grounded_to": "SUM(loans.late_fee_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB03",
+   "domain": "library",
+   "question": "Loans by genre",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"genre\" AS \"genre\", COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"titles\" AS j1 ON j1.\"isbn\" = t0.\"isbn\" GROUP BY j1.\"genre\"",
+   "rows": [
+    [
+     "children",
+     299
+    ],
+    [
+     "history",
+     237
+    ],
+    [
+     "mystery",
+     157
+    ],
+    [
+     "poetry",
+     211
+    ],
+    [
+     "science",
+     296
+    ]
+   ],
+   "ms": 2.6,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"genre\" AS \"genre\", COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"titles\" AS j1 ON j1.\"isbn\" = t0.\"isbn\" GROUP BY j1.\"genre\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "genre",
+      "grounded_to": "group by titles.genre",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB04",
+   "domain": "library",
+   "question": "How many loans have not been returned?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (t0.\"returned_dt\" IS NULL)",
+   "rows": [
+    [
+     119
+    ]
+   ],
+   "ms": 2.0,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (t0.\"returned_dt\" IS NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "returned",
+      "grounded_to": "loans.returned_dt IS NULL",
+      "reason": "event has not happened (no date)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB05",
+   "domain": "library",
+   "question": "Number of digital loans",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (t0.\"is_digital\" = 1)",
+   "rows": [
+    [
+     232
+    ]
+   ],
+   "ms": 1.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (t0.\"is_digital\" = 1)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "digital",
+      "grounded_to": "loans.is_digital = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB06",
+   "domain": "library",
+   "question": "Total late fee amount by member type",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"mbr_type\" AS \"mbr_type\", SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"loans\" AS t0 LEFT JOIN \"members\" AS j1 ON j1.\"mbr_no\" = t0.\"mbr_no\" GROUP BY j1.\"mbr_type\"",
+   "rows": [
+    [
+     "adult",
+     330.75
+    ],
+    [
+     "senior",
+     281.75
+    ],
+    [
+     "student",
+     294.0
+    ]
+   ],
+   "ms": 1.8,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"mbr_type\" AS \"mbr_type\", SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"loans\" AS t0 LEFT JOIN \"members\" AS j1 ON j1.\"mbr_no\" = t0.\"mbr_no\" GROUP BY j1.\"mbr_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "late fee amount",
+      "grounded_to": "SUM(loans.late_fee_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "member type",
+      "grounded_to": "group by members.mbr_type",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB07",
+   "domain": "library",
+   "question": "How many loans were never renewed?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (t0.\"renewal_cnt\" = 0)",
+   "rows": [
+    [
+     585
+    ]
+   ],
+   "ms": 1.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (t0.\"renewal_cnt\" = 0)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "renewed",
+      "grounded_to": "loans.renewal_cnt = 0",
+      "reason": "verb form of a count column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB08",
+   "domain": "library",
+   "question": "How many loans had a hold?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"holds\" AS x0_0 WHERE x0_0.\"loan_id\" = t0.\"loan_id\"))",
+   "rows": [
+    [
+     202
+    ]
+   ],
+   "ms": 8.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"holds\" AS x0_0 WHERE x0_0.\"loan_id\" = t0.\"loan_id\"))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "hold",
+      "grounded_to": "EXISTS holds",
+      "reason": "related rows (one-to-many)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB09",
+   "domain": "library",
+   "question": "Loans by checkout branch",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"branch_nm\" AS \"branch_nm\", COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"branches\" AS j1 ON j1.\"branch_id\" = t0.\"checkout_branch_id\" GROUP BY j1.\"branch_nm\"",
+   "rows": [
+    [
+     "Bayview",
+     284
+    ],
+    [
+     "Central",
+     301
+    ],
+    [
+     "Hillcrest",
+     312
+    ],
+    [
+     "Riverside",
+     303
+    ]
+   ],
+   "ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"branch_nm\" AS \"branch_nm\", COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"branches\" AS j1 ON j1.\"branch_id\" = t0.\"checkout_branch_id\" GROUP BY j1.\"branch_nm\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "checkout branch",
+      "grounded_to": "group by branches.branch_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB10",
+   "domain": "library",
+   "question": "Loans by branch",
+   "status": "clarify",
+   "message": "'branch' is reached in more than one way: branches.branch_nm via checkout_branch_id or branches.branch_nm via return_branch_id",
+   "sql": "",
+   "rows": [],
+   "ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "'branch' is reached in more than one way: branches.branch_nm via checkout_branch_id or branches.branch_nm via return_branch_id",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [
+     "'branch' is reached in more than one way: branches.branch_nm via checkout_branch_id or branches.branch_nm via return_branch_id"
+    ],
+    "unresolved": [
+     "words not grounded: branch"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB11",
+   "domain": "library",
+   "question": "Monthly loans",
+   "status": "clarify",
+   "message": "'monthly' does not say which date: checkout_dt, due_dt, returned_dt",
+   "sql": "",
+   "rows": [],
+   "ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "'monthly' does not say which date: checkout_dt, due_dt, returned_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [
+     "'monthly' does not say which date: checkout_dt, due_dt, returned_dt"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB12",
+   "domain": "library",
+   "question": "Top 3 genres by number of loans",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"genre\" AS \"genre\", COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"titles\" AS j1 ON j1.\"isbn\" = t0.\"isbn\" GROUP BY j1.\"genre\" ORDER BY \"row_count\" DESC, \"genre\" LIMIT 3",
+   "rows": [
+    [
+     "children",
+     299
+    ],
+    [
+     "science",
+     296
+    ],
+    [
+     "history",
+     237
+    ]
+   ],
+   "ms": 2.0,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"genre\" AS \"genre\", COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"titles\" AS j1 ON j1.\"isbn\" = t0.\"isbn\" GROUP BY j1.\"genre\" ORDER BY \"row_count\" DESC, \"genre\" LIMIT 3",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "genres",
+      "grounded_to": "group by titles.genre",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB13",
+   "domain": "library",
+   "question": "Average late fee for mystery loans",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT AVG(t0.\"late_fee_amt\") AS \"avg_late_fee_amt\" FROM \"loans\" AS t0 LEFT JOIN \"titles\" AS j1 ON j1.\"isbn\" = t0.\"isbn\" WHERE (j1.\"genre\" IN ('mystery'))",
+   "rows": [
+    [
+     0.7515923566878981
+    ]
+   ],
+   "ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"late_fee_amt\") AS \"avg_late_fee_amt\" FROM \"loans\" AS t0 LEFT JOIN \"titles\" AS j1 ON j1.\"isbn\" = t0.\"isbn\" WHERE (j1.\"genre\" IN ('mystery'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "mystery",
+      "grounded_to": "titles.genre IN ('mystery',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "late fee",
+      "grounded_to": "AVG(loans.late_fee_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB14",
+   "domain": "library",
+   "question": "Percentage of loans that were digital",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_digital\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"loans\" AS t0",
+   "rows": [
+    [
+     19.333333333333332
+    ]
+   ],
+   "ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_digital\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"loans\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "digital",
+      "grounded_to": "loans.is_digital = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "Percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB15",
+   "domain": "library",
+   "question": "How many loans had a waiting hold?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"holds\" AS x0_0 WHERE x0_0.\"loan_id\" = t0.\"loan_id\" AND x0_0.\"hold_status\" IN ('waiting')))",
+   "rows": [
+    [
+     73
+    ]
+   ],
+   "ms": 8.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"holds\" AS x0_0 WHERE x0_0.\"loan_id\" = t0.\"loan_id\" AND x0_0.\"hold_status\" IN ('waiting')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "waiting",
+      "grounded_to": "holds.hold_status IN ('waiting',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB16",
+   "domain": "library",
+   "question": "Number of members who borrowed",
+   "status": "clarify",
+   "message": "words not grounded: borrowed",
+   "sql": "",
+   "rows": [],
+   "ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: borrowed",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "'members' counted as distinct mbr_no values on loans"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: borrowed"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB17",
+   "domain": "library",
+   "question": "Loans returned to Riverside",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"branches\" AS j1 ON j1.\"branch_id\" = t0.\"return_branch_id\" WHERE (j1.\"branch_nm\" IN ('Riverside')) AND (t0.\"returned_dt\" IS NOT NULL)",
+   "rows": [
+    [
+     273
+    ]
+   ],
+   "ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"loans\" AS t0 LEFT JOIN \"branches\" AS j1 ON j1.\"branch_id\" = t0.\"return_branch_id\" WHERE (j1.\"branch_nm\" IN ('Riverside')) AND (t0.\"returned_dt\" IS NOT NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Riverside",
+      "grounded_to": "branches.branch_nm IN ('Riverside',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "returned",
+      "grounded_to": "loans.returned_dt IS NOT NULL",
+      "reason": "event has happened (date present)"
+     }
+    ],
+    "assumptions": [
+     "counting loans rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB18",
+   "domain": "library",
+   "question": "Average page count",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: Average, page, count",
+   "sql": "",
+   "rows": [],
+   "ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, page, count",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Average, page, count"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB19",
+   "domain": "library",
+   "question": "Which members are the most avid readers?",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: avid, readers, members",
+   "sql": "",
+   "rows": [],
+   "ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: avid, readers, members",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: avid, readers, members"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB20",
+   "domain": "library",
+   "question": "Total late fees in the first half of 2025",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: checkout_dt, due_dt, returned_dt",
+   "sql": "",
+   "rows": [],
+   "ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: checkout_dt, due_dt, returned_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "late fees",
+      "grounded_to": "SUM(loans.late_fee_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: checkout_dt, due_dt, returned_dt"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB21",
+   "domain": "library",
+   "question": "Late fees for loans with 2 or more renewals",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"loans\" AS t0 WHERE (t0.\"renewal_cnt\" >= 2)",
+   "rows": [
+    [
+     233.75
+    ]
+   ],
+   "ms": 2.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"loans\" AS t0 WHERE (t0.\"renewal_cnt\" >= 2)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "2 or more",
+      "grounded_to": "loans.renewal_cnt >= 2",
+      "reason": "comparison"
+     },
+     {
+      "span": "Late fees",
+      "grounded_to": "SUM(loans.late_fee_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "late_fee_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "LB22",
+   "domain": "library",
+   "question": "How many loans are overdue today?",
+   "status": "unsupported",
+   "message": "relative dates (last/this/next period) are not resolved against a reference date",
+   "sql": "",
+   "rows": [],
+   "ms": 1.1,
+   "trace": {
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: overdue, today"
+    ],
+    "unsupported": [
+     "relative dates (last/this/next period) are not resolved against a reference date"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL01",
+   "domain": "clinic",
+   "question": "How many appointments were there?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0",
+   "rows": [
+    [
+     1000
+    ]
+   ],
+   "ms": 34.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL02",
+   "domain": "clinic",
+   "question": "Total billed amount by clinic",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"clinic_nm\" AS \"clinic_nm\", SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 LEFT JOIN \"clinics\" AS j1 ON j1.\"clinic_id\" = t0.\"clinic_id\" GROUP BY j1.\"clinic_nm\"",
+   "rows": [
+    [
+     "Lakeside Clinic",
+     76028.9
+    ],
+    [
+     "Northgate Clinic",
+     81237.4
+    ],
+    [
+     "Summit Clinic",
+     74653.85
+    ]
+   ],
+   "ms": 1.8,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"clinic_nm\" AS \"clinic_nm\", SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 LEFT JOIN \"clinics\" AS j1 ON j1.\"clinic_id\" = t0.\"clinic_id\" GROUP BY j1.\"clinic_nm\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "billed amount",
+      "grounded_to": "SUM(appointments.billed_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "clinic",
+      "grounded_to": "group by clinics.clinic_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL03",
+   "domain": "clinic",
+   "question": "Average wait in minutes by visit type",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT t0.\"visit_type\" AS \"visit_type\", AVG(t0.\"wait_mins\") AS \"avg_wait_mins\" FROM \"appointments\" AS t0 GROUP BY t0.\"visit_type\"",
+   "rows": [
+    [
+     "checkup",
+     28.925324675324674
+    ],
+    [
+     "follow-up",
+     28.948051948051948
+    ],
+    [
+     "urgent",
+     30.957142857142856
+    ]
+   ],
+   "ms": 1.6,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"visit_type\" AS \"visit_type\", AVG(t0.\"wait_mins\") AS \"avg_wait_mins\" FROM \"appointments\" AS t0 GROUP BY t0.\"visit_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "wait",
+      "grounded_to": "AVG(appointments.wait_mins)",
+      "reason": "measure column"
+     },
+     {
+      "span": "visit type",
+      "grounded_to": "group by appointments.visit_type",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL04",
+   "domain": "clinic",
+   "question": "How many appointments were no-shows?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (t0.\"no_show\" = 1)",
+   "rows": [
+    [
+     104
+    ]
+   ],
+   "ms": 1.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (t0.\"no_show\" = 1)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "no-shows",
+      "grounded_to": "appointments.no_show = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL05",
+   "domain": "clinic",
+   "question": "How many patients had no insurer?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(DISTINCT t0.\"patient_id\") AS \"distinct_patient_id\" FROM \"appointments\" AS t0 LEFT JOIN \"patients\" AS j1 ON j1.\"patient_id\" = t0.\"patient_id\" WHERE (j1.\"insurer\" IS NULL)",
+   "rows": [
+    [
+     87
+    ]
+   ],
+   "ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"patient_id\") AS \"distinct_patient_id\" FROM \"appointments\" AS t0 LEFT JOIN \"patients\" AS j1 ON j1.\"patient_id\" = t0.\"patient_id\" WHERE (j1.\"insurer\" IS NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "insurer",
+      "grounded_to": "patients.insurer IS NULL",
+      "reason": "missing-value phrasing"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "'patients' counted as distinct patient_id values on appointments"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL06",
+   "domain": "clinic",
+   "question": "Number of telehealth appointments by city",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"city\" AS \"city\", COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 LEFT JOIN \"clinics\" AS j1 ON j1.\"clinic_id\" = t0.\"clinic_id\" WHERE (t0.\"is_telehealth\" = 1) GROUP BY j1.\"city\"",
+   "rows": [
+    [
+     "Avon",
+     159
+    ],
+    [
+     "Brill",
+     64
+    ]
+   ],
+   "ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"city\" AS \"city\", COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 LEFT JOIN \"clinics\" AS j1 ON j1.\"clinic_id\" = t0.\"clinic_id\" WHERE (t0.\"is_telehealth\" = 1) GROUP BY j1.\"city\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "telehealth",
+      "grounded_to": "appointments.is_telehealth = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "city",
+      "grounded_to": "group by clinics.city",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL07",
+   "domain": "clinic",
+   "question": "Appointments seen by each staff member",
+   "status": "clarify",
+   "message": "words not grounded: member",
+   "sql": "",
+   "rows": [],
+   "ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: member",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "staff",
+      "grounded_to": "appointments.seen_by_staff_id IS NOT NULL",
+      "reason": "the verb says the link exists"
+     },
+     {
+      "span": "staff",
+      "grounded_to": "group by staff.staff_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "counting appointments rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: member"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL08",
+   "domain": "clinic",
+   "question": "Appointments by staff",
+   "status": "clarify",
+   "message": "'staff' is reached in more than one way: staff.staff_nm via booked_by_staff_id or staff.staff_nm via seen_by_staff_id",
+   "sql": "",
+   "rows": [],
+   "ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "'staff' is reached in more than one way: staff.staff_nm via booked_by_staff_id or staff.staff_nm via seen_by_staff_id",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting appointments rows"
+    ],
+    "ambiguities": [
+     "'staff' is reached in more than one way: staff.staff_nm via booked_by_staff_id or staff.staff_nm via seen_by_staff_id"
+    ],
+    "unresolved": [
+     "words not grounded: staff"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL09",
+   "domain": "clinic",
+   "question": "Appointments booked by R. Diaz",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 LEFT JOIN \"staff\" AS j1 ON j1.\"staff_id\" = t0.\"booked_by_staff_id\" WHERE (j1.\"staff_nm\" IN ('R. Diaz'))",
+   "rows": [
+    [
+     201
+    ]
+   ],
+   "ms": 1.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 LEFT JOIN \"staff\" AS j1 ON j1.\"staff_id\" = t0.\"booked_by_staff_id\" WHERE (j1.\"staff_nm\" IN ('R. Diaz'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "R. Diaz",
+      "grounded_to": "staff.staff_nm IN ('R. Diaz',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [
+     "counting appointments rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL10",
+   "domain": "clinic",
+   "question": "How many appointments had a procedure?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"procedures\" AS x0_0 WHERE x0_0.\"appt_id\" = t0.\"appt_id\"))",
+   "rows": [
+    [
+     685
+    ]
+   ],
+   "ms": 21.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"procedures\" AS x0_0 WHERE x0_0.\"appt_id\" = t0.\"appt_id\"))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "procedure",
+      "grounded_to": "EXISTS procedures",
+      "reason": "related rows (one-to-many)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL11",
+   "domain": "clinic",
+   "question": "How many appointments included an EKG?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"procedures\" AS x0_0 WHERE x0_0.\"appt_id\" = t0.\"appt_id\" AND x0_0.\"proc_cd\" IN ('EKG')))",
+   "rows": [
+    [
+     209
+    ]
+   ],
+   "ms": 27.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"procedures\" AS x0_0 WHERE x0_0.\"appt_id\" = t0.\"appt_id\" AND x0_0.\"proc_cd\" IN ('EKG')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "EKG",
+      "grounded_to": "procedures.proc_cd IN ('EKG',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL12",
+   "domain": "clinic",
+   "question": "Total billed amount minus copay amount",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((SUM(t0.\"billed_amt\")) - (SUM(t0.\"copay_amt\"))) AS \"billed_amt_minus_copay_amt\" FROM \"appointments\" AS t0",
+   "rows": [
+    [
+     213105.15
+    ]
+   ],
+   "ms": 1.8,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"billed_amt\")) - (SUM(t0.\"copay_amt\"))) AS \"billed_amt_minus_copay_amt\" FROM \"appointments\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "billed amount minus copay amount",
+      "grounded_to": "SUM(billed_amt) - SUM(copay_amt)",
+      "reason": "totals combined as stated"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL13",
+   "domain": "clinic",
+   "question": "Monthly billed amount",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"appt_dt\",1,7) AS \"month\", SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 GROUP BY substr(t0.\"appt_dt\",1,7) ORDER BY \"month\"",
+   "rows": [
+    [
+     "2025-01",
+     16864.28
+    ],
+    [
+     "2025-02",
+     19671.61
+    ],
+    [
+     "2025-03",
+     19491.04
+    ],
+    [
+     "2025-04",
+     20103.29
+    ],
+    [
+     "2025-05",
+     17693.0
+    ],
+    [
+     "2025-06",
+     18013.24
+    ],
+    [
+     "2025-07",
+     16489.5
+    ],
+    [
+     "2025-08",
+     18684.87
+    ],
+    [
+     "2025-09",
+     20614.61
+    ],
+    [
+     "2025-10",
+     20626.74
+    ],
+    [
+     "2025-11",
+     23406.88
+    ],
+    [
+     "2025-12",
+     20261.09
+    ]
+   ],
+   "ms": 2.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"appt_dt\",1,7) AS \"month\", SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 GROUP BY substr(t0.\"appt_dt\",1,7) ORDER BY \"month\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "billed amount",
+      "grounded_to": "SUM(appointments.billed_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "Monthly",
+      "grounded_to": "month of appt_dt",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [
+     "billed_amt is summed (no aggregation word was given)",
+     "dates refer to appt_dt, the only date every appointments row has"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL14",
+   "domain": "clinic",
+   "question": "How many appointments have no check-in time?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (t0.\"checkin_ts\" IS NULL)",
+   "rows": [
+    [
+     104
+    ]
+   ],
+   "ms": 1.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (t0.\"checkin_ts\" IS NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "checkin",
+      "grounded_to": "appointments.checkin_ts IS NULL",
+      "reason": "missing-value phrasing"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL15",
+   "domain": "clinic",
+   "question": "Average wait for urgent visits",
+   "status": "clarify",
+   "message": "words not grounded: visits",
+   "sql": "",
+   "rows": [],
+   "ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: visits",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "urgent",
+      "grounded_to": "appointments.visit_type IN ('urgent',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "wait",
+      "grounded_to": "AVG(appointments.wait_mins)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: visits"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL16",
+   "domain": "clinic",
+   "question": "Share of appointments by visit type",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT t0.\"visit_type\" AS \"visit_type\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"appointments\" AS t0 GROUP BY t0.\"visit_type\"",
+   "rows": [
+    [
+     "checkup",
+     33.5
+    ],
+    [
+     "follow-up",
+     34.5
+    ],
+    [
+     "urgent",
+     32.0
+    ]
+   ],
+   "ms": 1.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"visit_type\" AS \"visit_type\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"appointments\" AS t0 GROUP BY t0.\"visit_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "visit type",
+      "grounded_to": "group by appointments.visit_type",
+      "reason": "grouping"
+     },
+     {
+      "span": "Share",
+      "grounded_to": "share of the grand total per group",
+      "reason": "percentage with grouping"
+     }
+    ],
+    "assumptions": [
+     "counting appointments rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL17",
+   "domain": "clinic",
+   "question": "Appointments with a wait over 45 minutes",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (t0.\"wait_mins\" > 45)",
+   "rows": [
+    [
+     203
+    ]
+   ],
+   "ms": 1.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"appointments\" AS t0 WHERE (t0.\"wait_mins\" > 45)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "over 45",
+      "grounded_to": "appointments.wait_mins > 45",
+      "reason": "comparison"
+     }
+    ],
+    "assumptions": [
+     "counting appointments rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL18",
+   "domain": "clinic",
+   "question": "Top 2 clinics by billed amount",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"clinic_nm\" AS \"clinic_nm\", SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 LEFT JOIN \"clinics\" AS j1 ON j1.\"clinic_id\" = t0.\"clinic_id\" GROUP BY j1.\"clinic_nm\" ORDER BY \"sum_billed_amt\" DESC, \"clinic_nm\" LIMIT 2",
+   "rows": [
+    [
+     "Northgate Clinic",
+     81237.4
+    ],
+    [
+     "Lakeside Clinic",
+     76028.9
+    ]
+   ],
+   "ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"clinic_nm\" AS \"clinic_nm\", SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 LEFT JOIN \"clinics\" AS j1 ON j1.\"clinic_id\" = t0.\"clinic_id\" GROUP BY j1.\"clinic_nm\" ORDER BY \"sum_billed_amt\" DESC, \"clinic_nm\" LIMIT 2",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "billed amount",
+      "grounded_to": "SUM(appointments.billed_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "clinics",
+      "grounded_to": "group by clinics.clinic_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "billed_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL19",
+   "domain": "clinic",
+   "question": "Percentage of appointments that were no-shows",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"no_show\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"appointments\" AS t0",
+   "rows": [
+    [
+     10.4
+    ]
+   ],
+   "ms": 1.6,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"no_show\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"appointments\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "no-shows",
+      "grounded_to": "appointments.no_show = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "Percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting appointments rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL20",
+   "domain": "clinic",
+   "question": "Which doctors are most efficient?",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: doctors, efficient",
+   "sql": "",
+   "rows": [],
+   "ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: doctors, efficient",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: doctors, efficient"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL21",
+   "domain": "clinic",
+   "question": "Billed amount for patients insured by Unity Care",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 LEFT JOIN \"patients\" AS j1 ON j1.\"patient_id\" = t0.\"patient_id\" WHERE (j1.\"insurer\" IN ('Unity Care'))",
+   "rows": [
+    [
+     68759.32
+    ]
+   ],
+   "ms": 2.0,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"billed_amt\") AS \"sum_billed_amt\" FROM \"appointments\" AS t0 LEFT JOIN \"patients\" AS j1 ON j1.\"patient_id\" = t0.\"patient_id\" WHERE (j1.\"insurer\" IN ('Unity Care'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Unity Care",
+      "grounded_to": "patients.insurer IN ('Unity Care',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "Billed amount",
+      "grounded_to": "SUM(appointments.billed_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "billed_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "CL22",
+   "domain": "clinic",
+   "question": "Expected billed amount next quarter",
+   "status": "unsupported",
+   "message": "relative dates (last/this/next period) are not resolved against a reference date",
+   "sql": "",
+   "rows": [],
+   "ms": 0.9,
+   "trace": {
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "billed amount",
+      "grounded_to": "SUM(appointments.billed_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "billed_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Expected, next, quarter"
+    ],
+    "unsupported": [
+     "relative dates (last/this/next period) are not resolved against a reference date"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HB01",
+   "domain": "bikes",
+   "question": "Average distance by bike type",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"bike_type\" AS \"bike_type\", AVG(t0.\"dist_km\") AS \"avg_dist_km\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" GROUP BY j1.\"bike_type\"",
+   "rows": [
+    [
+     "cargo",
+     8.872785388127854
+    ],
+    [
+     "classic",
+     8.647368421052631
+    ],
+    [
+     "electric",
+     9.28790625
+    ]
+   ],
+   "ms": 23.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"bike_type\" AS \"bike_type\", AVG(t0.\"dist_km\") AS \"avg_dist_km\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" GROUP BY j1.\"bike_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "distance",
+      "grounded_to": "AVG(rentals.dist_km)",
+      "reason": "measure column"
+     },
+     {
+      "span": "bike type",
+      "grounded_to": "group by bikes.bike_type",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HB02",
+   "domain": "bikes",
+   "question": "Number of rentals without GPS problems",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"gps_ok\" = 1)",
+   "rows": [
+    [
+     824
+    ]
+   ],
+   "ms": 1.6,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"gps_ok\" = 1)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "GPS",
+      "grounded_to": "rentals.gps_ok = 1",
+      "reason": "0/1 column (negated)"
+     },
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HB03",
+   "domain": "bikes",
+   "question": "How many rentals had an unresolved issue?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\" AND x0_0.\"resolved\" = 0))",
+   "rows": [
+    [
+     151
+    ]
+   ],
+   "ms": 14.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\" AND x0_0.\"resolved\" = 0))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "unresolved",
+      "grounded_to": "rental_issues.resolved = 0",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HB04",
+   "domain": "bikes",
+   "question": "Fare collected per start station",
+   "status": "clarify",
+   "message": "words not grounded: collected",
+   "sql": "",
+   "rows": [],
+   "ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: collected",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Fare",
+      "grounded_to": "SUM(rentals.fare_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "start station",
+      "grounded_to": "group by stations.stn_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "fare_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: collected"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HB05",
+   "domain": "bikes",
+   "question": "Rentals in March 2025 by bike type",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"bike_type\" AS \"bike_type\", COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" WHERE ((t0.\"start_ts\" >= '2025-03-01' AND t0.\"start_ts\" < '2025-04-01')) GROUP BY j1.\"bike_type\"",
+   "rows": [
+    [
+     "cargo",
+     33
+    ],
+    [
+     "classic",
+     36
+    ],
+    [
+     "electric",
+     14
+    ]
+   ],
+   "ms": 1.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"bike_type\" AS \"bike_type\", COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" WHERE ((t0.\"start_ts\" >= '2025-03-01' AND t0.\"start_ts\" < '2025-04-01')) GROUP BY j1.\"bike_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "bike type",
+      "grounded_to": "group by bikes.bike_type",
+      "reason": "grouping"
+     },
+     {
+      "span": "March 2025",
+      "grounded_to": "start_ts in [2025-03-01, 2025-04-01)",
+      "reason": "period on the chosen date column"
+     }
+    ],
+    "assumptions": [
+     "counting rentals rows",
+     "dates refer to start_ts, the only date every rentals row has"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HS01",
+   "domain": "school",
+   "question": "Number of retakes by course",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"crs_title\" AS \"crs_title\", COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" WHERE (t0.\"is_retake\" = 1) GROUP BY j1.\"crs_title\"",
+   "rows": [
+    [
+     "Algebra I",
+     31
+    ],
+    [
+     "Biology",
+     18
+    ],
+    [
+     "Chemistry",
+     26
+    ],
+    [
+     "English Composition",
+     30
+    ],
+    [
+     "Geometry",
+     31
+    ]
+   ],
+   "ms": 30.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"crs_title\" AS \"crs_title\", COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" WHERE (t0.\"is_retake\" = 1) GROUP BY j1.\"crs_title\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "retakes",
+      "grounded_to": "exam_results.is_retake = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "course",
+      "grounded_to": "group by courses.crs_title",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "counting exam_results rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HS02",
+   "domain": "school",
+   "question": "Lowest score in Biology",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT MIN(t0.\"score_pct\") AS \"min_score_pct\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" WHERE (j1.\"crs_title\" IN ('Biology'))",
+   "rows": [
+    [
+     30.0
+    ]
+   ],
+   "ms": 1.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT MIN(t0.\"score_pct\") AS \"min_score_pct\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" WHERE (j1.\"crs_title\" IN ('Biology'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Biology",
+      "grounded_to": "courses.crs_title IN ('Biology',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "score",
+      "grounded_to": "MIN(exam_results.score_pct)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HS03",
+   "domain": "school",
+   "question": "How many exams were taken by students in homeroom B-2?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"students\" AS j1 ON j1.\"student_id\" = t0.\"student_id\" WHERE (j1.\"homeroom\" IN ('B-2'))",
+   "rows": [
+    [
+     323
+    ]
+   ],
+   "ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"students\" AS j1 ON j1.\"student_id\" = t0.\"student_id\" WHERE (j1.\"homeroom\" IN ('B-2'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "B-2",
+      "grounded_to": "students.homeroom IN ('B-2',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HS04",
+   "domain": "school",
+   "question": "Exams without a separate room accommodation",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\" AND x0_0.\"accom_type\" IN ('separate room')))",
+   "rows": [
+    [
+     1031
+    ]
+   ],
+   "ms": 9.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\" AND x0_0.\"accom_type\" IN ('separate room')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "separate room",
+      "grounded_to": "accommodations.accom_type NOT IN ('separate room',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [
+     "counting exam_results rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HP01",
+   "domain": "shop",
+   "question": "Total refund amount",
+   "status": "unsupported",
+   "message": "a measure on the one-to-many table returns (needs that table as the base)",
+   "sql": "",
+   "rows": [],
+   "ms": 23.6,
+   "trace": {
+    "status": "unsupported",
+    "message": "a measure on the one-to-many table returns (needs that table as the base)",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: refund amount"
+    ],
+    "unsupported": [
+     "a measure on the one-to-many table returns (needs that table as the base)"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HP02",
+   "domain": "shop",
+   "question": "Number of orders by region",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"region\" AS \"region\", COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"region\"",
+   "rows": [
+    [
+     null,
+     312
+    ],
+    [
+     "Central",
+     243
+    ],
+    [
+     "East",
+     206
+    ],
+    [
+     "West",
+     239
+    ]
+   ],
+   "ms": 1.6,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"region\" AS \"region\", COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"region\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "region",
+      "grounded_to": "group by customers.region",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HP03",
+   "domain": "shop",
+   "question": "Average discount for Enterprise customers",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT AVG(t0.\"disc_amt\") AS \"avg_disc_amt\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" WHERE (j1.\"segment\" IN ('Enterprise'))",
+   "rows": [
+    [
+     25.27583333333333
+    ]
+   ],
+   "ms": 1.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"disc_amt\") AS \"avg_disc_amt\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" WHERE (j1.\"segment\" IN ('Enterprise'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Enterprise",
+      "grounded_to": "customers.segment IN ('Enterprise',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "discount",
+      "grounded_to": "AVG(orders.disc_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HP04",
+   "domain": "shop",
+   "question": "How many unpaid gift orders?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"paid_ok\" = 0) AND (t0.\"is_gift\" = 1)",
+   "rows": [
+    [
+     1
+    ]
+   ],
+   "ms": 0.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"paid_ok\" = 0) AND (t0.\"is_gift\" = 1)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "unpaid",
+      "grounded_to": "orders.paid_ok = 0",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "gift",
+      "grounded_to": "orders.is_gift = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HP05",
+   "domain": "shop",
+   "question": "Orders returned as damaged",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"returns\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"reason\" IN ('damaged')))",
+   "rows": [
+    [
+     27
+    ]
+   ],
+   "ms": 3.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"returns\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"reason\" IN ('damaged')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "damaged",
+      "grounded_to": "returns.reason IN ('damaged',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [
+     "counting orders rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HT01",
+   "domain": "support",
+   "question": "Average satisfaction by priority",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: Average, satisfaction",
+   "sql": "",
+   "rows": [],
+   "ms": 10.2,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, satisfaction",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "priority",
+      "grounded_to": "group by tickets.priority",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Average, satisfaction"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HT02",
+   "domain": "support",
+   "question": "Number of chat tickets that missed the SLA",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"channel\" IN ('chat')) AND (t0.\"sla_met\" = 0)",
+   "rows": [
+    [
+     62
+    ]
+   ],
+   "ms": 0.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"channel\" IN ('chat')) AND (t0.\"sla_met\" = 0)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "chat",
+      "grounded_to": "tickets.channel IN ('chat',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "SLA",
+      "grounded_to": "tickets.sla_met = 0",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "Number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HT03",
+   "domain": "support",
+   "question": "Tickets tagged outage by month",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"opened_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"ticket_tags\" AS x0_0 WHERE x0_0.\"ticket_id\" = t0.\"ticket_id\" AND x0_0.\"tag\" IN ('outage'))) GROUP BY substr(t0.\"opened_ts\",1,7) ORDER BY \"month\"",
+   "rows": [
+    [
+     "2025-01",
+     22
+    ],
+    [
+     "2025-02",
+     16
+    ],
+    [
+     "2025-03",
+     12
+    ],
+    [
+     "2025-04",
+     14
+    ],
+    [
+     "2025-05",
+     17
+    ],
+    [
+     "2025-06",
+     15
+    ],
+    [
+     "2025-07",
+     10
+    ],
+    [
+     "2025-08",
+     9
+    ],
+    [
+     "2025-09",
+     12
+    ],
+    [
+     "2025-10",
+     12
+    ],
+    [
+     "2025-11",
+     8
+    ],
+    [
+     "2025-12",
+     18
+    ]
+   ],
+   "ms": 18.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"opened_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"ticket_tags\" AS x0_0 WHERE x0_0.\"ticket_id\" = t0.\"ticket_id\" AND x0_0.\"tag\" IN ('outage'))) GROUP BY substr(t0.\"opened_ts\",1,7) ORDER BY \"month\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "outage",
+      "grounded_to": "ticket_tags.tag IN ('outage',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "by month",
+      "grounded_to": "month of opened_ts",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [
+     "counting tickets rows",
+     "dates refer to opened_ts, the only date every tickets row has"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HT04",
+   "domain": "support",
+   "question": "How many tickets did Cho Lee resolve?",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"resolved_by_agent_id\" WHERE (j1.\"agent_nm\" IN ('Cho Lee'))",
+   "rows": [
+    [
+     146
+    ]
+   ],
+   "ms": 1.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"resolved_by_agent_id\" WHERE (j1.\"agent_nm\" IN ('Cho Lee'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Cho Lee",
+      "grounded_to": "agents.agent_nm IN ('Cho Lee',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  },
+  {
+   "id": "HT05",
+   "domain": "support",
+   "question": "Total reopen count for Silver accounts",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"reopen_cnt\") AS \"sum_reopen_cnt\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" WHERE (j1.\"tier\" IN ('Silver'))",
+   "rows": [
+    [
+     155
+    ]
+   ],
+   "ms": 0.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"reopen_cnt\") AS \"sum_reopen_cnt\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" WHERE (j1.\"tier\" IN ('Silver'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Silver",
+      "grounded_to": "accounts.tier IN ('Silver',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "reopen count",
+      "grounded_to": "SUM(tickets.reopen_cnt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  }
+ ]
+}

@@ -131,12 +131,14 @@ def build(m: SchemaModel) -> Lexicon:
         tables.append(TableEntry(t, p, tw, disp, rw))
         fkp = {e.child_col: e.parent for e in m.edges if e.child == t}
         for c in tcols.values():
-            core = [w for w in c.words if w not in GENERIC and w not in FUNCTION] or [w for w in c.words if w not in ("is", "has")] or c.words
+            core = [w for w in c.words if (w not in GENERIC and w not in FUNCTION) or (w in ("no", "non") and c.words[0] == w)] or [w for w in c.words if w not in ("is", "has")] or c.words
             if c.values and c.kind in ("category", "text"):
                 for v in c.values:
                     lo = str(v).strip().lower()
                     if len(lo) >= 2 and not re.fullmatch(r"[\d\W_]+", lo):
                         values.setdefault(lo, []).append(ValueEntry(str(v), t, c.name, p))
+            if core and set(core) <= {"no", "non"}:
+                core = [w for w in c.words if w not in GENERIC]          # no_show needs both words
             if set(core) <= set(tw) and len(c.words) > len(core):
                 core = [w for w in c.words if w not in FUNCTION and w not in ("is", "has")]   # order_dt needs "order date"
             if c.kind == "id":

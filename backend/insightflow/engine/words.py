@@ -90,7 +90,9 @@ def canon(w: str) -> str:
 
 
 def col_words(name: str) -> List[str]:
-    return [canon(t) for t in tokens(name)]
+    ts = tokens(name)
+    # "order_no" -> number, but "no_show" keeps its negation
+    return [t if t in ("no", "non") and i < len(ts) - 1 else canon(t) for i, t in enumerate(ts)]
 
 
 def table_words(name: str) -> List[str]:
@@ -102,6 +104,9 @@ def table_words(name: str) -> List[str]:
 UNITS = {canon(w) for w in ("minute", "min", "mins", "hour", "hrs", "hr", "second", "secs", "day", "days", "km", "mi",
                             "mile", "kg", "lb", "percent", "pct", "usd", "eur", "gbp", "dollar", "kwh", "gb", "mb",
                             "ft", "sqft", "cents", "cent")}
+
+
+DERIV = ("al", "ment", "ion", "ation", "s")     # renewal / shipment / completion: derived from the verb
 
 
 def participle(w: str) -> bool:
