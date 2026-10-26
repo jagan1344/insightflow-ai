@@ -22,8 +22,12 @@ LEGACY_SPECS = {
 }
 
 
-@pytest.fixture(autouse=True)
-def _engine_for_module(request, monkeypatch):
-    if os.path.basename(str(request.node.fspath)) in LEGACY_SPECS:
-        monkeypatch.setenv("INSIGHTFLOW_ENGINE", os.environ.get("INSIGHTFLOW_TEST_ENGINE", "legacy"))
-    yield
+@pytest.fixture(autouse=True, scope="module")
+def _engine_for_module(request):
+    # module scope: module-level fixtures (e.g. test_multitable_eval's precomputed outcomes) see the setting too
+    if os.path.basename(str(request.node.fspath)) not in LEGACY_SPECS:
+        yield
+        return
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("INSIGHTFLOW_ENGINE", os.environ.get("INSIGHTFLOW_TEST_ENGINE", "legacy"))
+        yield

@@ -1,5 +1,5 @@
 {
- "engine_commit": "4db2aaa629da21915b4bb9c6cdb43b539273d991",
+ "engine_commit": "cc3fb916378884bdeb0a8ffedc68b76b325e8184",
  "diagnostic_only": true,
  "records": [
   {
@@ -23,7 +23,7 @@
      726609.61
     ]
    ],
-   "latency_ms": 47.2,
+   "latency_ms": 51.3,
    "trace": {
     "status": "answer",
     "message": "",
@@ -76,7 +76,7 @@
      2941
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 2.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: sold, nights",
@@ -150,7 +150,7 @@
      175100.19
     ]
    ],
-   "latency_ms": 8.6,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: Break, down",
@@ -235,7 +235,7 @@
      89513.03
     ]
    ],
-   "latency_ms": 6.4,
+   "latency_ms": 2.2,
    "trace": {
     "status": "answer",
     "message": "",
@@ -318,7 +318,7 @@
      261
     ]
    ],
-   "latency_ms": 3.9,
+   "latency_ms": 2.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -380,7 +380,7 @@
      640
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 1.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: sold, counting, room",
@@ -487,7 +487,7 @@
      28667.01
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 1.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: month, checking, guests",
@@ -534,14 +534,14 @@
    "question": "How many bookings did we have in March 2025?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "the question gives a period but not which date: booked_on, checkin_dt",
+   "message": "the question gives a period but not which date: booked_on, checkin_dt. The readings give different results \u2014 booked_on: 81.00; checkin_dt: 76.00. Which did you mean?",
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.3,
+   "latency_ms": 4.6,
    "trace": {
     "status": "clarify",
-    "message": "the question gives a period but not which date: booked_on, checkin_dt",
+    "message": "the question gives a period but not which date: booked_on, checkin_dt. The readings give different results \u2014 booked_on: 81.00; checkin_dt: 76.00. Which did you mean?",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -588,7 +588,7 @@
      81
     ]
    ],
-   "latency_ms": 1.2,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: booked_on, checkin_dt",
@@ -642,7 +642,7 @@
      119
     ]
    ],
-   "latency_ms": 1.2,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: ended, up",
@@ -697,7 +697,7 @@
      67606.12
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "'payment' does not say which value of payment_ok is meant",
@@ -799,7 +799,7 @@
      45
     ]
    ],
-   "latency_ms": 1.9,
+   "latency_ms": 1.8,
    "trace": {
     "status": "answer",
     "message": "",
@@ -904,7 +904,7 @@
      382124.03
     ]
    ],
-   "latency_ms": 1.6,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: metres",
@@ -963,7 +963,7 @@
      147587.66
     ]
    ],
-   "latency_ms": 25.5,
+   "latency_ms": 26.4,
    "trace": {
     "status": "answer",
     "message": "",
@@ -1012,7 +1012,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.3,
+   "latency_ms": 1.4,
    "trace": {
     "status": "unsupported",
     "message": "grouping by booking_addons.addon_type (one-to-many) would count rows more than once",
@@ -1127,7 +1127,7 @@
      12.319274169798001
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 2.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -1185,7 +1185,7 @@
      7049.220000000001
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 2.5,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: booked_on, checkin_dt",
@@ -1228,7 +1228,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.2,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: best, hotel",
@@ -1269,7 +1269,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.2,
+   "latency_ms": 1.0,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: attach, rate, addon",
@@ -1311,7 +1311,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.2,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: guests; 'never' is not attached to any condition",
@@ -1354,7 +1354,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.3,
+   "latency_ms": 1.2,
    "trace": {
     "status": "unsupported",
     "message": "relative dates (last/this/next period) are not resolved against a reference date",
@@ -1400,7 +1400,7 @@
      null
     ]
    ],
-   "latency_ms": 1.5,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: brought",
@@ -1447,7 +1447,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.6,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average, length, stay",
@@ -1502,7 +1502,7 @@
      4675289.19
     ]
    ],
-   "latency_ms": 24.3,
+   "latency_ms": 19.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -1567,7 +1567,7 @@
      236240.91
     ]
    ],
-   "latency_ms": 0.8,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: insurance",
@@ -1644,7 +1644,7 @@
      257
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 1.2,
    "trace": {
     "status": "answer",
     "message": "",
@@ -1759,7 +1759,7 @@
      549211.13
     ]
    ],
-   "latency_ms": 1.3,
+   "latency_ms": 1.6,
    "trace": {
     "status": "answer",
     "message": "",
@@ -1810,7 +1810,7 @@
    "action": "ANSWER",
    "status": "answer",
    "message": "",
-   "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" GROUP BY j1.\"adj_nm\" ORDER BY \"row_count\" DESC, \"adj_nm\" LIMIT 3",
+   "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" WHERE (j1.\"adj_nm\" IS NOT NULL) GROUP BY j1.\"adj_nm\" ORDER BY \"row_count\" DESC, \"adj_nm\" LIMIT 3",
    "rows": [
     [
      "Lee & Partners (external)",
@@ -1839,11 +1839,11 @@
      129
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 1.6,
    "trace": {
     "status": "answer",
     "message": "",
-    "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" GROUP BY j1.\"adj_nm\" ORDER BY \"row_count\" DESC, \"adj_nm\" LIMIT 3",
+    "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" WHERE (j1.\"adj_nm\" IS NOT NULL) GROUP BY j1.\"adj_nm\" ORDER BY \"row_count\" DESC, \"adj_nm\" LIMIT 3",
     "violations": [],
     "evidence": [
      {
@@ -1858,7 +1858,8 @@
      }
     ],
     "assumptions": [
-     "counting claims rows"
+     "counting claims rows",
+     "rows with no adj_nm are not ranked"
     ],
     "ambiguities": [],
     "unresolved": [],
@@ -1870,7 +1871,7 @@
      "plan_violations": 0,
      "executed": true,
      "empty_result": false,
-     "assumptions": 1,
+     "assumptions": 2,
      "inferred_joins": true,
      "note": "component indicators, not a calibrated probability"
     }
@@ -1894,7 +1895,7 @@
      583
     ]
    ],
-   "latency_ms": 1.0,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: filed",
@@ -1949,13 +1950,19 @@
      11.408181818181818
     ]
    ],
-   "latency_ms": 0.9,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average, days, pass, date, loss",
     "sql": "",
     "violations": [],
-    "evidence": [],
+    "evidence": [
+     {
+      "span": "reported",
+      "grounded_to": "claims.rpt_dt: no condition",
+      "reason": "every row has this date"
+     }
+    ],
     "assumptions": [],
     "ambiguities": [],
     "unresolved": [
@@ -1994,7 +2001,7 @@
      874.4647597254004
     ]
    ],
-   "latency_ms": 0.8,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "prem_amt describes policies; aggregate it over policies itself, or once per claims row (weighted by claims)?",
@@ -2041,7 +2048,7 @@
      61
     ]
    ],
-   "latency_ms": 0.6,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: flagged",
@@ -2146,7 +2153,7 @@
      85
     ]
    ],
-   "latency_ms": 0.6,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: assigned, adjuster; 'not' is not attached to any condition",
@@ -2256,7 +2263,7 @@
      3967259.49
     ]
    ],
-   "latency_ms": 0.9,
+   "latency_ms": 1.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2311,7 +2318,7 @@
      437
     ]
    ],
-   "latency_ms": 0.7,
+   "latency_ms": 0.6,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: filed",
@@ -2455,7 +2462,7 @@
      48
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 1.5,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2505,14 +2512,14 @@
    "question": "How many claims did we get in Q2 2025?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt",
+   "message": "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt. The readings give different results \u2014 loss_dt: 165.00; rpt_dt: 178.00; closed_dt: 137.00. Which did you mean?",
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.6,
+   "latency_ms": 3.4,
    "trace": {
     "status": "clarify",
-    "message": "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt",
+    "message": "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt. The readings give different results \u2014 loss_dt: 165.00; rpt_dt: 178.00; closed_dt: 137.00. Which did you mean?",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -2559,7 +2566,7 @@
      -7690.270000000019
     ]
    ],
-   "latency_ms": 1.3,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: Q2, Q1",
@@ -2606,57 +2613,51 @@
    "answerability": "answerable",
    "kind": "scalar",
    "question": "What percentage of claims were denied?",
-   "action": "ANSWER",
-   "status": "answer",
-   "message": "",
-   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"status\" IN ('Denied') THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"claims\" AS t0",
-   "rows": [
-    [
-     14.09090909090909
-    ]
-   ],
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'denied' could be the stored value claims.status = 'Denied' or just a verb",
+   "sql": "",
+   "rows": [],
    "expected": [
     [
      14.090909090909092
     ]
    ],
-   "latency_ms": 0.9,
+   "latency_ms": 0.5,
    "trace": {
-    "status": "answer",
-    "message": "",
-    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"status\" IN ('Denied') THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"claims\" AS t0",
+    "status": "clarify",
+    "message": "'denied' could be the stored value claims.status = 'Denied' or just a verb",
+    "sql": "",
     "violations": [],
     "evidence": [
      {
       "span": "denied",
       "grounded_to": "claims.status IN ('Denied',)",
       "reason": "stored value"
-     },
-     {
-      "span": "percentage",
-      "grounded_to": "100 * (with condition) / (all)",
-      "reason": "percentage of rows or of a total"
      }
     ],
-    "assumptions": [
-     "counting claims rows"
+    "assumptions": [],
+    "ambiguities": [
+     "'denied' could be the stored value claims.status = 'Denied' or just a verb"
     ],
-    "ambiguities": [],
-    "unresolved": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: percentage"
+    ],
     "unsupported": [],
     "reliability": {
-     "grounding": "complete",
-     "ambiguities": 0,
-     "unresolved": 0,
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
      "plan_violations": 0,
-     "executed": true,
+     "executed": false,
      "empty_result": false,
-     "assumptions": 1,
+     "assumptions": 0,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
    },
-   "outcome": "correct"
+   "outcome": "unnecessary_clarify"
   },
   {
    "id": "IN19",
@@ -2671,7 +2672,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.5,
+   "latency_ms": 0.4,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: ratio, loss",
@@ -2876,7 +2877,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.6,
+   "latency_ms": 1.8,
    "trace": {
     "status": "unsupported",
     "message": "grouping by claim_payments (one-to-many) would count rows more than once",
@@ -2924,7 +2925,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.6,
+   "latency_ms": 0.5,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: policies; 'never' is not attached to any condition",
@@ -3012,7 +3013,7 @@
      2363554.56
     ]
    ],
-   "latency_ms": 0.6,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: paid, out",
@@ -3094,7 +3095,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.5,
+   "latency_ms": 0.4,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average",
@@ -3139,7 +3140,7 @@
      652537.4
     ]
    ],
-   "latency_ms": 38.5,
+   "latency_ms": 35.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: kilowatt, hours",
@@ -3193,7 +3194,7 @@
      110.076016
     ]
    ],
-   "latency_ms": 1.5,
+   "latency_ms": 1.9,
    "trace": {
     "status": "answer",
     "message": "",
@@ -3263,7 +3264,7 @@
      168226.4
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 2.8,
    "trace": {
     "status": "answer",
     "message": "",
@@ -3333,7 +3334,7 @@
      27597.28
     ]
    ],
-   "latency_ms": 1.0,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: Break, down",
@@ -3428,7 +3429,7 @@
      1945.22
     ]
    ],
-   "latency_ms": 2.3,
+   "latency_ms": 2.9,
    "trace": {
     "status": "answer",
     "message": "",
@@ -3635,7 +3636,7 @@
      78
     ]
    ],
-   "latency_ms": 1.6,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: issued, while",
@@ -3806,7 +3807,7 @@
      67483.27
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 1.7,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: priced, customers, tariffs",
@@ -4023,7 +4024,7 @@
      -31359.79999999999
     ]
    ],
-   "latency_ms": 1.9,
+   "latency_ms": 2.1,
    "trace": {
     "status": "answer",
     "message": "",
@@ -4074,7 +4075,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.9,
+   "latency_ms": 1.0,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: period_start, due_dt, paid_dt",
@@ -4178,7 +4179,7 @@
      226533.6
     ]
    ],
-   "latency_ms": 2.5,
+   "latency_ms": 3.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -4236,7 +4237,7 @@
      null
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 1.5,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: customers",
@@ -4284,7 +4285,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.0,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "'meters' does not say which value of meter_ok is meant",
@@ -4328,7 +4329,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.3,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: CO2, emissions, associated, electricity",
@@ -4370,7 +4371,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.8,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: problem",
@@ -4455,7 +4456,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.0,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: Forecast, next, January, electricity, demand",
@@ -4500,7 +4501,7 @@
      1001
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: working, actual, readings",
@@ -4556,7 +4557,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.2,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: consumption, winter, compare",
@@ -4601,7 +4602,7 @@
      20309.69
     ]
    ],
-   "latency_ms": 22.2,
+   "latency_ms": 19.5,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: revenue",
@@ -4656,7 +4657,7 @@
      383.76666666666665
     ]
    ],
-   "latency_ms": 1.2,
+   "latency_ms": 0.8,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: hours",
@@ -4733,7 +4734,7 @@
      1243
     ]
    ],
-   "latency_ms": 1.8,
+   "latency_ms": 1.4,
    "trace": {
     "status": "answer",
     "message": "",
@@ -4811,7 +4812,7 @@
      2059.0
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: Break, down",
@@ -4882,7 +4883,7 @@
      172
     ]
    ],
-   "latency_ms": 1.0,
+   "latency_ms": 0.8,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: received",
@@ -4935,7 +4936,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.1,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: generates, revenue, zone",
@@ -4979,14 +4980,14 @@
    "question": "What's the average fare in the Arts & Theatre District?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+   "message": "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd. The readings give different results \u2014 zones.zone_nm via pickup_zone_cd: 12.33; zones.zone_nm via dropoff_zone_cd: 13.15. Which did you mean?",
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.1,
+   "latency_ms": 6.1,
    "trace": {
     "status": "clarify",
-    "message": "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+    "message": "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd. The readings give different results \u2014 zones.zone_nm via pickup_zone_cd: 12.33; zones.zone_nm via dropoff_zone_cd: 13.15. Which did you mean?",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -5125,7 +5126,7 @@
      956.92
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.9,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5187,7 +5188,7 @@
      271
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 1.6,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5240,7 +5241,7 @@
      644
     ]
    ],
-   "latency_ms": 1.9,
+   "latency_ms": 2.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: field, left, blank, opposed, zero, tip; 'not' is not attached to any condition",
@@ -5296,7 +5297,7 @@
      1039
     ]
    ],
-   "latency_ms": 0.7,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: paid",
@@ -5362,7 +5363,7 @@
      399
     ]
    ],
-   "latency_ms": 1.5,
+   "latency_ms": 2.5,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5419,7 +5420,7 @@
      7327.88
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 1.8,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5477,7 +5478,7 @@
      3.2355521073627056
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: divided",
@@ -5598,7 +5599,7 @@
      14
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 2.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5728,7 +5729,7 @@
      125
     ]
    ],
-   "latency_ms": 1.9,
+   "latency_ms": 2.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5787,7 +5788,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.5,
+   "latency_ms": 1.2,
    "trace": {
     "status": "unsupported",
     "message": "grouping by driver_languages (one-to-many) would count rows more than once",
@@ -5839,7 +5840,7 @@
      319
     ]
    ],
-   "latency_ms": 3.9,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: speaking",
@@ -5943,7 +5944,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 4.2,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average, wait, ride, arriving, request, driver",
@@ -5988,7 +5989,7 @@
      null
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "'Old Mill (Closed)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
@@ -6082,14 +6083,14 @@
    "question": "What was the total fare for trips between Downtown Core and Harbourfront?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd; 'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+   "message": "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd; 'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd. The readings give different results \u2014 zones.zone_nm via pickup_zone_cd, zones.zone_nm via pickup_zone_cd: 7,104.85; zones.zone_nm via pickup_zone_cd, zones.zone_nm via dropoff_zone_cd: 366.68; zones.zone_nm via dropoff_zone_cd, zones.zone_nm via pickup_zone_cd: 150.21; zones.zone_nm via dropoff_zone_cd, zones.zone_nm via dropoff_zone_cd: 3,971.72. Which did you mean?",
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.5,
+   "latency_ms": 8.0,
    "trace": {
     "status": "clarify",
-    "message": "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd; 'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+    "message": "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd; 'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd. The readings give different results \u2014 zones.zone_nm via pickup_zone_cd, zones.zone_nm via pickup_zone_cd: 7,104.85; zones.zone_nm via pickup_zone_cd, zones.zone_nm via dropoff_zone_cd: 366.68; zones.zone_nm via dropoff_zone_cd, zones.zone_nm via pickup_zone_cd: 150.21; zones.zone_nm via dropoff_zone_cd, zones.zone_nm via dropoff_zone_cd: 3,971.72. Which did you mean?",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -6133,7 +6134,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.9,
+   "latency_ms": 1.1,
    "trace": {
     "status": "unsupported",
     "message": "relative dates (last/this/next period) are not resolved against a reference date",
@@ -6178,17 +6179,17 @@
   "n": 105,
   "answerable": 74,
   "clarify_or_unsupported": 31,
-  "correct": 30,
-  "correct_rate": 0.405,
+  "correct": 29,
+  "correct_rate": 0.392,
   "correct_ci95": [
-   0.301,
-   0.519
+   0.289,
+   0.506
   ],
-  "answered_answerable": 30,
-  "coverage": 0.405,
+  "answered_answerable": 29,
+  "coverage": 0.392,
   "accuracy_when_answered": 1.0,
   "accuracy_when_answered_ci95": [
-   0.886,
+   0.883,
    1.0
   ],
   "silent_wrong_answerable": 0,
@@ -6199,12 +6200,12 @@
    0.0,
    0.035
   ],
-  "unnecessary_clarify": 44,
+  "unnecessary_clarify": 45,
   "correct_clarify": 31,
   "errors": 0,
-  "latency_ms_p50": 1.3,
-  "latency_ms_p95": 8.6,
-  "latency_ms_max": 47.2,
+  "latency_ms_p50": 1.4,
+  "latency_ms_p95": 8.0,
+  "latency_ms_max": 51.3,
   "clarify_items_refused": "19/19",
   "unsupported_items_refused": "12/12",
   "by_category": {
@@ -6336,9 +6337,9 @@
    },
    "ratio": {
     "n": 9,
-    "correct": 2,
+    "correct": 1,
     "silent_wrong": 0,
-    "unnecessary_clarify": 2,
+    "unnecessary_clarify": 3,
     "correct_clarify": 5,
     "wrong_answer_to_clarify_item": 0,
     "error": 0

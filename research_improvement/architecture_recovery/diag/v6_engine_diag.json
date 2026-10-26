@@ -1,5 +1,5 @@
 {
- "engine_commit": "4db2aaa629da21915b4bb9c6cdb43b539273d991",
+ "engine_commit": "cc3fb916378884bdeb0a8ffedc68b76b325e8184",
  "diagnostic_only": true,
  "records": [
   {
@@ -9,25 +9,21 @@
    "answerability": "answerable",
    "kind": "scalar",
    "question": "How much did we take in delivery fees on orders that were actually delivered?",
-   "action": "ANSWER",
-   "status": "answer",
-   "message": "",
-   "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED'))",
-   "rows": [
-    [
-     3314.54
-    ]
-   ],
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb. The readings give different results \u2014 order_status = 'DELIVERED': 3,314.54; 'delivered' as a verb: 3,748.31. Which did you mean?",
+   "sql": "",
+   "rows": [],
    "expected": [
     [
      3314.54
     ]
    ],
-   "latency_ms": 55.0,
+   "latency_ms": 69.4,
    "trace": {
-    "status": "answer",
-    "message": "",
-    "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED'))",
+    "status": "clarify",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb. The readings give different results \u2014 order_status = 'DELIVERED': 3,314.54; 'delivered' as a verb: 3,748.31. Which did you mean?",
+    "sql": "",
     "violations": [],
     "evidence": [
      {
@@ -42,22 +38,24 @@
      }
     ],
     "assumptions": [],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [],
     "unsupported": [],
     "reliability": {
-     "grounding": "complete",
-     "ambiguities": 0,
+     "grounding": "incomplete",
+     "ambiguities": 1,
      "unresolved": 0,
      "plan_violations": 0,
-     "executed": true,
+     "executed": false,
      "empty_result": false,
      "assumptions": 0,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
    },
-   "outcome": "correct"
+   "outcome": "unnecessary_clarify"
   },
   {
    "id": "FD02",
@@ -109,7 +107,7 @@
      74
     ]
    ],
-   "latency_ms": 3.3,
+   "latency_ms": 2.8,
    "trace": {
     "status": "unsupported",
     "message": "'cuisine' is missing either when restaurants has no row or when the value is empty; these cannot be told apart",
@@ -158,7 +156,7 @@
    "question": "Which 3 restaurants brought in the most food sales (before fees and tips) on delivered orders?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "words not grounded: brought, food, sales, fees",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -178,7 +176,7 @@
    "latency_ms": 2.5,
    "trace": {
     "status": "clarify",
-    "message": "words not grounded: brought, food, sales, fees",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -199,21 +197,24 @@
      }
     ],
     "assumptions": [
-     "tip_amt is summed (no aggregation word was given)"
+     "tip_amt is summed (no aggregation word was given)",
+     "rows with no rest_nm are not ranked"
     ],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [
      "words not grounded: brought, food, sales, fees"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
+     "ambiguities": 1,
      "unresolved": 1,
      "plan_violations": 0,
      "executed": false,
      "empty_result": false,
-     "assumptions": 1,
+     "assumptions": 2,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
@@ -258,7 +259,7 @@
      175
     ]
    ],
-   "latency_ms": 2.3,
+   "latency_ms": 2.4,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: order_ts, dlv_ts; 'monthly' does not say which date: order_ts, dlv_ts",
@@ -279,13 +280,14 @@
      "'monthly' does not say which date: order_ts, dlv_ts"
     ],
     "unresolved": [
+     "'by when the order' would give one value per orders row; did you mean the average per order, or the overall total?",
      "words not grounded: going"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 2,
-     "unresolved": 1,
+     "unresolved": 2,
      "plan_violations": 0,
      "executed": false,
      "empty_result": false,
@@ -322,7 +324,7 @@
      806.01
     ]
    ],
-   "latency_ms": 3.2,
+   "latency_ms": 3.1,
    "trace": {
     "status": "unsupported",
     "message": "'vehicle' is missing either when couriers has no row or when the value is empty; these cannot be told apart",
@@ -376,7 +378,7 @@
    "question": "How many delivered orders came from restaurants whose average prep time is 15 minutes or more?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "words not grounded: minutes, restaurants, average prep",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -384,10 +386,10 @@
      516
     ]
    ],
-   "latency_ms": 2.5,
+   "latency_ms": 2.2,
    "trace": {
     "status": "clarify",
-    "message": "words not grounded: minutes, restaurants, average prep",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -403,14 +405,16 @@
      }
     ],
     "assumptions": [],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [
      "words not grounded: minutes, restaurants, average prep"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
+     "ambiguities": 1,
      "unresolved": 1,
      "plan_violations": 0,
      "executed": false,
@@ -476,7 +480,7 @@
      3.4324324324324325
     ]
    ],
-   "latency_ms": 2.3,
+   "latency_ms": 2.0,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: star",
@@ -528,7 +532,7 @@
    "question": "avg tkt size (subtotal) for GOLD-tier custs, delivered orders only?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "words not grounded: tkt, size, tier",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -539,7 +543,7 @@
    "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
-    "message": "words not grounded: tkt, size, tier",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -560,14 +564,16 @@
      }
     ],
     "assumptions": [],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [
      "words not grounded: tkt, size, tier"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
+     "ambiguities": 1,
      "unresolved": 1,
      "plan_violations": 0,
      "executed": false,
@@ -600,7 +606,7 @@
      1030
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 2.4,
    "trace": {
     "status": "answer",
     "message": "",
@@ -647,7 +653,7 @@
    "question": "How many delivered orders showed up late?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "words not grounded: up",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -655,10 +661,10 @@
      405
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 2.1,
    "trace": {
     "status": "clarify",
-    "message": "words not grounded: up",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -679,14 +685,16 @@
      }
     ],
     "assumptions": [],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [
      "words not grounded: up"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
+     "ambiguities": 1,
      "unresolved": 1,
      "plan_violations": 0,
      "executed": false,
@@ -707,7 +715,7 @@
    "question": "Of the delivered orders, how many had a problem with the drop-off, i.e. weren't marked as delivered OK?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "words not grounded: problem, dropoff, marked, OK",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb; 'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -718,7 +726,7 @@
    "latency_ms": 2.6,
    "trace": {
     "status": "clarify",
-    "message": "words not grounded: problem, dropoff, marked, OK",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb; 'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -742,14 +750,17 @@
      "rows with no order_status are kept when excluding DELIVERED",
      "counting orders rows"
     ],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [
      "words not grounded: problem, dropoff, marked, OK"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
+     "ambiguities": 2,
      "unresolved": 1,
      "plan_violations": 0,
      "executed": false,
@@ -782,7 +793,7 @@
      74
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 2.2,
    "trace": {
     "status": "answer",
     "message": "",
@@ -825,25 +836,21 @@
    "answerability": "answerable",
    "kind": "scalar",
    "question": "What's the total delivery fee on delivered orders that had at least one drink in them?",
-   "action": "ANSWER",
-   "status": "answer",
-   "message": "",
-   "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED')) AND (EXISTS (SELECT 1 FROM \"order_items\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"item_cat\" IN ('DRINK')))",
-   "rows": [
-    [
-     1466.74
-    ]
-   ],
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb. The readings give different results \u2014 order_status = 'DELIVERED': 1,466.74; 'delivered' as a verb: 1,682.15. Which did you mean?",
+   "sql": "",
+   "rows": [],
    "expected": [
     [
      1466.74
     ]
    ],
-   "latency_ms": 3.6,
+   "latency_ms": 9.0,
    "trace": {
-    "status": "answer",
-    "message": "",
-    "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED')) AND (EXISTS (SELECT 1 FROM \"order_items\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"item_cat\" IN ('DRINK')))",
+    "status": "clarify",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb. The readings give different results \u2014 order_status = 'DELIVERED': 1,466.74; 'delivered' as a verb: 1,682.15. Which did you mean?",
+    "sql": "",
     "violations": [],
     "evidence": [
      {
@@ -863,22 +870,24 @@
      }
     ],
     "assumptions": [],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [],
     "unsupported": [],
     "reliability": {
-     "grounding": "complete",
-     "ambiguities": 0,
+     "grounding": "incomplete",
+     "ambiguities": 1,
      "unresolved": 0,
      "plan_violations": 0,
-     "executed": true,
+     "executed": false,
      "empty_result": false,
      "assumptions": 0,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
    },
-   "outcome": "correct"
+   "outcome": "unnecessary_clarify"
   },
   {
    "id": "FD14",
@@ -897,7 +906,7 @@
      51
     ]
    ],
-   "latency_ms": 1.8,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: assigned",
@@ -944,7 +953,7 @@
    "question": "Compare delivered order counts for Q1 vs Q2 2025 (by order date).",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "the question gives a period but not which date: order_ts, dlv_ts",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb; the question gives a period but not which date: order_ts, dlv_ts",
    "sql": "",
    "rows": [],
    "expected": [
@@ -957,10 +966,10 @@
      530
     ]
    ],
-   "latency_ms": 2.9,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
-    "message": "the question gives a period but not which date: order_ts, dlv_ts",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb; the question gives a period but not which date: order_ts, dlv_ts",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -970,24 +979,25 @@
       "reason": "stored value"
      }
     ],
-    "assumptions": [
-     "counting orders rows"
-    ],
+    "assumptions": [],
     "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
      "the question gives a period but not which date: order_ts, dlv_ts"
     ],
     "unresolved": [
+     "no measure could be grounded",
+     "'by order' would give one value per orders row; did you mean the average per order, or the overall total?",
      "words not grounded: Compare, counts, date"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 1,
-     "unresolved": 1,
+     "ambiguities": 2,
+     "unresolved": 3,
      "plan_violations": 0,
      "executed": false,
      "empty_result": false,
-     "assumptions": 1,
+     "assumptions": 0,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
@@ -1003,7 +1013,7 @@
    "question": "What percentage of delivered orders arrived late?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "words not grounded: arrived",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -1011,10 +1021,10 @@
      38.06390977443609
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
-    "message": "words not grounded: arrived",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -1027,29 +1037,25 @@
       "span": "late",
       "grounded_to": "orders.is_late = 1",
       "reason": "0/1 column"
-     },
-     {
-      "span": "percentage",
-      "grounded_to": "100 * (with condition) / (all)",
-      "reason": "percentage of rows or of a total"
      }
     ],
-    "assumptions": [
-     "counting orders rows"
+    "assumptions": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
     ],
-    "ambiguities": [],
     "unresolved": [
-     "words not grounded: arrived"
+     "no measure could be grounded",
+     "words not grounded: percentage, arrived"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
-     "unresolved": 1,
+     "ambiguities": 1,
+     "unresolved": 2,
      "plan_violations": 0,
      "executed": false,
      "empty_result": false,
-     "assumptions": 1,
+     "assumptions": 0,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
@@ -1065,7 +1071,7 @@
    "question": "What share of delivered food sales came from restaurants in each city? Give percentages.",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "no measure could be grounded; words not grounded: share, food, sales, percentages",
+   "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
    "sql": "",
    "rows": [],
    "expected": [
@@ -1082,10 +1088,10 @@
      41.97858580634606
     ]
    ],
-   "latency_ms": 2.9,
+   "latency_ms": 2.2,
    "trace": {
     "status": "clarify",
-    "message": "no measure could be grounded; words not grounded: share, food, sales, percentages",
+    "message": "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -1101,7 +1107,9 @@
      }
     ],
     "assumptions": [],
-    "ambiguities": [],
+    "ambiguities": [
+     "'delivered' could be the stored value orders.order_status = 'DELIVERED' or just a verb"
+    ],
     "unresolved": [
      "no measure could be grounded",
      "words not grounded: share, food, sales, percentages"
@@ -1109,7 +1117,7 @@
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
-     "ambiguities": 0,
+     "ambiguities": 1,
      "unresolved": 2,
      "plan_violations": 0,
      "executed": false,
@@ -1138,7 +1146,7 @@
      null
     ]
    ],
-   "latency_ms": 2.7,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: food, sales",
@@ -1233,7 +1241,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.3,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: best, restaurant",
@@ -1274,7 +1282,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.5,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average, value",
@@ -1315,7 +1323,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.9,
+   "latency_ms": 1.5,
    "trace": {
     "status": "unsupported",
     "message": "grouping by order_items.item_cat (one-to-many) would count rows more than once",
@@ -1359,7 +1367,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.6,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: big",
@@ -1405,7 +1413,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 2.9,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: order_ts, dlv_ts",
@@ -1453,7 +1461,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.7,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: customers; 'never' is not attached to any condition",
@@ -1496,7 +1504,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 2.2,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average, distance, travels, courier, delivery",
@@ -1545,7 +1553,7 @@
      216300.0
     ]
    ],
-   "latency_ms": 21.3,
+   "latency_ms": 16.3,
    "trace": {
     "status": "answer",
     "message": "",
@@ -1679,7 +1687,7 @@
      2165.3571428571427
     ]
    ],
-   "latency_ms": 1.3,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: average",
@@ -1702,7 +1710,9 @@
       "reason": "period on the chosen date column"
      }
     ],
-    "assumptions": [],
+    "assumptions": [
+     "rows with no bldg_name are not ranked"
+    ],
     "ambiguities": [],
     "unresolved": [
      "words not grounded: average"
@@ -1715,7 +1725,7 @@
      "plan_violations": 0,
      "executed": false,
      "empty_result": false,
-     "assumptions": 0,
+     "assumptions": 1,
      "inferred_joins": false,
      "note": "component indicators, not a calibrated probability"
     }
@@ -1764,7 +1774,7 @@
      40
     ]
    ],
-   "latency_ms": 0.9,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt; 'each year' does not say which date: signed_dt, start_dt, end_dt",
@@ -1817,7 +1827,7 @@
      238
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: feet",
@@ -2123,7 +2133,7 @@
      65
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 1.0,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2230,7 +2240,7 @@
      384
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.5,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2287,7 +2297,7 @@
      241020.0
     ]
    ],
-   "latency_ms": 29.4,
+   "latency_ms": 22.4,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2406,7 +2416,7 @@
      86
     ]
    ],
-   "latency_ms": 3.2,
+   "latency_ms": 1.6,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2471,7 +2481,7 @@
      25.60777957860616
     ]
    ],
-   "latency_ms": 2.5,
+   "latency_ms": 1.1,
    "trace": {
     "status": "answer",
     "message": "",
@@ -2547,7 +2557,7 @@
      16.08876560332871
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: account",
@@ -2612,7 +2622,7 @@
      null
     ]
    ],
-   "latency_ms": 1.2,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: security deposit",
@@ -2654,14 +2664,14 @@
    "question": "How many leases did we have in 2024?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+   "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt. The readings give different results \u2014 signed_dt: 86.00; start_dt: 89.00; end_dt: 82.00. Which did you mean?",
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.7,
+   "latency_ms": 3.6,
    "trace": {
     "status": "clarify",
-    "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+    "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt. The readings give different results \u2014 signed_dt: 86.00; start_dt: 89.00; end_dt: 82.00. Which did you mean?",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -2704,7 +2714,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.0,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: staff, member, responsible",
@@ -2921,7 +2931,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.6,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: units; 'never' is not attached to any condition",
@@ -2964,7 +2974,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.0,
+   "latency_ms": 0.8,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: average, satisfaction, score, tenant",
@@ -3015,7 +3025,7 @@
      71687.96
     ]
    ],
-   "latency_ms": 38.0,
+   "latency_ms": 28.3,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
@@ -3084,7 +3094,7 @@
      950.0
     ]
    ],
-   "latency_ms": 2.8,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: Overage, charges, blank, group",
@@ -3157,7 +3167,7 @@
      370.6103515625
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
@@ -3235,7 +3245,7 @@
      1240.0
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "'monthly' does not say which date: stmt_dt, due_dt, paid_dt",
@@ -3303,7 +3313,7 @@
      64.57208163265307
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 1.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: charge",
@@ -3363,7 +3373,7 @@
      298
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 1.5,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: allowance, GB, plans, data",
@@ -3413,7 +3423,7 @@
      1770.19
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: chgs, Q2, bill periods",
@@ -3468,7 +3478,7 @@
      5156.79
     ]
    ],
-   "latency_ms": 1.8,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: outside",
@@ -3523,7 +3533,7 @@
      244
     ]
    ],
-   "latency_ms": 1.8,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: allowance, data",
@@ -3577,7 +3587,7 @@
      116
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 1.6,
    "trace": {
     "status": "answer",
     "message": "",
@@ -3630,7 +3640,7 @@
      214
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
@@ -3682,7 +3692,7 @@
      4734.67
     ]
    ],
-   "latency_ms": 2.4,
+   "latency_ms": 1.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: charge, credit",
@@ -3737,7 +3747,7 @@
      -679.21
     ]
    ],
-   "latency_ms": 2.0,
+   "latency_ms": 1.4,
    "trace": {
     "status": "unsupported",
     "message": "a measure on the one-to-many table bill_adjustments (needs that table as the base)",
@@ -3794,7 +3804,7 @@
      3500.0
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.2,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
@@ -3841,7 +3851,7 @@
      23.353819139596137
     ]
    ],
-   "latency_ms": 2.7,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: due date",
@@ -3924,7 +3934,7 @@
      22.068085073141987
     ]
    ],
-   "latency_ms": 2.2,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
     "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
@@ -3977,7 +3987,7 @@
      null
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
     "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
@@ -4030,7 +4040,7 @@
      766.4297297297297
     ]
    ],
-   "latency_ms": 1.9,
+   "latency_ms": 1.6,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: accts",
@@ -4077,14 +4087,14 @@
    "question": "How many bills did we have in March 2025?",
    "action": "CLARIFY",
    "status": "clarify",
-   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt. The readings give different results \u2014 stmt_dt: 213.00; due_dt: 213.00; paid_dt: 202.00. Which did you mean?",
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.6,
+   "latency_ms": 8.5,
    "trace": {
     "status": "clarify",
-    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt. The readings give different results \u2014 stmt_dt: 213.00; due_dt: 213.00; paid_dt: 202.00. Which did you mean?",
     "sql": "",
     "violations": [],
     "evidence": [
@@ -4127,7 +4137,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.0,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: ARPU",
@@ -4168,7 +4178,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.3,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: performing, best, region",
@@ -4209,7 +4219,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.8,
+   "latency_ms": 1.2,
    "trace": {
     "status": "unsupported",
     "message": "grouping by bill_adjustments.reason_cd (one-to-many) would count rows more than once",
@@ -4252,7 +4262,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.6,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
@@ -4295,7 +4305,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.8,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
@@ -4338,7 +4348,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 2.0,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: usage",
@@ -4389,7 +4399,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.6,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: plans; 'not' is not attached to any condition",
@@ -4432,7 +4442,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 1.9,
+   "latency_ms": 1.3,
    "trace": {
     "status": "unsupported",
     "message": "relative dates (last/this/next period) are not resolved against a reference date",
@@ -4484,7 +4494,7 @@
      27614
     ]
    ],
-   "latency_ms": 28.7,
+   "latency_ms": 20.6,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: move_ts, posted_dt",
@@ -4555,7 +4565,7 @@
      12970
     ]
    ],
-   "latency_ms": 2.1,
+   "latency_ms": 1.3,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: units, product, uncategorized, shown, separate, group, category, items",
@@ -4617,7 +4627,7 @@
      262
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 0.6,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; 'top 5' ranks something, but no group was grounded; words not grounded: products, units, picked",
@@ -4709,7 +4719,7 @@
      247
     ]
    ],
-   "latency_ms": 2.7,
+   "latency_ms": 1.6,
    "trace": {
     "status": "answer",
     "message": "",
@@ -4767,7 +4777,7 @@
      13310
     ]
    ],
-   "latency_ms": 1.9,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
@@ -4843,7 +4853,7 @@
      1225
     ]
    ],
-   "latency_ms": 1.3,
+   "latency_ms": 0.8,
    "trace": {
     "status": "clarify",
     "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
@@ -4891,7 +4901,7 @@
      768
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: unit",
@@ -4946,7 +4956,7 @@
      888646.76
     ]
    ],
-   "latency_ms": 2.3,
+   "latency_ms": 1.4,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: value",
@@ -5005,7 +5015,7 @@
      2211
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.2,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5063,7 +5073,7 @@
      1349
     ]
    ],
-   "latency_ms": 1.3,
+   "latency_ms": 0.8,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: cycle, count, corrections; 'not' is not attached to any condition",
@@ -5114,7 +5124,7 @@
      82
     ]
    ],
-   "latency_ms": 1.7,
+   "latency_ms": 1.0,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: barcode",
@@ -5169,7 +5179,7 @@
      595
     ]
    ],
-   "latency_ms": 1.2,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: units, receipts",
@@ -5226,7 +5236,7 @@
      55
     ]
    ],
-   "latency_ms": 1.4,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: movements, against",
@@ -5283,7 +5293,7 @@
      44
     ]
    ],
-   "latency_ms": 1.1,
+   "latency_ms": 0.8,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: move_ts, posted_dt",
@@ -5339,7 +5349,7 @@
      6766
     ]
    ],
-   "latency_ms": 11.3,
+   "latency_ms": 11.7,
    "trace": {
     "status": "answer",
     "message": "",
@@ -5397,7 +5407,7 @@
      1447
     ]
    ],
-   "latency_ms": 0.9,
+   "latency_ms": 1.0,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: move_ts, posted_dt",
@@ -5411,13 +5421,14 @@
      "the question gives a period but not which date: move_ts, posted_dt"
     ],
     "unresolved": [
+     "'by move' would give one value per inv_moves row; did you mean the average per move, or the overall total?",
      "words not grounded: Units, picked, date"
     ],
     "unsupported": [],
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
-     "unresolved": 1,
+     "unresolved": 2,
      "plan_violations": 0,
      "executed": false,
      "empty_result": false,
@@ -5505,7 +5516,7 @@
      25.479341074804214
     ]
    ],
-   "latency_ms": 1.3,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: share, picked, units, percent",
@@ -5659,7 +5670,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.5,
+   "latency_ms": 0.7,
    "trace": {
     "status": "clarify",
     "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
@@ -5703,7 +5714,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.6,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: productive, operator",
@@ -5744,7 +5755,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.8,
+   "latency_ms": 1.8,
    "trace": {
     "status": "clarify",
     "message": "words not grounded: Break, down, units, exception code",
@@ -5786,7 +5797,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.9,
+   "latency_ms": 1.1,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: move_ts, posted_dt",
@@ -5830,7 +5841,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.7,
+   "latency_ms": 0.8,
    "trace": {
     "status": "unsupported",
     "message": "relative dates (last/this/next period) are not resolved against a reference date",
@@ -5872,7 +5883,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.7,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "the question gives a period but not which date: move_ts, posted_dt",
@@ -5917,7 +5928,7 @@
    "sql": "",
    "rows": [],
    "expected": null,
-   "latency_ms": 0.7,
+   "latency_ms": 0.9,
    "trace": {
     "status": "clarify",
     "message": "no measure could be grounded; words not grounded: inbound, freight, cost, receipt",
@@ -5950,17 +5961,17 @@
   "n": 106,
   "answerable": 73,
   "clarify_or_unsupported": 33,
-  "correct": 14,
-  "correct_rate": 0.192,
+  "correct": 12,
+  "correct_rate": 0.164,
   "correct_ci95": [
-   0.118,
-   0.297
+   0.097,
+   0.266
   ],
-  "answered_answerable": 14,
-  "coverage": 0.192,
+  "answered_answerable": 12,
+  "coverage": 0.164,
   "accuracy_when_answered": 1.0,
   "accuracy_when_answered_ci95": [
-   0.785,
+   0.757,
    1.0
   ],
   "silent_wrong_answerable": 0,
@@ -5971,20 +5982,20 @@
    -0.0,
    0.035
   ],
-  "unnecessary_clarify": 59,
+  "unnecessary_clarify": 61,
   "correct_clarify": 33,
   "errors": 0,
-  "latency_ms_p50": 1.7,
-  "latency_ms_p95": 11.3,
-  "latency_ms_max": 55.0,
+  "latency_ms_p50": 1.2,
+  "latency_ms_p95": 11.7,
+  "latency_ms_max": 69.4,
   "clarify_items_refused": "20/20",
   "unsupported_items_refused": "13/13",
   "by_category": {
    "direct_kpi": {
     "n": 5,
-    "correct": 2,
+    "correct": 1,
     "silent_wrong": 0,
-    "unnecessary_clarify": 3,
+    "unnecessary_clarify": 4,
     "correct_clarify": 0,
     "wrong_answer_to_clarify_item": 0,
     "error": 0
@@ -6081,9 +6092,9 @@
    },
    "join_fanout": {
     "n": 7,
-    "correct": 3,
+    "correct": 2,
     "silent_wrong": 0,
-    "unnecessary_clarify": 1,
+    "unnecessary_clarify": 2,
     "correct_clarify": 3,
     "wrong_answer_to_clarify_item": 0,
     "error": 0

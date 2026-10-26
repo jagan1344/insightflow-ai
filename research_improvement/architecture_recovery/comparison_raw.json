@@ -1,5 +1,5 @@
 {
- "commit": "bb7513f64ca6c9a03443ca1b06a6ea9b800103a9",
+ "commit": "cc3fb916378884bdeb0a8ffedc68b76b325e8184",
  "records": [
   {
    "split": "dev",
@@ -18,7 +18,7 @@
      900
     ]
    ],
-   "ms": 214.1,
+   "ms": 262.6,
    "outcome": "correct"
   },
   {
@@ -38,7 +38,7 @@
      900
     ]
    ],
-   "ms": 38.5,
+   "ms": 39.4,
    "outcome": "correct"
   },
   {
@@ -58,7 +58,7 @@
      900
     ]
    ],
-   "ms": 7.7,
+   "ms": 6.7,
    "outcome": "correct"
   },
   {
@@ -78,7 +78,7 @@
      8063.35
     ]
    ],
-   "ms": 239.0,
+   "ms": 168.3,
    "outcome": "correct"
   },
   {
@@ -98,7 +98,7 @@
      8063.35
     ]
    ],
-   "ms": 36.2,
+   "ms": 34.0,
    "outcome": "correct"
   },
   {
@@ -118,7 +118,7 @@
      8063.35
     ]
    ],
-   "ms": 10.3,
+   "ms": 6.2,
    "outcome": "correct"
   },
   {
@@ -134,7 +134,7 @@
    "sql": "SELECT j_bike_id.bike_type AS bike_type, SUM(\"rentals\".\"dur_min\") AS sum_dur_min FROM \"rentals\" LEFT JOIN bikes AS j_bike_id ON j_bike_id.bike_id = rentals.bike_id GROUP BY j_bike_id.bike_type ORDER BY sum_dur_min DESC",
    "reason": "plan requires items not in the dataset: value:bike type=min by",
    "rows": [],
-   "ms": 196.3,
+   "ms": 170.6,
    "outcome": "abstain"
   },
   {
@@ -150,7 +150,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: ride",
    "rows": [],
-   "ms": 39.8,
+   "ms": 37.9,
    "outcome": "abstain"
   },
   {
@@ -166,7 +166,7 @@
    "sql": "SELECT j_bike_id.bike_type AS bike_type, SUM(\"rentals\".\"dur_min\") AS sum_dur_min FROM \"rentals\" LEFT JOIN bikes AS j_bike_id ON j_bike_id.bike_id = rentals.bike_id GROUP BY j_bike_id.bike_type ORDER BY sum_dur_min DESC",
    "reason": "plan requires items not in the dataset: value:bike type=min by",
    "rows": [],
-   "ms": 199.9,
+   "ms": 163.1,
    "outcome": "abstain"
   },
   {
@@ -182,7 +182,7 @@
    "sql": "SELECT SUM(\"rentals\".\"fare_amt\") AS sum_fare_amt FROM \"rentals\" WHERE \"rentals\".\"start_ts\" IS NOT NULL",
    "reason": "the question is about 'station', but the query's base table is 'rentals' and does not involve them, so it would answer at the wrong grain",
    "rows": [],
-   "ms": 157.8,
+   "ms": 162.6,
    "outcome": "abstain"
   },
   {
@@ -219,7 +219,7 @@
      1488.0
     ]
    ],
-   "ms": 28.1,
+   "ms": 30.5,
    "outcome": "correct"
   },
   {
@@ -256,7 +256,7 @@
      1488.0
     ]
    ],
-   "ms": 6.8,
+   "ms": 7.2,
    "outcome": "correct"
   },
   {
@@ -272,7 +272,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"rentals\"",
    "reason": "plan requires items not in the dataset: dimension:end",
    "rows": [],
-   "ms": 162.6,
+   "ms": 160.5,
    "outcome": "abstain"
   },
   {
@@ -313,7 +313,7 @@
      183
     ]
    ],
-   "ms": 30.2,
+   "ms": 29.2,
    "outcome": "correct"
   },
   {
@@ -354,7 +354,7 @@
      183
     ]
    ],
-   "ms": 10.4,
+   "ms": 7.1,
    "outcome": "correct"
   },
   {
@@ -374,7 +374,7 @@
      398
     ]
    ],
-   "ms": 184.0,
+   "ms": 168.8,
    "outcome": "correct"
   },
   {
@@ -394,7 +394,7 @@
      398
     ]
    ],
-   "ms": 36.7,
+   "ms": 29.9,
    "outcome": "correct"
   },
   {
@@ -414,7 +414,7 @@
      398
     ]
    ],
-   "ms": 8.5,
+   "ms": 6.3,
    "outcome": "correct"
   },
   {
@@ -430,7 +430,7 @@
    "sql": "SELECT COUNT(*) AS null_end_ts FROM \"rentals\" WHERE \"rentals\".\"end_ts\" IS NULL",
    "reason": "the question is about 'station', but the query's base table is 'rentals' and does not involve them, so it would answer at the wrong grain",
    "rows": [],
-   "ms": 183.2,
+   "ms": 184.4,
    "outcome": "abstain"
   },
   {
@@ -450,7 +450,7 @@
      50
     ]
    ],
-   "ms": 30.3,
+   "ms": 42.0,
    "outcome": "correct"
   },
   {
@@ -470,7 +470,7 @@
      50
     ]
    ],
-   "ms": 7.3,
+   "ms": 9.9,
    "outcome": "correct"
   },
   {
@@ -486,7 +486,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"rentals\"",
    "reason": "plan requires items not in the dataset: unsupported_negative_existence:had no",
    "rows": [],
-   "ms": 196.5,
+   "ms": 190.8,
    "outcome": "abstain"
   },
   {
@@ -506,7 +506,7 @@
      100
     ]
    ],
-   "ms": 41.5,
+   "ms": 30.1,
    "outcome": "correct"
   },
   {
@@ -526,7 +526,7 @@
      100
     ]
    ],
-   "ms": 10.8,
+   "ms": 8.8,
    "outcome": "correct"
   },
   {
@@ -546,7 +546,7 @@
      2972.13
     ]
    ],
-   "ms": 251.0,
+   "ms": 160.8,
    "outcome": "correct"
   },
   {
@@ -566,7 +566,7 @@
      2972.13
     ]
    ],
-   "ms": 47.6,
+   "ms": 30.0,
    "outcome": "correct"
   },
   {
@@ -586,7 +586,7 @@
      2972.13
     ]
    ],
-   "ms": 11.0,
+   "ms": 6.3,
    "outcome": "correct"
   },
   {
@@ -602,7 +602,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by start_ts -> 12 groups (2025-01: 20, 2025-02: 12, 2025-03: 20, 2025-04: 15, 2025-05: 24, 2025-06: 22, ...); by end_ts -> 12 groups (2025-01: 19, 2025-02: 11, 2025-03: 20, 2025-04: 14, 2025-05: 23, 2025-06: 18, ...); by signup_dt -> 10 groups (2025-02: 17, 2025-03: 7, 2025-04: 5, 2025-05: 10, 2025-07: 11, 2025-08: 6, ...). Which did you mean?",
    "rows": [],
-   "ms": 447.8,
+   "ms": 317.6,
    "outcome": "abstain_ok"
   },
   {
@@ -618,7 +618,7 @@
    "sql": "",
    "reason": "I need a clarification: 'Monthly' could mean a monthly time series or the stored value riders.plan_type = 'monthly'; the question gives a period but not which date: start_ts, end_ts",
    "rows": [],
-   "ms": 31.0,
+   "ms": 29.3,
    "outcome": "abstain_ok"
   },
   {
@@ -634,7 +634,7 @@
    "sql": "",
    "reason": "I need a clarification: 'Monthly' could mean a monthly time series or the stored value riders.plan_type = 'monthly'; the question gives a period but not which date: start_ts, end_ts",
    "rows": [],
-   "ms": 7.7,
+   "ms": 5.9,
    "outcome": "abstain_ok"
   },
   {
@@ -650,7 +650,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"rentals\" WHERE \"rentals\".\"start_ts\" IS NOT NULL",
    "reason": "the question is about 'stations', but the query's base table is 'rentals' and does not involve them, so it would answer at the wrong grain",
    "rows": [],
-   "ms": 187.2,
+   "ms": 162.4,
    "outcome": "abstain"
   },
   {
@@ -679,7 +679,7 @@
      180
     ]
    ],
-   "ms": 39.2,
+   "ms": 28.4,
    "outcome": "correct"
   },
   {
@@ -708,7 +708,7 @@
      180
     ]
    ],
-   "ms": 8.9,
+   "ms": 6.7,
    "outcome": "correct"
   },
   {
@@ -724,7 +724,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"rentals\" WHERE EXISTS (SELECT 1 FROM \"rental_issues\" AS \"x1_0\" WHERE \"x1_0\".\"rental_id\" = \"rentals\".\"rental_id\" AND 1=1)",
    "reason": "plan requires items not in the dataset: value:issue=least one",
    "rows": [],
-   "ms": 210.1,
+   "ms": 155.3,
    "outcome": "abstain"
   },
   {
@@ -744,7 +744,7 @@
      390
     ]
    ],
-   "ms": 54.7,
+   "ms": 38.6,
    "outcome": "correct"
   },
   {
@@ -764,7 +764,7 @@
      390
     ]
    ],
-   "ms": 26.2,
+   "ms": 21.0,
    "outcome": "correct"
   },
   {
@@ -784,7 +784,7 @@
      510
     ]
    ],
-   "ms": 195.1,
+   "ms": 171.7,
    "outcome": "correct"
   },
   {
@@ -804,7 +804,7 @@
      510
     ]
    ],
-   "ms": 40.1,
+   "ms": 40.5,
    "outcome": "correct"
   },
   {
@@ -824,7 +824,7 @@
      510
     ]
    ],
-   "ms": 19.6,
+   "ms": 17.6,
    "outcome": "correct"
   },
   {
@@ -844,7 +844,7 @@
      127
     ]
    ],
-   "ms": 220.3,
+   "ms": 208.3,
    "outcome": "correct"
   },
   {
@@ -864,7 +864,7 @@
      127
     ]
    ],
-   "ms": 70.3,
+   "ms": 43.6,
    "outcome": "correct"
   },
   {
@@ -884,7 +884,7 @@
      127
     ]
    ],
-   "ms": 32.8,
+   "ms": 21.6,
    "outcome": "correct"
   },
   {
@@ -900,7 +900,7 @@
    "sql": "SELECT SUM(\"rentals\".\"per_min_rate\") AS sum_per_min_rate, SUM(\"rentals\".\"dur_min\") AS sum_dur_min FROM \"rentals\"",
    "reason": "the answer may not mean what you asked: the question asks for a grouped breakdown but the plan is a single figure; 'per min' asks for a ratio of two measures, which this query does not compute",
    "rows": [],
-   "ms": 174.4,
+   "ms": 199.3,
    "outcome": "abstain"
   },
   {
@@ -920,7 +920,7 @@
      7163.35
     ]
    ],
-   "ms": 28.9,
+   "ms": 36.3,
    "outcome": "correct"
   },
   {
@@ -940,7 +940,7 @@
      7163.35
     ]
    ],
-   "ms": 7.8,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -956,7 +956,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('bikes'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 115.9,
+   "ms": 117.1,
    "outcome": "abstain"
   },
   {
@@ -976,7 +976,7 @@
      55.77777777777778
     ]
    ],
-   "ms": 29.9,
+   "ms": 28.7,
    "outcome": "correct"
   },
   {
@@ -996,7 +996,7 @@
      55.77777777777778
     ]
    ],
-   "ms": 6.9,
+   "ms": 6.2,
    "outcome": "correct"
   },
   {
@@ -1012,7 +1012,7 @@
    "sql": "",
    "reason": "Could not compile a SQL query for this plan.",
    "rows": [],
-   "ms": 156.1,
+   "ms": 139.5,
    "outcome": "abstain"
   },
   {
@@ -1041,7 +1041,7 @@
      35.55555555555556
     ]
    ],
-   "ms": 42.5,
+   "ms": 28.4,
    "outcome": "correct"
   },
   {
@@ -1070,7 +1070,7 @@
      35.55555555555556
     ]
    ],
-   "ms": 8.3,
+   "ms": 7.9,
    "outcome": "correct"
   },
   {
@@ -1086,7 +1086,7 @@
    "sql": "SELECT AVG(\"rentals\".\"fare_amt\") AS avg_fare_amt FROM \"rentals\"",
    "reason": "the question contains the number(s) 30 but the generated query does not use them, so a threshold or quantity would be ignored",
    "rows": [],
-   "ms": 176.2,
+   "ms": 151.0,
    "outcome": "abstain"
   },
   {
@@ -1106,7 +1106,7 @@
      11.650620567375887
     ]
    ],
-   "ms": 34.1,
+   "ms": 29.9,
    "outcome": "correct"
   },
   {
@@ -1142,7 +1142,7 @@
    "sql": "SELECT COUNT(DISTINCT \"rentals\".\"rdr_id\") AS distinct_rdr_id FROM \"rentals\"",
    "reason": "the question mentions column(s) 'distinct (dist_km)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 233.3,
+   "ms": 168.2,
    "outcome": "abstain"
   },
   {
@@ -1162,7 +1162,7 @@
      149
     ]
    ],
-   "ms": 43.0,
+   "ms": 36.8,
    "outcome": "correct"
   },
   {
@@ -1182,7 +1182,7 @@
      149
     ]
    ],
-   "ms": 9.4,
+   "ms": 8.0,
    "outcome": "correct"
   },
   {
@@ -1215,7 +1215,7 @@
      1466.25
     ]
    ],
-   "ms": 190.2,
+   "ms": 178.3,
    "outcome": "correct"
   },
   {
@@ -1248,7 +1248,7 @@
      1466.25
     ]
    ],
-   "ms": 34.8,
+   "ms": 32.9,
    "outcome": "correct"
   },
   {
@@ -1281,7 +1281,7 @@
      1466.25
     ]
    ],
-   "ms": 7.4,
+   "ms": 6.9,
    "outcome": "correct"
   },
   {
@@ -1297,7 +1297,7 @@
    "sql": "SELECT SUM(\"rentals\".\"fare_amt\") AS sum_fare_amt FROM \"rentals\"",
    "reason": "plan requires items not in the dataset: dimension:km",
    "rows": [],
-   "ms": 156.2,
+   "ms": 147.6,
    "outcome": "abstain"
   },
   {
@@ -1317,7 +1317,7 @@
      1.003282331525438
     ]
    ],
-   "ms": 38.5,
+   "ms": 33.4,
    "outcome": "correct"
   },
   {
@@ -1337,7 +1337,7 @@
      1.003282331525438
     ]
    ],
-   "ms": 9.4,
+   "ms": 5.9,
    "outcome": "correct"
   },
   {
@@ -1353,7 +1353,7 @@
    "sql": "SELECT SUM(\"rentals\".\"fare_amt\") AS sum_fare_amt FROM \"rentals\"",
    "reason": "plan requires items not in the dataset: dimension:station",
    "rows": [],
-   "ms": 163.1,
+   "ms": 159.7,
    "outcome": "abstain_ok"
   },
   {
@@ -1369,7 +1369,7 @@
    "sql": "",
    "reason": "I need a clarification: 'station' is reached in more than one way: stations.stn_nm via start_stn_id or stations.stn_nm via end_stn_id",
    "rows": [],
-   "ms": 41.3,
+   "ms": 32.7,
    "outcome": "abstain_ok"
   },
   {
@@ -1385,7 +1385,7 @@
    "sql": "",
    "reason": "I need a clarification: 'station' is reached in more than one way: stations.stn_nm via start_stn_id or stations.stn_nm via end_stn_id",
    "rows": [],
-   "ms": 10.2,
+   "ms": 9.2,
    "outcome": "abstain_ok"
   },
   {
@@ -1401,7 +1401,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('bikes'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 163.1,
+   "ms": 126.7,
    "outcome": "abstain_ok"
   },
   {
@@ -1417,7 +1417,7 @@
    "sql": "",
    "reason": "I need a clarification: 'district' could be stations.district via start_stn_id or stations.district via end_stn_id; 'district' could be stations.district via start_stn_id or stations.district via end_stn_id",
    "rows": [],
-   "ms": 35.2,
+   "ms": 30.8,
    "outcome": "abstain_ok"
   },
   {
@@ -1433,7 +1433,7 @@
    "sql": "",
    "reason": "I need a clarification: 'district' could be stations.district via start_stn_id or stations.district via end_stn_id; 'district' could be stations.district via start_stn_id or stations.district via end_stn_id",
    "rows": [],
-   "ms": 7.8,
+   "ms": 6.7,
    "outcome": "abstain_ok"
   },
   {
@@ -1449,7 +1449,7 @@
    "sql": "SELECT j_rdr_id.rdr_nm AS rdr_nm, COUNT(*) AS row_count FROM \"rentals\" LEFT JOIN riders AS j_rdr_id ON j_rdr_id.rdr_id = rentals.rdr_id WHERE j_rdr_id.rdr_nm IS NOT NULL GROUP BY j_rdr_id.rdr_nm ORDER BY row_count DESC LIMIT 1",
    "reason": "I don't know how 'loyal' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 187.7,
+   "ms": 192.9,
    "outcome": "abstain_ok"
   },
   {
@@ -1465,7 +1465,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: loyal, riders",
    "rows": [],
-   "ms": 30.0,
+   "ms": 38.4,
    "outcome": "abstain_ok"
   },
   {
@@ -1481,7 +1481,7 @@
    "sql": "SELECT j_rdr_id.rdr_nm AS rdr_nm, COUNT(*) AS row_count FROM \"rentals\" LEFT JOIN riders AS j_rdr_id ON j_rdr_id.rdr_id = rentals.rdr_id WHERE j_rdr_id.rdr_nm IS NOT NULL GROUP BY j_rdr_id.rdr_nm ORDER BY row_count DESC LIMIT 1",
    "reason": "I don't know how 'loyal' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 149.5,
+   "ms": 214.5,
    "outcome": "abstain_ok"
   },
   {
@@ -1497,7 +1497,7 @@
    "sql": "",
    "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
    "rows": [],
-   "ms": 6.2,
+   "ms": 9.7,
    "outcome": "abstain_ok"
   },
   {
@@ -1513,7 +1513,7 @@
    "sql": "",
    "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
    "rows": [],
-   "ms": 4.3,
+   "ms": 7.0,
    "outcome": "abstain_ok"
   },
   {
@@ -1529,7 +1529,7 @@
    "sql": "",
    "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
    "rows": [],
-   "ms": 4.6,
+   "ms": 6.8,
    "outcome": "abstain_ok"
   },
   {
@@ -1549,7 +1549,7 @@
      null
     ]
    ],
-   "ms": 436.8,
+   "ms": 485.8,
    "outcome": "answered_unanswerable"
   },
   {
@@ -1565,7 +1565,7 @@
    "sql": "",
    "reason": "I can't answer this safely: relative dates (last/this/next period) are not resolved against a reference date",
    "rows": [],
-   "ms": 29.7,
+   "ms": 27.7,
    "outcome": "abstain_ok"
   },
   {
@@ -1581,7 +1581,7 @@
    "sql": "",
    "reason": "I can't answer this safely: relative dates (last/this/next period) are not resolved against a reference date",
    "rows": [],
-   "ms": 7.6,
+   "ms": 6.2,
    "outcome": "abstain_ok"
   },
   {
@@ -1597,7 +1597,7 @@
    "sql": "SELECT SUM(\"rentals\".\"fare_amt\") AS sum_fare_amt FROM \"rentals\"",
    "reason": "plan requires items not in the dataset: value:unrecognised=harbor point",
    "rows": [],
-   "ms": 159.6,
+   "ms": 141.8,
    "outcome": "abstain"
   },
   {
@@ -1617,7 +1617,7 @@
      1517.8
     ]
    ],
-   "ms": 29.3,
+   "ms": 28.1,
    "outcome": "correct"
   },
   {
@@ -1637,7 +1637,7 @@
      1517.8
     ]
    ],
-   "ms": 7.3,
+   "ms": 6.8,
    "outcome": "correct"
   },
   {
@@ -1653,7 +1653,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('bikes'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 147.6,
+   "ms": 107.3,
    "outcome": "abstain_ok"
   },
   {
@@ -1669,7 +1669,7 @@
    "sql": "",
    "reason": "I need a clarification: 'dock capacity' could be stations.dock_cap via start_stn_id or stations.dock_cap via end_stn_id",
    "rows": [],
-   "ms": 31.3,
+   "ms": 26.2,
    "outcome": "abstain_ok"
   },
   {
@@ -1685,7 +1685,7 @@
    "sql": "",
    "reason": "I need a clarification: 'dock capacity' could be stations.dock_cap via start_stn_id or stations.dock_cap via end_stn_id",
    "rows": [],
-   "ms": 12.9,
+   "ms": 5.8,
    "outcome": "abstain_ok"
   },
   {
@@ -1705,7 +1705,7 @@
      1100
     ]
    ],
-   "ms": 177.8,
+   "ms": 175.0,
    "outcome": "correct"
   },
   {
@@ -1725,7 +1725,7 @@
      1100
     ]
    ],
-   "ms": 45.5,
+   "ms": 36.5,
    "outcome": "correct"
   },
   {
@@ -1745,7 +1745,7 @@
      1100
     ]
    ],
-   "ms": 6.6,
+   "ms": 5.8,
    "outcome": "correct"
   },
   {
@@ -1782,7 +1782,7 @@
      62.78628318584071
     ]
    ],
-   "ms": 174.3,
+   "ms": 162.8,
    "outcome": "correct"
   },
   {
@@ -1819,7 +1819,7 @@
      64.30981308411215
     ]
    ],
-   "ms": 36.3,
+   "ms": 41.0,
    "outcome": "correct"
   },
   {
@@ -1856,7 +1856,7 @@
      64.30981308411215
     ]
    ],
-   "ms": 7.0,
+   "ms": 6.8,
    "outcome": "correct"
   },
   {
@@ -1872,7 +1872,7 @@
    "sql": "SELECT j_crs_cd.dept AS dept, AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\" LEFT JOIN courses AS j_crs_cd ON j_crs_cd.crs_cd = exam_results.crs_cd GROUP BY j_crs_cd.dept ORDER BY avg_score_pct DESC",
    "reason": "I don't know how 'department' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 194.3,
+   "ms": 147.3,
    "outcome": "abstain"
   },
   {
@@ -1901,7 +1901,7 @@
      65.17469879518072
     ]
    ],
-   "ms": 40.8,
+   "ms": 30.9,
    "outcome": "correct"
   },
   {
@@ -1930,7 +1930,7 @@
      65.17469879518072
     ]
    ],
-   "ms": 10.1,
+   "ms": 6.5,
    "outcome": "correct"
   },
   {
@@ -1946,7 +1946,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('school'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 128.7,
+   "ms": 111.1,
    "outcome": "abstain"
   },
   {
@@ -1966,7 +1966,7 @@
      43
     ]
    ],
-   "ms": 32.7,
+   "ms": 31.4,
    "outcome": "correct"
   },
   {
@@ -1986,7 +1986,7 @@
      43
     ]
    ],
-   "ms": 6.2,
+   "ms": 7.1,
    "outcome": "correct"
   },
   {
@@ -2006,7 +2006,7 @@
      136
     ]
    ],
-   "ms": 152.4,
+   "ms": 153.0,
    "outcome": "correct"
   },
   {
@@ -2026,7 +2026,7 @@
      136
     ]
    ],
-   "ms": 30.0,
+   "ms": 33.0,
    "outcome": "correct"
   },
   {
@@ -2046,7 +2046,7 @@
      136
     ]
    ],
-   "ms": 6.0,
+   "ms": 9.5,
    "outcome": "correct"
   },
   {
@@ -2066,7 +2066,7 @@
      124
     ]
    ],
-   "ms": 169.8,
+   "ms": 174.1,
    "outcome": "correct"
   },
   {
@@ -2086,7 +2086,7 @@
      124
     ]
    ],
-   "ms": 33.2,
+   "ms": 31.1,
    "outcome": "correct"
   },
   {
@@ -2106,7 +2106,7 @@
      124
     ]
    ],
-   "ms": 6.2,
+   "ms": 6.5,
    "outcome": "correct"
   },
   {
@@ -2126,7 +2126,7 @@
      109
     ]
    ],
-   "ms": 162.1,
+   "ms": 176.5,
    "outcome": "correct"
   },
   {
@@ -2146,7 +2146,7 @@
      109
     ]
    ],
-   "ms": 29.7,
+   "ms": 31.5,
    "outcome": "correct"
   },
   {
@@ -2166,7 +2166,7 @@
      109
     ]
    ],
-   "ms": 7.0,
+   "ms": 6.6,
    "outcome": "correct"
   },
   {
@@ -2182,7 +2182,7 @@
    "sql": "",
    "reason": "this is computed as total points earned divided by total points possible, but a part could not be answered safely ('What is the total points earned?': Question is too vague or off-scope for the loaded dataset ('school'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.; 'What is the total points possible?': Question is too vague or off-scope for the loaded dataset ('school'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.)",
    "rows": [],
-   "ms": 273.2,
+   "ms": 232.3,
    "outcome": "abstain"
   },
   {
@@ -2202,7 +2202,7 @@
      0.6162327005511329
     ]
    ],
-   "ms": 45.8,
+   "ms": 31.4,
    "outcome": "correct"
   },
   {
@@ -2222,7 +2222,7 @@
      0.6162327005511329
     ]
    ],
-   "ms": 8.5,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -2238,7 +2238,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\"",
    "reason": "the question mentions column(s) 'grade (graded_dt)', 'grade (grade_lvl)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 217.0,
+   "ms": 164.7,
    "outcome": "abstain"
   },
   {
@@ -2254,7 +2254,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: grade, students",
    "rows": [],
-   "ms": 34.5,
+   "ms": 31.5,
    "outcome": "abstain"
   },
   {
@@ -2270,7 +2270,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\"",
    "reason": "the question mentions column(s) 'grade (graded_dt)', 'grade (grade_lvl)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 163.0,
+   "ms": 186.3,
    "outcome": "abstain"
   },
   {
@@ -2286,7 +2286,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"exam_results\"",
    "reason": "the question mentions column(s) 'grade (graded_dt)', 'grade (grade_lvl)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 172.0,
+   "ms": 225.4,
    "outcome": "abstain"
   },
   {
@@ -2319,7 +2319,7 @@
      353
     ]
    ],
-   "ms": 36.4,
+   "ms": 43.8,
    "outcome": "correct"
   },
   {
@@ -2372,7 +2372,7 @@
      185
     ]
    ],
-   "ms": 221.5,
+   "ms": 210.0,
    "outcome": "correct"
   },
   {
@@ -2392,7 +2392,7 @@
      185
     ]
    ],
-   "ms": 39.6,
+   "ms": 45.4,
    "outcome": "correct"
   },
   {
@@ -2412,7 +2412,7 @@
      185
     ]
    ],
-   "ms": 13.3,
+   "ms": 21.6,
    "outcome": "correct"
   },
   {
@@ -2432,7 +2432,7 @@
      101
     ]
    ],
-   "ms": 185.8,
+   "ms": 178.2,
    "outcome": "correct"
   },
   {
@@ -2452,7 +2452,7 @@
      101
     ]
    ],
-   "ms": 40.2,
+   "ms": 36.9,
    "outcome": "correct"
   },
   {
@@ -2472,7 +2472,7 @@
      101
     ]
    ],
-   "ms": 17.4,
+   "ms": 13.6,
    "outcome": "correct"
   },
   {
@@ -2492,7 +2492,7 @@
      64.45649202733486
     ]
    ],
-   "ms": 189.6,
+   "ms": 204.7,
    "outcome": "correct"
   },
   {
@@ -2512,7 +2512,7 @@
      64.45649202733486
     ]
    ],
-   "ms": 45.9,
+   "ms": 42.4,
    "outcome": "correct"
   },
   {
@@ -2532,7 +2532,7 @@
      64.45649202733486
     ]
    ],
-   "ms": 16.2,
+   "ms": 14.6,
    "outcome": "correct"
   },
   {
@@ -2548,7 +2548,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by exam_dt -> 64.30; by graded_dt -> 64.40. Which did you mean?",
    "rows": [],
-   "ms": 266.6,
+   "ms": 307.0,
    "outcome": "abstain_ok"
   },
   {
@@ -2562,9 +2562,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: exam_dt, graded_dt",
+   "reason": "I need a clarification: 'monthly' does not say which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 8 rows; graded_dt: 9 rows. Which did you mean?",
    "rows": [],
-   "ms": 30.6,
+   "ms": 40.0,
    "outcome": "abstain_ok"
   },
   {
@@ -2578,9 +2578,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: exam_dt, graded_dt",
+   "reason": "I need a clarification: 'monthly' does not say which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 8 rows; graded_dt: 9 rows. Which did you mean?",
    "rows": [],
-   "ms": 5.9,
+   "ms": 9.8,
    "outcome": "abstain_ok"
   },
   {
@@ -2600,7 +2600,7 @@
      64.30981308411215
     ]
    ],
-   "ms": 166.6,
+   "ms": 170.5,
    "outcome": "correct"
   },
   {
@@ -2620,7 +2620,7 @@
      64.30981308411215
     ]
    ],
-   "ms": 39.5,
+   "ms": 41.8,
    "outcome": "correct"
   },
   {
@@ -2640,7 +2640,7 @@
      64.30981308411215
     ]
    ],
-   "ms": 9.1,
+   "ms": 7.4,
    "outcome": "correct"
   },
   {
@@ -2660,7 +2660,7 @@
      100.0
     ]
    ],
-   "ms": 218.6,
+   "ms": 186.0,
    "outcome": "correct"
   },
   {
@@ -2680,7 +2680,7 @@
      100.0
     ]
    ],
-   "ms": 45.7,
+   "ms": 46.3,
    "outcome": "correct"
   },
   {
@@ -2700,7 +2700,7 @@
      100.0
     ]
    ],
-   "ms": 9.2,
+   "ms": 8.6,
    "outcome": "correct"
   },
   {
@@ -2716,7 +2716,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('school'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 144.5,
+   "ms": 120.4,
    "outcome": "abstain"
   },
   {
@@ -2736,7 +2736,7 @@
      12.363636363636363
     ]
    ],
-   "ms": 30.8,
+   "ms": 30.6,
    "outcome": "correct"
   },
   {
@@ -2756,7 +2756,7 @@
      12.363636363636363
     ]
    ],
-   "ms": 6.1,
+   "ms": 6.0,
    "outcome": "correct"
   },
   {
@@ -2772,7 +2772,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\" LEFT JOIN courses AS j_crs_cd ON j_crs_cd.crs_cd = exam_results.crs_cd WHERE j_crs_cd.dept = 'English'",
    "reason": "I don't know how 'language' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 164.3,
+   "ms": 141.2,
    "outcome": "abstain"
   },
   {
@@ -2788,7 +2788,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: language, learners",
    "rows": [],
-   "ms": 32.0,
+   "ms": 29.0,
    "outcome": "abstain"
   },
   {
@@ -2804,7 +2804,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\" LEFT JOIN courses AS j_crs_cd ON j_crs_cd.crs_cd = exam_results.crs_cd WHERE j_crs_cd.dept = 'English'",
    "reason": "I don't know how 'language' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 152.0,
+   "ms": 158.7,
    "outcome": "abstain"
   },
   {
@@ -2837,7 +2837,7 @@
      247
     ]
    ],
-   "ms": 176.7,
+   "ms": 149.3,
    "outcome": "correct"
   },
   {
@@ -2870,7 +2870,7 @@
      247
     ]
    ],
-   "ms": 30.1,
+   "ms": 30.0,
    "outcome": "correct"
   },
   {
@@ -2903,7 +2903,7 @@
      247
     ]
    ],
-   "ms": 6.1,
+   "ms": 6.0,
    "outcome": "correct"
   },
   {
@@ -2928,7 +2928,7 @@
      65.15308056872037
     ]
    ],
-   "ms": 150.5,
+   "ms": 141.0,
    "outcome": "correct"
   },
   {
@@ -2953,7 +2953,7 @@
      65.15308056872037
     ]
    ],
-   "ms": 30.8,
+   "ms": 30.7,
    "outcome": "correct"
   },
   {
@@ -2978,7 +2978,7 @@
      65.15308056872037
     ]
    ],
-   "ms": 6.6,
+   "ms": 6.5,
    "outcome": "correct"
   },
   {
@@ -2994,7 +2994,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\"",
    "reason": "plan requires items not in the dataset: dimension:grader",
    "rows": [],
-   "ms": 138.3,
+   "ms": 131.9,
    "outcome": "abstain_ok"
   },
   {
@@ -3010,7 +3010,7 @@
    "sql": "",
    "reason": "I need a clarification: grader_id has no lookup table that names its values",
    "rows": [],
-   "ms": 29.0,
+   "ms": 28.5,
    "outcome": "abstain_ok"
   },
   {
@@ -3026,7 +3026,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\"",
    "reason": "plan requires items not in the dataset: dimension:grader",
    "rows": [],
-   "ms": 139.5,
+   "ms": 183.0,
    "outcome": "abstain_ok"
   },
   {
@@ -3042,7 +3042,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\" WHERE \"exam_results\".\"graded_dt\" IS NOT NULL",
    "reason": "plan requires items not in the dataset: dimension:mr, value:unrecognised=mr",
    "rows": [],
-   "ms": 149.0,
+   "ms": 206.6,
    "outcome": "abstain_ok"
   },
   {
@@ -3058,7 +3058,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: Mr, Chen",
    "rows": [],
-   "ms": 29.9,
+   "ms": 33.2,
    "outcome": "abstain_ok"
   },
   {
@@ -3074,7 +3074,7 @@
    "sql": "SELECT AVG(\"exam_results\".\"score_pct\") AS avg_score_pct FROM \"exam_results\" WHERE \"exam_results\".\"graded_dt\" IS NOT NULL",
    "reason": "plan requires items not in the dataset: dimension:mr, value:unrecognised=mr",
    "rows": [],
-   "ms": 141.7,
+   "ms": 145.6,
    "outcome": "abstain_ok"
   },
   {
@@ -3090,7 +3090,7 @@
    "sql": "SELECT j_student_id.stu_nm AS stu_nm, COUNT(*) AS row_count FROM \"exam_results\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = exam_results.student_id GROUP BY j_student_id.stu_nm ORDER BY row_count DESC",
    "reason": "I don't know how 'struggling' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 142.7,
+   "ms": 145.1,
    "outcome": "abstain_ok"
   },
   {
@@ -3106,7 +3106,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: struggling, students",
    "rows": [],
-   "ms": 29.5,
+   "ms": 29.9,
    "outcome": "abstain_ok"
   },
   {
@@ -3122,7 +3122,7 @@
    "sql": "SELECT j_student_id.stu_nm AS stu_nm, COUNT(*) AS row_count FROM \"exam_results\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = exam_results.student_id GROUP BY j_student_id.stu_nm ORDER BY row_count DESC",
    "reason": "I don't know how 'struggling' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 151.9,
+   "ms": 142.6,
    "outcome": "abstain_ok"
   },
   {
@@ -3138,7 +3138,7 @@
    "sql": "SELECT SUM(\"exam_results\".\"score_pct\") AS sum_score_pct FROM \"exam_results\"",
    "reason": "I don't know how 'improve', 'term' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 151.7,
+   "ms": 157.1,
    "outcome": "abstain_ok"
   },
   {
@@ -3154,7 +3154,7 @@
    "sql": "",
    "reason": "I need a clarification: no aggregation was stated for score_pct, which is not additive; no measure could be grounded; words not grounded: improve, next, term",
    "rows": [],
-   "ms": 29.6,
+   "ms": 31.6,
    "outcome": "abstain_ok"
   },
   {
@@ -3170,7 +3170,7 @@
    "sql": "SELECT SUM(\"exam_results\".\"score_pct\") AS sum_score_pct FROM \"exam_results\"",
    "reason": "I don't know how 'improve', 'term' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 146.0,
+   "ms": 191.1,
    "outcome": "abstain_ok"
   },
   {
@@ -3190,7 +3190,7 @@
      438
     ]
    ],
-   "ms": 150.4,
+   "ms": 211.7,
    "outcome": "correct"
   },
   {
@@ -3204,9 +3204,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: exam_dt, graded_dt",
+   "reason": "I need a clarification: the question gives a period but not which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 438.00; graded_dt: 381.00. Which did you mean?",
    "rows": [],
-   "ms": 29.0,
+   "ms": 32.3,
    "outcome": "abstain_ok"
   },
   {
@@ -3220,9 +3220,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: exam_dt, graded_dt",
+   "reason": "I need a clarification: the question gives a period but not which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 438.00; graded_dt: 381.00. Which did you mean?",
    "rows": [],
-   "ms": 5.6,
+   "ms": 7.8,
    "outcome": "abstain_ok"
   },
   {
@@ -3242,7 +3242,7 @@
      1.096818181818182
     ]
    ],
-   "ms": 155.3,
+   "ms": 153.9,
    "outcome": "wrong"
   },
   {
@@ -3258,7 +3258,7 @@
    "sql": "",
    "reason": "I need a clarification: credit_hrs describes courses; aggregate it over courses itself, or once per exam_results row (weighted by exam_results)?",
    "rows": [],
-   "ms": 35.9,
+   "ms": 29.7,
    "outcome": "abstain_ok"
   },
   {
@@ -3274,7 +3274,7 @@
    "sql": "",
    "reason": "I need a clarification: credit_hrs describes courses; aggregate it over courses itself, or once per exam_results row (weighted by exam_results)?",
    "rows": [],
-   "ms": 6.8,
+   "ms": 7.1,
    "outcome": "abstain_ok"
   },
   {
@@ -3294,7 +3294,7 @@
      1000
     ]
    ],
-   "ms": 211.8,
+   "ms": 205.5,
    "outcome": "correct"
   },
   {
@@ -3314,7 +3314,7 @@
      1000
     ]
    ],
-   "ms": 41.2,
+   "ms": 48.2,
    "outcome": "correct"
   },
   {
@@ -3334,7 +3334,7 @@
      1000
     ]
    ],
-   "ms": 6.6,
+   "ms": 7.9,
    "outcome": "correct"
   },
   {
@@ -3354,7 +3354,7 @@
      308995.13
     ]
    ],
-   "ms": 169.0,
+   "ms": 239.2,
    "outcome": "correct"
   },
   {
@@ -3374,7 +3374,7 @@
      308995.13
     ]
    ],
-   "ms": 30.7,
+   "ms": 30.9,
    "outcome": "correct"
   },
   {
@@ -3394,7 +3394,7 @@
      308995.13
     ]
    ],
-   "ms": 5.4,
+   "ms": 5.7,
    "outcome": "correct"
   },
   {
@@ -3410,7 +3410,7 @@
    "sql": "SELECT j_cust_id.region AS region, SUM(\"orders\".\"gross_amt\") AS total_revenue FROM \"orders\" LEFT JOIN customers AS j_cust_id ON j_cust_id.cust_id = orders.cust_id GROUP BY j_cust_id.region ORDER BY total_revenue DESC",
    "reason": "the question mentions column(s) 'discount (disc_amt)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 157.5,
+   "ms": 161.7,
    "outcome": "abstain"
   },
   {
@@ -3443,7 +3443,7 @@
      5864.9
     ]
    ],
-   "ms": 32.1,
+   "ms": 44.8,
    "outcome": "correct"
   },
   {
@@ -3476,7 +3476,7 @@
      5864.9
     ]
    ],
-   "ms": 6.2,
+   "ms": 7.7,
    "outcome": "correct"
   },
   {
@@ -3496,7 +3496,7 @@
      77
     ]
    ],
-   "ms": 169.5,
+   "ms": 204.4,
    "outcome": "correct"
   },
   {
@@ -3516,7 +3516,7 @@
      77
     ]
    ],
-   "ms": 29.3,
+   "ms": 38.3,
    "outcome": "correct"
   },
   {
@@ -3536,7 +3536,7 @@
      77
     ]
    ],
-   "ms": 6.2,
+   "ms": 5.8,
    "outcome": "correct"
   },
   {
@@ -3552,7 +3552,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"orders\" WHERE \"orders\".\"promo_cd\" IS NULL",
    "reason": "I don't know how 'code' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 161.5,
+   "ms": 166.6,
    "outcome": "abstain"
   },
   {
@@ -3572,7 +3572,7 @@
      601
     ]
    ],
-   "ms": 29.1,
+   "ms": 36.8,
    "outcome": "correct"
   },
   {
@@ -3592,7 +3592,7 @@
      601
     ]
    ],
-   "ms": 6.0,
+   "ms": 9.4,
    "outcome": "correct"
   },
   {
@@ -3612,7 +3612,7 @@
      31001.5
     ]
    ],
-   "ms": 187.3,
+   "ms": 181.4,
    "outcome": "correct"
   },
   {
@@ -3632,7 +3632,7 @@
      31001.5
     ]
    ],
-   "ms": 44.6,
+   "ms": 30.9,
    "outcome": "correct"
   },
   {
@@ -3652,7 +3652,7 @@
      31001.5
     ]
    ],
-   "ms": 8.2,
+   "ms": 6.5,
    "outcome": "correct"
   },
   {
@@ -3668,7 +3668,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"orders\"",
    "reason": "the question mentions column(s) 'paid (paid_ok)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 195.5,
+   "ms": 172.2,
    "outcome": "abstain"
   },
   {
@@ -3688,7 +3688,7 @@
      39
     ]
    ],
-   "ms": 33.2,
+   "ms": 40.9,
    "outcome": "correct"
   },
   {
@@ -3708,7 +3708,7 @@
      39
     ]
    ],
-   "ms": 7.0,
+   "ms": 6.1,
    "outcome": "correct"
   },
   {
@@ -3724,7 +3724,7 @@
    "sql": "SELECT SUM(\"orders\".\"gross_amt\") AS sum_gross_amt, SUM(\"orders\".\"gross_amt\") AS total_revenue FROM \"orders\"",
    "reason": "plan requires items not in the dataset: unsupported_exclusion:minus total gross_amt",
    "rows": [],
-   "ms": 159.5,
+   "ms": 162.6,
    "outcome": "abstain"
   },
   {
@@ -3744,7 +3744,7 @@
      284424.67
     ]
    ],
-   "ms": 30.9,
+   "ms": 30.5,
    "outcome": "correct"
   },
   {
@@ -3764,7 +3764,7 @@
      284424.67
     ]
    ],
-   "ms": 6.1,
+   "ms": 6.0,
    "outcome": "correct"
   },
   {
@@ -3793,7 +3793,7 @@
      308
     ]
    ],
-   "ms": 171.3,
+   "ms": 177.8,
    "outcome": "correct"
   },
   {
@@ -3822,7 +3822,7 @@
      308
     ]
    ],
-   "ms": 30.8,
+   "ms": 43.9,
    "outcome": "correct"
   },
   {
@@ -3851,7 +3851,7 @@
      308
     ]
    ],
-   "ms": 7.0,
+   "ms": 8.4,
    "outcome": "correct"
   },
   {
@@ -3867,7 +3867,7 @@
    "sql": "SELECT j_cust_id.segment AS segment, SUM(\"orders\".\"gross_amt\") AS total_revenue FROM \"orders\" LEFT JOIN customers AS j_cust_id ON j_cust_id.cust_id = orders.cust_id GROUP BY j_cust_id.segment ORDER BY total_revenue DESC",
    "reason": "the question mentions column(s) 'shipping (ship_dt)', 'shipping (ship_mode)', 'shipping (ship_fee)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 168.6,
+   "ms": 215.7,
    "outcome": "abstain"
   },
   {
@@ -3896,7 +3896,7 @@
      1318.1200000000001
     ]
    ],
-   "ms": 35.0,
+   "ms": 31.9,
    "outcome": "correct"
   },
   {
@@ -3925,7 +3925,7 @@
      1318.1200000000001
     ]
    ],
-   "ms": 7.0,
+   "ms": 6.6,
    "outcome": "correct"
   },
   {
@@ -3945,7 +3945,7 @@
      1000
     ]
    ],
-   "ms": 227.9,
+   "ms": 171.6,
    "outcome": "wrong"
   },
   {
@@ -3965,7 +3965,7 @@
      78
     ]
    ],
-   "ms": 36.7,
+   "ms": 32.0,
    "outcome": "correct"
   },
   {
@@ -3985,7 +3985,7 @@
      78
     ]
    ],
-   "ms": 8.6,
+   "ms": 8.5,
    "outcome": "correct"
   },
   {
@@ -4005,7 +4005,7 @@
      504
     ]
    ],
-   "ms": 257.5,
+   "ms": 226.3,
    "outcome": "correct"
   },
   {
@@ -4025,7 +4025,7 @@
      504
     ]
    ],
-   "ms": 117.7,
+   "ms": 94.6,
    "outcome": "correct"
   },
   {
@@ -4045,7 +4045,7 @@
      504
     ]
    ],
-   "ms": 62.5,
+   "ms": 68.9,
    "outcome": "correct"
   },
   {
@@ -4061,7 +4061,7 @@
    "sql": "SELECT SUM(\"orders\".\"gross_amt\") AS sum_gross_amt FROM \"orders\"",
    "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
    "rows": [],
-   "ms": 158.7,
+   "ms": 201.2,
    "outcome": "abstain"
   },
   {
@@ -4081,7 +4081,7 @@
      286413.1
     ]
    ],
-   "ms": 32.7,
+   "ms": 45.1,
    "outcome": "correct"
   },
   {
@@ -4101,7 +4101,7 @@
      286413.1
     ]
    ],
-   "ms": 11.6,
+   "ms": 13.8,
    "outcome": "correct"
   },
   {
@@ -4117,7 +4117,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by order_dt -> 12 groups (2025-01: 25,498.28, 2025-02: 25,504.06, 2025-03: 26,490.47, 2025-04: 24,385.25, 2025-05: 31,157.65, 2025-06: 22,271.96, ...); by ship_dt -> 13 groups (None: 24,054.93, 2025-01: 24,329.90, 2025-02: 24,415.13, 2025-03: 24,720.21, 2025-04: 22,163.28, 2025-05: 28,868.61, ...); by joined_dt -> 36 groups (2022-01: 3,765.16, 2022-02: 9,755.20, 2022-03: 3,699.42, 2022-04: 8,741.83, 2022-05: 2,705.80, 2022-06: 13,811.79, ...). Which did you mean?",
    "rows": [],
-   "ms": 230.1,
+   "ms": 260.1,
    "outcome": "abstain_ok"
   },
   {
@@ -4131,9 +4131,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: order_dt, ship_dt",
+   "reason": "I need a clarification: 'monthly' does not say which date: order_dt, ship_dt. The readings give different results \u2014 order_dt: 12 rows; ship_dt: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 28.8,
+   "ms": 30.2,
    "outcome": "abstain_ok"
   },
   {
@@ -4147,9 +4147,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: order_dt, ship_dt",
+   "reason": "I need a clarification: 'monthly' does not say which date: order_dt, ship_dt. The readings give different results \u2014 order_dt: 12 rows; ship_dt: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 5.5,
+   "ms": 7.7,
    "outcome": "abstain_ok"
   },
   {
@@ -4186,7 +4186,7 @@
      4196.05
     ]
    ],
-   "ms": 166.8,
+   "ms": 155.5,
    "outcome": "correct"
   },
   {
@@ -4223,7 +4223,7 @@
      4196.05
     ]
    ],
-   "ms": 30.9,
+   "ms": 30.1,
    "outcome": "correct"
   },
   {
@@ -4260,7 +4260,7 @@
      4196.05
     ]
    ],
-   "ms": 6.6,
+   "ms": 6.1,
    "outcome": "correct"
   },
   {
@@ -4280,7 +4280,7 @@
      993.78
     ]
    ],
-   "ms": 195.1,
+   "ms": 159.7,
    "outcome": "correct"
   },
   {
@@ -4300,7 +4300,7 @@
      993.78
     ]
    ],
-   "ms": 31.1,
+   "ms": 29.4,
    "outcome": "correct"
   },
   {
@@ -4320,7 +4320,7 @@
      993.78
     ]
    ],
-   "ms": 6.0,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -4336,7 +4336,7 @@
    "sql": "SELECT COUNT(*) AS order_count FROM \"orders\" WHERE \"orders\".\"promo_cd\" = 'VIP20'",
    "reason": "I don't know how 'code' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 193.6,
+   "ms": 168.2,
    "outcome": "abstain"
   },
   {
@@ -4356,7 +4356,7 @@
      200
     ]
    ],
-   "ms": 30.4,
+   "ms": 36.1,
    "outcome": "correct"
   },
   {
@@ -4376,7 +4376,7 @@
      200
     ]
    ],
-   "ms": 6.1,
+   "ms": 5.7,
    "outcome": "correct"
   },
   {
@@ -4392,7 +4392,7 @@
    "sql": "SELECT COUNT(*) AS order_count FROM \"orders\" WHERE \"orders\".\"is_gift\" = 1",
    "reason": "the query may answer a different question than the one asked: the question asks for a percentage/share/ratio but the query returns a plain total or count",
    "rows": [],
-   "ms": 207.7,
+   "ms": 171.0,
    "outcome": "abstain"
   },
   {
@@ -4412,7 +4412,7 @@
      9.6
     ]
    ],
-   "ms": 36.7,
+   "ms": 28.5,
    "outcome": "correct"
   },
   {
@@ -4432,7 +4432,7 @@
      9.6
     ]
    ],
-   "ms": 7.3,
+   "ms": 5.9,
    "outcome": "correct"
   },
   {
@@ -4452,7 +4452,7 @@
      311.59359420289854
     ]
    ],
-   "ms": 205.7,
+   "ms": 157.8,
    "outcome": "correct"
   },
   {
@@ -4472,7 +4472,7 @@
      311.59359420289854
     ]
    ],
-   "ms": 32.4,
+   "ms": 29.3,
    "outcome": "correct"
   },
   {
@@ -4492,7 +4492,7 @@
      311.59359420289854
     ]
    ],
-   "ms": 6.6,
+   "ms": 5.4,
    "outcome": "correct"
   },
   {
@@ -4508,7 +4508,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by order_dt -> 153,687.46; by ship_dt -> 140,555.24; by joined_dt -> None. Which did you mean?",
    "rows": [],
-   "ms": 210.4,
+   "ms": 173.0,
    "outcome": "abstain_ok"
   },
   {
@@ -4522,9 +4522,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: order_dt, ship_dt",
+   "reason": "I need a clarification: the question gives a period but not which date: order_dt, ship_dt. The readings give different results \u2014 order_dt: 153,687.46; ship_dt: 140,555.24. Which did you mean?",
    "rows": [],
-   "ms": 45.2,
+   "ms": 30.2,
    "outcome": "abstain_ok"
   },
   {
@@ -4538,9 +4538,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: order_dt, ship_dt",
+   "reason": "I need a clarification: the question gives a period but not which date: order_dt, ship_dt. The readings give different results \u2014 order_dt: 153,687.46; ship_dt: 140,555.24. Which did you mean?",
    "rows": [],
-   "ms": 8.8,
+   "ms": 7.1,
    "outcome": "abstain_ok"
   },
   {
@@ -4556,7 +4556,7 @@
    "sql": "SELECT COUNT(*) AS order_count, SUM(\"orders\".\"gross_amt\") AS sum_gross_amt FROM \"orders\"",
    "reason": "the question contains the number(s) 500 but the generated query does not use them, so a threshold or quantity would be ignored",
    "rows": [],
-   "ms": 231.3,
+   "ms": 151.2,
    "outcome": "abstain"
   },
   {
@@ -4576,7 +4576,7 @@
      180
     ]
    ],
-   "ms": 37.1,
+   "ms": 28.3,
    "outcome": "correct"
   },
   {
@@ -4596,7 +4596,7 @@
      180
     ]
    ],
-   "ms": 7.1,
+   "ms": 5.4,
    "outcome": "correct"
   },
   {
@@ -4612,7 +4612,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('shop'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 122.2,
+   "ms": 104.9,
    "outcome": "abstain_ok"
   },
   {
@@ -4628,7 +4628,7 @@
    "sql": "",
    "reason": "I can't answer this safely: a measure on the one-to-many table order_lines (needs that table as the base)",
    "rows": [],
-   "ms": 30.1,
+   "ms": 27.6,
    "outcome": "abstain_ok"
   },
   {
@@ -4644,7 +4644,7 @@
    "sql": "",
    "reason": "I can't answer this safely: a measure on the one-to-many table order_lines (needs that table as the base)",
    "rows": [],
-   "ms": 5.2,
+   "ms": 5.1,
    "outcome": "abstain_ok"
   },
   {
@@ -4664,7 +4664,7 @@
      308995.13
     ]
    ],
-   "ms": 197.4,
+   "ms": 150.6,
    "outcome": "answered_unanswerable"
   },
   {
@@ -4680,7 +4680,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: revenue",
    "rows": [],
-   "ms": 36.7,
+   "ms": 39.7,
    "outcome": "abstain_ok"
   },
   {
@@ -4700,7 +4700,7 @@
      308995.13
     ]
    ],
-   "ms": 165.4,
+   "ms": 160.5,
    "outcome": "answered_unanswerable"
   },
   {
@@ -4716,7 +4716,7 @@
    "sql": "SELECT j_cust_id.cust_nm AS cust_nm, SUM(\"orders\".\"gross_amt\") AS total_revenue FROM \"orders\" LEFT JOIN customers AS j_cust_id ON j_cust_id.cust_id = orders.cust_id GROUP BY j_cust_id.cust_nm ORDER BY total_revenue DESC",
    "reason": "I don't know how 'risk', 'churn' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 154.5,
+   "ms": 151.1,
    "outcome": "abstain_ok"
   },
   {
@@ -4732,7 +4732,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: risk, churn, customers",
    "rows": [],
-   "ms": 30.8,
+   "ms": 28.0,
    "outcome": "abstain_ok"
   },
   {
@@ -4748,7 +4748,7 @@
    "sql": "SELECT j_cust_id.cust_nm AS cust_nm, SUM(\"orders\".\"gross_amt\") AS total_revenue FROM \"orders\" LEFT JOIN customers AS j_cust_id ON j_cust_id.cust_id = orders.cust_id GROUP BY j_cust_id.cust_nm ORDER BY total_revenue DESC",
    "reason": "I don't know how 'risk', 'churn' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 158.4,
+   "ms": 147.8,
    "outcome": "abstain_ok"
   },
   {
@@ -4768,7 +4768,7 @@
      308995.13
     ]
    ],
-   "ms": 194.9,
+   "ms": 157.3,
    "outcome": "answered_unanswerable"
   },
   {
@@ -4784,7 +4784,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: amount",
    "rows": [],
-   "ms": 26.8,
+   "ms": 27.0,
    "outcome": "abstain_ok"
   },
   {
@@ -4804,7 +4804,7 @@
      308995.13
     ]
    ],
-   "ms": 302.6,
+   "ms": 155.8,
    "outcome": "answered_unanswerable"
   },
   {
@@ -4836,7 +4836,7 @@
      0.3105918853802
     ]
    ],
-   "ms": 237.9,
+   "ms": 171.6,
    "outcome": "wrong"
   },
   {
@@ -4865,7 +4865,7 @@
      31.05918853802
     ]
    ],
-   "ms": 37.8,
+   "ms": 29.8,
    "outcome": "correct"
   },
   {
@@ -4894,7 +4894,7 @@
      31.05918853802
     ]
    ],
-   "ms": 6.0,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -4914,7 +4914,7 @@
      120
     ]
    ],
-   "ms": 168.0,
+   "ms": 174.3,
    "outcome": "correct"
   },
   {
@@ -4934,7 +4934,7 @@
      120
     ]
    ],
-   "ms": 31.4,
+   "ms": 30.8,
    "outcome": "correct"
   },
   {
@@ -4954,7 +4954,7 @@
      120
     ]
    ],
-   "ms": 5.9,
+   "ms": 6.2,
    "outcome": "correct"
   },
   {
@@ -4974,7 +4974,7 @@
      800
     ]
    ],
-   "ms": 95.4,
+   "ms": 104.2,
    "outcome": "correct"
   },
   {
@@ -4994,7 +4994,7 @@
      800
     ]
    ],
-   "ms": 26.5,
+   "ms": 25.0,
    "outcome": "correct"
   },
   {
@@ -5014,7 +5014,7 @@
      800
     ]
    ],
-   "ms": 5.0,
+   "ms": 4.8,
    "outcome": "correct"
   },
   {
@@ -5047,7 +5047,7 @@
      180
     ]
    ],
-   "ms": 93.0,
+   "ms": 98.3,
    "outcome": "correct"
   },
   {
@@ -5080,7 +5080,7 @@
      199
     ]
    ],
-   "ms": 21.4,
+   "ms": 25.6,
    "outcome": "correct"
   },
   {
@@ -5113,7 +5113,7 @@
      199
     ]
    ],
-   "ms": 4.9,
+   "ms": 7.2,
    "outcome": "correct"
   },
   {
@@ -5142,7 +5142,7 @@
      2.887323943661972
     ]
    ],
-   "ms": 105.3,
+   "ms": 102.2,
    "outcome": "correct"
   },
   {
@@ -5171,7 +5171,7 @@
      2.887323943661972
     ]
    ],
-   "ms": 19.9,
+   "ms": 19.5,
    "outcome": "correct"
   },
   {
@@ -5200,7 +5200,7 @@
      2.887323943661972
     ]
    ],
-   "ms": 5.8,
+   "ms": 5.4,
    "outcome": "correct"
   },
   {
@@ -5220,7 +5220,7 @@
      800
     ]
    ],
-   "ms": 100.0,
+   "ms": 102.3,
    "outcome": "wrong"
   },
   {
@@ -5236,7 +5236,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: open",
    "rows": [],
-   "ms": 21.2,
+   "ms": 21.6,
    "outcome": "abstain"
   },
   {
@@ -5256,7 +5256,7 @@
      800
     ]
    ],
-   "ms": 100.9,
+   "ms": 103.9,
    "outcome": "wrong"
   },
   {
@@ -5276,7 +5276,7 @@
      631
     ]
    ],
-   "ms": 114.2,
+   "ms": 107.9,
    "outcome": "wrong"
   },
   {
@@ -5296,7 +5296,7 @@
      169
     ]
    ],
-   "ms": 21.1,
+   "ms": 20.4,
    "outcome": "correct"
   },
   {
@@ -5332,7 +5332,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: via tickets.opened_by_agent_id=agents.agent_id -> 5 groups (Cho Lee: 193, Ben Ruiz: 159, Eli Stone: 154, Ava Moss: 154, Dee Park: 140); via tickets.resolved_by_agent_id=agents.agent_id -> 6 groups (Dee Park: 151, Cho Lee: 146, Ben Ruiz: 138, Eli Stone: 132, Ava Moss: 125, None: 108). Which did you mean?",
    "rows": [],
-   "ms": 110.5,
+   "ms": 110.2,
    "outcome": "abstain"
   },
   {
@@ -5369,7 +5369,7 @@
      132
     ]
    ],
-   "ms": 22.9,
+   "ms": 22.8,
    "outcome": "correct"
   },
   {
@@ -5406,7 +5406,7 @@
      132
     ]
    ],
-   "ms": 6.2,
+   "ms": 5.9,
    "outcome": "correct"
   },
   {
@@ -5426,7 +5426,7 @@
      154
     ]
    ],
-   "ms": 125.4,
+   "ms": 141.5,
    "outcome": "correct"
   },
   {
@@ -5446,7 +5446,7 @@
      154
     ]
    ],
-   "ms": 35.3,
+   "ms": 27.6,
    "outcome": "correct"
   },
   {
@@ -5466,7 +5466,7 @@
      154
     ]
    ],
-   "ms": 10.7,
+   "ms": 7.7,
    "outcome": "correct"
   },
   {
@@ -5482,7 +5482,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: via tickets.opened_by_agent_id=agents.agent_id -> 5 groups (Cho Lee: 193, Ben Ruiz: 159, Eli Stone: 154, Ava Moss: 154, Dee Park: 140); via tickets.resolved_by_agent_id=agents.agent_id -> 6 groups (Dee Park: 151, Cho Lee: 146, Ben Ruiz: 138, Eli Stone: 132, Ava Moss: 125, None: 108). Which did you mean?",
    "rows": [],
-   "ms": 157.5,
+   "ms": 136.9,
    "outcome": "abstain_ok"
   },
   {
@@ -5498,7 +5498,7 @@
    "sql": "",
    "reason": "I need a clarification: 'agent' is reached in more than one way: agents.agent_nm via opened_by_agent_id or agents.agent_nm via resolved_by_agent_id",
    "rows": [],
-   "ms": 32.0,
+   "ms": 26.7,
    "outcome": "abstain_ok"
   },
   {
@@ -5514,7 +5514,7 @@
    "sql": "",
    "reason": "I need a clarification: 'agent' is reached in more than one way: agents.agent_nm via opened_by_agent_id or agents.agent_nm via resolved_by_agent_id",
    "rows": [],
-   "ms": 9.5,
+   "ms": 6.8,
    "outcome": "abstain_ok"
   },
   {
@@ -5534,7 +5534,7 @@
      148
     ]
    ],
-   "ms": 123.5,
+   "ms": 158.0,
    "outcome": "correct"
   },
   {
@@ -5554,7 +5554,7 @@
      148
     ]
    ],
-   "ms": 37.1,
+   "ms": 34.8,
    "outcome": "correct"
   },
   {
@@ -5574,7 +5574,7 @@
      148
     ]
    ],
-   "ms": 26.7,
+   "ms": 21.6,
    "outcome": "correct"
   },
   {
@@ -5594,7 +5594,7 @@
      223
     ]
    ],
-   "ms": 109.5,
+   "ms": 101.1,
    "outcome": "correct"
   },
   {
@@ -5614,7 +5614,7 @@
      223
     ]
    ],
-   "ms": 52.0,
+   "ms": 31.8,
    "outcome": "correct"
   },
   {
@@ -5634,7 +5634,7 @@
      223
     ]
    ],
-   "ms": 30.0,
+   "ms": 20.1,
    "outcome": "correct"
   },
   {
@@ -5663,7 +5663,7 @@
      155
     ]
    ],
-   "ms": 102.6,
+   "ms": 95.3,
    "outcome": "correct"
   },
   {
@@ -5692,7 +5692,7 @@
      155
     ]
    ],
-   "ms": 23.9,
+   "ms": 19.5,
    "outcome": "correct"
   },
   {
@@ -5721,7 +5721,7 @@
      155
     ]
    ],
-   "ms": 5.8,
+   "ms": 5.5,
    "outcome": "correct"
   },
   {
@@ -5741,7 +5741,7 @@
      312
     ]
    ],
-   "ms": 109.4,
+   "ms": 84.0,
    "outcome": "correct"
   },
   {
@@ -5761,7 +5761,7 @@
      312
     ]
    ],
-   "ms": 29.8,
+   "ms": 19.3,
    "outcome": "correct"
   },
   {
@@ -5781,7 +5781,7 @@
      312
     ]
    ],
-   "ms": 8.3,
+   "ms": 5.1,
    "outcome": "correct"
   },
   {
@@ -5846,7 +5846,7 @@
      56
     ]
    ],
-   "ms": 135.9,
+   "ms": 94.9,
    "outcome": "correct"
   },
   {
@@ -5911,7 +5911,7 @@
      56
     ]
    ],
-   "ms": 25.0,
+   "ms": 22.6,
    "outcome": "correct"
   },
   {
@@ -5976,7 +5976,7 @@
      56
     ]
    ],
-   "ms": 5.5,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -5992,7 +5992,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('support'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 60.2,
+   "ms": 65.7,
    "outcome": "abstain"
   },
   {
@@ -6012,7 +6012,7 @@
      78.875
     ]
    ],
-   "ms": 19.4,
+   "ms": 21.0,
    "outcome": "correct"
   },
   {
@@ -6032,7 +6032,7 @@
      78.875
     ]
    ],
-   "ms": 5.2,
+   "ms": 5.6,
    "outcome": "correct"
   },
   {
@@ -6061,7 +6061,7 @@
      29
     ]
    ],
-   "ms": 90.0,
+   "ms": 105.0,
    "outcome": "correct"
   },
   {
@@ -6090,7 +6090,7 @@
      29
     ]
    ],
-   "ms": 18.7,
+   "ms": 24.7,
    "outcome": "correct"
   },
   {
@@ -6119,7 +6119,7 @@
      29
     ]
    ],
-   "ms": 5.1,
+   "ms": 7.3,
    "outcome": "correct"
   },
   {
@@ -6135,7 +6135,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('support'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 61.1,
+   "ms": 79.5,
    "outcome": "abstain"
   },
   {
@@ -6151,7 +6151,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, csat",
    "rows": [],
-   "ms": 18.8,
+   "ms": 20.3,
    "outcome": "abstain"
   },
   {
@@ -6167,7 +6167,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('support'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 62.2,
+   "ms": 59.8,
    "outcome": "abstain"
   },
   {
@@ -6183,7 +6183,7 @@
    "sql": "SELECT \"revenue\" FROM \"tickets\" WHERE \"tickets\".\"priority\" = 'P1'",
    "reason": "query execution failed",
    "rows": [],
-   "ms": 31.6,
+   "ms": 32.0,
    "outcome": "abstain"
   },
   {
@@ -6212,7 +6212,7 @@
      67
     ]
    ],
-   "ms": 15.7,
+   "ms": 16.3,
    "outcome": "correct"
   },
   {
@@ -6257,7 +6257,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"tickets\"",
    "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
    "rows": [],
-   "ms": 82.0,
+   "ms": 90.4,
    "outcome": "abstain"
   },
   {
@@ -6277,7 +6277,7 @@
      470
     ]
    ],
-   "ms": 18.8,
+   "ms": 19.0,
    "outcome": "correct"
   },
   {
@@ -6297,7 +6297,7 @@
      470
     ]
    ],
-   "ms": 5.2,
+   "ms": 4.9,
    "outcome": "correct"
   },
   {
@@ -6317,7 +6317,7 @@
      17
     ]
    ],
-   "ms": 90.2,
+   "ms": 90.1,
    "outcome": "correct"
   },
   {
@@ -6337,7 +6337,7 @@
      17
     ]
    ],
-   "ms": 17.9,
+   "ms": 18.2,
    "outcome": "correct"
   },
   {
@@ -6357,7 +6357,7 @@
      17
     ]
    ],
-   "ms": 5.1,
+   "ms": 5.0,
    "outcome": "correct"
   },
   {
@@ -6373,7 +6373,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: via tickets.opened_by_agent_id=agents.agent_id -> 154; via tickets.resolved_by_agent_id=agents.agent_id -> 132. Which did you mean?",
    "rows": [],
-   "ms": 94.0,
+   "ms": 96.1,
    "outcome": "abstain"
   },
   {
@@ -6393,7 +6393,7 @@
      132
     ]
    ],
-   "ms": 18.6,
+   "ms": 18.4,
    "outcome": "correct"
   },
   {
@@ -6413,7 +6413,7 @@
      132
     ]
    ],
-   "ms": 5.4,
+   "ms": 5.1,
    "outcome": "correct"
   },
   {
@@ -6429,7 +6429,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: via tickets.opened_by_agent_id=agents.agent_id -> 3 groups (Tier 2: 333, Tier 1: 313, Escalations: 154); via tickets.resolved_by_agent_id=agents.agent_id -> 4 groups (Tier 2: 297, Tier 1: 263, Escalations: 132, None: 108). Which did you mean?",
    "rows": [],
-   "ms": 93.0,
+   "ms": 93.1,
    "outcome": "abstain_ok"
   },
   {
@@ -6445,7 +6445,7 @@
    "sql": "",
    "reason": "I need a clarification: 'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id; 'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id",
    "rows": [],
-   "ms": 19.6,
+   "ms": 18.9,
    "outcome": "abstain_ok"
   },
   {
@@ -6461,7 +6461,7 @@
    "sql": "",
    "reason": "I need a clarification: 'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id; 'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id",
    "rows": [],
-   "ms": 5.4,
+   "ms": 4.9,
    "outcome": "abstain_ok"
   },
   {
@@ -6477,7 +6477,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('support'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 60.7,
+   "ms": 69.7,
    "outcome": "abstain_ok"
   },
   {
@@ -6493,7 +6493,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, resolution",
    "rows": [],
-   "ms": 17.9,
+   "ms": 19.1,
    "outcome": "abstain_ok"
   },
   {
@@ -6509,7 +6509,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('support'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 92.5,
+   "ms": 72.0,
    "outcome": "abstain_ok"
   },
   {
@@ -6525,7 +6525,7 @@
    "sql": "SELECT j_opened_by_agent_id.agent_nm AS opened_by_agent_id, COUNT(*) AS row_count FROM \"tickets\" LEFT JOIN agents AS j_opened_by_agent_id ON j_opened_by_agent_id.agent_id = tickets.opened_by_agent_id WHERE j_opened_by_agent_id.agent_nm IS NOT NULL GROUP BY j_opened_by_agent_id.agent_nm ORDER BY row_count DESC LIMIT 1",
    "reason": "the answer may not mean what you asked: the question asks who is doing best or performing, but names no measure; the query picked one by default",
    "rows": [],
-   "ms": 58.9,
+   "ms": 42.2,
    "outcome": "abstain_ok"
   },
   {
@@ -6541,7 +6541,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: best, agents",
    "rows": [],
-   "ms": 24.4,
+   "ms": 16.3,
    "outcome": "abstain_ok"
   },
   {
@@ -6557,7 +6557,7 @@
    "sql": "SELECT j_opened_by_agent_id.agent_nm AS opened_by_agent_id, COUNT(*) AS row_count FROM \"tickets\" LEFT JOIN agents AS j_opened_by_agent_id ON j_opened_by_agent_id.agent_id = tickets.opened_by_agent_id WHERE j_opened_by_agent_id.agent_nm IS NOT NULL GROUP BY j_opened_by_agent_id.agent_nm ORDER BY row_count DESC LIMIT 1",
    "reason": "the answer may not mean what you asked: the question asks who is doing best or performing, but names no measure; the query picked one by default",
    "rows": [],
-   "ms": 135.6,
+   "ms": 94.3,
    "outcome": "abstain_ok"
   },
   {
@@ -6577,7 +6577,7 @@
      58
     ]
    ],
-   "ms": 139.6,
+   "ms": 110.3,
    "outcome": "correct"
   },
   {
@@ -6597,7 +6597,7 @@
      58
     ]
    ],
-   "ms": 27.3,
+   "ms": 19.1,
    "outcome": "correct"
   },
   {
@@ -6637,7 +6637,7 @@
      40
     ]
    ],
-   "ms": 90.6,
+   "ms": 146.5,
    "outcome": "correct"
   },
   {
@@ -6657,7 +6657,7 @@
      40
     ]
    ],
-   "ms": 24.3,
+   "ms": 24.2,
    "outcome": "correct"
   },
   {
@@ -6677,7 +6677,7 @@
      40
     ]
    ],
-   "ms": 8.0,
+   "ms": 7.3,
    "outcome": "correct"
   },
   {
@@ -6693,7 +6693,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by opened_ts -> 800.00; by closed_ts -> 400.00. Which did you mean?",
    "rows": [],
-   "ms": 101.8,
+   "ms": 144.7,
    "outcome": "abstain_ok"
   },
   {
@@ -6709,7 +6709,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, annual, revenue",
    "rows": [],
-   "ms": 18.6,
+   "ms": 26.9,
    "outcome": "abstain_ok"
   },
   {
@@ -6725,7 +6725,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by opened_ts -> 800.00; by closed_ts -> 400.00. Which did you mean?",
    "rows": [],
-   "ms": 112.5,
+   "ms": 116.9,
    "outcome": "abstain_ok"
   },
   {
@@ -6745,7 +6745,7 @@
      1200
     ]
    ],
-   "ms": 205.2,
+   "ms": 289.8,
    "outcome": "correct"
   },
   {
@@ -6765,7 +6765,7 @@
      1200
     ]
    ],
-   "ms": 56.0,
+   "ms": 51.2,
    "outcome": "correct"
   },
   {
@@ -6785,7 +6785,7 @@
      1200
     ]
    ],
-   "ms": 7.7,
+   "ms": 6.2,
    "outcome": "correct"
   },
   {
@@ -6805,7 +6805,7 @@
      906.5
     ]
    ],
-   "ms": 269.5,
+   "ms": 183.6,
    "outcome": "correct"
   },
   {
@@ -6825,7 +6825,7 @@
      906.5
     ]
    ],
-   "ms": 43.1,
+   "ms": 39.2,
    "outcome": "correct"
   },
   {
@@ -6845,7 +6845,7 @@
      906.5
     ]
    ],
-   "ms": 6.7,
+   "ms": 5.9,
    "outcome": "correct"
   },
   {
@@ -6882,7 +6882,7 @@
      157
     ]
    ],
-   "ms": 283.8,
+   "ms": 181.9,
    "outcome": "correct"
   },
   {
@@ -6919,7 +6919,7 @@
      296
     ]
    ],
-   "ms": 44.3,
+   "ms": 44.0,
    "outcome": "correct"
   },
   {
@@ -6956,7 +6956,7 @@
      296
     ]
    ],
-   "ms": 6.6,
+   "ms": 7.8,
    "outcome": "correct"
   },
   {
@@ -6976,7 +6976,7 @@
      119
     ]
    ],
-   "ms": 262.7,
+   "ms": 207.6,
    "outcome": "correct"
   },
   {
@@ -6996,7 +6996,7 @@
      119
     ]
    ],
-   "ms": 59.3,
+   "ms": 42.0,
    "outcome": "correct"
   },
   {
@@ -7016,7 +7016,7 @@
      119
     ]
    ],
-   "ms": 8.7,
+   "ms": 6.8,
    "outcome": "correct"
   },
   {
@@ -7036,7 +7036,7 @@
      232
     ]
    ],
-   "ms": 266.1,
+   "ms": 259.9,
    "outcome": "correct"
   },
   {
@@ -7056,7 +7056,7 @@
      232
     ]
    ],
-   "ms": 53.5,
+   "ms": 57.6,
    "outcome": "correct"
   },
   {
@@ -7076,7 +7076,7 @@
      232
     ]
    ],
-   "ms": 9.0,
+   "ms": 7.5,
    "outcome": "correct"
   },
   {
@@ -7893,7 +7893,7 @@
      0.0
     ]
    ],
-   "ms": 273.1,
+   "ms": 193.2,
    "outcome": "wrong"
   },
   {
@@ -7922,7 +7922,7 @@
      294.0
     ]
    ],
-   "ms": 42.7,
+   "ms": 48.7,
    "outcome": "correct"
   },
   {
@@ -7951,7 +7951,7 @@
      294.0
     ]
    ],
-   "ms": 7.4,
+   "ms": 7.0,
    "outcome": "correct"
   },
   {
@@ -7967,7 +7967,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"loans\"",
    "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
    "rows": [],
-   "ms": 186.7,
+   "ms": 230.5,
    "outcome": "abstain"
   },
   {
@@ -7987,7 +7987,7 @@
      585
     ]
    ],
-   "ms": 43.2,
+   "ms": 55.8,
    "outcome": "correct"
   },
   {
@@ -8007,7 +8007,7 @@
      585
     ]
    ],
-   "ms": 6.3,
+   "ms": 9.6,
    "outcome": "correct"
   },
   {
@@ -8027,7 +8027,7 @@
      202
     ]
    ],
-   "ms": 224.6,
+   "ms": 213.7,
    "outcome": "correct"
   },
   {
@@ -8047,7 +8047,7 @@
      202
     ]
    ],
-   "ms": 54.5,
+   "ms": 47.0,
    "outcome": "correct"
   },
   {
@@ -8067,7 +8067,7 @@
      202
     ]
    ],
-   "ms": 17.8,
+   "ms": 13.4,
    "outcome": "correct"
   },
   {
@@ -8100,7 +8100,7 @@
      284
     ]
    ],
-   "ms": 237.7,
+   "ms": 187.1,
    "outcome": "correct"
   },
   {
@@ -8133,7 +8133,7 @@
      303
     ]
    ],
-   "ms": 55.6,
+   "ms": 41.2,
    "outcome": "correct"
   },
   {
@@ -8166,7 +8166,7 @@
      303
     ]
    ],
-   "ms": 7.4,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -8182,7 +8182,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: via loans.checkout_branch_id=branches.branch_id -> 4 groups (Hillcrest: 312, Riverside: 303, Central: 301, Bayview: 284); via loans.return_branch_id=branches.branch_id -> 5 groups (Bayview: 300, Riverside: 273, Central: 256, Hillcrest: 252, None: 119). Which did you mean?",
    "rows": [],
-   "ms": 340.0,
+   "ms": 299.0,
    "outcome": "abstain_ok"
   },
   {
@@ -8198,7 +8198,7 @@
    "sql": "",
    "reason": "I need a clarification: 'branch' is reached in more than one way: branches.branch_nm via checkout_branch_id or branches.branch_nm via return_branch_id",
    "rows": [],
-   "ms": 55.7,
+   "ms": 43.7,
    "outcome": "abstain_ok"
   },
   {
@@ -8214,7 +8214,7 @@
    "sql": "",
    "reason": "I need a clarification: 'branch' is reached in more than one way: branches.branch_nm via checkout_branch_id or branches.branch_nm via return_branch_id",
    "rows": [],
-   "ms": 8.3,
+   "ms": 8.5,
    "outcome": "abstain_ok"
   },
   {
@@ -8230,7 +8230,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by checkout_dt -> 12 groups (2025-01: 104, 2025-02: 112, 2025-03: 88, 2025-04: 98, 2025-05: 111, 2025-06: 115, ...); by due_dt -> 12 groups (2025-01: 104, 2025-02: 112, 2025-03: 88, 2025-04: 98, 2025-05: 111, 2025-06: 115, ...); by returned_dt -> 13 groups (None: 119, 2025-01: 93, 2025-02: 101, 2025-03: 75, 2025-04: 87, 2025-05: 101, ...). Which did you mean?",
    "rows": [],
-   "ms": 435.0,
+   "ms": 468.8,
    "outcome": "abstain"
   },
   {
@@ -8244,9 +8244,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: checkout_dt, due_dt, returned_dt",
+   "reason": "I need a clarification: 'monthly' does not say which date: checkout_dt, due_dt, returned_dt. The readings give different results \u2014 checkout_dt: 12 rows; due_dt: 12 rows; returned_dt: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 37.7,
+   "ms": 43.2,
    "outcome": "abstain"
   },
   {
@@ -8260,9 +8260,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: checkout_dt, due_dt, returned_dt",
+   "reason": "I need a clarification: 'monthly' does not say which date: checkout_dt, due_dt, returned_dt. The readings give different results \u2014 checkout_dt: 12 rows; due_dt: 12 rows; returned_dt: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 5.3,
+   "ms": 11.1,
    "outcome": "abstain"
   },
   {
@@ -8291,7 +8291,7 @@
      237
     ]
    ],
-   "ms": 185.3,
+   "ms": 185.6,
    "outcome": "correct"
   },
   {
@@ -8320,7 +8320,7 @@
      237
     ]
    ],
-   "ms": 40.6,
+   "ms": 42.3,
    "outcome": "correct"
   },
   {
@@ -8349,7 +8349,7 @@
      237
     ]
    ],
-   "ms": 6.6,
+   "ms": 7.0,
    "outcome": "correct"
   },
   {
@@ -8369,7 +8369,7 @@
      0.7515923566878981
     ]
    ],
-   "ms": 183.8,
+   "ms": 185.7,
    "outcome": "correct"
   },
   {
@@ -8389,7 +8389,7 @@
      0.7515923566878981
     ]
    ],
-   "ms": 40.0,
+   "ms": 41.3,
    "outcome": "correct"
   },
   {
@@ -8409,7 +8409,7 @@
      0.7515923566878981
     ]
    ],
-   "ms": 6.4,
+   "ms": 7.0,
    "outcome": "correct"
   },
   {
@@ -8425,7 +8425,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('library'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 129.9,
+   "ms": 142.8,
    "outcome": "abstain"
   },
   {
@@ -8445,7 +8445,7 @@
      19.333333333333332
     ]
    ],
-   "ms": 39.6,
+   "ms": 46.9,
    "outcome": "correct"
   },
   {
@@ -8465,7 +8465,7 @@
      19.333333333333332
     ]
    ],
-   "ms": 6.0,
+   "ms": 7.9,
    "outcome": "correct"
   },
   {
@@ -8485,7 +8485,7 @@
      73
     ]
    ],
-   "ms": 194.9,
+   "ms": 283.6,
    "outcome": "correct"
   },
   {
@@ -8505,7 +8505,7 @@
      73
     ]
    ],
-   "ms": 47.3,
+   "ms": 72.5,
    "outcome": "correct"
   },
   {
@@ -8525,7 +8525,7 @@
      73
     ]
    ],
-   "ms": 14.0,
+   "ms": 24.0,
    "outcome": "correct"
   },
   {
@@ -8545,7 +8545,7 @@
      200
     ]
    ],
-   "ms": 186.6,
+   "ms": 277.9,
    "outcome": "correct"
   },
   {
@@ -8561,7 +8561,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: borrowed",
    "rows": [],
-   "ms": 40.4,
+   "ms": 42.3,
    "outcome": "abstain"
   },
   {
@@ -8581,7 +8581,7 @@
      200
     ]
    ],
-   "ms": 188.9,
+   "ms": 221.7,
    "outcome": "correct"
   },
   {
@@ -8597,7 +8597,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('library'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 133.6,
+   "ms": 161.7,
    "outcome": "abstain"
   },
   {
@@ -8617,7 +8617,7 @@
      273
     ]
    ],
-   "ms": 41.7,
+   "ms": 49.1,
    "outcome": "correct"
   },
   {
@@ -8637,7 +8637,7 @@
      273
     ]
    ],
-   "ms": 6.4,
+   "ms": 6.5,
    "outcome": "correct"
   },
   {
@@ -8653,7 +8653,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('library'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 148.0,
+   "ms": 145.1,
    "outcome": "abstain_ok"
   },
   {
@@ -8669,7 +8669,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, page, count",
    "rows": [],
-   "ms": 54.4,
+   "ms": 46.1,
    "outcome": "abstain_ok"
   },
   {
@@ -8685,7 +8685,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('library'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 207.8,
+   "ms": 167.3,
    "outcome": "abstain_ok"
   },
   {
@@ -8701,7 +8701,7 @@
    "sql": "SELECT j_mbr_no.mbr_nm AS mbr_nm, COUNT(*) AS row_count FROM \"loans\" LEFT JOIN members AS j_mbr_no ON j_mbr_no.mbr_no = loans.mbr_no WHERE j_mbr_no.mbr_nm IS NOT NULL GROUP BY j_mbr_no.mbr_nm ORDER BY row_count DESC LIMIT 1",
    "reason": "I don't know how 'avid', 'readers' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 262.5,
+   "ms": 216.5,
    "outcome": "abstain_ok"
   },
   {
@@ -8717,7 +8717,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: avid, readers, members",
    "rows": [],
-   "ms": 62.4,
+   "ms": 42.1,
    "outcome": "abstain_ok"
   },
   {
@@ -8733,7 +8733,7 @@
    "sql": "SELECT j_mbr_no.mbr_nm AS mbr_nm, COUNT(*) AS row_count FROM \"loans\" LEFT JOIN members AS j_mbr_no ON j_mbr_no.mbr_no = loans.mbr_no WHERE j_mbr_no.mbr_nm IS NOT NULL GROUP BY j_mbr_no.mbr_nm ORDER BY row_count DESC LIMIT 1",
    "reason": "I don't know how 'avid', 'readers' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 247.7,
+   "ms": 194.4,
    "outcome": "abstain_ok"
   },
   {
@@ -8749,7 +8749,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by checkout_dt -> 450.50; by due_dt -> 450.50; by returned_dt -> 398.75. Which did you mean?",
    "rows": [],
-   "ms": 345.3,
+   "ms": 353.8,
    "outcome": "abstain"
   },
   {
@@ -8763,9 +8763,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: checkout_dt, due_dt, returned_dt",
+   "reason": "I need a clarification: the question gives a period but not which date: checkout_dt, due_dt, returned_dt. The readings give different results \u2014 checkout_dt: 450.50; due_dt: 450.50; returned_dt: 398.75. Which did you mean?",
    "rows": [],
-   "ms": 39.6,
+   "ms": 52.3,
    "outcome": "abstain"
   },
   {
@@ -8779,9 +8779,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: checkout_dt, due_dt, returned_dt",
+   "reason": "I need a clarification: the question gives a period but not which date: checkout_dt, due_dt, returned_dt. The readings give different results \u2014 checkout_dt: 450.50; due_dt: 450.50; returned_dt: 398.75. Which did you mean?",
    "rows": [],
-   "ms": 6.2,
+   "ms": 10.3,
    "outcome": "abstain"
   },
   {
@@ -8797,7 +8797,7 @@
    "sql": "SELECT SUM(\"loans\".\"late_fee_amt\") AS sum_late_fee_amt, SUM(\"loans\".\"renewal_cnt\") AS sum_renewal_cnt FROM \"loans\"",
    "reason": "the question contains the number(s) 2 but the generated query does not use them, so a threshold or quantity would be ignored",
    "rows": [],
-   "ms": 181.3,
+   "ms": 181.8,
    "outcome": "abstain"
   },
   {
@@ -8817,7 +8817,7 @@
      233.75
     ]
    ],
-   "ms": 40.9,
+   "ms": 46.7,
    "outcome": "correct"
   },
   {
@@ -8837,7 +8837,7 @@
      233.75
     ]
    ],
-   "ms": 6.2,
+   "ms": 6.6,
    "outcome": "correct"
   },
   {
@@ -8853,7 +8853,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"loans\"",
    "reason": "I don't know how 'overdue', 'today' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 179.2,
+   "ms": 204.0,
    "outcome": "abstain_ok"
   },
   {
@@ -8869,7 +8869,7 @@
    "sql": "",
    "reason": "I can't answer this safely: relative dates (last/this/next period) are not resolved against a reference date",
    "rows": [],
-   "ms": 42.8,
+   "ms": 49.5,
    "outcome": "abstain_ok"
   },
   {
@@ -8885,7 +8885,7 @@
    "sql": "",
    "reason": "I can't answer this safely: relative dates (last/this/next period) are not resolved against a reference date",
    "rows": [],
-   "ms": 7.2,
+   "ms": 6.2,
    "outcome": "abstain_ok"
   },
   {
@@ -8905,7 +8905,7 @@
      1000
     ]
    ],
-   "ms": 179.7,
+   "ms": 259.7,
    "outcome": "correct"
   },
   {
@@ -8925,7 +8925,7 @@
      1000
     ]
    ],
-   "ms": 44.0,
+   "ms": 50.0,
    "outcome": "correct"
   },
   {
@@ -8945,7 +8945,7 @@
      1000
     ]
    ],
-   "ms": 6.7,
+   "ms": 10.0,
    "outcome": "correct"
   },
   {
@@ -8974,7 +8974,7 @@
      74653.85
     ]
    ],
-   "ms": 193.9,
+   "ms": 222.3,
    "outcome": "correct"
   },
   {
@@ -9003,7 +9003,7 @@
      74653.85
     ]
    ],
-   "ms": 41.4,
+   "ms": 50.0,
    "outcome": "correct"
   },
   {
@@ -9032,7 +9032,7 @@
      74653.85
     ]
    ],
-   "ms": 6.7,
+   "ms": 9.1,
    "outcome": "correct"
   },
   {
@@ -9048,7 +9048,7 @@
    "sql": "SELECT \"appointments\".\"visit_type\" AS visit_type, AVG(\"appointments\".\"wait_mins\") AS avg_wait_mins FROM \"appointments\" GROUP BY \"appointments\".\"visit_type\" ORDER BY avg_wait_mins DESC",
    "reason": "plan requires items not in the dataset: value:visit type=minutes by",
    "rows": [],
-   "ms": 171.4,
+   "ms": 185.8,
    "outcome": "abstain"
   },
   {
@@ -9077,7 +9077,7 @@
      30.957142857142856
     ]
    ],
-   "ms": 37.1,
+   "ms": 36.6,
    "outcome": "correct"
   },
   {
@@ -9106,7 +9106,7 @@
      30.957142857142856
     ]
    ],
-   "ms": 7.0,
+   "ms": 6.7,
    "outcome": "correct"
   },
   {
@@ -9126,7 +9126,7 @@
      104
     ]
    ],
-   "ms": 198.1,
+   "ms": 178.9,
    "outcome": "correct"
   },
   {
@@ -9146,7 +9146,7 @@
      104
     ]
    ],
-   "ms": 47.5,
+   "ms": 36.0,
    "outcome": "correct"
   },
   {
@@ -9166,7 +9166,7 @@
      104
     ]
    ],
-   "ms": 8.3,
+   "ms": 6.1,
    "outcome": "correct"
   },
   {
@@ -9186,7 +9186,7 @@
      87
     ]
    ],
-   "ms": 200.7,
+   "ms": 187.2,
    "outcome": "correct"
   },
   {
@@ -9206,7 +9206,7 @@
      87
     ]
    ],
-   "ms": 40.9,
+   "ms": 37.7,
    "outcome": "correct"
   },
   {
@@ -9226,7 +9226,7 @@
      87
     ]
    ],
-   "ms": 9.2,
+   "ms": 9.6,
    "outcome": "correct"
   },
   {
@@ -9251,7 +9251,7 @@
      64
     ]
    ],
-   "ms": 196.0,
+   "ms": 201.1,
    "outcome": "correct"
   },
   {
@@ -9276,7 +9276,7 @@
      64
     ]
    ],
-   "ms": 38.6,
+   "ms": 40.0,
    "outcome": "correct"
   },
   {
@@ -9301,7 +9301,7 @@
      64
     ]
    ],
-   "ms": 7.2,
+   "ms": 7.0,
    "outcome": "correct"
   },
   {
@@ -9317,7 +9317,7 @@
    "sql": "SELECT j_booked_by_staff_id.staff_nm AS booked_by_staff_id, COUNT(*) AS row_count FROM \"appointments\" LEFT JOIN staff AS j_booked_by_staff_id ON j_booked_by_staff_id.staff_id = appointments.booked_by_staff_id GROUP BY j_booked_by_staff_id.staff_nm ORDER BY row_count DESC",
    "reason": "the question mentions column(s) 'seen (seen_by_staff_id)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 185.3,
+   "ms": 173.6,
    "outcome": "abstain"
   },
   {
@@ -9333,7 +9333,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: member",
    "rows": [],
-   "ms": 40.5,
+   "ms": 40.3,
    "outcome": "abstain"
   },
   {
@@ -9349,7 +9349,7 @@
    "sql": "SELECT j_booked_by_staff_id.staff_nm AS booked_by_staff_id, COUNT(*) AS row_count FROM \"appointments\" LEFT JOIN staff AS j_booked_by_staff_id ON j_booked_by_staff_id.staff_id = appointments.booked_by_staff_id GROUP BY j_booked_by_staff_id.staff_nm ORDER BY row_count DESC",
    "reason": "the question mentions column(s) 'seen (seen_by_staff_id)' that the generated query does not use, so it would ignore part of your question",
    "rows": [],
-   "ms": 185.4,
+   "ms": 206.2,
    "outcome": "abstain"
   },
   {
@@ -9386,7 +9386,7 @@
      172
     ]
    ],
-   "ms": 197.5,
+   "ms": 231.9,
    "outcome": "answered_unanswerable"
   },
   {
@@ -9402,7 +9402,7 @@
    "sql": "",
    "reason": "I need a clarification: 'staff' is reached in more than one way: staff.staff_nm via booked_by_staff_id or staff.staff_nm via seen_by_staff_id",
    "rows": [],
-   "ms": 38.9,
+   "ms": 38.5,
    "outcome": "abstain_ok"
   },
   {
@@ -9418,7 +9418,7 @@
    "sql": "",
    "reason": "I need a clarification: 'staff' is reached in more than one way: staff.staff_nm via booked_by_staff_id or staff.staff_nm via seen_by_staff_id",
    "rows": [],
-   "ms": 6.8,
+   "ms": 5.8,
    "outcome": "abstain_ok"
   },
   {
@@ -9434,7 +9434,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('clinic'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 131.6,
+   "ms": 145.2,
    "outcome": "abstain"
   },
   {
@@ -9454,7 +9454,7 @@
      201
     ]
    ],
-   "ms": 37.8,
+   "ms": 38.8,
    "outcome": "correct"
   },
   {
@@ -9474,7 +9474,7 @@
      201
     ]
    ],
-   "ms": 7.2,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -9494,7 +9494,7 @@
      685
     ]
    ],
-   "ms": 203.0,
+   "ms": 243.5,
    "outcome": "correct"
   },
   {
@@ -9514,7 +9514,7 @@
      685
     ]
    ],
-   "ms": 56.0,
+   "ms": 55.3,
    "outcome": "correct"
   },
   {
@@ -9534,7 +9534,7 @@
      685
     ]
    ],
-   "ms": 24.7,
+   "ms": 24.8,
    "outcome": "correct"
   },
   {
@@ -9554,7 +9554,7 @@
      209
     ]
    ],
-   "ms": 208.7,
+   "ms": 220.2,
    "outcome": "correct"
   },
   {
@@ -9574,7 +9574,7 @@
      209
     ]
    ],
-   "ms": 77.2,
+   "ms": 62.3,
    "outcome": "correct"
   },
   {
@@ -9594,7 +9594,7 @@
      209
     ]
    ],
-   "ms": 32.8,
+   "ms": 43.5,
    "outcome": "correct"
   },
   {
@@ -9610,7 +9610,7 @@
    "sql": "SELECT SUM(\"appointments\".\"billed_amt\") AS sum_billed_amt, SUM(\"appointments\".\"copay_amt\") AS sum_copay_amt FROM \"appointments\"",
    "reason": "plan requires items not in the dataset: unsupported_exclusion:minus copay amt",
    "rows": [],
-   "ms": 221.9,
+   "ms": 171.4,
    "outcome": "abstain"
   },
   {
@@ -9630,7 +9630,7 @@
      213105.15
     ]
    ],
-   "ms": 52.9,
+   "ms": 38.2,
    "outcome": "correct"
   },
   {
@@ -9650,7 +9650,7 @@
      213105.15
     ]
    ],
-   "ms": 7.9,
+   "ms": 8.5,
    "outcome": "correct"
   },
   {
@@ -9666,7 +9666,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by appt_dt -> 12 groups (2025-01: 16,864.28, 2025-02: 19,671.61, 2025-03: 19,491.04, 2025-04: 20,103.29, 2025-05: 17,693.00, 2025-06: 18,013.24, ...); by checkin_ts -> 13 groups (None: 23,178.87, 2025-01: 15,574.08, 2025-02: 17,814.02, 2025-03: 17,010.88, 2025-04: 18,453.87, 2025-05: 15,799.57, ...). Which did you mean?",
    "rows": [],
-   "ms": 376.7,
+   "ms": 284.1,
    "outcome": "abstain"
   },
   {
@@ -9680,9 +9680,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: appt_dt, checkin_ts",
+   "reason": "I need a clarification: 'monthly' does not say which date: appt_dt, checkin_ts. The readings give different results \u2014 appt_dt: 12 rows; checkin_ts: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 54.6,
+   "ms": 45.1,
    "outcome": "abstain"
   },
   {
@@ -9696,9 +9696,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'monthly' does not say which date: appt_dt, checkin_ts",
+   "reason": "I need a clarification: 'monthly' does not say which date: appt_dt, checkin_ts. The readings give different results \u2014 appt_dt: 12 rows; checkin_ts: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 6.3,
+   "ms": 8.9,
    "outcome": "abstain"
   },
   {
@@ -9718,7 +9718,7 @@
      104
     ]
    ],
-   "ms": 210.3,
+   "ms": 201.4,
    "outcome": "correct"
   },
   {
@@ -9738,7 +9738,7 @@
      104
     ]
    ],
-   "ms": 37.5,
+   "ms": 48.1,
    "outcome": "correct"
   },
   {
@@ -9758,7 +9758,7 @@
      104
     ]
    ],
-   "ms": 6.5,
+   "ms": 9.9,
    "outcome": "correct"
   },
   {
@@ -9778,7 +9778,7 @@
      30.957142857142856
     ]
    ],
-   "ms": 214.2,
+   "ms": 179.5,
    "outcome": "correct"
   },
   {
@@ -9794,7 +9794,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: visits",
    "rows": [],
-   "ms": 48.4,
+   "ms": 35.3,
    "outcome": "abstain"
   },
   {
@@ -9814,7 +9814,7 @@
      30.957142857142856
     ]
    ],
-   "ms": 189.1,
+   "ms": 199.9,
    "outcome": "correct"
   },
   {
@@ -9846,7 +9846,7 @@
      0.32
     ]
    ],
-   "ms": 191.5,
+   "ms": 181.2,
    "outcome": "wrong"
   },
   {
@@ -9875,7 +9875,7 @@
      32.0
     ]
    ],
-   "ms": 52.5,
+   "ms": 38.7,
    "outcome": "correct"
   },
   {
@@ -9904,7 +9904,7 @@
      32.0
     ]
    ],
-   "ms": 7.4,
+   "ms": 6.7,
    "outcome": "correct"
   },
   {
@@ -9920,7 +9920,7 @@
    "sql": "SELECT SUM(\"appointments\".\"wait_mins\") AS sum_wait_mins FROM \"appointments\"",
    "reason": "the question contains the number(s) 45 but the generated query does not use them, so a threshold or quantity would be ignored",
    "rows": [],
-   "ms": 184.6,
+   "ms": 234.0,
    "outcome": "abstain"
   },
   {
@@ -9940,7 +9940,7 @@
      203
     ]
    ],
-   "ms": 43.6,
+   "ms": 36.3,
    "outcome": "correct"
   },
   {
@@ -9960,7 +9960,7 @@
      203
     ]
    ],
-   "ms": 7.0,
+   "ms": 5.9,
    "outcome": "correct"
   },
   {
@@ -9985,7 +9985,7 @@
      76028.9
     ]
    ],
-   "ms": 209.7,
+   "ms": 169.9,
    "outcome": "correct"
   },
   {
@@ -10010,7 +10010,7 @@
      76028.9
     ]
    ],
-   "ms": 46.5,
+   "ms": 38.0,
    "outcome": "correct"
   },
   {
@@ -10035,7 +10035,7 @@
      76028.9
     ]
    ],
-   "ms": 7.3,
+   "ms": 8.3,
    "outcome": "correct"
   },
   {
@@ -10051,7 +10051,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('clinic'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 133.8,
+   "ms": 131.1,
    "outcome": "abstain"
   },
   {
@@ -10071,7 +10071,7 @@
      10.4
     ]
    ],
-   "ms": 38.2,
+   "ms": 39.0,
    "outcome": "correct"
   },
   {
@@ -10091,7 +10091,7 @@
      10.4
     ]
    ],
-   "ms": 6.7,
+   "ms": 6.4,
    "outcome": "correct"
   },
   {
@@ -10107,7 +10107,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('clinic'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 142.3,
+   "ms": 121.2,
    "outcome": "abstain_ok"
   },
   {
@@ -10123,7 +10123,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: doctors, efficient",
    "rows": [],
-   "ms": 41.0,
+   "ms": 37.1,
    "outcome": "abstain_ok"
   },
   {
@@ -10139,7 +10139,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('clinic'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 143.8,
+   "ms": 143.7,
    "outcome": "abstain_ok"
   },
   {
@@ -10159,7 +10159,7 @@
      68759.32
     ]
    ],
-   "ms": 255.9,
+   "ms": 265.3,
    "outcome": "correct"
   },
   {
@@ -10179,7 +10179,7 @@
      68759.32
     ]
    ],
-   "ms": 51.6,
+   "ms": 41.7,
    "outcome": "correct"
   },
   {
@@ -10199,7 +10199,7 @@
      68759.32
     ]
    ],
-   "ms": 8.1,
+   "ms": 7.2,
    "outcome": "correct"
   },
   {
@@ -10215,7 +10215,7 @@
    "sql": "",
    "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
    "rows": [],
-   "ms": 8.4,
+   "ms": 5.7,
    "outcome": "abstain_ok"
   },
   {
@@ -10247,7 +10247,7 @@
    "sql": "",
    "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
    "rows": [],
-   "ms": 4.5,
+   "ms": 15.6,
    "outcome": "abstain_ok"
   },
   {
@@ -10276,7 +10276,7 @@
      8.647368421052631
     ]
    ],
-   "ms": 201.2,
+   "ms": 186.0,
    "outcome": "correct"
   },
   {
@@ -10305,7 +10305,7 @@
      9.28790625
     ]
    ],
-   "ms": 44.2,
+   "ms": 42.5,
    "outcome": "correct"
   },
   {
@@ -10334,7 +10334,7 @@
      9.28790625
     ]
    ],
-   "ms": 6.6,
+   "ms": 9.0,
    "outcome": "correct"
   },
   {
@@ -10350,7 +10350,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"rentals\"",
    "reason": "I don't know how 'problems' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 188.0,
+   "ms": 239.2,
    "outcome": "abstain"
   },
   {
@@ -10370,7 +10370,7 @@
      824
     ]
    ],
-   "ms": 31.8,
+   "ms": 43.8,
    "outcome": "correct"
   },
   {
@@ -10390,7 +10390,7 @@
      824
     ]
    ],
-   "ms": 6.3,
+   "ms": 9.6,
    "outcome": "correct"
   },
   {
@@ -10406,7 +10406,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"rentals\"",
    "reason": "the question is about 'issue', but the query's base table is 'rentals' and does not involve them, so it would answer at the wrong grain",
    "rows": [],
-   "ms": 166.1,
+   "ms": 163.5,
    "outcome": "abstain"
   },
   {
@@ -10426,7 +10426,7 @@
      151
     ]
    ],
-   "ms": 46.8,
+   "ms": 42.4,
    "outcome": "correct"
   },
   {
@@ -10446,7 +10446,7 @@
      151
     ]
    ],
-   "ms": 24.8,
+   "ms": 20.0,
    "outcome": "correct"
   },
   {
@@ -10462,7 +10462,7 @@
    "sql": "SELECT SUM(\"rentals\".\"fare_amt\") AS sum_fare_amt FROM \"rentals\" WHERE \"rentals\".\"start_ts\" IS NOT NULL",
    "reason": "the question is about 'station', but the query's base table is 'rentals' and does not involve them, so it would answer at the wrong grain",
    "rows": [],
-   "ms": 203.1,
+   "ms": 155.6,
    "outcome": "abstain"
   },
   {
@@ -10478,7 +10478,7 @@
    "sql": "",
    "reason": "I need a clarification: words not grounded: collected",
    "rows": [],
-   "ms": 46.7,
+   "ms": 28.9,
    "outcome": "abstain"
   },
   {
@@ -10494,7 +10494,7 @@
    "sql": "SELECT SUM(\"rentals\".\"fare_amt\") AS sum_fare_amt FROM \"rentals\" WHERE \"rentals\".\"start_ts\" IS NOT NULL",
    "reason": "the question is about 'station', but the query's base table is 'rentals' and does not involve them, so it would answer at the wrong grain",
    "rows": [],
-   "ms": 204.3,
+   "ms": 216.4,
    "outcome": "abstain"
   },
   {
@@ -10510,7 +10510,7 @@
    "sql": "SELECT j_bike_id.bike_type AS bike_type, COUNT(*) AS row_count FROM \"rentals\" LEFT JOIN bikes AS j_bike_id ON j_bike_id.bike_id = rentals.bike_id WHERE \"rentals\".\"start_ts\" >= '2025-03-01' AND \"rentals\".\"start_ts\" < '2025-04-01' GROUP BY j_bike_id.bike_type ORDER BY row_count DESC",
    "reason": "plan requires items not in the dataset: value:bike type=march 2025 by, ambiguous_date_column:start_ts|end_ts|signup_dt",
    "rows": [],
-   "ms": 185.0,
+   "ms": 158.4,
    "outcome": "abstain"
   },
   {
@@ -10524,9 +10524,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: start_ts, end_ts",
+   "reason": "I need a clarification: the question gives a period but not which date: start_ts, end_ts. The readings give different results \u2014 start_ts: 3 rows; end_ts: 3 rows. Which did you mean?",
    "rows": [],
-   "ms": 29.6,
+   "ms": 38.2,
    "outcome": "abstain"
   },
   {
@@ -10540,9 +10540,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: the question gives a period but not which date: start_ts, end_ts",
+   "reason": "I need a clarification: the question gives a period but not which date: start_ts, end_ts. The readings give different results \u2014 start_ts: 3 rows; end_ts: 3 rows. Which did you mean?",
    "rows": [],
-   "ms": 6.9,
+   "ms": 13.3,
    "outcome": "abstain"
   },
   {
@@ -10579,7 +10579,7 @@
      18
     ]
    ],
-   "ms": 207.4,
+   "ms": 201.1,
    "outcome": "correct"
   },
   {
@@ -10616,7 +10616,7 @@
      31
     ]
    ],
-   "ms": 54.9,
+   "ms": 38.6,
    "outcome": "correct"
   },
   {
@@ -10653,7 +10653,7 @@
      31
     ]
    ],
-   "ms": 10.3,
+   "ms": 6.0,
    "outcome": "correct"
   },
   {
@@ -10673,7 +10673,7 @@
      13747.3
     ]
    ],
-   "ms": 176.4,
+   "ms": 155.3,
    "outcome": "wrong"
   },
   {
@@ -10729,7 +10729,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"exam_results\" LEFT JOIN students AS j_student_id ON j_student_id.student_id = exam_results.student_id WHERE j_student_id.homeroom = 'B-2'",
    "reason": "the query may answer a different question than the one asked: 'by students in homeroom' asks for a breakdown but the query returns a single figure",
    "rows": [],
-   "ms": 203.1,
+   "ms": 227.0,
    "outcome": "abstain"
   },
   {
@@ -10749,7 +10749,7 @@
      323
     ]
    ],
-   "ms": 59.0,
+   "ms": 46.4,
    "outcome": "correct"
   },
   {
@@ -10769,7 +10769,7 @@
      323
     ]
    ],
-   "ms": 14.1,
+   "ms": 10.2,
    "outcome": "correct"
   },
   {
@@ -10785,7 +10785,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('school'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 141.0,
+   "ms": 119.4,
    "outcome": "abstain"
   },
   {
@@ -10805,7 +10805,7 @@
      1031
     ]
    ],
-   "ms": 40.1,
+   "ms": 45.9,
    "outcome": "correct"
   },
   {
@@ -10825,7 +10825,7 @@
      1031
     ]
    ],
-   "ms": 14.0,
+   "ms": 15.2,
    "outcome": "correct"
   },
   {
@@ -10841,7 +10841,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('shop'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 120.6,
+   "ms": 166.3,
    "outcome": "abstain_ok"
   },
   {
@@ -10857,7 +10857,7 @@
    "sql": "",
    "reason": "I can't answer this safely: a measure on the one-to-many table returns (needs that table as the base)",
    "rows": [],
-   "ms": 43.4,
+   "ms": 58.7,
    "outcome": "abstain_ok"
   },
   {
@@ -10873,7 +10873,7 @@
    "sql": "",
    "reason": "I can't answer this safely: a measure on the one-to-many table returns (needs that table as the base)",
    "rows": [],
-   "ms": 6.2,
+   "ms": 6.8,
    "outcome": "abstain_ok"
   },
   {
@@ -10906,7 +10906,7 @@
      206
     ]
    ],
-   "ms": 192.0,
+   "ms": 164.8,
    "outcome": "correct"
   },
   {
@@ -10939,7 +10939,7 @@
      239
     ]
    ],
-   "ms": 38.4,
+   "ms": 30.1,
    "outcome": "correct"
   },
   {
@@ -10972,7 +10972,7 @@
      239
     ]
    ],
-   "ms": 6.8,
+   "ms": 7.1,
    "outcome": "correct"
   },
   {
@@ -10988,7 +10988,7 @@
    "sql": "",
    "reason": "Question is too vague or off-scope for the loaded dataset ('shop'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
    "rows": [],
-   "ms": 236.1,
+   "ms": 114.3,
    "outcome": "abstain"
   },
   {
@@ -11008,7 +11008,7 @@
      25.27583333333333
     ]
    ],
-   "ms": 72.9,
+   "ms": 30.6,
    "outcome": "correct"
   },
   {
@@ -11028,7 +11028,7 @@
      25.27583333333333
     ]
    ],
-   "ms": 13.6,
+   "ms": 6.8,
    "outcome": "correct"
   },
   {
@@ -11044,7 +11044,7 @@
    "sql": "SELECT COUNT(*) AS order_count FROM \"orders\" WHERE \"orders\".\"is_gift\" = 1",
    "reason": "I don't know how 'unpaid' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 353.1,
+   "ms": 165.9,
    "outcome": "abstain"
   },
   {
@@ -11064,7 +11064,7 @@
      1
     ]
    ],
-   "ms": 29.5,
+   "ms": 31.0,
    "outcome": "correct"
   },
   {
@@ -11084,7 +11084,7 @@
      1
     ]
    ],
-   "ms": 5.6,
+   "ms": 5.8,
    "outcome": "correct"
   },
   {
@@ -11104,7 +11104,7 @@
      27
     ]
    ],
-   "ms": 172.4,
+   "ms": 182.4,
    "outcome": "correct"
   },
   {
@@ -11124,7 +11124,7 @@
      27
     ]
    ],
-   "ms": 37.3,
+   "ms": 47.6,
    "outcome": "correct"
   },
   {
@@ -11144,7 +11144,7 @@
      27
     ]
    ],
-   "ms": 9.8,
+   "ms": 8.9,
    "outcome": "correct"
   },
   {
@@ -11160,7 +11160,7 @@
    "sql": "SELECT \"tickets\".\"priority\" AS priority, COUNT(*) AS row_count FROM \"tickets\" GROUP BY \"tickets\".\"priority\" ORDER BY row_count DESC",
    "reason": "I don't know how 'satisfaction' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 89.9,
+   "ms": 98.4,
    "outcome": "abstain_ok"
   },
   {
@@ -11176,7 +11176,7 @@
    "sql": "",
    "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, satisfaction",
    "rows": [],
-   "ms": 28.3,
+   "ms": 28.9,
    "outcome": "abstain_ok"
   },
   {
@@ -11192,7 +11192,7 @@
    "sql": "SELECT \"tickets\".\"priority\" AS priority, COUNT(*) AS row_count FROM \"tickets\" GROUP BY \"tickets\".\"priority\" ORDER BY row_count DESC",
    "reason": "I don't know how 'satisfaction' maps to this data, so the answer could ignore part of your question",
    "rows": [],
-   "ms": 105.0,
+   "ms": 102.8,
    "outcome": "abstain_ok"
   },
   {
@@ -11212,7 +11212,7 @@
      224
     ]
    ],
-   "ms": 109.2,
+   "ms": 121.2,
    "outcome": "wrong"
   },
   {
@@ -11232,7 +11232,7 @@
      62
     ]
    ],
-   "ms": 24.7,
+   "ms": 20.3,
    "outcome": "correct"
   },
   {
@@ -11252,7 +11252,7 @@
      62
     ]
    ],
-   "ms": 5.7,
+   "ms": 5.2,
    "outcome": "correct"
   },
   {
@@ -11268,7 +11268,7 @@
    "sql": "",
    "reason": "This question can be read more than one way and the answer depends on it: by opened_ts -> 12 groups (2025-01: 22, 2025-02: 16, 2025-03: 12, 2025-04: 14, 2025-05: 17, 2025-06: 15, ...); by closed_ts -> 13 groups (None: 21, 2025-01: 18, 2025-02: 15, 2025-03: 10, 2025-04: 14, 2025-05: 14, ...). Which did you mean?",
    "rows": [],
-   "ms": 140.5,
+   "ms": 146.9,
    "outcome": "abstain"
   },
   {
@@ -11282,9 +11282,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'by month' does not say which date: opened_ts, closed_ts",
+   "reason": "I need a clarification: 'by month' does not say which date: opened_ts, closed_ts. The readings give different results \u2014 opened_ts: 12 rows; closed_ts: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 19.9,
+   "ms": 59.3,
    "outcome": "abstain"
   },
   {
@@ -11298,9 +11298,9 @@
    "status": "abstain",
    "path": "typed",
    "sql": "",
-   "reason": "I need a clarification: 'by month' does not say which date: opened_ts, closed_ts",
+   "reason": "I need a clarification: 'by month' does not say which date: opened_ts, closed_ts. The readings give different results \u2014 opened_ts: 12 rows; closed_ts: 13 rows. Which did you mean?",
    "rows": [],
-   "ms": 4.7,
+   "ms": 64.8,
    "outcome": "abstain"
   },
   {
@@ -11316,7 +11316,7 @@
    "sql": "SELECT COUNT(*) AS row_count FROM \"tickets\"",
    "reason": "plan requires items not in the dataset: ambiguous_value:cho lee=agent_nm|opened_by_agent_id|resolved_by_agent_id",
    "rows": [],
-   "ms": 83.3,
+   "ms": 122.8,
    "outcome": "abstain"
   },
   {
@@ -11336,7 +11336,7 @@
      146
     ]
    ],
-   "ms": 20.5,
+   "ms": 30.4,
    "outcome": "correct"
   },
   {
@@ -11356,7 +11356,7 @@
      146
     ]
    ],
-   "ms": 8.4,
+   "ms": 8.8,
    "outcome": "correct"
   },
   {
@@ -11376,7 +11376,7 @@
      155
     ]
    ],
-   "ms": 138.5,
+   "ms": 134.8,
    "outcome": "correct"
   },
   {
@@ -11396,7 +11396,7 @@
      155
     ]
    ],
-   "ms": 26.8,
+   "ms": 20.0,
    "outcome": "correct"
   },
   {
@@ -11416,7 +11416,7 @@
      155
     ]
    ],
-   "ms": 7.7,
+   "ms": 5.4,
    "outcome": "correct"
   }
  ]
