@@ -1,0 +1,167 @@
+{
+ "typed": {
+  "n": 75,
+  "answerable": 58,
+  "correct": 38,
+  "correct_ci95": [
+   0.527,
+   0.764
+  ],
+  "wrong_answerable": 1,
+  "answered_unanswerable": 0,
+  "either_wrong": 0,
+  "wrong_total": 1,
+  "answered": 40,
+  "wrong_rate_among_answered": 0.025,
+  "wrong_among_answered_ci95": [
+   0.004,
+   0.129
+  ],
+  "unanswerable_refused": "10/10",
+  "either_correct": 1,
+  "errors": 0,
+  "latency_ms_p50": 7.6,
+  "latency_ms_p95": 24.0,
+  "outcomes": {
+   "correct": 39,
+   "abstain": 19,
+   "abstain_ok": 16,
+   "wrong": 1
+  }
+ },
+ "legacy": {
+  "n": 75,
+  "answerable": 58,
+  "correct": 28,
+  "correct_ci95": [
+   0.359,
+   0.608
+  ],
+  "wrong_answerable": 4,
+  "answered_unanswerable": 1,
+  "either_wrong": 1,
+  "wrong_total": 6,
+  "answered": 35,
+  "wrong_rate_among_answered": 0.171,
+  "wrong_among_answered_ci95": [
+   0.081,
+   0.327
+  ],
+  "unanswerable_refused": "9/10",
+  "either_correct": 1,
+  "errors": 0,
+  "latency_ms_p50": 87.7,
+  "latency_ms_p95": 135.1,
+  "outcomes": {
+   "correct": 29,
+   "abstain": 26,
+   "wrong": 5,
+   "abstain_ok": 14,
+   "answered_unanswerable": 1
+  }
+ },
+ "typed+legacy": {
+  "n": 75,
+  "answerable": 58,
+  "correct": 44,
+  "correct_ci95": [
+   0.635,
+   0.85
+  ],
+  "wrong_answerable": 1,
+  "answered_unanswerable": 0,
+  "either_wrong": 0,
+  "wrong_total": 1,
+  "answered": 46,
+  "wrong_rate_among_answered": 0.022,
+  "wrong_among_answered_ci95": [
+   0.004,
+   0.113
+  ],
+  "unanswerable_refused": "10/10",
+  "either_correct": 1,
+  "errors": 0,
+  "latency_ms_p50": 22.1,
+  "latency_ms_p95": 123.1,
+  "outcomes": {
+   "correct": 45,
+   "abstain": 13,
+   "abstain_ok": 16,
+   "wrong": 1
+  }
+ },
+ "paired_legacy_to_typed": {
+  "correct -> correct": 21,
+  "abstain -> abstain": 11,
+  "wrong -> correct": 3,
+  "abstain -> correct": 14,
+  "abstain_ok -> abstain_ok": 13,
+  "wrong -> abstain_ok": 1,
+  "correct -> abstain": 7,
+  "wrong -> abstain": 1,
+  "answered_unanswerable -> abstain_ok": 1,
+  "abstain_ok -> correct": 1,
+  "correct -> abstain_ok": 1,
+  "abstain -> wrong": 1
+ }
+}
+PK04 abstain                How many citations are still unpaid?
+    -> CLARIFY: I need a clarification: words not grounded: unpaid
+    
+PK06 abstain                How many cars were towed?
+    -> CLARIFY: I need a clarification: words not grounded: cars
+    
+PK07 abstain                Citations written by each officer
+    -> CLARIFY: I need a clarification: words not grounded: written
+    
+PK20 abstain                Number of fines over 100 dollars
+    -> CLARIFY: I need a clarification: 'how many' with the money column fine_amt: a count of rows or a sum?
+    
+PK25 abstain                Citations from New Jersey plates that were not paid
+    -> CLARIFY: I need a clarification: words not grounded: New, Jersey, plates
+    
+FR02 abstain                Total passengers carried
+    -> CLARIFY: I need a clarification: words not grounded: carried
+    
+FR06 abstain                Sailings by departure terminal
+    -> CLARIFY: I need a clarification: 'terminal' is reached in more than one way: terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd
+    
+FR08 abstain                Total passengers arriving at Brackwater
+    -> CLARIFY: I need a clarification: 'Brackwater' could be terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd
+    
+FR11 abstain                Fuel used per passenger
+    -> CLARIFY: I need a clarification: words not grounded: Fuel
+    
+FR14 abstain                Sailings that never actually departed
+    -> CLARIFY: I need a clarification: words not grounded: departed; 'never' is not attached to any condition
+    
+FR17 abstain                Top 2 vessels by passengers carried
+    -> CLARIFY: I need a clarification: words not grounded: carried
+    
+FR25 abstain                Ticket revenue by departure island
+    -> CLARIFY: I need a clarification: 'island' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd; 'island' could be terminals.island via dep_termina
+    
+BA03 abstain                Units wasted by recipe
+    -> CLARIFY: I need a clarification: words not grounded: recipe
+    
+BA05 abstain                Total flour used in kg
+    -> CLARIFY: I need a clarification: words not grounded: kg
+    
+BA06 abstain                Units made by category
+    -> CLARIFY: I need a clarification: words not grounded: category
+    
+BA07 abstain                Batches mixed by each baker
+    -> CLARIFY: I need a clarification: words not grounded: mixed, baker
+    
+BA09 abstain                How many batches were not checked?
+    -> CLARIFY: I need a clarification: words not grounded: checked; 'not' is not attached to any condition
+    
+BA18 abstain                Average oven temperature for Sourdough Loaf batches
+    -> CLARIFY: I need a clarification: no measure could be grounded; words not grounded: Average, oven, temperature
+    
+BA22 abstain                Batches baked at 240 degrees or more
+    -> CLARIFY: I need a clarification: words not grounded: degrees
+    
+BA25 wrong                  Batches without any complaint for pastry recipes
+    -> WARN: answer rests on: rows with no category are kept when excluding pastry; counting batches rows
+    SELECT COUNT(*) AS "row_count" FROM "batches" AS t0 LEFT JOIN "recipes" AS j1 ON j1."recipe_id" = t0."recipe_id" WHERE ((j1."category" IS NULL OR j1."category" NOT IN ('pastry'))) AND (NOT EXISTS (SELECT 1 FROM "complaints" AS x1_0 WHERE x1

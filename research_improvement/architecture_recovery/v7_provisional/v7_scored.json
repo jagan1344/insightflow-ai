@@ -1,0 +1,4528 @@
+{
+ "source": "v7_raw_first_run.json",
+ "commit": "dba1d666be04514a21e676047f83adc7b6d4261f",
+ "summary": {
+  "typed": {
+   "n": 75,
+   "answerable": 58,
+   "correct": 38,
+   "correct_ci95": [
+    0.527,
+    0.764
+   ],
+   "wrong_answerable": 1,
+   "answered_unanswerable": 0,
+   "either_wrong": 0,
+   "wrong_total": 1,
+   "answered": 40,
+   "wrong_rate_among_answered": 0.025,
+   "wrong_among_answered_ci95": [
+    0.004,
+    0.129
+   ],
+   "unanswerable_refused": "10/10",
+   "either_correct": 1,
+   "errors": 0,
+   "latency_ms_p50": 7.6,
+   "latency_ms_p95": 24.0,
+   "outcomes": {
+    "correct": 39,
+    "abstain": 19,
+    "abstain_ok": 16,
+    "wrong": 1
+   }
+  },
+  "legacy": {
+   "n": 75,
+   "answerable": 58,
+   "correct": 28,
+   "correct_ci95": [
+    0.359,
+    0.608
+   ],
+   "wrong_answerable": 4,
+   "answered_unanswerable": 1,
+   "either_wrong": 1,
+   "wrong_total": 6,
+   "answered": 35,
+   "wrong_rate_among_answered": 0.171,
+   "wrong_among_answered_ci95": [
+    0.081,
+    0.327
+   ],
+   "unanswerable_refused": "9/10",
+   "either_correct": 1,
+   "errors": 0,
+   "latency_ms_p50": 87.7,
+   "latency_ms_p95": 135.1,
+   "outcomes": {
+    "correct": 29,
+    "abstain": 26,
+    "wrong": 5,
+    "abstain_ok": 14,
+    "answered_unanswerable": 1
+   }
+  },
+  "typed+legacy": {
+   "n": 75,
+   "answerable": 58,
+   "correct": 44,
+   "correct_ci95": [
+    0.635,
+    0.85
+   ],
+   "wrong_answerable": 1,
+   "answered_unanswerable": 0,
+   "either_wrong": 0,
+   "wrong_total": 1,
+   "answered": 46,
+   "wrong_rate_among_answered": 0.022,
+   "wrong_among_answered_ci95": [
+    0.004,
+    0.113
+   ],
+   "unanswerable_refused": "10/10",
+   "either_correct": 1,
+   "errors": 0,
+   "latency_ms_p50": 22.1,
+   "latency_ms_p95": 123.1,
+   "outcomes": {
+    "correct": 45,
+    "abstain": 13,
+    "abstain_ok": 16,
+    "wrong": 1
+   }
+  },
+  "paired_legacy_to_typed": {
+   "correct -> correct": 21,
+   "abstain -> abstain": 11,
+   "wrong -> correct": 3,
+   "abstain -> correct": 14,
+   "abstain_ok -> abstain_ok": 13,
+   "wrong -> abstain_ok": 1,
+   "correct -> abstain": 7,
+   "wrong -> abstain": 1,
+   "answered_unanswerable -> abstain_ok": 1,
+   "abstain_ok -> correct": 1,
+   "correct -> abstain_ok": 1,
+   "abstain -> wrong": 1
+  }
+ },
+ "records": [
+  {
+   "id": "PK01",
+   "domain": "parking",
+   "question": "How many citations were issued?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     1500
+    ]
+   ],
+   "latency_ms": 89.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK01",
+   "domain": "parking",
+   "question": "How many citations were issued?",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"citations\" WHERE \"citations\".\"issued_dt\" IS NOT NULL",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     1500
+    ]
+   ],
+   "latency_ms": 164.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK01",
+   "domain": "parking",
+   "question": "How many citations were issued?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     1500
+    ]
+   ],
+   "latency_ms": 24.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK02",
+   "domain": "parking",
+   "question": "Total fines",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     105290.0
+    ]
+   ],
+   "latency_ms": 6.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK02",
+   "domain": "parking",
+   "question": "Total fines",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"citations\".\"fine_amt\") AS sum_fine_amt FROM \"citations\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     105290.0
+    ]
+   ],
+   "latency_ms": 131.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK02",
+   "domain": "parking",
+   "question": "Total fines",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     105290.0
+    ]
+   ],
+   "latency_ms": 22.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK03",
+   "domain": "parking",
+   "question": "Total fine amount by area",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT j1.\"area_nm\" AS \"area_nm\", SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0 LEFT JOIN \"areas\" AS j1 ON j1.\"area_id\" = t0.\"area_id\" GROUP BY j1.\"area_nm\"",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "Harbourfront",
+     26060.0
+    ],
+    [
+     "Mill Lane",
+     28205.0
+    ],
+    [
+     "Old Town",
+     23345.0
+    ],
+    [
+     "Station Plaza",
+     27680.0
+    ]
+   ],
+   "latency_ms": 8.2,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK03",
+   "domain": "parking",
+   "question": "Total fine amount by area",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_area_id.area_nm AS area_nm, SUM(\"citations\".\"fine_amt\") AS sum_fine_amt FROM \"citations\" LEFT JOIN areas AS j_area_id ON j_area_id.area_id = citations.area_id GROUP BY j_area_id.area_nm ORDER BY sum_fine_amt DESC",
+   "reason": "confidence 1.00 \u2265 0.70",
+   "rows": [
+    [
+     "Mill Lane",
+     28205.0
+    ],
+    [
+     "Station Plaza",
+     27680.0
+    ],
+    [
+     "Harbourfront",
+     26060.0
+    ],
+    [
+     "Old Town",
+     23345.0
+    ]
+   ],
+   "latency_ms": 122.5,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK03",
+   "domain": "parking",
+   "question": "Total fine amount by area",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT j1.\"area_nm\" AS \"area_nm\", SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0 LEFT JOIN \"areas\" AS j1 ON j1.\"area_id\" = t0.\"area_id\" GROUP BY j1.\"area_nm\"",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "Harbourfront",
+     26060.0
+    ],
+    [
+     "Mill Lane",
+     28205.0
+    ],
+    [
+     "Old Town",
+     23345.0
+    ],
+    [
+     "Station Plaza",
+     27680.0
+    ]
+   ],
+   "latency_ms": 16.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK04",
+   "domain": "parking",
+   "question": "How many citations are still unpaid?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: unpaid",
+   "rows": [],
+   "latency_ms": 4.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK04",
+   "domain": "parking",
+   "question": "How many citations are still unpaid?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"citations\" WHERE \"citations\".\"paid_dt\" IS NULL",
+   "reason": "I don't know how 'unpaid' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     366
+    ]
+   ],
+   "latency_ms": 87.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK04",
+   "domain": "parking",
+   "question": "How many citations are still unpaid?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"citations\" WHERE \"citations\".\"paid_dt\" IS NULL",
+   "reason": "I don't know how 'unpaid' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     366
+    ]
+   ],
+   "latency_ms": 98.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK05",
+   "domain": "parking",
+   "question": "Number of citations by violation",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT t0.\"violation\" AS \"violation\", COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 GROUP BY t0.\"violation\"",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "double parked",
+     368
+    ],
+    [
+     "expired meter",
+     374
+    ],
+    [
+     "hydrant",
+     362
+    ],
+    [
+     "no permit",
+     396
+    ]
+   ],
+   "latency_ms": 16.0,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK05",
+   "domain": "parking",
+   "question": "Number of citations by violation",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT \"citations\".\"violation\" AS violation, COUNT(*) AS row_count FROM \"citations\" GROUP BY \"citations\".\"violation\" ORDER BY row_count DESC",
+   "reason": "confidence 1.00 \u2265 0.70",
+   "rows": [
+    [
+     "no permit",
+     396
+    ],
+    [
+     "expired meter",
+     374
+    ],
+    [
+     "double parked",
+     368
+    ],
+    [
+     "hydrant",
+     362
+    ]
+   ],
+   "latency_ms": 104.2,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK05",
+   "domain": "parking",
+   "question": "Number of citations by violation",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT t0.\"violation\" AS \"violation\", COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 GROUP BY t0.\"violation\"",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "double parked",
+     368
+    ],
+    [
+     "expired meter",
+     374
+    ],
+    [
+     "hydrant",
+     362
+    ],
+    [
+     "no permit",
+     396
+    ]
+   ],
+   "latency_ms": 25.6,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK06",
+   "domain": "parking",
+   "question": "How many cars were towed?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: cars",
+   "rows": [],
+   "latency_ms": 6.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK06",
+   "domain": "parking",
+   "question": "How many cars were towed?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 88.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK06",
+   "domain": "parking",
+   "question": "How many cars were towed?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 104.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK07",
+   "domain": "parking",
+   "question": "Citations written by each officer",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: written",
+   "rows": [],
+   "latency_ms": 22.3,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK07",
+   "domain": "parking",
+   "question": "Citations written by each officer",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_badge_no.officer_nm AS officer_nm, COUNT(*) AS row_count FROM \"citations\" LEFT JOIN officers AS j_badge_no ON j_badge_no.badge_no = citations.badge_no GROUP BY j_badge_no.officer_nm ORDER BY row_count DESC",
+   "reason": "I don't know how 'written' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "L. Varga",
+     387
+    ],
+    [
+     "K. Osei",
+     378
+    ],
+    [
+     "M. Quist",
+     371
+    ],
+    [
+     "N. Roy",
+     364
+    ]
+   ],
+   "latency_ms": 123.5,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK07",
+   "domain": "parking",
+   "question": "Citations written by each officer",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_badge_no.officer_nm AS officer_nm, COUNT(*) AS row_count FROM \"citations\" LEFT JOIN officers AS j_badge_no ON j_badge_no.badge_no = citations.badge_no GROUP BY j_badge_no.officer_nm ORDER BY row_count DESC",
+   "reason": "I don't know how 'written' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "L. Varga",
+     387
+    ],
+    [
+     "K. Osei",
+     378
+    ],
+    [
+     "M. Quist",
+     371
+    ],
+    [
+     "N. Roy",
+     364
+    ]
+   ],
+   "latency_ms": 136.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK08",
+   "domain": "parking",
+   "question": "Total late fees for the Night unit",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"citations\" AS t0 LEFT JOIN \"officers\" AS j1 ON j1.\"badge_no\" = t0.\"badge_no\" WHERE (j1.\"unit\" IN ('Night'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     2335.0
+    ]
+   ],
+   "latency_ms": 17.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK08",
+   "domain": "parking",
+   "question": "Total late fees for the Night unit",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"citations\".\"late_fee_amt\") AS sum_late_fee_amt FROM \"citations\" LEFT JOIN officers AS j_badge_no ON j_badge_no.badge_no = citations.badge_no WHERE j_badge_no.unit = 'Night'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     2335.0
+    ]
+   ],
+   "latency_ms": 97.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK08",
+   "domain": "parking",
+   "question": "Total late fees for the Night unit",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"late_fee_amt\") AS \"sum_late_fee_amt\" FROM \"citations\" AS t0 LEFT JOIN \"officers\" AS j1 ON j1.\"badge_no\" = t0.\"badge_no\" WHERE (j1.\"unit\" IN ('Night'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     2335.0
+    ]
+   ],
+   "latency_ms": 15.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK09",
+   "domain": "parking",
+   "question": "How many citations were appealed?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"appeals\" AS x0_0 WHERE x0_0.\"citation_id\" = t0.\"citation_id\"))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     152
+    ]
+   ],
+   "latency_ms": 12.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK09",
+   "domain": "parking",
+   "question": "How many citations were appealed?",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"citations\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     1500
+    ]
+   ],
+   "latency_ms": 90.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "wrong"
+  },
+  {
+   "id": "PK09",
+   "domain": "parking",
+   "question": "How many citations were appealed?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"appeals\" AS x0_0 WHERE x0_0.\"citation_id\" = t0.\"citation_id\"))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     152
+    ]
+   ],
+   "latency_ms": 22.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK10",
+   "domain": "parking",
+   "question": "How many citations had an appeal that was dismissed?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"appeals\" AS x0_0 WHERE x0_0.\"citation_id\" = t0.\"citation_id\" AND x0_0.\"outcome\" IN ('dismissed')))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     47
+    ]
+   ],
+   "latency_ms": 12.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK10",
+   "domain": "parking",
+   "question": "How many citations had an appeal that was dismissed?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Query not run (too expensive or unsafe): estimated 34,656,000 row visits exceeds budget 20,000,000 (citations=1500, appeals=152, appeals=152)",
+   "rows": [],
+   "latency_ms": 93.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK10",
+   "domain": "parking",
+   "question": "How many citations had an appeal that was dismissed?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"appeals\" AS x0_0 WHERE x0_0.\"citation_id\" = t0.\"citation_id\" AND x0_0.\"outcome\" IN ('dismissed')))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     47
+    ]
+   ],
+   "latency_ms": 22.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK11",
+   "domain": "parking",
+   "question": "Monthly fine amount",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'monthly' does not say which date: issued_dt, paid_dt. The readings give different results \u2014 issued_dt: 12 rows; paid_dt: 13 rows. Which did you mean?",
+   "rows": [],
+   "latency_ms": 8.1,
+   "expect": "either",
+   "kind": "rowset",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK11",
+   "domain": "parking",
+   "question": "Monthly fine amount",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: by issued_dt -> 12 groups (2025-01: 7,440.00, 2025-02: 9,045.00, 2025-03: 8,995.00, 2025-04: 8,625.00, 2025-05: 10,055.00, 2025-06: 7,630.00, ...); by paid_dt -> 13 groups (None: 26,135.00, 2025-01: 5,705.00, 2025-02: 6,165.00, 2025-03: 6,885.00, 2025-04: 6,420.00, 2025-05: 7,110.00, ...). Which did you mean?",
+   "rows": [],
+   "latency_ms": 100.9,
+   "expect": "either",
+   "kind": "rowset",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK11",
+   "domain": "parking",
+   "question": "Monthly fine amount",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'monthly' does not say which date: issued_dt, paid_dt. The readings give different results \u2014 issued_dt: 12 rows; paid_dt: 13 rows. Which did you mean?",
+   "rows": [],
+   "latency_ms": 19.5,
+   "expect": "either",
+   "kind": "rowset",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK12",
+   "domain": "parking",
+   "question": "Fines issued in March 2025",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0 WHERE ((t0.\"issued_dt\" >= '2025-03-01' AND t0.\"issued_dt\" < '2025-04-01'))",
+   "reason": "answer rests on: fine_amt is summed (no aggregation word was given)",
+   "rows": [
+    [
+     8995.0
+    ]
+   ],
+   "latency_ms": 5.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK12",
+   "domain": "parking",
+   "question": "Fines issued in March 2025",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"citations\".\"fine_amt\") AS sum_fine_amt FROM \"citations\" WHERE \"citations\".\"issued_dt\" >= '2025-03-01' AND \"citations\".\"issued_dt\" < '2025-04-01'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     8995.0
+    ]
+   ],
+   "latency_ms": 135.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK12",
+   "domain": "parking",
+   "question": "Fines issued in March 2025",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0 WHERE ((t0.\"issued_dt\" >= '2025-03-01' AND t0.\"issued_dt\" < '2025-04-01'))",
+   "reason": "answer rests on: fine_amt is summed (no aggregation word was given)",
+   "rows": [
+    [
+     8995.0
+    ]
+   ],
+   "latency_ms": 23.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK13",
+   "domain": "parking",
+   "question": "Number of citations issued in the second quarter of 2025",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE ((t0.\"issued_dt\" >= '2025-04-01' AND t0.\"issued_dt\" < '2025-07-01'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     367
+    ]
+   ],
+   "latency_ms": 7.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK13",
+   "domain": "parking",
+   "question": "Number of citations issued in the second quarter of 2025",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"citations\" WHERE \"citations\".\"issued_dt\" >= '2025-04-01' AND \"citations\".\"issued_dt\" < '2025-07-01'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     367
+    ]
+   ],
+   "latency_ms": 137.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK13",
+   "domain": "parking",
+   "question": "Number of citations issued in the second quarter of 2025",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE ((t0.\"issued_dt\" >= '2025-04-01' AND t0.\"issued_dt\" < '2025-07-01'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     367
+    ]
+   ],
+   "latency_ms": 24.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK14",
+   "domain": "parking",
+   "question": "Citations with no plate state recorded",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE (t0.\"plate_state\" IS NULL)",
+   "reason": "answer rests on: counting citations rows",
+   "rows": [
+    [
+     356
+    ]
+   ],
+   "latency_ms": 8.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK14",
+   "domain": "parking",
+   "question": "Citations with no plate state recorded",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS null_plate_state FROM \"citations\" WHERE \"citations\".\"plate_state\" IS NULL",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     356
+    ]
+   ],
+   "latency_ms": 98.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK14",
+   "domain": "parking",
+   "question": "Citations with no plate state recorded",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"citations\" AS t0 WHERE (t0.\"plate_state\" IS NULL)",
+   "reason": "answer rests on: counting citations rows",
+   "rows": [
+    [
+     356
+    ]
+   ],
+   "latency_ms": 15.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK15",
+   "domain": "parking",
+   "question": "Average fine for hydrant violations",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT AVG(t0.\"fine_amt\") AS \"avg_fine_amt\" FROM \"citations\" AS t0 WHERE (t0.\"violation\" IN ('hydrant'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     71.50552486187846
+    ]
+   ],
+   "latency_ms": 5.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK15",
+   "domain": "parking",
+   "question": "Average fine for hydrant violations",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT AVG(\"citations\".\"fine_amt\") AS avg_fine_amt FROM \"citations\" WHERE \"citations\".\"violation\" = 'hydrant'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     71.50552486187846
+    ]
+   ],
+   "latency_ms": 90.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK15",
+   "domain": "parking",
+   "question": "Average fine for hydrant violations",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT AVG(t0.\"fine_amt\") AS \"avg_fine_amt\" FROM \"citations\" AS t0 WHERE (t0.\"violation\" IN ('hydrant'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     71.50552486187846
+    ]
+   ],
+   "latency_ms": 15.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK16",
+   "domain": "parking",
+   "question": "Total fine amount plus late fee amount",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT ((SUM(t0.\"fine_amt\")) + (SUM(t0.\"late_fee_amt\"))) AS \"fine_amt_plus_late_fee_amt\" FROM \"citations\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     110115.0
+    ]
+   ],
+   "latency_ms": 5.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK16",
+   "domain": "parking",
+   "question": "Total fine amount plus late fee amount",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"citations\".\"late_fee_amt\") AS sum_late_fee_amt, SUM(\"citations\".\"fine_amt\") AS sum_fine_amt FROM \"citations\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     4825.0,
+     105290.0
+    ]
+   ],
+   "latency_ms": 89.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "wrong"
+  },
+  {
+   "id": "PK16",
+   "domain": "parking",
+   "question": "Total fine amount plus late fee amount",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT ((SUM(t0.\"fine_amt\")) + (SUM(t0.\"late_fee_amt\"))) AS \"fine_amt_plus_late_fee_amt\" FROM \"citations\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     110115.0
+    ]
+   ],
+   "latency_ms": 16.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK17",
+   "domain": "parking",
+   "question": "Share of citations by borough",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT j1.\"borough\" AS \"borough\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"citations\" AS t0 LEFT JOIN \"areas\" AS j1 ON j1.\"area_id\" = t0.\"area_id\" GROUP BY j1.\"borough\"",
+   "reason": "answer rests on: counting citations rows",
+   "rows": [
+    [
+     "Central",
+     49.2
+    ],
+    [
+     "East",
+     24.6
+    ],
+    [
+     "West",
+     26.2
+    ]
+   ],
+   "latency_ms": 5.5,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK17",
+   "domain": "parking",
+   "question": "Share of citations by borough",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Could not compile a SQL query for this plan.",
+   "rows": [],
+   "latency_ms": 76.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK17",
+   "domain": "parking",
+   "question": "Share of citations by borough",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT j1.\"borough\" AS \"borough\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"citations\" AS t0 LEFT JOIN \"areas\" AS j1 ON j1.\"area_id\" = t0.\"area_id\" GROUP BY j1.\"borough\"",
+   "reason": "answer rests on: counting citations rows",
+   "rows": [
+    [
+     "Central",
+     49.2
+    ],
+    [
+     "East",
+     24.6
+    ],
+    [
+     "West",
+     26.2
+    ]
+   ],
+   "latency_ms": 16.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK18",
+   "domain": "parking",
+   "question": "Percentage of citations that were contested",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"contested\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"citations\" AS t0",
+   "reason": "answer rests on: counting citations rows",
+   "rows": [
+    [
+     12.533333333333333
+    ]
+   ],
+   "latency_ms": 6.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK18",
+   "domain": "parking",
+   "question": "Percentage of citations that were contested",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 59.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK18",
+   "domain": "parking",
+   "question": "Percentage of citations that were contested",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"contested\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"citations\" AS t0",
+   "reason": "answer rests on: counting citations rows",
+   "rows": [
+    [
+     12.533333333333333
+    ]
+   ],
+   "latency_ms": 18.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK19",
+   "domain": "parking",
+   "question": "Top 2 areas by total fines",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT j1.\"area_nm\" AS \"area_nm\", SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0 LEFT JOIN \"areas\" AS j1 ON j1.\"area_id\" = t0.\"area_id\" GROUP BY j1.\"area_nm\" ORDER BY \"sum_fine_amt\" DESC, \"area_nm\" LIMIT 2",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "Mill Lane",
+     28205.0
+    ],
+    [
+     "Station Plaza",
+     27680.0
+    ]
+   ],
+   "latency_ms": 6.7,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK19",
+   "domain": "parking",
+   "question": "Top 2 areas by total fines",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_area_id.area_nm AS area_nm, SUM(\"citations\".\"fine_amt\") AS sum_fine_amt FROM \"citations\" LEFT JOIN areas AS j_area_id ON j_area_id.area_id = citations.area_id WHERE j_area_id.area_nm IS NOT NULL GROUP BY j_area_id.area_nm ORDER BY sum_fine_amt DESC LIMIT 2",
+   "reason": "confidence 0.99 \u2265 0.70",
+   "rows": [
+    [
+     "Mill Lane",
+     28205.0
+    ],
+    [
+     "Station Plaza",
+     27680.0
+    ]
+   ],
+   "latency_ms": 90.8,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK19",
+   "domain": "parking",
+   "question": "Top 2 areas by total fines",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT j1.\"area_nm\" AS \"area_nm\", SUM(t0.\"fine_amt\") AS \"sum_fine_amt\" FROM \"citations\" AS t0 LEFT JOIN \"areas\" AS j1 ON j1.\"area_id\" = t0.\"area_id\" GROUP BY j1.\"area_nm\" ORDER BY \"sum_fine_amt\" DESC, \"area_nm\" LIMIT 2",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "Mill Lane",
+     28205.0
+    ],
+    [
+     "Station Plaza",
+     27680.0
+    ]
+   ],
+   "latency_ms": 16.9,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "PK20",
+   "domain": "parking",
+   "question": "Number of fines over 100 dollars",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'how many' with the money column fine_amt: a count of rows or a sum?",
+   "rows": [],
+   "latency_ms": 4.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK20",
+   "domain": "parking",
+   "question": "Number of fines over 100 dollars",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"citations\"",
+   "reason": "the question mentions column(s) 'fines (fine_amt)' that the generated query does not use, so it would ignore part of your question",
+   "rows": [
+    [
+     1500
+    ]
+   ],
+   "latency_ms": 97.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK20",
+   "domain": "parking",
+   "question": "Number of fines over 100 dollars",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'how many' with the money column fine_amt: a count of rows or a sum?",
+   "rows": [],
+   "latency_ms": 17.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK21",
+   "domain": "parking",
+   "question": "How much revenue did parking enforcement bring in?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: revenue, parking, enforcement, bring",
+   "rows": [],
+   "latency_ms": 5.5,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK21",
+   "domain": "parking",
+   "question": "How much revenue did parking enforcement bring in?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 63.1,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK21",
+   "domain": "parking",
+   "question": "How much revenue did parking enforcement bring in?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 75.8,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK22",
+   "domain": "parking",
+   "question": "Which officers are the strictest?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: strictest, officers",
+   "rows": [],
+   "latency_ms": 16.7,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK22",
+   "domain": "parking",
+   "question": "Which officers are the strictest?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_badge_no.officer_nm AS officer_nm, COUNT(*) AS row_count FROM \"citations\" LEFT JOIN officers AS j_badge_no ON j_badge_no.badge_no = citations.badge_no GROUP BY j_badge_no.officer_nm ORDER BY row_count DESC",
+   "reason": "I don't know how 'strictest' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "L. Varga",
+     387
+    ],
+    [
+     "K. Osei",
+     378
+    ],
+    [
+     "M. Quist",
+     371
+    ],
+    [
+     "N. Roy",
+     364
+    ]
+   ],
+   "latency_ms": 85.5,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK22",
+   "domain": "parking",
+   "question": "Which officers are the strictest?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_badge_no.officer_nm AS officer_nm, COUNT(*) AS row_count FROM \"citations\" LEFT JOIN officers AS j_badge_no ON j_badge_no.badge_no = citations.badge_no GROUP BY j_badge_no.officer_nm ORDER BY row_count DESC",
+   "reason": "I don't know how 'strictest' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "L. Varga",
+     387
+    ],
+    [
+     "K. Osei",
+     378
+    ],
+    [
+     "M. Quist",
+     371
+    ],
+    [
+     "N. Roy",
+     364
+    ]
+   ],
+   "latency_ms": 97.4,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK23",
+   "domain": "parking",
+   "question": "Average meter rate",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: meter_rate describes areas; aggregate it over areas itself, or once per citations row (weighted by citations)?",
+   "rows": [],
+   "latency_ms": 15.6,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK23",
+   "domain": "parking",
+   "question": "Average meter rate",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT AVG(j_area_id.meter_rate) AS avg_meter_rate FROM \"citations\" LEFT JOIN areas AS j_area_id ON j_area_id.area_id = citations.area_id",
+   "reason": "answer rests on: a measure stored on a related table is counted once per 'citations' row, so a value shared by several rows is counted several times",
+   "rows": [
+    [
+     2.623666666666667
+    ]
+   ],
+   "latency_ms": 101.9,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "wrong"
+  },
+  {
+   "id": "PK23",
+   "domain": "parking",
+   "question": "Average meter rate",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: meter_rate describes areas; aggregate it over areas itself, or once per citations row (weighted by citations)?",
+   "rows": [],
+   "latency_ms": 18.7,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK24",
+   "domain": "parking",
+   "question": "How many citations will be paid next month?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "rows": [],
+   "latency_ms": 7.1,
+   "expect": "unsupported",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK24",
+   "domain": "parking",
+   "question": "How many citations will be paid next month?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "rows": [],
+   "latency_ms": 4.9,
+   "expect": "unsupported",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK24",
+   "domain": "parking",
+   "question": "How many citations will be paid next month?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "rows": [],
+   "latency_ms": 5.3,
+   "expect": "unsupported",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "PK25",
+   "domain": "parking",
+   "question": "Citations from New Jersey plates that were not paid",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: New, Jersey, plates",
+   "rows": [],
+   "latency_ms": 7.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK25",
+   "domain": "parking",
+   "question": "Citations from New Jersey plates that were not paid",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 64.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "PK25",
+   "domain": "parking",
+   "question": "Citations from New Jersey plates that were not paid",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('parking'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 74.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR01",
+   "domain": "ferry",
+   "question": "How many sailings were there?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     1200
+    ]
+   ],
+   "latency_ms": 26.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR01",
+   "domain": "ferry",
+   "question": "How many sailings were there?",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"sailings\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     1200
+    ]
+   ],
+   "latency_ms": 98.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR01",
+   "domain": "ferry",
+   "question": "How many sailings were there?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     1200
+    ]
+   ],
+   "latency_ms": 15.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR02",
+   "domain": "ferry",
+   "question": "Total passengers carried",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: carried",
+   "rows": [],
+   "latency_ms": 6.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR02",
+   "domain": "ferry",
+   "question": "Total passengers carried",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\"",
+   "reason": "answer rests on: 'carried' was not mapped to any column or value and was not applied",
+   "rows": [
+    [
+     225535
+    ]
+   ],
+   "latency_ms": 94.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR02",
+   "domain": "ferry",
+   "question": "Total passengers carried",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\"",
+   "reason": "answer rests on: 'carried' was not mapped to any column or value and was not applied",
+   "rows": [
+    [
+     225535
+    ]
+   ],
+   "latency_ms": 131.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR03",
+   "domain": "ferry",
+   "question": "Total ticket revenue by vessel",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT j1.\"vessel_nm\" AS \"vessel_nm\", SUM(t0.\"ticket_rev\") AS \"sum_ticket_rev\" FROM \"sailings\" AS t0 LEFT JOIN \"vessels\" AS j1 ON j1.\"vessel_id\" = t0.\"vessel_id\" GROUP BY j1.\"vessel_nm\"",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "MV Gannet",
+     878825.54
+    ],
+    [
+     "MV Petrel",
+     864961.49
+    ],
+    [
+     "MV Tern",
+     858165.77
+    ]
+   ],
+   "latency_ms": 21.9,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR03",
+   "domain": "ferry",
+   "question": "Total ticket revenue by vessel",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_vessel_id.vessel_nm AS vessel_nm, COUNT(*) AS row_count FROM \"sailings\" LEFT JOIN vessels AS j_vessel_id ON j_vessel_id.vessel_id = sailings.vessel_id GROUP BY j_vessel_id.vessel_nm ORDER BY row_count DESC",
+   "reason": "the question mentions column(s) 'ticket (ticket_rev)' that the generated query does not use, so it would ignore part of your question",
+   "rows": [
+    [
+     "MV Gannet",
+     405
+    ],
+    [
+     "MV Tern",
+     403
+    ],
+    [
+     "MV Petrel",
+     392
+    ]
+   ],
+   "latency_ms": 81.0,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR03",
+   "domain": "ferry",
+   "question": "Total ticket revenue by vessel",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT j1.\"vessel_nm\" AS \"vessel_nm\", SUM(t0.\"ticket_rev\") AS \"sum_ticket_rev\" FROM \"sailings\" AS t0 LEFT JOIN \"vessels\" AS j1 ON j1.\"vessel_id\" = t0.\"vessel_id\" GROUP BY j1.\"vessel_nm\"",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     "MV Gannet",
+     878825.54
+    ],
+    [
+     "MV Petrel",
+     864961.49
+    ],
+    [
+     "MV Tern",
+     858165.77
+    ]
+   ],
+   "latency_ms": 17.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR04",
+   "domain": "ferry",
+   "question": "How many sailings were cancelled?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (t0.\"cancelled\" = 1)",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     80
+    ]
+   ],
+   "latency_ms": 9.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR04",
+   "domain": "ferry",
+   "question": "How many sailings were cancelled?",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"sailings\" WHERE \"sailings\".\"cancelled\" = 1",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     80
+    ]
+   ],
+   "latency_ms": 118.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR04",
+   "domain": "ferry",
+   "question": "How many sailings were cancelled?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (t0.\"cancelled\" = 1)",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     80
+    ]
+   ],
+   "latency_ms": 17.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR05",
+   "domain": "ferry",
+   "question": "Average delay in minutes",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT AVG(t0.\"delay_mins\") AS \"avg_delay_mins\" FROM \"sailings\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     14.620535714285714
+    ]
+   ],
+   "latency_ms": 7.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR05",
+   "domain": "ferry",
+   "question": "Average delay in minutes",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT AVG(\"sailings\".\"delay_mins\") AS avg_delay_mins FROM \"sailings\"",
+   "reason": "answer rests on: null_measure_share: 80/1200 rows have no 'delay_mins'; AVG ignores them",
+   "rows": [
+    [
+     14.620535714285714
+    ]
+   ],
+   "latency_ms": 95.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR05",
+   "domain": "ferry",
+   "question": "Average delay in minutes",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT AVG(t0.\"delay_mins\") AS \"avg_delay_mins\" FROM \"sailings\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     14.620535714285714
+    ]
+   ],
+   "latency_ms": 16.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR06",
+   "domain": "ferry",
+   "question": "Sailings by departure terminal",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'terminal' is reached in more than one way: terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 7.3,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR06",
+   "domain": "ferry",
+   "question": "Sailings by departure terminal",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT j_arr_terminal_cd.terminal_nm AS arr_terminal_cd, COUNT(*) AS row_count FROM \"sailings\" LEFT JOIN terminals AS j_arr_terminal_cd ON j_arr_terminal_cd.terminal_cd = sailings.arr_terminal_cd GROUP BY j_arr_terminal_cd.terminal_nm ORDER BY row_count DESC",
+   "reason": "answer rests on: relationship inferred from names and values, not declared: sailings.arr_terminal_cd->terminals.terminal_cd",
+   "rows": [
+    [
+     "Fenmouth",
+     331
+    ],
+    [
+     "South Pier",
+     303
+    ],
+    [
+     "North Quay",
+     285
+    ],
+    [
+     "Brackwater",
+     281
+    ]
+   ],
+   "latency_ms": 108.7,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "wrong"
+  },
+  {
+   "id": "FR06",
+   "domain": "ferry",
+   "question": "Sailings by departure terminal",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'terminal' is reached in more than one way: terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 22.1,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR07",
+   "domain": "ferry",
+   "question": "Passengers by terminal",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'terminal' is reached in more than one way: terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 7.6,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR07",
+   "domain": "ferry",
+   "question": "Passengers by terminal",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT j_arr_terminal_cd.terminal_nm AS arr_terminal_cd, SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\" LEFT JOIN terminals AS j_arr_terminal_cd ON j_arr_terminal_cd.terminal_cd = sailings.arr_terminal_cd GROUP BY j_arr_terminal_cd.terminal_nm ORDER BY sum_pax_count DESC",
+   "reason": "answer rests on: relationship inferred from names and values, not declared: sailings.arr_terminal_cd->terminals.terminal_cd",
+   "rows": [
+    [
+     "South Pier",
+     60607
+    ],
+    [
+     "Fenmouth",
+     59256
+    ],
+    [
+     "Brackwater",
+     53167
+    ],
+    [
+     "North Quay",
+     52505
+    ]
+   ],
+   "latency_ms": 104.7,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "answered_unanswerable"
+  },
+  {
+   "id": "FR07",
+   "domain": "ferry",
+   "question": "Passengers by terminal",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'terminal' is reached in more than one way: terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 16.7,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR08",
+   "domain": "ferry",
+   "question": "Total passengers arriving at Brackwater",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'Brackwater' could be terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 6.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR08",
+   "domain": "ferry",
+   "question": "Total passengers arriving at Brackwater",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\" LEFT JOIN terminals AS j_arr_terminal_cd ON j_arr_terminal_cd.terminal_cd = sailings.arr_terminal_cd WHERE j_arr_terminal_cd.terminal_nm = 'Brackwater'",
+   "reason": "answer rests on: relationship inferred from names and values, not declared: sailings.arr_terminal_cd->terminals.terminal_cd",
+   "rows": [
+    [
+     53167
+    ]
+   ],
+   "latency_ms": 94.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR08",
+   "domain": "ferry",
+   "question": "Total passengers arriving at Brackwater",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'Brackwater' could be terminals.terminal_nm via dep_terminal_cd or terminals.terminal_nm via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 17.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR09",
+   "domain": "ferry",
+   "question": "How many sailings had an incident?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"incidents\" AS x0_0 WHERE x0_0.\"sailing_id\" = t0.\"sailing_id\"))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     78
+    ]
+   ],
+   "latency_ms": 8.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR09",
+   "domain": "ferry",
+   "question": "How many sailings had an incident?",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"sailings\" WHERE EXISTS (SELECT 1 FROM \"incidents\" AS \"x1_0\" WHERE \"x1_0\".\"sailing_id\" = \"sailings\".\"sailing_id\" AND 1=1)",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     78
+    ]
+   ],
+   "latency_ms": 93.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR09",
+   "domain": "ferry",
+   "question": "How many sailings had an incident?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"incidents\" AS x0_0 WHERE x0_0.\"sailing_id\" = t0.\"sailing_id\"))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     78
+    ]
+   ],
+   "latency_ms": 21.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR10",
+   "domain": "ferry",
+   "question": "Sailings with a major incident",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"incidents\" AS x0_0 WHERE x0_0.\"sailing_id\" = t0.\"sailing_id\" AND x0_0.\"severity\" IN ('major')))",
+   "reason": "answer rests on: counting sailings rows",
+   "rows": [
+    [
+     38
+    ]
+   ],
+   "latency_ms": 10.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR10",
+   "domain": "ferry",
+   "question": "Sailings with a major incident",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 64.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR10",
+   "domain": "ferry",
+   "question": "Sailings with a major incident",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"incidents\" AS x0_0 WHERE x0_0.\"sailing_id\" = t0.\"sailing_id\" AND x0_0.\"severity\" IN ('major')))",
+   "reason": "answer rests on: counting sailings rows",
+   "rows": [
+    [
+     38
+    ]
+   ],
+   "latency_ms": 18.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR11",
+   "domain": "ferry",
+   "question": "Fuel used per passenger",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: Fuel",
+   "rows": [],
+   "latency_ms": 6.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR11",
+   "domain": "ferry",
+   "question": "Fuel used per passenger",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\"",
+   "reason": "the question mentions column(s) 'fuel (fuel_litres)' that the generated query does not use, so it would ignore part of your question",
+   "rows": [
+    [
+     225535
+    ]
+   ],
+   "latency_ms": 97.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR11",
+   "domain": "ferry",
+   "question": "Fuel used per passenger",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\"",
+   "reason": "the question mentions column(s) 'fuel (fuel_litres)' that the generated query does not use, so it would ignore part of your question",
+   "rows": [
+    [
+     225535
+    ]
+   ],
+   "latency_ms": 123.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR12",
+   "domain": "ferry",
+   "question": "Total ticket revenue in July 2025",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"ticket_rev\") AS \"sum_ticket_rev\" FROM \"sailings\" AS t0 WHERE ((t0.\"sched_dep_ts\" >= '2025-07-01' AND t0.\"sched_dep_ts\" < '2025-08-01'))",
+   "reason": "answer rests on: the question can be read 2 ways (sched_dep_ts | actual_dep_ts); all give the same result",
+   "rows": [
+    [
+     267369.26
+    ]
+   ],
+   "latency_ms": 26.1,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR12",
+   "domain": "ferry",
+   "question": "Total ticket revenue in July 2025",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 67.4,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR12",
+   "domain": "ferry",
+   "question": "Total ticket revenue in July 2025",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"ticket_rev\") AS \"sum_ticket_rev\" FROM \"sailings\" AS t0 WHERE ((t0.\"sched_dep_ts\" >= '2025-07-01' AND t0.\"sched_dep_ts\" < '2025-08-01'))",
+   "reason": "answer rests on: the question can be read 2 ways (sched_dep_ts | actual_dep_ts); all give the same result",
+   "rows": [
+    [
+     267369.26
+    ]
+   ],
+   "latency_ms": 18.4,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR13",
+   "domain": "ferry",
+   "question": "Monthly passengers",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'monthly' does not say which date: sched_dep_ts, actual_dep_ts. The readings give different results \u2014 sched_dep_ts: 12 rows; actual_dep_ts: 13 rows. Which did you mean?",
+   "rows": [],
+   "latency_ms": 7.2,
+   "expect": "either",
+   "kind": "rowset",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR13",
+   "domain": "ferry",
+   "question": "Monthly passengers",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: by sched_dep_ts -> 12 groups (2025-01: 21787, 2025-02: 20130, 2025-03: 16897, 2025-04: 18324, 2025-05: 17804, 2025-06: 15385, ...); by actual_dep_ts -> 13 groups (None: 0, 2025-01: 21787, 2025-02: 20130, 2025-03: 16897, 2025-04: 18324, 2025-05: 17804, ...). Which did you mean?",
+   "rows": [],
+   "latency_ms": 100.4,
+   "expect": "either",
+   "kind": "rowset",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR13",
+   "domain": "ferry",
+   "question": "Monthly passengers",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'monthly' does not say which date: sched_dep_ts, actual_dep_ts. The readings give different results \u2014 sched_dep_ts: 12 rows; actual_dep_ts: 13 rows. Which did you mean?",
+   "rows": [],
+   "latency_ms": 17.5,
+   "expect": "either",
+   "kind": "rowset",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR14",
+   "domain": "ferry",
+   "question": "Sailings that never actually departed",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: departed; 'never' is not attached to any condition",
+   "rows": [],
+   "latency_ms": 6.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR14",
+   "domain": "ferry",
+   "question": "Sailings that never actually departed",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 82.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR14",
+   "domain": "ferry",
+   "question": "Sailings that never actually departed",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 107.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR15",
+   "domain": "ferry",
+   "question": "Average passengers per sailing on the MV Gannet",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT AVG(t0.\"pax_count\") AS \"avg_pax_count\" FROM \"sailings\" AS t0 LEFT JOIN \"vessels\" AS j1 ON j1.\"vessel_id\" = t0.\"vessel_id\" WHERE (j1.\"vessel_nm\" IN ('MV Gannet'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     188.53333333333333
+    ]
+   ],
+   "latency_ms": 24.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR15",
+   "domain": "ferry",
+   "question": "Average passengers per sailing on the MV Gannet",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Could not compile a SQL query for this plan.",
+   "rows": [],
+   "latency_ms": 83.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR15",
+   "domain": "ferry",
+   "question": "Average passengers per sailing on the MV Gannet",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT AVG(t0.\"pax_count\") AS \"avg_pax_count\" FROM \"sailings\" AS t0 LEFT JOIN \"vessels\" AS j1 ON j1.\"vessel_id\" = t0.\"vessel_id\" WHERE (j1.\"vessel_nm\" IN ('MV Gannet'))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     188.53333333333333
+    ]
+   ],
+   "latency_ms": 17.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR16",
+   "domain": "ferry",
+   "question": "Sailings delayed more than 20 minutes",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (t0.\"delay_mins\" > 20)",
+   "reason": "answer rests on: counting sailings rows",
+   "rows": [
+    [
+     330
+    ]
+   ],
+   "latency_ms": 8.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR16",
+   "domain": "ferry",
+   "question": "Sailings delayed more than 20 minutes",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 71.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR16",
+   "domain": "ferry",
+   "question": "Sailings delayed more than 20 minutes",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (t0.\"delay_mins\" > 20)",
+   "reason": "answer rests on: counting sailings rows",
+   "rows": [
+    [
+     330
+    ]
+   ],
+   "latency_ms": 18.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR17",
+   "domain": "ferry",
+   "question": "Top 2 vessels by passengers carried",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: carried",
+   "rows": [],
+   "latency_ms": 6.0,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR17",
+   "domain": "ferry",
+   "question": "Top 2 vessels by passengers carried",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT j_vessel_id.vessel_nm AS vessel_nm, SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\" LEFT JOIN vessels AS j_vessel_id ON j_vessel_id.vessel_id = sailings.vessel_id WHERE j_vessel_id.vessel_nm IS NOT NULL GROUP BY j_vessel_id.vessel_nm ORDER BY sum_pax_count DESC LIMIT 2",
+   "reason": "answer rests on: 'carried' was not mapped to any column or value and was not applied",
+   "rows": [
+    [
+     "MV Gannet",
+     76356
+    ],
+    [
+     "MV Petrel",
+     74901
+    ]
+   ],
+   "latency_ms": 115.9,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR17",
+   "domain": "ferry",
+   "question": "Top 2 vessels by passengers carried",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT j_vessel_id.vessel_nm AS vessel_nm, SUM(\"sailings\".\"pax_count\") AS sum_pax_count FROM \"sailings\" LEFT JOIN vessels AS j_vessel_id ON j_vessel_id.vessel_id = sailings.vessel_id WHERE j_vessel_id.vessel_nm IS NOT NULL GROUP BY j_vessel_id.vessel_nm ORDER BY sum_pax_count DESC LIMIT 2",
+   "reason": "answer rests on: 'carried' was not mapped to any column or value and was not applied",
+   "rows": [
+    [
+     "MV Gannet",
+     76356
+    ],
+    [
+     "MV Petrel",
+     74901
+    ]
+   ],
+   "latency_ms": 106.2,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR18",
+   "domain": "ferry",
+   "question": "Percentage of sailings cancelled",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"cancelled\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"sailings\" AS t0",
+   "reason": "answer rests on: counting sailings rows",
+   "rows": [
+    [
+     6.666666666666667
+    ]
+   ],
+   "latency_ms": 17.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR18",
+   "domain": "ferry",
+   "question": "Percentage of sailings cancelled",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 73.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR18",
+   "domain": "ferry",
+   "question": "Percentage of sailings cancelled",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"cancelled\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"sailings\" AS t0",
+   "reason": "answer rests on: counting sailings rows",
+   "rows": [
+    [
+     6.666666666666667
+    ]
+   ],
+   "latency_ms": 21.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR19",
+   "domain": "ferry",
+   "question": "Total vehicles carried from the mainland",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'mainland' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 6.4,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR19",
+   "domain": "ferry",
+   "question": "Total vehicles carried from the mainland",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"sailings\".\"vehicle_count\") AS sum_vehicle_count FROM \"sailings\" LEFT JOIN terminals AS j_dep_terminal_cd ON j_dep_terminal_cd.terminal_cd = sailings.dep_terminal_cd WHERE j_dep_terminal_cd.island = 'Mainland'",
+   "reason": "answer rests on: 'carried' was not mapped to any column or value and was not applied; the question could be read more than one way; every reading gave this same result; relationship inferred from names and values, not declared: sailings.dep_terminal_cd->terminals.terminal_cd",
+   "rows": [
+    [
+     16821
+    ]
+   ],
+   "latency_ms": 218.6,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR19",
+   "domain": "ferry",
+   "question": "Total vehicles carried from the mainland",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'mainland' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 22.1,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR20",
+   "domain": "ferry",
+   "question": "How punctual is the fleet?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: punctual, fleet",
+   "rows": [],
+   "latency_ms": 4.9,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR20",
+   "domain": "ferry",
+   "question": "How punctual is the fleet?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 60.9,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR20",
+   "domain": "ferry",
+   "question": "How punctual is the fleet?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 70.4,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR21",
+   "domain": "ferry",
+   "question": "Average vessel capacity",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, capacity, vessel",
+   "rows": [],
+   "latency_ms": 15.7,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR21",
+   "domain": "ferry",
+   "question": "Average vessel capacity",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 61.0,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR21",
+   "domain": "ferry",
+   "question": "Average vessel capacity",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 73.6,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR22",
+   "domain": "ferry",
+   "question": "Load factor by vessel",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: Load",
+   "rows": [],
+   "latency_ms": 15.7,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR22",
+   "domain": "ferry",
+   "question": "Load factor by vessel",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_vessel_id.vessel_nm AS vessel_nm, COUNT(*) AS row_count FROM \"sailings\" LEFT JOIN vessels AS j_vessel_id ON j_vessel_id.vessel_id = sailings.vessel_id GROUP BY j_vessel_id.vessel_nm ORDER BY row_count DESC",
+   "reason": "I don't know how 'load', 'factor' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "MV Gannet",
+     405
+    ],
+    [
+     "MV Tern",
+     403
+    ],
+    [
+     "MV Petrel",
+     392
+    ]
+   ],
+   "latency_ms": 79.2,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR22",
+   "domain": "ferry",
+   "question": "Load factor by vessel",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_vessel_id.vessel_nm AS vessel_nm, COUNT(*) AS row_count FROM \"sailings\" LEFT JOIN vessels AS j_vessel_id ON j_vessel_id.vessel_id = sailings.vessel_id GROUP BY j_vessel_id.vessel_nm ORDER BY row_count DESC",
+   "reason": "I don't know how 'load', 'factor' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "MV Gannet",
+     405
+    ],
+    [
+     "MV Tern",
+     403
+    ],
+    [
+     "MV Petrel",
+     392
+    ]
+   ],
+   "latency_ms": 90.4,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR23",
+   "domain": "ferry",
+   "question": "Number of sailings with no delay recorded",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (t0.\"delay_mins\" IS NULL)",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     80
+    ]
+   ],
+   "latency_ms": 16.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR23",
+   "domain": "ferry",
+   "question": "Number of sailings with no delay recorded",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count, SUM(\"sailings\".\"delay_mins\") AS sum_delay_mins FROM \"sailings\"",
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:with no",
+   "rows": [
+    [
+     1200,
+     16375
+    ]
+   ],
+   "latency_ms": 90.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR23",
+   "domain": "ferry",
+   "question": "Number of sailings with no delay recorded",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"sailings\" AS t0 WHERE (t0.\"delay_mins\" IS NULL)",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     80
+    ]
+   ],
+   "latency_ms": 17.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "FR24",
+   "domain": "ferry",
+   "question": "Revenue per sailing",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'per sailing' would give one value per sailings row; did you mean the average per sailing, or the overall total?; words not grounded: Revenue",
+   "rows": [],
+   "latency_ms": 5.6,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR24",
+   "domain": "ferry",
+   "question": "Revenue per sailing",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 72.4,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR24",
+   "domain": "ferry",
+   "question": "Revenue per sailing",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('ferry'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 104.6,
+   "expect": "either",
+   "kind": "scalar",
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "FR25",
+   "domain": "ferry",
+   "question": "Ticket revenue by departure island",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'island' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd; 'island' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 21.0,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR25",
+   "domain": "ferry",
+   "question": "Ticket revenue by departure island",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: via sailings.dep_terminal_cd=terminals.terminal_cd -> 3 groups (Mainland: 606, Isle of Brack: 329, Fen Island: 265); via sailings.arr_terminal_cd=terminals.terminal_cd -> 3 groups (Mainland: 588, Fen Island: 331, Isle of Brack: 281). Which did you mean?",
+   "rows": [],
+   "latency_ms": 102.2,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "FR25",
+   "domain": "ferry",
+   "question": "Ticket revenue by departure island",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'island' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd; 'island' could be terminals.island via dep_terminal_cd or terminals.island via arr_terminal_cd",
+   "rows": [],
+   "latency_ms": 17.1,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA01",
+   "domain": "bakery",
+   "question": "How many batches were baked?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     900
+    ]
+   ],
+   "latency_ms": 17.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA01",
+   "domain": "bakery",
+   "question": "How many batches were baked?",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"batches\" WHERE \"batches\".\"bake_dt\" IS NOT NULL",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     900
+    ]
+   ],
+   "latency_ms": 112.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA01",
+   "domain": "bakery",
+   "question": "How many batches were baked?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     900
+    ]
+   ],
+   "latency_ms": 22.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA02",
+   "domain": "bakery",
+   "question": "Total units made",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     101066
+    ]
+   ],
+   "latency_ms": 6.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA02",
+   "domain": "bakery",
+   "question": "Total units made",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     101066
+    ]
+   ],
+   "latency_ms": 120.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA02",
+   "domain": "bakery",
+   "question": "Total units made",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     101066
+    ]
+   ],
+   "latency_ms": 22.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA03",
+   "domain": "bakery",
+   "question": "Units wasted by recipe",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: recipe",
+   "rows": [],
+   "latency_ms": 6.6,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA03",
+   "domain": "bakery",
+   "question": "Units wasted by recipe",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_recipe_id.recipe_nm AS recipe_nm, SUM(\"batches\".\"units_wasted\") AS sum_units_wasted FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id GROUP BY j_recipe_id.recipe_nm ORDER BY sum_units_wasted DESC",
+   "reason": "confidence 1.00 \u2265 0.70",
+   "rows": [
+    [
+     "Sourdough Loaf",
+     1107
+    ],
+    [
+     "Rye Loaf",
+     1106
+    ],
+    [
+     "Almond Croissant",
+     1100
+    ],
+    [
+     "Rice Bread",
+     1007
+    ],
+    [
+     "Lemon Tart",
+     1006
+    ],
+    [
+     "Flourless Brownie",
+     1003
+    ]
+   ],
+   "latency_ms": 118.7,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA03",
+   "domain": "bakery",
+   "question": "Units wasted by recipe",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_recipe_id.recipe_nm AS recipe_nm, SUM(\"batches\".\"units_wasted\") AS sum_units_wasted FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id GROUP BY j_recipe_id.recipe_nm ORDER BY sum_units_wasted DESC",
+   "reason": "confidence 1.00 \u2265 0.70",
+   "rows": [
+    [
+     "Sourdough Loaf",
+     1107
+    ],
+    [
+     "Rye Loaf",
+     1106
+    ],
+    [
+     "Almond Croissant",
+     1100
+    ],
+    [
+     "Rice Bread",
+     1007
+    ],
+    [
+     "Lemon Tart",
+     1006
+    ],
+    [
+     "Flourless Brownie",
+     1003
+    ]
+   ],
+   "latency_ms": 129.9,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA04",
+   "domain": "bakery",
+   "question": "How many batches failed QC?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 WHERE (t0.\"passed_qc\" = 0)",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     85
+    ]
+   ],
+   "latency_ms": 14.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA04",
+   "domain": "bakery",
+   "question": "How many batches failed QC?",
+   "mode": "legacy",
+   "action": "WARN",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"batches\" WHERE \"batches\".\"passed_qc\" = 0",
+   "reason": "answer rests on: 'failed' was not mapped to any column or value and was not applied",
+   "rows": [
+    [
+     85
+    ]
+   ],
+   "latency_ms": 81.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA04",
+   "domain": "bakery",
+   "question": "How many batches failed QC?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 WHERE (t0.\"passed_qc\" = 0)",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     85
+    ]
+   ],
+   "latency_ms": 14.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA05",
+   "domain": "bakery",
+   "question": "Total flour used in kg",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: kg",
+   "rows": [],
+   "latency_ms": 5.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA05",
+   "domain": "bakery",
+   "question": "Total flour used in kg",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"flour_kg\") AS sum_flour_kg FROM \"batches\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     8579.43
+    ]
+   ],
+   "latency_ms": 80.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA05",
+   "domain": "bakery",
+   "question": "Total flour used in kg",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"flour_kg\") AS sum_flour_kg FROM \"batches\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     8579.43
+    ]
+   ],
+   "latency_ms": 95.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA06",
+   "domain": "bakery",
+   "question": "Units made by category",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: category",
+   "rows": [],
+   "latency_ms": 17.3,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA06",
+   "domain": "bakery",
+   "question": "Units made by category",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_recipe_id.category AS category, SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id GROUP BY j_recipe_id.category ORDER BY sum_units_made DESC",
+   "reason": "confidence 0.99 \u2265 0.70",
+   "rows": [
+    [
+     "bread",
+     51243
+    ],
+    [
+     "pastry",
+     33148
+    ],
+    [
+     "cake",
+     16675
+    ]
+   ],
+   "latency_ms": 81.7,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA06",
+   "domain": "bakery",
+   "question": "Units made by category",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_recipe_id.category AS category, SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id GROUP BY j_recipe_id.category ORDER BY sum_units_made DESC",
+   "reason": "confidence 0.99 \u2265 0.70",
+   "rows": [
+    [
+     "bread",
+     51243
+    ],
+    [
+     "pastry",
+     33148
+    ],
+    [
+     "cake",
+     16675
+    ]
+   ],
+   "latency_ms": 90.7,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA07",
+   "domain": "bakery",
+   "question": "Batches mixed by each baker",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: mixed, baker",
+   "rows": [],
+   "latency_ms": 16.3,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA07",
+   "domain": "bakery",
+   "question": "Batches mixed by each baker",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: via batches.mixed_by_baker_id=bakers.baker_id -> 4 groups (Ines: 231, Lena: 230, Joon: 226, Kofi: 213); via batches.checked_by_baker_id=bakers.baker_id -> 5 groups (Lena: 211, Ines: 199, Kofi: 178, Joon: 175, None: 137). Which did you mean?",
+   "rows": [],
+   "latency_ms": 78.7,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA07",
+   "domain": "bakery",
+   "question": "Batches mixed by each baker",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: via batches.mixed_by_baker_id=bakers.baker_id -> 4 groups (Ines: 231, Lena: 230, Joon: 226, Kofi: 213); via batches.checked_by_baker_id=bakers.baker_id -> 5 groups (Lena: 211, Ines: 199, Kofi: 178, Joon: 175, None: 137). Which did you mean?",
+   "rows": [],
+   "latency_ms": 89.2,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA08",
+   "domain": "bakery",
+   "question": "Batches by baker",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: baker",
+   "rows": [],
+   "latency_ms": 14.9,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA08",
+   "domain": "bakery",
+   "question": "Batches by baker",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: via batches.mixed_by_baker_id=bakers.baker_id -> 4 groups (Ines: 231, Lena: 230, Joon: 226, Kofi: 213); via batches.checked_by_baker_id=bakers.baker_id -> 5 groups (Lena: 211, Ines: 199, Kofi: 178, Joon: 175, None: 137). Which did you mean?",
+   "rows": [],
+   "latency_ms": 77.2,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA08",
+   "domain": "bakery",
+   "question": "Batches by baker",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: via batches.mixed_by_baker_id=bakers.baker_id -> 4 groups (Ines: 231, Lena: 230, Joon: 226, Kofi: 213); via batches.checked_by_baker_id=bakers.baker_id -> 5 groups (Lena: 211, Ines: 199, Kofi: 178, Joon: 175, None: 137). Which did you mean?",
+   "rows": [],
+   "latency_ms": 90.9,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA09",
+   "domain": "bakery",
+   "question": "How many batches were not checked?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: checked; 'not' is not attached to any condition",
+   "rows": [],
+   "latency_ms": 14.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA09",
+   "domain": "bakery",
+   "question": "How many batches were not checked?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"batches\"",
+   "reason": "the question mentions column(s) 'checked (checked_by_baker_id)' that the generated query does not use, so it would ignore part of your question",
+   "rows": [
+    [
+     900
+    ]
+   ],
+   "latency_ms": 78.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA09",
+   "domain": "bakery",
+   "question": "How many batches were not checked?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"batches\"",
+   "reason": "the question mentions column(s) 'checked (checked_by_baker_id)' that the generated query does not use, so it would ignore part of your question",
+   "rows": [
+    [
+     900
+    ]
+   ],
+   "latency_ms": 85.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA10",
+   "domain": "bakery",
+   "question": "Total production cost",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: production, cost",
+   "rows": [],
+   "latency_ms": 14.8,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA10",
+   "domain": "bakery",
+   "question": "Total production cost",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"unit_cost\") AS total_cost FROM \"batches\"",
+   "reason": "I don't know how 'production' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     1158.06
+    ]
+   ],
+   "latency_ms": 78.0,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA10",
+   "domain": "bakery",
+   "question": "Total production cost",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"unit_cost\") AS total_cost FROM \"batches\"",
+   "reason": "I don't know how 'production' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     1158.06
+    ]
+   ],
+   "latency_ms": 92.9,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA11",
+   "domain": "bakery",
+   "question": "Total units made times unit cost",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(((t0.\"units_made\") * (t0.\"unit_cost\"))) AS \"sum_units_made_x_unit_cost\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     129137.3
+    ]
+   ],
+   "latency_ms": 15.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA11",
+   "domain": "bakery",
+   "question": "Total units made times unit cost",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"units_made\") AS sum_units_made, SUM(\"batches\".\"unit_cost\") AS sum_unit_cost FROM \"batches\"",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     101066,
+     1158.06
+    ]
+   ],
+   "latency_ms": 84.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "wrong"
+  },
+  {
+   "id": "BA11",
+   "domain": "bakery",
+   "question": "Total units made times unit cost",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT SUM(((t0.\"units_made\") * (t0.\"unit_cost\"))) AS \"sum_units_made_x_unit_cost\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     129137.3
+    ]
+   ],
+   "latency_ms": 15.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA12",
+   "domain": "bakery",
+   "question": "Units wasted divided by units made",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT ((SUM(t0.\"units_wasted\")) * 1.0 / NULLIF((SUM(t0.\"units_made\")), 0)) AS \"units_wasted_per_units_made\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     0.06262244473908139
+    ]
+   ],
+   "latency_ms": 5.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA12",
+   "domain": "bakery",
+   "question": "Units wasted divided by units made",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"units_wasted\") AS sum_units_wasted, SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\"",
+   "reason": "the answer may not mean what you asked: the question asks for a grouped breakdown but the plan is a single figure",
+   "rows": [
+    [
+     6329,
+     101066
+    ]
+   ],
+   "latency_ms": 82.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA12",
+   "domain": "bakery",
+   "question": "Units wasted divided by units made",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT ((SUM(t0.\"units_wasted\")) * 1.0 / NULLIF((SUM(t0.\"units_made\")), 0)) AS \"units_wasted_per_units_made\" FROM \"batches\" AS t0",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     0.06262244473908139
+    ]
+   ],
+   "latency_ms": 16.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA13",
+   "domain": "bakery",
+   "question": "How many batches got a complaint?",
+   "mode": "typed",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"complaints\" AS x0_0 WHERE x0_0.\"batch_id\" = t0.\"batch_id\"))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     53
+    ]
+   ],
+   "latency_ms": 7.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA13",
+   "domain": "bakery",
+   "question": "How many batches got a complaint?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT COUNT(*) AS row_count FROM \"batches\"",
+   "reason": "the question is about 'complaint', but the query's base table is 'batches' and does not involve them, so it would answer at the wrong grain",
+   "rows": [
+    [
+     900
+    ]
+   ],
+   "latency_ms": 79.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA13",
+   "domain": "bakery",
+   "question": "How many batches got a complaint?",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"complaints\" AS x0_0 WHERE x0_0.\"batch_id\" = t0.\"batch_id\"))",
+   "reason": "every word was grounded, the plan passed verification and the query executed",
+   "rows": [
+    [
+     53
+    ]
+   ],
+   "latency_ms": 16.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA14",
+   "domain": "bakery",
+   "question": "Batches with a burnt complaint",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"complaints\" AS x0_0 WHERE x0_0.\"batch_id\" = t0.\"batch_id\" AND x0_0.\"reason\" IN ('burnt')))",
+   "reason": "answer rests on: counting batches rows",
+   "rows": [
+    [
+     15
+    ]
+   ],
+   "latency_ms": 6.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA14",
+   "domain": "bakery",
+   "question": "Batches with a burnt complaint",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('bakery'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 58.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA14",
+   "domain": "bakery",
+   "question": "Batches with a burnt complaint",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"complaints\" AS x0_0 WHERE x0_0.\"batch_id\" = t0.\"batch_id\" AND x0_0.\"reason\" IN ('burnt')))",
+   "reason": "answer rests on: counting batches rows",
+   "rows": [
+    [
+     15
+    ]
+   ],
+   "latency_ms": 17.5,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA15",
+   "domain": "bakery",
+   "question": "Units made of gluten-free recipes",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0 LEFT JOIN \"recipes\" AS j1 ON j1.\"recipe_id\" = t0.\"recipe_id\" WHERE (j1.\"is_gluten_free\" = 1)",
+   "reason": "answer rests on: units_made is summed (no aggregation word was given)",
+   "rows": [
+    [
+     32914
+    ]
+   ],
+   "latency_ms": 6.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA15",
+   "domain": "bakery",
+   "question": "Units made of gluten-free recipes",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id WHERE j_recipe_id.is_gluten_free = 1",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     32914
+    ]
+   ],
+   "latency_ms": 82.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA15",
+   "domain": "bakery",
+   "question": "Units made of gluten-free recipes",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0 LEFT JOIN \"recipes\" AS j1 ON j1.\"recipe_id\" = t0.\"recipe_id\" WHERE (j1.\"is_gluten_free\" = 1)",
+   "reason": "answer rests on: units_made is summed (no aggregation word was given)",
+   "rows": [
+    [
+     32914
+    ]
+   ],
+   "latency_ms": 16.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA16",
+   "domain": "bakery",
+   "question": "Monthly units made",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT substr(t0.\"bake_dt\",1,7) AS \"month\", SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0 GROUP BY substr(t0.\"bake_dt\",1,7) ORDER BY \"month\"",
+   "reason": "answer rests on: units_made is summed (no aggregation word was given)",
+   "rows": [
+    [
+     "2025-01",
+     6877
+    ],
+    [
+     "2025-02",
+     7341
+    ],
+    [
+     "2025-03",
+     10123
+    ],
+    [
+     "2025-04",
+     8164
+    ],
+    [
+     "2025-05",
+     8934
+    ],
+    [
+     "2025-06",
+     7175
+    ],
+    [
+     "2025-07",
+     9046
+    ],
+    [
+     "2025-08",
+     8863
+    ],
+    [
+     "2025-09",
+     10301
+    ],
+    [
+     "2025-10",
+     7227
+    ],
+    [
+     "2025-11",
+     7327
+    ],
+    [
+     "2025-12",
+     9688
+    ]
+   ],
+   "latency_ms": 5.2,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA16",
+   "domain": "bakery",
+   "question": "Monthly units made",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT substr(\"batches\".\"bake_dt\",1,7) AS month, SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\" GROUP BY substr(\"batches\".\"bake_dt\",1,7) ORDER BY month",
+   "reason": "confidence 1.00 \u2265 0.70",
+   "rows": [
+    [
+     "2025-01",
+     6877
+    ],
+    [
+     "2025-02",
+     7341
+    ],
+    [
+     "2025-03",
+     10123
+    ],
+    [
+     "2025-04",
+     8164
+    ],
+    [
+     "2025-05",
+     8934
+    ],
+    [
+     "2025-06",
+     7175
+    ],
+    [
+     "2025-07",
+     9046
+    ],
+    [
+     "2025-08",
+     8863
+    ],
+    [
+     "2025-09",
+     10301
+    ],
+    [
+     "2025-10",
+     7227
+    ],
+    [
+     "2025-11",
+     7327
+    ],
+    [
+     "2025-12",
+     9688
+    ]
+   ],
+   "latency_ms": 83.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA16",
+   "domain": "bakery",
+   "question": "Monthly units made",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT substr(t0.\"bake_dt\",1,7) AS \"month\", SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0 GROUP BY substr(t0.\"bake_dt\",1,7) ORDER BY \"month\"",
+   "reason": "answer rests on: units_made is summed (no aggregation word was given)",
+   "rows": [
+    [
+     "2025-01",
+     6877
+    ],
+    [
+     "2025-02",
+     7341
+    ],
+    [
+     "2025-03",
+     10123
+    ],
+    [
+     "2025-04",
+     8164
+    ],
+    [
+     "2025-05",
+     8934
+    ],
+    [
+     "2025-06",
+     7175
+    ],
+    [
+     "2025-07",
+     9046
+    ],
+    [
+     "2025-08",
+     8863
+    ],
+    [
+     "2025-09",
+     10301
+    ],
+    [
+     "2025-10",
+     7227
+    ],
+    [
+     "2025-11",
+     7327
+    ],
+    [
+     "2025-12",
+     9688
+    ]
+   ],
+   "latency_ms": 16.4,
+   "expect": "answer",
+   "kind": "rowset",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA17",
+   "domain": "bakery",
+   "question": "Units made in the first half of 2025",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0 WHERE ((t0.\"bake_dt\" >= '2025-01-01' AND t0.\"bake_dt\" < '2025-07-01'))",
+   "reason": "answer rests on: units_made is summed (no aggregation word was given)",
+   "rows": [
+    [
+     48614
+    ]
+   ],
+   "latency_ms": 6.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA17",
+   "domain": "bakery",
+   "question": "Units made in the first half of 2025",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT SUM(\"batches\".\"units_made\") AS sum_units_made FROM \"batches\" WHERE \"batches\".\"bake_dt\" >= '2025-01-01' AND \"batches\".\"bake_dt\" < '2025-07-01'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     48614
+    ]
+   ],
+   "latency_ms": 82.3,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA17",
+   "domain": "bakery",
+   "question": "Units made in the first half of 2025",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT SUM(t0.\"units_made\") AS \"sum_units_made\" FROM \"batches\" AS t0 WHERE ((t0.\"bake_dt\" >= '2025-01-01' AND t0.\"bake_dt\" < '2025-07-01'))",
+   "reason": "answer rests on: units_made is summed (no aggregation word was given)",
+   "rows": [
+    [
+     48614
+    ]
+   ],
+   "latency_ms": 16.0,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA18",
+   "domain": "bakery",
+   "question": "Average oven temperature for Sourdough Loaf batches",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: Average, oven, temperature",
+   "rows": [],
+   "latency_ms": 4.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA18",
+   "domain": "bakery",
+   "question": "Average oven temperature for Sourdough Loaf batches",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT AVG(\"batches\".\"oven_temp_c\") AS avg_oven_temp_c FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id WHERE j_recipe_id.recipe_nm = 'Sourdough Loaf'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     210.6122448979592
+    ]
+   ],
+   "latency_ms": 82.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA18",
+   "domain": "bakery",
+   "question": "Average oven temperature for Sourdough Loaf batches",
+   "mode": "typed+legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT AVG(\"batches\".\"oven_temp_c\") AS avg_oven_temp_c FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id WHERE j_recipe_id.recipe_nm = 'Sourdough Loaf'",
+   "reason": "confidence 0.98 \u2265 0.70",
+   "rows": [
+    [
+     210.6122448979592
+    ]
+   ],
+   "latency_ms": 92.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA19",
+   "domain": "bakery",
+   "question": "Top 3 recipes by units wasted",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT j1.\"recipe_nm\" AS \"recipe_nm\", SUM(t0.\"units_wasted\") AS \"sum_units_wasted\" FROM \"batches\" AS t0 LEFT JOIN \"recipes\" AS j1 ON j1.\"recipe_id\" = t0.\"recipe_id\" GROUP BY j1.\"recipe_nm\" ORDER BY \"sum_units_wasted\" DESC, \"recipe_nm\" LIMIT 3",
+   "reason": "answer rests on: units_wasted is summed (no aggregation word was given)",
+   "rows": [
+    [
+     "Sourdough Loaf",
+     1107
+    ],
+    [
+     "Rye Loaf",
+     1106
+    ],
+    [
+     "Almond Croissant",
+     1100
+    ]
+   ],
+   "latency_ms": 15.6,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA19",
+   "domain": "bakery",
+   "question": "Top 3 recipes by units wasted",
+   "mode": "legacy",
+   "action": "ANSWER",
+   "path": "legacy",
+   "sql": "SELECT j_recipe_id.recipe_nm AS recipe_nm, SUM(\"batches\".\"units_wasted\") AS sum_units_wasted FROM \"batches\" LEFT JOIN recipes AS j_recipe_id ON j_recipe_id.recipe_id = batches.recipe_id WHERE j_recipe_id.recipe_nm IS NOT NULL GROUP BY j_recipe_id.recipe_nm ORDER BY sum_units_wasted DESC LIMIT 3",
+   "reason": "confidence 0.99 \u2265 0.70",
+   "rows": [
+    [
+     "Sourdough Loaf",
+     1107
+    ],
+    [
+     "Rye Loaf",
+     1106
+    ],
+    [
+     "Almond Croissant",
+     1100
+    ]
+   ],
+   "latency_ms": 83.8,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA19",
+   "domain": "bakery",
+   "question": "Top 3 recipes by units wasted",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT j1.\"recipe_nm\" AS \"recipe_nm\", SUM(t0.\"units_wasted\") AS \"sum_units_wasted\" FROM \"batches\" AS t0 LEFT JOIN \"recipes\" AS j1 ON j1.\"recipe_id\" = t0.\"recipe_id\" GROUP BY j1.\"recipe_nm\" ORDER BY \"sum_units_wasted\" DESC, \"recipe_nm\" LIMIT 3",
+   "reason": "answer rests on: units_wasted is summed (no aggregation word was given)",
+   "rows": [
+    [
+     "Sourdough Loaf",
+     1107
+    ],
+    [
+     "Rye Loaf",
+     1106
+    ],
+    [
+     "Almond Croissant",
+     1100
+    ]
+   ],
+   "latency_ms": 16.9,
+   "expect": "answer",
+   "kind": "ordered",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA20",
+   "domain": "bakery",
+   "question": "Percentage of batches that passed QC",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"passed_qc\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"batches\" AS t0",
+   "reason": "answer rests on: counting batches rows",
+   "rows": [
+    [
+     90.55555555555556
+    ]
+   ],
+   "latency_ms": 5.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA20",
+   "domain": "bakery",
+   "question": "Percentage of batches that passed QC",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('bakery'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 80.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA20",
+   "domain": "bakery",
+   "question": "Percentage of batches that passed QC",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"passed_qc\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"batches\" AS t0",
+   "reason": "answer rests on: counting batches rows",
+   "rows": [
+    [
+     90.55555555555556
+    ]
+   ],
+   "latency_ms": 20.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA21",
+   "domain": "bakery",
+   "question": "Which bakers are most careful?",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: no measure could be grounded; words not grounded: careful, bakers",
+   "rows": [],
+   "latency_ms": 5.8,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA21",
+   "domain": "bakery",
+   "question": "Which bakers are most careful?",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_mixed_by_baker_id.baker_nm AS mixed_by_baker_id, COUNT(*) AS row_count FROM \"batches\" LEFT JOIN bakers AS j_mixed_by_baker_id ON j_mixed_by_baker_id.baker_id = batches.mixed_by_baker_id WHERE j_mixed_by_baker_id.baker_nm IS NOT NULL GROUP BY j_mixed_by_baker_id.baker_nm ORDER BY row_count DESC LIMIT 1",
+   "reason": "I don't know how 'careful' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "Ines",
+     231
+    ]
+   ],
+   "latency_ms": 76.2,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA21",
+   "domain": "bakery",
+   "question": "Which bakers are most careful?",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "SELECT j_mixed_by_baker_id.baker_nm AS mixed_by_baker_id, COUNT(*) AS row_count FROM \"batches\" LEFT JOIN bakers AS j_mixed_by_baker_id ON j_mixed_by_baker_id.baker_id = batches.mixed_by_baker_id WHERE j_mixed_by_baker_id.baker_nm IS NOT NULL GROUP BY j_mixed_by_baker_id.baker_nm ORDER BY row_count DESC LIMIT 1",
+   "reason": "I don't know how 'careful' maps to this data, so the answer could ignore part of your question",
+   "rows": [
+    [
+     "Ines",
+     231
+    ]
+   ],
+   "latency_ms": 90.4,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA22",
+   "domain": "bakery",
+   "question": "Batches baked at 240 degrees or more",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: words not grounded: degrees",
+   "rows": [],
+   "latency_ms": 15.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA22",
+   "domain": "bakery",
+   "question": "Batches baked at 240 degrees or more",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('bakery'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 58.8,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA22",
+   "domain": "bakery",
+   "question": "Batches baked at 240 degrees or more",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('bakery'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 74.2,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA23",
+   "domain": "bakery",
+   "question": "Batches checked by Lena",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 LEFT JOIN \"bakers\" AS j1 ON j1.\"baker_id\" = t0.\"checked_by_baker_id\" WHERE (j1.\"baker_nm\" IN ('Lena'))",
+   "reason": "answer rests on: counting batches rows; a join was inferred from column names and contents (not declared in the schema)",
+   "rows": [
+    [
+     211
+    ]
+   ],
+   "latency_ms": 22.9,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA23",
+   "domain": "bakery",
+   "question": "Batches checked by Lena",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('bakery'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 88.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA23",
+   "domain": "bakery",
+   "question": "Batches checked by Lena",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 LEFT JOIN \"bakers\" AS j1 ON j1.\"baker_id\" = t0.\"checked_by_baker_id\" WHERE (j1.\"baker_nm\" IN ('Lena'))",
+   "reason": "answer rests on: counting batches rows; a join was inferred from column names and contents (not declared in the schema)",
+   "rows": [
+    [
+     211
+    ]
+   ],
+   "latency_ms": 22.4,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "correct"
+  },
+  {
+   "id": "BA24",
+   "domain": "bakery",
+   "question": "Waste rate by shift",
+   "mode": "typed",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'shift' could be bakers.shift via mixed_by_baker_id or bakers.shift via checked_by_baker_id; 'shift' could be bakers.shift via mixed_by_baker_id or bakers.shift via checked_by_baker_id",
+   "rows": [],
+   "latency_ms": 6.7,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA24",
+   "domain": "bakery",
+   "question": "Waste rate by shift",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "This question can be read more than one way and the answer depends on it: via batches.mixed_by_baker_id=bakers.baker_id -> 2 groups (early: 457, late: 443); via batches.checked_by_baker_id=bakers.baker_id -> 3 groups (late: 389, early: 374, None: 137). Which did you mean?",
+   "rows": [],
+   "latency_ms": 119.9,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA24",
+   "domain": "bakery",
+   "question": "Waste rate by shift",
+   "mode": "typed+legacy",
+   "action": "CLARIFY",
+   "path": "typed",
+   "sql": "",
+   "reason": "I need a clarification: 'shift' could be bakers.shift via mixed_by_baker_id or bakers.shift via checked_by_baker_id; 'shift' could be bakers.shift via mixed_by_baker_id or bakers.shift via checked_by_baker_id",
+   "rows": [],
+   "latency_ms": 22.3,
+   "expect": "clarify",
+   "kind": null,
+   "outcome": "abstain_ok"
+  },
+  {
+   "id": "BA25",
+   "domain": "bakery",
+   "question": "Batches without any complaint for pastry recipes",
+   "mode": "typed",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 LEFT JOIN \"recipes\" AS j1 ON j1.\"recipe_id\" = t0.\"recipe_id\" WHERE ((j1.\"category\" IS NULL OR j1.\"category\" NOT IN ('pastry'))) AND (NOT EXISTS (SELECT 1 FROM \"complaints\" AS x1_0 WHERE x1_0.\"batch_id\" = t0.\"batch_id\"))",
+   "reason": "answer rests on: rows with no category are kept when excluding pastry; counting batches rows",
+   "rows": [
+    [
+     569
+    ]
+   ],
+   "latency_ms": 12.1,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "wrong"
+  },
+  {
+   "id": "BA25",
+   "domain": "bakery",
+   "question": "Batches without any complaint for pastry recipes",
+   "mode": "legacy",
+   "action": "CLARIFY",
+   "path": "legacy",
+   "sql": "",
+   "reason": "Question is too vague or off-scope for the loaded dataset ('bakery'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "rows": [],
+   "latency_ms": 87.7,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "abstain"
+  },
+  {
+   "id": "BA25",
+   "domain": "bakery",
+   "question": "Batches without any complaint for pastry recipes",
+   "mode": "typed+legacy",
+   "action": "WARN",
+   "path": "typed",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"batches\" AS t0 LEFT JOIN \"recipes\" AS j1 ON j1.\"recipe_id\" = t0.\"recipe_id\" WHERE ((j1.\"category\" IS NULL OR j1.\"category\" NOT IN ('pastry'))) AND (NOT EXISTS (SELECT 1 FROM \"complaints\" AS x1_0 WHERE x1_0.\"batch_id\" = t0.\"batch_id\"))",
+   "reason": "answer rests on: rows with no category are kept when excluding pastry; counting batches rows",
+   "rows": [
+    [
+     569
+    ]
+   ],
+   "latency_ms": 27.6,
+   "expect": "answer",
+   "kind": "scalar",
+   "outcome": "wrong"
+  }
+ ]
+}
