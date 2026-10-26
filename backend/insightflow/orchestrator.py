@@ -1058,6 +1058,7 @@ class Orchestrator:
                        "confidence": {"score": score, "signals": signals,
                                       "note": "ordinal level from hard rules, not a calibrated probability"}}
         notes = list(self._extra_notes) + [f"active_dataset={ds.id} table={ds.table}", "engine=typed"]
+        notes += [f"ambiguity_immaterial: {a}" for a in (q.assumptions if q else []) if "all give the same result" in a]
         return InsightResponse(question=question, sql=r.display_sql, intent="typed",
                                decision=decision, confidence=confidence, analysis=analysis, evidence=evidence,
                                result=result, explanation=explanation, recommendation=None, chart=chart,

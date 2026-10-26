@@ -238,3 +238,8 @@ def test_never_drops_words_that_change_the_answer(dbs, dom, q):
 def test_customers_who_ordered_is_a_distinct_count(dbs):
     r = ask(dbs, "shop", "Number of customers who placed orders")
     assert r.status == "answer" and r.rows[0][0] == ref(dbs, "shop", "SELECT COUNT(DISTINCT cust_id) FROM orders")[0][0]
+
+
+def test_ratio_with_a_lookup_attribute_is_not_summed_per_row(dbs):
+    # credit hours belong to courses; SUM over exam rows would count each course many times
+    assert ask(dbs, "school", "Total points earned divided by credit hours").status != "answer"

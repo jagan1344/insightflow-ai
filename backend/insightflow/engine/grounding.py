@@ -783,6 +783,10 @@ class Grounder:
                 Q.ambiguities.append("an operand of the expression is ambiguous")
             elif any(x.path is not None and x.path.fans_out for x in (ea, eb)):
                 Q.unsupported.append("an expression over a one-to-many table")
+            elif op != "*" and any(x.path is not None for x in (ea, eb)):
+                x = next(x for x in (ea, eb) if x.path is not None)
+                Q.ambiguities.append(f"{x.column} describes {x.table}; totalling it once per {m.anchor} row would count "
+                                     f"each {x.table} row several times")
             else:
                 ca, cb = self._col(ea), self._col(eb)
                 for j in range(a.i1, b.i0):
