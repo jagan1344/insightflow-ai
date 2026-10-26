@@ -1,0 +1,926 @@
+"""Question -> typed Query. Every content word must be accounted for by a grounded element (value, column,
+table, role, date, number) or an operator cue; anything left over is reported as unresolved. Competing
+candidates are kept as ambiguities, never resolved arbitrarily. Each decision is recorded as Evidence."""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Set, Tuple
+
+from . import lexicon as L
+from .ir import Agg, Arith, BoolOp, Cmp, Col, Evidence, Exists, InSet, IsNull, Lit, Measure, Not, Query
+from .schema_model import Path, SchemaModel
+from .words import FUNCTION, canon
+
+# ------------------------------------------------------------------ vocabulary of operations (language only)
+LIGHT = {canon(w) for w in """
+have has had get got make made do did take took come came go went happen occur show see give record recorded
+log logged list tell want need know look find book put use using used involve involved handle handled process
+processed actually currently still ever already overall altogether across all entire whole our us we company
+business data dataset table record records entry entries row rows item items thing things kind kinds type types last
+""".split()} - {canon("item"), canon("items"), canon("type"), canon("types"), canon("kind")}
+FILLER = {"please", "also", "just", "i", "e", "eg", "ie", "etc", "currently", "actually", "ever", "so", "far"}
+
+AGG_CUES = [
+    (r"\bhow\s+much\b", "sum"), (r"\btotals?\b", "sum"), (r"\bsum(?:\s+of)?\b", "sum"), (r"\bcombined\b", "sum"),
+    (r"\baverage\b|\bavg\b|\bmean\b|\btypical\b", "avg"),
+    (r"\bhow\s+many\b", "count"), (r"\bnumber\s+of\b", "count"), (r"\bcount(?:\s+of)?\b", "count"),
+    (r"\bvolume\b", "count"),
+    (r"\bmaximum\b|\bmax\b|\blargest\b|\bbiggest\b|\bhighest\b", "max"),
+    (r"\bminimum\b|\bmin\b|\bsmallest\b|\blowest\b", "min"),
+]
+DISTINCT_CUE = r"\b(?:distinct|unique|different)\b"
+GROUP_CUES = r"\b(?:broken\s+(?:out|down)\s+by|split\s+by|grouped\s+by|break\s+(?:it\s+)?down\s+by|for\s+each|for\s+every|by\s+each|in\s+each|by|per|each|every)\b"
+NEG_CUES = (r"\b(?:not|no|never|without|excluding|exclude|except(?:\s+for)?|other\s+than|apart\s+from|"
+            r"leaving\s+out|leave\s+out|skip|skipping|ignore|ignoring|omit|omitting|non)\b")
+NULL_AFTER = (r"^\s*(?:(?:is|was|are|were|has\s+been|have\s+been)\s+)?(?:missing|unknown|blank|empty|null|unrecorded|unset|"
+              r"left\s+blank|not\s+(?:recorded|known|set|entered|given|provided|filled\s+in|captured|on\s+file|assigned)|"
+              r"(?:isn't|wasn't|aren't|weren't|hasn't\s+been|haven't\s+been)\s+(?:recorded|known|set|entered|on\s+file|assigned))\b")
+NULL_BEFORE = (r"(?:\bno|\bwithout\s+(?:an?\s+|any\s+)?|\bmissing|\bunknown|\b(?:do|does|did)\s+not\s+have\s+(?:an?\s+|any\s+)?|"
+               r"\bnever\s+(?:got|had|received|was\s+given)\s+(?:an?\s+|any\s+)?|\bhas\s+no|\bhave\s+no|\bhad\s+no)\s*$")
+NOTNULL_AFTER = r"^\s*(?:(?:is|was|are|were)\s+)?(?:on\s+file|recorded|known|present|set|provided|filled\s+in)\b"
+PCT_CUE = r"\b(?:percentage|percent|share|proportion|fraction)\b|%"
+TOP_CUE = r"\b(?:top|bottom|best|worst|leading)\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b"
+WHICH_N = r"\b(?:which|what)\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\b"
+RANK_DESC = r"\b(?:most|highest|largest|biggest|top|greatest|best)\b"
+RANK_ASC = r"\b(?:least|lowest|smallest|fewest|bottom|worst)\b"
+BUCKET_CUES = [(r"\bmonthly\b|\bmonth[\s-]+by[\s-]+month\b|\b(?:by|per|each|every|a)\s+month\b|\bmonth\s+over\s+month\b", "month"),
+               (r"\bquarterly\b|\b(?:by|per|each|every|a)\s+quarter\b", "quarter"),
+               (r"\byearly\b|\bannually\b|\b(?:by|per|each|every|a)\s+year\b|\byear\s+over\s+year\b", "year"),
+               (r"\bweekly\b|\b(?:by|per|each|every|a)\s+week\b", "week"),
+               (r"\bdaily\b|\b(?:by|per|each|every|a)\s+day\b", "day")]
+COMPARE = r"\b(?:vs\.?|versus|compared?\s+(?:to|with)|compare|minus|difference|change[ds]?|more|fewer|less)\b"
+NUMWORD = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+POLARITY = {"ok", "good", "valid", "success", "successful", "pass", "passed", "active", "standing", "complet", "clean"}
+ANTONYM = r"\b(?:faulty|failed|failing|failure|broken|bad|invalid|incomplete|problem|problems|issue|issues|declined|rejected|unsuccessful|errors?)\b"
+POSITIVE = r"\b(?:ok|okay|good|valid|successful|success|passed|working|clean|complete)\b"
+
+MONTHS = {m: i for i, m in enumerate(["january", "february", "march", "april", "may", "june", "july", "august",
+                                      "september", "october", "november", "december"], 1)}
+MON = r"(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)"
+YEAR = r"((?:19|20)\d{2})"
+
+
+def _mon(s: str) -> int:
+    s = s.lower()[:3]
+    return next(i for m, i in MONTHS.items() if m.startswith(s))
+
+
+def _nxt(y: int, m: int) -> str:
+    return f"{y + (m == 12):04d}-{(m % 12) + 1:02d}-01"
+
+
+@dataclass
+class Tok:
+    text: str
+    low: str
+    can: str
+    s: int
+    e: int
+
+
+@dataclass
+class Period:
+    lo: str
+    hi: str           # exclusive
+    label: str
+    i0: int
+    i1: int
+
+
+@dataclass
+class Mention:
+    i0: int
+    i1: int
+    kind: str          # col | table | value
+    cands: list        # ColEntry / TableEntry / ValueEntry
+    text: str
+
+
+@dataclass
+class Grounding:
+    query: Query
+    mentions: List[Mention] = field(default_factory=list)
+    periods: List[Period] = field(default_factory=list)
+    consumed: Dict[int, str] = field(default_factory=dict)
+
+
+class Grounder:
+    def __init__(self, model: SchemaModel, lex: L.Lexicon):
+        self.m, self.lex = model, lex
+
+    # ------------------------------------------------------------------ helpers
+    def _tok(self, q: str) -> List[Tok]:
+        return [Tok(m.group(0), m.group(0).lower(), canon(m.group(0)), m.start(), m.end())
+                for m in re.finditer(r"[A-Za-z0-9]+(?:\.[0-9]+)?", q)]
+
+    def _span(self, s: int, e: int) -> Tuple[int, int]:
+        idx = [i for i, t in enumerate(self.t) if t.s >= s and t.e <= e]
+        return (idx[0], idx[-1] + 1) if idx else (-1, -1)
+
+    def _use(self, i0: int, i1: int, why: str) -> None:
+        for i in range(i0, i1):
+            self.used.setdefault(i, why)
+
+    def _free(self, i0: int, i1: int) -> bool:
+        return all(i not in self.used for i in range(i0, i1))
+
+    def _text(self, i0: int, i1: int) -> str:
+        return self.q[self.t[i0].s:self.t[i1 - 1].e] if 0 <= i0 < i1 <= len(self.t) else ""
+
+    def _ev(self, i0, i1, what, why):
+        self.Q.evidence.append(Evidence(self._text(i0, i1), what, why))
+
+    def _col(self, e) -> Col:
+        return Col(e.table, e.column, e.path)
+
+    # ------------------------------------------------------------------ main
+    def ground(self, question: str) -> Grounding:
+        q = question.strip()
+        q = re.sub(r"(?<=\d),(?=\d{3}\b)", "", q)
+        q = re.sub(r"\b(\w+)n't\b", lambda m: {"wo": "will", "ca": "can", "sha": "shall"}.get(m.group(1).lower(), m.group(1)) + " not", q, flags=re.I)
+        q = q.replace("%", " percent ")
+        self.q, self.ql = q, q.lower()
+        self.t = self._tok(q)
+        self.used: Dict[int, str] = {}
+        self.Q = Query()
+        self.G = Grounding(self.Q)
+        self._values()
+        self._periods()
+        self._numbers_and_limits()
+        self._schema_mentions()
+        self._assemble()
+        self._account()
+        return self.G
+
+    # ------------------------------------------------------------------ values
+    def _values(self) -> None:
+        found = []
+        for lo, ents in sorted(self.lex.values.items(), key=lambda kv: -len(kv[0])):
+            pat = rf"(?<![A-Za-z0-9]){re.escape(lo)}(?:s|es)?(?![A-Za-z0-9])"
+            for m in re.finditer(pat, self.ql):
+                orig = self.q[m.start():m.start() + len(lo)]
+                if lo in FUNCTION and orig != ents[0].text:
+                    continue
+                if len(lo) <= 3 and all(e.text.isupper() for e in ents) and orig != orig.upper():
+                    continue
+                i0, i1 = self._span(m.start(), m.end())
+                if i0 < 0 or not self._free(i0, i1):
+                    continue
+                self._use(i0, i1, "value")
+                found.append(Mention(i0, i1, "value", ents, orig))
+        self.G.mentions += found
+
+    # ------------------------------------------------------------------ dates
+    def _add_period(self, s, e, lo, hi, label):
+        i0, i1 = self._span(s, e)
+        if i0 < 0 or not self._free(i0, i1):
+            return
+        self._use(i0, i1, "date")
+        self.G.periods.append(Period(lo, hi, label, i0, i1))
+
+    def _periods(self) -> None:
+        ql = self.ql
+        # month ranges: "january through june 2025", "from january to june 2025"
+        for m in re.finditer(rf"\b(?:from\s+|between\s+)?{MON}\s+(?:{YEAR}\s+)?(?:through|thru|to|until|-|and)\s+{MON}\s+{YEAR}\b", ql):
+            y1 = int(m.group(2) or m.group(4)); y2 = int(m.group(4))
+            self._add_period(m.start(), m.end(), f"{y1:04d}-{_mon(m.group(1)):02d}-01", _nxt(y2, _mon(m.group(3))), m.group(0))
+        # quarter pairs sharing a year: "q1 vs q2 2025"
+        for m in re.finditer(rf"\bq([1-4])\s+(?:and|vs\.?|versus|to|or|compared\s+(?:to|with))\s+q([1-4])\s+(?:of\s+)?{YEAR}\b", ql):
+            y = int(m.group(3))
+            for qn, (a, b) in ((m.group(1), (m.start(), m.start() + 2)), (m.group(2), (m.start(2) - 1, m.end(2)))):
+                n = int(qn)
+                self.G.periods.append(Period(f"{y:04d}-{3 * n - 2:02d}-01", _nxt(y, 3 * n), f"q{n} {y}", *self._span(a, b)))
+            self._use(*self._span(m.start(), m.end()), "date")
+        # month pairs sharing a year: "april vs may 2025"
+        for m in re.finditer(rf"\b{MON}\s+(?:and|vs\.?|versus|or|compared\s+(?:to|with))\s+{MON}\s+{YEAR}\b", ql):
+            if not self._free(*self._span(m.start(), m.end())):
+                continue
+            y = int(m.group(3))
+            for mon, (a, b) in ((m.group(1), m.span(1)), (m.group(2), m.span(2))):
+                k = _mon(mon)
+                self.G.periods.append(Period(f"{y:04d}-{k:02d}-01", _nxt(y, k), f"{mon} {y}", *self._span(a, b)))
+            self._use(*self._span(m.start(), m.end()), "date")
+        for m in re.finditer(rf"\b(?:the\s+)?(first|second|1st|2nd)\s+half\s+(?:of\s+)?{YEAR}\b|\bh([12])\s+{YEAR}\b", ql):
+            y = int(m.group(2) or m.group(4)); h = 1 if (m.group(1) or "").startswith(("first", "1")) or m.group(3) == "1" else 2
+            self._add_period(m.start(), m.end(), f"{y:04d}-{1 if h == 1 else 7:02d}-01", f"{y if h == 1 else y + 1:04d}-{7 if h == 1 else 1:02d}-01", m.group(0))
+        for m in re.finditer(rf"\b(?:q([1-4])|(first|second|third|fourth)\s+quarter)\s+(?:of\s+)?{YEAR}\b", ql):
+            n = int(m.group(1)) if m.group(1) else ["first", "second", "third", "fourth"].index(m.group(2)) + 1
+            y = int(m.group(3))
+            self._add_period(m.start(), m.end(), f"{y:04d}-{3 * n - 2:02d}-01", _nxt(y, 3 * n), m.group(0))
+        for m in re.finditer(r"\b((?:19|20)\d{2})-(\d{2})-(\d{2})\b", ql):
+            d = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+            import datetime as _d
+            nx = (_d.date.fromisoformat(d) + _d.timedelta(days=1)).isoformat()
+            self._add_period(m.start(), m.end(), d, nx, d)
+        for m in re.finditer(rf"\b{MON}\.?\s+{YEAR}\b", ql):
+            k, y = _mon(m.group(1)), int(m.group(2))
+            self._add_period(m.start(), m.end(), f"{y:04d}-{k:02d}-01", _nxt(y, k), m.group(0))
+        for m in re.finditer(rf"\b(?:from|between)\s+{YEAR}\s+(?:to|and|through|until)\s+{YEAR}\b|\b{YEAR}\s*(?:-|through|to)\s*{YEAR}\b", ql):
+            a = int(m.group(1) or m.group(3)); b = int(m.group(2) or m.group(4))
+            self._add_period(m.start(), m.end(), f"{a:04d}-01-01", f"{b + 1:04d}-01-01", m.group(0))
+        for m in re.finditer(rf"\b(before|after|since|until|through)\s+{YEAR}\b", ql):
+            y = int(m.group(2)); w = m.group(1)
+            lo, hi = ("0001-01-01", f"{y:04d}-01-01") if w == "before" else (f"{y + 1:04d}-01-01", "9999-12-31") if w == "after" \
+                else (f"{y:04d}-01-01", "9999-12-31") if w == "since" else ("0001-01-01", f"{y + 1:04d}-01-01")
+            self._add_period(m.start(), m.end(), lo, hi, m.group(0))
+        for m in re.finditer(rf"(?<![\d-]){YEAR}(?![\d-])", ql):
+            y = int(m.group(1))
+            self._add_period(m.start(), m.end(), f"{y:04d}-01-01", f"{y + 1:04d}-01-01", m.group(0))
+        self.G.periods.sort(key=lambda p: p.i0)
+        if re.search(r"\b(?:last|this|next|previous|past|current)\s+(?:\d+\s+)?(?:year|quarter|month|week|day)s?\b|\byesterday\b|\btoday\b|\bytd\b", ql):
+            self.Q.unsupported.append("relative dates (last/this/next period) are not resolved against a reference date")
+
+    # ------------------------------------------------------------------ numbers, comparators, limits
+    def _numbers_and_limits(self) -> None:
+        ql = self.ql
+        self.limits = []
+        for rx in (TOP_CUE, WHICH_N, r"\b(?:the\s+)?(\d+|three|five|ten)\s+(?:highest|largest|biggest|most|lowest|smallest|fewest|least|top|best|worst)\b"):
+            for m in re.finditer(rx, ql):
+                n = m.group(1)
+                n = int(n) if n.isdigit() else NUMWORD.get(n)
+                i0, i1 = self._span(m.start(), m.end())
+                if n and i0 >= 0 and self._free(i0, i1):
+                    self.limits.append((n, i0, i1, m.group(0)))
+                    self._use(i0, i1, "limit")
+        self.nums = []
+        GE = r"at\s+least|no\s+less\s+than|minimum\s+of|a\s+minimum\s+of"
+        GT = r"more\s+than|greater\s+than|over|above|exceeding|higher\s+than|larger\s+than|bigger\s+than|heavier\s+than|longer\s+than|older\s+than|later\s+than|after"
+        LE = r"at\s+most|no\s+more\s+than|maximum\s+of|up\s+to"
+        LT = r"less\s+than|fewer\s+than|under|below|lower\s+than|smaller\s+than|lighter\s+than|shorter\s+than|younger\s+than|cheaper\s+than|before"
+        EQ = r"exactly|equal\s+to|equals|of|=|is|at"
+        pre = rf"(?:({GE})|({GT})|({LE})|({LT})|({EQ}))\s+"
+        for m in re.finditer(rf"(?:{pre})?(?<![\w.])(\d+(?:\.\d+)?)(?![\w.])(\s*(?:\+|or\s+(?:more|higher|greater|above|over|up|longer|later|heavier)|and\s+(?:up|above|over)|or\s+(?:less|fewer|lower|below|under|shorter)|and\s+(?:below|under)))?", ql):
+            i0, i1 = self._span(m.start(6), m.end(6))
+            if i0 < 0 or not self._free(i0, i1):
+                continue
+            op = ">=" if m.group(1) else ">" if m.group(2) else "<=" if m.group(3) else "<" if m.group(4) else "="
+            suf = (m.group(7) or "").strip()
+            if suf:
+                op = ">=" if re.search(r"\+|more|higher|greater|above|over|up|longer|later|heavier", suf) else "<="
+            explicit = bool(m.group(1) or m.group(2) or m.group(3) or m.group(4) or suf)
+            j0, j1 = self._span(m.start(), m.end())
+            self.nums.append(dict(value=float(m.group(6)), op=op, i0=j0, i1=j1, explicit=explicit, num_i=i0))
+            self._use(j0 if explicit else i0, j1 if explicit else i1, "number")
+
+    # ------------------------------------------------------------------ schema mentions
+    def _match(self, allowed: Set[str], required: Set[str], i: int) -> Optional[Tuple[int, Set[str]]]:
+        got, j, last = set(), i, None
+        while j < len(self.t):
+            if j in self.used:
+                break
+            c = self.t[j].can
+            pre = [w for w in allowed if 3 <= len(w) <= 4 and len(self.t[j].low) > len(w) and self.t[j].low.startswith(w)]
+            if c in allowed or pre:
+                got.add(c if c in allowed else pre[0]); last = j
+            elif c in ("of", "the") and last is not None and j + 1 < len(self.t):
+                pass
+            else:
+                break
+            j += 1
+        if last is None or not required <= got:
+            return None
+        return last + 1, got
+
+    def _schema_mentions(self) -> None:
+        cands = []
+        for e in self.lex.cols:
+            allowed = set(e.words) | set(e.role_words)
+            req = set(e.core) - POLARITY if self.m.col(e.table, e.column).kind == "boolean" and set(e.core) - POLARITY else set(e.core)
+            for i in range(len(self.t)):
+                if i in self.used or not (self.t[i].can in allowed or any(
+                        3 <= len(w) <= 4 and len(self.t[i].low) > len(w) and self.t[i].low.startswith(w) for w in allowed)):
+                    continue
+                r = self._match(allowed, req, i)
+                if r:
+                    end, got = r
+                    rolehit = len(got & set(e.role_words))
+                    cands.append((end - i, len(got) + rolehit, i, end, "col", e))
+        for te in self.lex.tables:
+            allowed = set(te.words) | set(te.role_words)
+            req = set(te.words[-1:]) | (set(te.role_words) if te.role_words else set())
+            for i in range(len(self.t)):
+                if self.t[i].can not in allowed or i in self.used:
+                    continue
+                r = self._match(allowed, req, i)
+                if r:
+                    end, got = r
+                    cands.append((end - i, len(got) - 0.5, i, end, "table", te))
+        cands.sort(key=lambda c: (-c[0], -c[1], c[2]))
+        taken: Dict[Tuple[int, int], Mention] = {}
+        for ln, sc, i, end, kind, e in cands:
+            key = (i, end)
+            if key in taken:
+                mm = taken[key]
+                if mm.kind == kind and mm.score == sc:
+                    mm.cands.append(e)
+                continue
+            if not self._free(i, end):
+                continue
+            mm = Mention(i, end, kind, [e], self._text(i, end))
+            mm.score = sc
+            taken[key] = mm
+            self._use(i, end, kind)
+        self.G.mentions += list(taken.values())
+        self.G.mentions.sort(key=lambda x: x.i0)
+
+    # ------------------------------------------------------------------ assembly
+    def _near(self, rx: str, i0: int, i1: int, before: int = 4, after: int = 0) -> Optional[re.Match]:
+        s = self.t[max(0, i0 - before)].s if before else self.t[i0].s
+        e = self.t[min(len(self.t), i1 + after) - 1].e if after else self.t[i0].s
+        return re.search(rx, self.ql[s:e] if before else self.ql[self.t[i1 - 1].e:e])
+
+    def _neg_before(self, i0: int, window: int = 5) -> Optional[Tuple[int, int]]:
+        lo = max(0, i0 - window)
+        seg_s, seg_e = self.t[lo].s, self.t[i0].s
+        best = None
+        for m in re.finditer(NEG_CUES, self.ql[seg_s:seg_e]):
+            mid = self.ql[seg_s + m.end():seg_e]
+            if re.search(r"\b(?:and|but|or|,|which|that)\b|,", mid) and not re.match(r"\s*(?:\w+\s+){0,1}$", mid):
+                continue
+            best = self._span(seg_s + m.start(), seg_s + m.end())
+        return best
+
+    def _choose_path(self, ents, i0: int, i1: int):
+        """Several candidates for one mention: keep those whose role / table words appear next to it."""
+        if len({e.key if hasattr(e, "key") else (e.table, e.column, e.path and e.path.role) for e in ents}) <= 1:
+            return ents[0], None
+        near = {self.t[j].can for j in range(max(0, i0 - 3), min(len(self.t), i1 + 3))}
+        best = []
+        for e in ents:
+            p = e.path
+            rw = set(L._role_words(p, e.table)) if p is not None else set()
+            cw = set(self.m.col(e.table, e.column).words) if hasattr(e, "column") else set()
+            tw = set(self.lex.model and [w for w in (canon(x) for x in re.split(r"[^a-z0-9]+", e.table.lower())) if w])
+            hit = len(rw & near) * 2 + len((cw | tw) & near)
+            best.append((hit, e))
+        best.sort(key=lambda x: -x[0])
+        if best[0][0] > 0 and (len(best) == 1 or best[0][0] > best[1][0]):
+            w = best[0][1]
+            for j in range(max(0, i0 - 3), min(len(self.t), i1 + 3)):
+                if j not in self.used and self.t[j].can in (set(L._role_words(w.path, w.table)) if w.path else set()) | \
+                        set(self.m.col(w.table, w.column).words if hasattr(w, "column") else []) | {canon(x) for x in w.table.split("_")}:
+                    self.used[j] = "context"
+            return w, None
+        return None, [f"{getattr(e, 'table', '')}.{getattr(e, 'column', '')}" + (f" via {e.path.role}" if e.path is not None and e.path.role else "") for e in ents]
+
+    def _pred_for(self, e, p) -> object:
+        """Wrap a predicate on a column of `e`'s table: EXISTS when the table is reached one-to-many."""
+        if e.path is not None and e.path.fans_out:
+            return Exists(e.path, p if not isinstance(p, InSet) or not p.negated else InSet(p.col, p.values, False))
+        return p
+
+    def _assemble(self) -> None:
+        Q, m = self.Q, self.m
+        ql = self.ql
+        conds: List[Tuple[int, object]] = []          # (token position, predicate)
+        cols_m = [x for x in self.G.mentions if x.kind == "col"]
+        tabs_m = [x for x in self.G.mentions if x.kind == "table"]
+        vals_m = [x for x in self.G.mentions if x.kind == "value"]
+
+        # values -> equality / exclusion (EXISTS for one-to-many tables)
+        groups: Dict[str, List] = {}
+        for vm in vals_m:
+            ents = vm.cands
+            by_col = {}
+            for e in ents:
+                by_col.setdefault((e.table, e.column, e.path.role if e.path else "", id(e.path)), e)
+            ents = list(by_col.values())
+            e, amb = self._choose_path(ents, vm.i0, vm.i1)
+            if e is None:
+                Q.ambiguities.append(f"'{vm.text}' could be " + " or ".join(amb))
+                continue
+            neg = self._neg_before(vm.i0)
+            if neg:
+                self._use(*neg, "negation")
+            col = Col(e.table, e.column, e.path if e.path and not e.path.fans_out else e.path)
+            groups.setdefault((col.key(), bool(neg), id(e.path)), []).append((vm, e, col))
+        for (_k, neg, _p), items in groups.items():
+            vm, e, col = items[0]
+            vals = tuple(dict.fromkeys(x[1].text for x in items))
+            if e.path is not None and e.path.fans_out:
+                inner = InSet(Col(e.table, e.column, None), vals)
+                p = Exists(e.path, inner, negated=neg)
+            else:
+                p = InSet(col, vals, negated=neg)
+                if neg:
+                    Q.assumptions.append(f"rows with no {e.column} are kept when excluding {', '.join(vals)}")
+            conds.append((vm.i0, p))
+            self._ev(vm.i0, items[-1][0].i1, f"{e.table}.{e.column} {'NOT IN' if neg else 'IN'} {vals}", "stored value")
+
+        # columns: classify by kind and context
+        measures_c, dims_c, dates_c, bools_c, ids_c = [], [], [], [], []
+        for cm in cols_m:
+            e, amb = self._choose_path(cm.cands, cm.i0, cm.i1)
+            if e is None:
+                # several columns share these words; a measure context may still decide later
+                kinds = {m.col(x.table, x.column).kind for x in cm.cands}
+                cm.amb = amb
+                if kinds == {"measure"}:
+                    measures_c.append(cm)
+                elif kinds == {"date"}:
+                    dates_c.append(cm)
+                else:
+                    Q.ambiguities.append(f"'{cm.text}' could be " + " or ".join(amb))
+                continue
+            cm.e = e; cm.amb = None
+            k = m.col(e.table, e.column).kind
+            {"measure": measures_c, "date": dates_c, "boolean": bools_c, "id": ids_c}.get(k, dims_c).append(cm)
+
+        # booleans -> conditions with polarity
+        for bm in bools_c:
+            e = bm.e
+            words = set(m.col(e.table, e.column).words)
+            pol = bool(words & POLARITY)
+            neg = self._neg_before(bm.i0, 4)
+            v = 1
+            ant = self._near(ANTONYM, bm.i0, bm.i1, before=3) or (re.search(ANTONYM, ql[self.t[bm.i1 - 1].e:self.t[min(len(self.t), bm.i1 + 2) - 1].e]) if bm.i1 < len(self.t) else None)
+            if pol:
+                has_word = bool(words & POLARITY & {self.t[j].can for j in range(bm.i0, bm.i1)})
+                posw = self._near(POSITIVE, bm.i0, bm.i1, before=3)
+                if ant:
+                    v = 0
+                elif not (has_word or posw):
+                    Q.ambiguities.append(f"'{bm.text}' does not say which value of {e.column} is meant")
+                    continue
+            if neg:
+                v = 1 - v
+                self._use(*neg, "negation")
+            if ant:
+                for j in range(max(0, bm.i0 - 3), min(len(self.t), bm.i1 + 2)):
+                    if re.fullmatch(ANTONYM.replace(r"\b", ""), self.t[j].low):
+                        self.used.setdefault(j, "polarity")
+            if re.match(r"^\s*(?:[a-z]+\s+)?(?:included|as\s+well|too)\b", ql[self.t[bm.i1 - 1].e:]) or \
+                    re.search(r"\b(?:including|incl|plus|even)\s+(?:the\s+|all\s+)?$", ql[:self.t[bm.i0].s]):
+                self._ev(bm.i0, bm.i1, f"{e.column}: no condition", "inclusion phrase ('... included')")
+                for j in range(bm.i1, min(len(self.t), bm.i1 + 3)):
+                    if self.t[j].low in ("included", "too", "well", "as", "ones"):
+                        self.used.setdefault(j, "inclusion")
+                continue
+            p = self._pred_for(e, Cmp(Col(e.table, e.column, None if e.path and e.path.fans_out else e.path), "=", Lit(v)))
+            if isinstance(p, Exists) and neg:
+                p = Exists(e.path, Cmp(Col(e.table, e.column, None), "=", Lit(1 - v)), False)
+            conds.append((bm.i0, p))
+            self._ev(bm.i0, bm.i1, f"{e.table}.{e.column} = {v}", "0/1 column" + (" (negated)" if neg else ""))
+
+        # NULL conditions on any mentioned column (incl. FK ids and table nouns of parents)
+        def null_check(mm, col_e, is_table=False):
+            after = ql[self.t[mm.i1 - 1].e:]
+            before = ql[:self.t[mm.i0].s]
+            nn = re.match(NOTNULL_AFTER, after)
+            isn = re.match(NULL_AFTER, after) or re.search(NULL_BEFORE, before)
+            if not (isn or nn):
+                return None
+            negated = bool(nn and not isn)
+            outer = re.search(r"\b(?:skip|skipping|leave\s+out|leaving\s+out|exclude|excluding|ignore|ignoring|omit|without|except)\b[^.?]{0,60}$", before[:self.t[mm.i0].s])
+            if outer and isn:
+                negated = not negated
+            for rx, where in ((NULL_AFTER, "after"), (NOTNULL_AFTER, "after"), (NULL_BEFORE, "before")):
+                mt = re.match(rx, after) if where == "after" else re.search(rx, before)
+                if mt:
+                    s0 = self.t[mm.i1 - 1].e + mt.start() if where == "after" else mt.start()
+                    s1 = self.t[mm.i1 - 1].e + mt.end() if where == "after" else mt.end()
+                    a, b = self._span(s0, s1)
+                    if a >= 0:
+                        for j in range(a, b):
+                            self.used.setdefault(j, "null")
+            return IsNull(Col(col_e.table, col_e.column, col_e.path), negated)
+
+        for cm in [c for c in cols_m if getattr(c, "e", None) is not None]:
+            k = m.col(cm.e.table, cm.e.column).kind
+            if k == "boolean":
+                continue
+            p = null_check(cm, cm.e)
+            if p is not None:
+                if cm.e.path is not None and cm.e.path.fans_out:
+                    Q.unsupported.append(f"a missing value on the one-to-many table {cm.e.table}")
+                    continue
+                if cm.e.path is not None and cm.e.path.steps[-1][0].nullable:
+                    Q.unsupported.append(f"'{cm.text}' is missing either when {cm.e.table} has no row or when the value is empty; these cannot be told apart")
+                    continue
+                conds.append((cm.i0, p)); cm.null = True
+                self._ev(cm.i0, cm.i1, f"{cm.e.table}.{cm.e.column} IS {'NOT ' if p.negated else ''}NULL", "missing-value phrasing")
+        for tm in tabs_m:
+            te = tm.cands[0]
+            if te.path is None or te.path.fans_out or len(te.path.steps) != 1:
+                continue
+            fk = te.path.steps[0][0]
+            fake = L.ColEntry(m.anchor, fk.child_col, None, [], [], "id")
+            p = null_check(tm, fake, True)
+            if p is not None:
+                conds.append((tm.i0, p)); tm.null = True
+                self._ev(tm.i0, tm.i1, f"{m.anchor}.{fk.child_col} IS {'NOT ' if p.negated else ''}NULL", "no linked " + te.table)
+
+        # numeric comparisons -> nearest numeric column (measure) by position, or by unit
+        for n in self.nums:
+            if not n["explicit"]:
+                continue
+            best = None
+            for cm in measures_c:
+                if getattr(cm, "e", None) is None:
+                    continue
+                d = min(abs(cm.i1 - n["i0"]), abs(n["i1"] - cm.i0))
+                if best is None or d < best[0]:
+                    best = (d, cm)
+            unit_tok = self.t[n["num_i"] + 1].can if n["num_i"] + 1 < len(self.t) else ""
+            if best is None or best[0] > 4:
+                ucols = [c for c in self.lex.cols if m.col(c.table, c.column).kind == "measure" and m.col(c.table, c.column).unit
+                         and canon(m.col(c.table, c.column).unit) == unit_tok]
+                if len(ucols) == 1:
+                    e = ucols[0]
+                    cm = Mention(n["num_i"], n["num_i"] + 1, "col", [e], self._text(n["num_i"], n["num_i"] + 2)); cm.e = e
+                    best = (0, cm)
+                    self.used.setdefault(n["num_i"] + 1, "unit")
+            if best is None or best[0] > 4:
+                Q.unresolved.append(f"the number {n['value']:g} is not attached to a numeric column")
+                continue
+            cm = best[1]; cm.cmp = True; e = cm.e
+            if n["num_i"] + 1 < len(self.t) and m.col(e.table, e.column).unit and \
+                    self.t[n["num_i"] + 1].can in (canon(m.col(e.table, e.column).unit), canon(m.col(e.table, e.column).unit) + "s"):
+                self.used.setdefault(n["num_i"] + 1, "unit")
+            val = int(n["value"]) if n["value"] == int(n["value"]) else n["value"]
+            p = self._pred_for(e, Cmp(Col(e.table, e.column, None if e.path and e.path.fans_out else e.path), n["op"], Lit(val)))
+            conds.append((n["i0"], p))
+            self._ev(n["i0"], n["i1"], f"{e.table}.{e.column} {n['op']} {val}", "comparison")
+
+        # dates: role
+        anchor_dates = [c for c in m.tables[m.anchor].values() if c.kind == "date"]
+        named = [cm for cm in dates_c if getattr(cm, "e", None) is not None]
+        role_col = None
+        if named:
+            roles = {(x.e.table, x.e.column) for x in named}
+            if len(roles) == 1:
+                role_col = self._col(named[0].e)
+        if role_col is None and len(anchor_dates) == 1:
+            role_col = Col(m.anchor, anchor_dates[0].name, None)
+        if role_col is None and not named:
+            # verbs that name a date column ("signed" -> signed_dt)
+            hits = []
+            for c in anchor_dates:
+                core = [w for w in c.words if w not in L.GENERIC]
+                for j, t in enumerate(self.t):
+                    if j not in self.used and core and t.can in core:
+                        hits.append((c, j))
+            if len({c.name for c, _ in hits}) == 1:
+                role_col = Col(m.anchor, hits[0][0].name, None)
+                for _c, j in hits:
+                    self.used[j] = "date role"
+        periods = self.G.periods
+        comparing = len(periods) >= 2 and re.search(COMPARE, ql)
+
+        # ---------------- measures
+        aggs = []
+        for rx, fn in AGG_CUES:
+            for mt in re.finditer(rx, ql):
+                i0, i1 = self._span(mt.start(), mt.end())
+                if i0 >= 0 and self._free(i0, i1):
+                    aggs.append((i0, i1, fn))
+        aggs.sort()
+        distinct = re.search(DISTINCT_CUE, ql)
+        pct = re.search(PCT_CUE, ql)
+
+        def take(i0, i1, why):
+            self._use(i0, i1, why)
+
+        def additive(e) -> bool:
+            c = m.col(e.table, e.column)
+            ws = set(c.words)
+            return c.kind == "measure" and not (ws & {canon(x) for x in ("rating", "rate", "score", "percent", "pct", "ratio",
+                                                                         "temperature", "avg", "average", "age", "price", "lat", "lon")})
+
+        meas_free = [cm for cm in measures_c if not getattr(cm, "cmp", False)]
+        # explicit products / ratios between measure mentions
+        expr_pairs = []
+        for a, b in zip(meas_free, meas_free[1:]):
+            mid = ql[self.t[a.i1 - 1].e:self.t[b.i0].s]
+            if re.fullmatch(r"\s*(?:times|multiplied\s+by|x|\*)\s*(?:the\s+)?", mid):
+                expr_pairs.append(("*", a, b, mid))
+            elif re.fullmatch(r"\s*(?:divided\s+by|over|/)\s*(?:the\s+)?(?:total\s+)?", mid):
+                expr_pairs.append(("/", a, b, mid))
+
+        def ent(cm):
+            if getattr(cm, "e", None) is not None:
+                return cm.e
+            return None
+
+        cue = None
+        if aggs:
+            cue = aggs[0]
+        measure: Optional[Measure] = None
+        if expr_pairs:
+            op, a, b, mid = expr_pairs[0]
+            ea, eb = ent(a), ent(b)
+            if ea is None or eb is None:
+                Q.ambiguities.append("an operand of the expression is ambiguous")
+            elif any(x.path is not None and x.path.fans_out for x in (ea, eb)):
+                Q.unsupported.append("an expression over a one-to-many table")
+            else:
+                ca, cb = self._col(ea), self._col(eb)
+                for j in range(a.i1, b.i0):
+                    self.used.setdefault(j, "operator")
+                fn = cue[2] if cue else None
+                if op == "*":
+                    if fn in (None, "sum", "count"):
+                        measure = Measure(f"sum_{ea.column}_x_{eb.column}", Agg("sum", Arith("*", ca, cb)), None)
+                        if fn is None:
+                            Q.assumptions.append("the product is summed over the rows")
+                    elif fn == "avg":
+                        measure = Measure(f"avg_{ea.column}_x_{eb.column}", Agg("avg", Arith("*", ca, cb)))
+                    self._ev(a.i0, b.i1, f"SUM({ea.column} * {eb.column})", "product computed per row, then aggregated")
+                else:
+                    measure = Measure(f"{ea.column}_per_{eb.column}", Arith("/", Agg("sum", ca), Agg("sum", cb)))
+                    self._ev(a.i0, b.i1, f"SUM({ea.column}) / SUM({eb.column})", "ratio of totals as stated")
+                if cue:
+                    take(cue[0], cue[1], "aggregation")
+                for x in (a, b):
+                    x.used_as_measure = True
+        if measure is None:
+            # the measure column the cue refers to: the next measure mention after the cue, else the nearest one
+            cm = None
+            if cue:
+                after = [x for x in meas_free if x.i0 >= cue[1]]
+                before = [x for x in meas_free if x.i1 <= cue[0]]
+                cm = after[0] if after else (before[-1] if before else None)
+            elif len(meas_free) == 1:
+                cm = meas_free[0]
+            elif len(meas_free) > 1:
+                cm = meas_free[0]
+            if cm is not None and ent(cm) is None and cue:
+                # ambiguous measure words; still ambiguous
+                Q.ambiguities.append(f"'{cm.text}' could be " + " or ".join(cm.amb))
+                cm = None
+            fn = cue[2] if cue else None
+            if cm is not None:
+                e = ent(cm)
+                if e.path is not None and e.path.fans_out:
+                    Q.unsupported.append(f"a measure on the one-to-many table {e.table} (needs that table as the base)")
+                else:
+                    c = self._col(e)
+                    if fn in ("max", "min", "avg", "sum"):
+                        measure = Measure(f"{fn}_{e.column}", Agg(fn, c), m.col(e.table, e.column).unit)
+                        take(cue[0], cue[1], "aggregation")
+                    elif fn == "count":
+                        # "how many units / kWh / minutes": the quantity is summed, never counted
+                        if not m.col(e.table, e.column).money:
+                            measure = Measure(f"sum_{e.column}", Agg("sum", c), m.col(e.table, e.column).unit)
+                            take(cue[0], cue[1], "aggregation")
+                            self._ev(cue[0], cm.i1, f"SUM({e.column})", "'how many <quantity>' sums the quantity")
+                        else:
+                            Q.ambiguities.append(f"'how many' with the money column {e.column}: a count of rows or a sum?")
+                    elif fn is None:
+                        if additive(e):
+                            measure = Measure(f"sum_{e.column}", Agg("sum", c), m.col(e.table, e.column).unit)
+                            Q.assumptions.append(f"{e.column} is summed (no aggregation word was given)")
+                        else:
+                            Q.unresolved.append(f"no aggregation was stated for {e.column}, which is not additive")
+                    cm.used_as_measure = True
+                    if measure:
+                        self._ev(cm.i0, cm.i1, f"{measure.expr.func.upper()}({e.table}.{e.column})" if isinstance(measure.expr, Agg) else str(measure.expr), "measure column")
+        # counts of rows or entities
+        if measure is None and (cue and cue[2] == "count" or (distinct and not meas_free)):
+            target = None
+            after_t = [x for x in tabs_m if (cue is None or x.i0 >= cue[1]) and not getattr(x, "null", False)]
+            after_c = [x for x in dims_c + ids_c if (cue is None or x.i0 >= cue[1]) and getattr(x, "e", None) is not None
+                       and not getattr(x, "null", False)]
+            if distinct and (after_c or after_t):
+                nxt = sorted(after_c + after_t, key=lambda x: x.i0)[0]
+                if nxt.kind == "col":
+                    e = nxt.e
+                    if e.path is not None and e.path.fans_out:
+                        Q.unsupported.append(f"distinct count over the one-to-many table {e.table}")
+                    else:
+                        measure = Measure(f"distinct_{e.column}", Agg("count_distinct", self._col(e)))
+                        nxt.used_as_measure = True
+                else:
+                    te = nxt.cands[0]
+                    if te.path is None:
+                        measure = Measure("row_count", Agg("count"))
+                    elif not te.path.fans_out and len(te.path.steps) == 1:
+                        fk = te.path.steps[0][0]
+                        measure = Measure(f"distinct_{fk.child_col}", Agg("count_distinct", Col(m.anchor, fk.child_col, None)))
+                    else:
+                        Q.unsupported.append(f"counting {te.table} from {m.anchor}")
+                    nxt.used_as_measure = True
+                distinct_span = self._span(distinct.start(), distinct.end())
+                take(*distinct_span, "distinct")
+            elif after_t:
+                te = after_t[0].cands[0]
+                if te.path is None:
+                    measure = Measure("row_count", Agg("count"))
+                elif not te.path.fans_out and len(te.path.steps) == 1:
+                    fk = te.path.steps[0][0]
+                    measure = Measure(f"distinct_{fk.child_col}", Agg("count_distinct", Col(m.anchor, fk.child_col, None)))
+                    Q.assumptions.append(f"'{after_t[0].text}' counted as distinct {fk.child_col} values on {m.anchor}")
+                else:
+                    Q.unsupported.append(f"counting {te.table} rows from {m.anchor}")
+                after_t[0].used_as_measure = True
+            else:
+                measure = Measure("row_count", Agg("count"))
+                Q.assumptions.append(f"counting {m.anchor} rows")
+            if cue:
+                take(cue[0], cue[1], "aggregation")
+            if measure:
+                self._ev(cue[0] if cue else 0, cue[1] if cue else 0, measure.expr.func.upper(), "count")
+        if measure is None and not Q.unsupported and not Q.ambiguities:
+            # a bare anchor noun with a percentage / grouping and no measure ("share of orders by city")
+            if pct or any(re.search(GROUP_CUES, ql) for _ in [0]):
+                if any(x.cands[0].path is None for x in tabs_m):
+                    measure = Measure("row_count", Agg("count"))
+                    Q.assumptions.append(f"counting {m.anchor} rows")
+        if measure is None and not Q.unsupported:
+            Q.unresolved.append("no measure could be grounded")
+
+        # ---------------- percentages / shares
+        grouping = self._grouping(dims_c, tabs_m, ids_c)
+        if pct and measure is not None:
+            ps, pe = self._span(pct.start(), pct.end())
+            take(ps, pe, "percentage")
+            if grouping:
+                Q.share_of_total = True
+                self._ev(ps, pe, "share of the grand total per group", "percentage with grouping")
+            else:
+                # conditions stated after the subject ('of delivered orders') are the numerator condition
+                pivot = self._pct_pivot(ps)
+                num = [p for pos, p in conds if pos >= pivot]
+                base = [p for pos, p in conds if pos < pivot]
+                if not num:
+                    Q.unresolved.append("the percentage has no condition for its numerator")
+                else:
+                    w = num[0] if len(num) == 1 else BoolOp("and", tuple(num))
+                    ex = measure.expr
+                    if isinstance(ex, Agg) and ex.func in ("sum", "count"):
+                        numer = Agg(ex.func, ex.arg, w)
+                        measure = Measure("percent", Arith("*", Lit(100.0), Arith("/", numer, ex)), "percent")
+                        conds = [(0, p) for p in base]
+                        self._ev(ps, pe, "100 * (with condition) / (all)", "percentage of rows or of a total")
+                    else:
+                        Q.unsupported.append("a percentage of a non-additive measure")
+
+        # ---------------- periods
+        filters = [p for _pos, p in conds]
+        if periods:
+            if role_col is None:
+                if len(anchor_dates) > 1:
+                    Q.ambiguities.append("the question gives a period but not which date: " + ", ".join(c.name for c in anchor_dates))
+                elif not anchor_dates:
+                    Q.unsupported.append("no date column on the base table")
+            elif comparing and measure is not None and isinstance(measure.expr, Agg) and measure.expr.where is None:
+                ms = []
+                for p in periods[:2]:
+                    w = BoolOp("and", (Cmp(role_col, ">=", Lit(p.lo)), Cmp(role_col, "<", Lit(p.hi))))
+                    ms.append(Measure(f"{measure.name}_{re.sub(r'[^a-z0-9]+', '_', p.label)}", Agg(measure.expr.func, measure.expr.arg, w), measure.unit))
+                Q.measures = ms
+                if re.search(r"\b(?:minus|difference|change[ds]?|differ|more|fewer|less|how\s+much\s+(?:higher|lower))\b", ql):
+                    later = max(periods[:2], key=lambda p: p.lo) if not re.search(r"\(\s*\w+\s+minus", ql) else periods[0]
+                    other = [p for p in periods[:2] if p is not later][0]
+                    li = periods.index(later)
+                    Q.measures.append(Measure("difference", Arith("-", ms[li].expr, ms[1 - li].expr), measure.unit))
+                    Q.assumptions.append(f"difference = {later.label} minus {other.label}")
+                for mt in re.finditer(COMPARE, ql):
+                    a, b = self._span(mt.start(), mt.end())
+                    take(a, b, "comparison")
+                self._ev(periods[0].i0, periods[1].i1, f"{role_col.column}: {periods[0].label} vs {periods[1].label}", "period comparison")
+                measure = None
+            else:
+                lo = min(p.lo for p in periods); hi = max(p.hi for p in periods)
+                if len(periods) > 1 and not re.search(r"\b(?:from|through|to|until|between|thru)\b", ql):
+                    Q.ambiguities.append("several periods are named; a comparison or a range?")
+                filters.append(BoolOp("and", (Cmp(role_col, ">=", Lit(lo)), Cmp(role_col, "<", Lit(hi)))))
+                self._ev(periods[0].i0, periods[-1].i1, f"{role_col.column} in [{lo}, {hi})", "period on the chosen date column")
+        if measure is not None:
+            Q.measures = [measure]
+        Q.filters = filters
+
+        # ---------------- grouping, time buckets, ranking
+        Q.group_by = grouping
+        for rx, unit in BUCKET_CUES:
+            mt = re.search(rx, ql)
+            if mt:
+                a, b = self._span(mt.start(), mt.end())
+                if a >= 0 and self._free(a, b):
+                    if role_col is None:
+                        if len(anchor_dates) > 1:
+                            Q.ambiguities.append(f"'{mt.group(0)}' does not say which date: " + ", ".join(c.name for c in anchor_dates))
+                        else:
+                            Q.unsupported.append("no date column for a time series")
+                    else:
+                        Q.time_bucket = (role_col, unit)
+                        self._ev(a, b, f"{unit} of {role_col.column}", "time series")
+                    take(a, b, "time bucket")
+                break
+        if self.limits:
+            n, a, b, txt = self.limits[0]
+            Q.limit = n
+            Q.order_desc = not re.search(RANK_ASC, txt)
+            if not Q.group_by:
+                Q.unresolved.append(f"'{txt}' ranks something, but no group was grounded")
+        rk = re.search(r"\b(?:the\s+)?(most|highest|largest|biggest|least|lowest|smallest|fewest)\b", ql)
+        if rk:
+            a, b = self._span(rk.start(), rk.end())
+            if a >= 0 and self._free(a, b) and Q.group_by:
+                Q.order_desc = rk.group(1) in ("most", "highest", "largest", "biggest")
+                if Q.limit is None and re.search(r"\bwhich\s+\w+", ql) and not re.search(r"\beach\b|\bevery\b", ql):
+                    Q.limit = 1
+                take(a, b, "ranking")
+        Q.shape = "ranked" if Q.limit else "series" if Q.time_bucket else "grouped" if Q.group_by else "scalar"
+
+    def _pct_pivot(self, pct_tok: int) -> int:
+        """Token index after the subject of 'percentage of <subject> <verb> ...'."""
+        for j in range(pct_tok, len(self.t)):
+            if self.t[j].low in ("were", "was", "are", "is", "had", "have", "has", "got", "did", "that", "which", "came",
+                                 "come", "arrived", "went", "ended", "showed", "turned") and j > pct_tok + 1:
+                return j
+        return pct_tok
+
+    def _grouping(self, dims_c, tabs_m, ids_c) -> List[Col]:
+        out = []
+        ql = self.ql
+        for mt in re.finditer(GROUP_CUES, ql):
+            a, b = self._span(mt.start(), mt.end())
+            if a < 0 or not self._free(a, b):
+                continue
+            cands = [x for x in self.G.mentions if x.i0 >= b and x.i0 <= b + 3 and x.kind in ("col", "table")
+                     and not getattr(x, "used_as_measure", False) and not getattr(x, "null", False)]
+            if not cands:
+                continue
+            x = cands[0]
+            if x.kind == "col":
+                e = getattr(x, "e", None)
+                if e is None:
+                    self.Q.ambiguities.append(f"'{x.text}' could be " + " or ".join(x.amb)); continue
+                k = self.m.col(e.table, e.column).kind
+                if k in ("measure", "date"):
+                    continue
+                if k == "id" and e.path is None:
+                    tgt = [te for te in self.lex.tables if te.path is not None and te.path.role == e.column and not te.path.fans_out]
+                    if tgt and tgt[0].display:
+                        out.append(Col(tgt[0].table, tgt[0].display, tgt[0].path))
+                        self._use(a, b, "group"); self._ev(x.i0, x.i1, f"group by {tgt[0].table}.{tgt[0].display}", "entity label"); continue
+                if e.path is not None and e.path.fans_out:
+                    self.Q.unsupported.append(f"grouping by {e.table}.{e.column} (one-to-many) would count rows more than once")
+                    continue
+                out.append(self._col(e))
+                self._use(a, b, "group"); self._ev(x.i0, x.i1, f"group by {e.table}.{e.column}", "grouping")
+            else:
+                tes = x.cands
+                if len({(t.table, t.path.role if t.path else "") for t in tes}) > 1:
+                    w, amb = self._choose_path([L.ColEntry(t.table, t.display or "", t.path, [], [], "text") for t in tes], x.i0, x.i1)
+                    if w is None:
+                        self.Q.ambiguities.append(f"'{x.text}' is reached in more than one way: " + " or ".join(amb)); continue
+                    te = next(t for t in tes if t.path is w.path)
+                else:
+                    te = tes[0]
+                if te.path is None:
+                    continue
+                if te.path.fans_out:
+                    self.Q.unsupported.append(f"grouping by {te.table} (one-to-many) would count rows more than once")
+                    continue
+                if not te.display:
+                    self.Q.unresolved.append(f"{te.table} has no name column to label groups")
+                    continue
+                out.append(Col(te.table, te.display, te.path))
+                self._use(a, b, "group"); self._ev(x.i0, x.i1, f"group by {te.table}.{te.display}", "entity label")
+        return list(dict.fromkeys(out))
+
+    # ------------------------------------------------------------------ accounting
+    def _account(self) -> None:
+        # the base table's own noun and generic words are not unresolved content
+        for x in self.G.mentions:
+            if x.kind == "table" and x.cands[0].path is None:
+                self._use(x.i0, x.i1, "base table")
+        # a verb directly before "by <value or entity>" links them ("taught by Ana Ruiz", "driven by drivers")
+        for x in self.G.mentions:
+            if x.kind in ("value", "table") and x.i0 >= 2 and self.t[x.i0 - 1].low == "by" and (x.i0 - 2) not in self.used:
+                self.used[x.i0 - 2] = "linking verb"
+                self.used.setdefault(x.i0 - 1, "linking verb")
+        left = []
+        for i, t in enumerate(self.t):
+            if i in self.used:
+                continue
+            if t.low in FUNCTION or t.can in FUNCTION or t.can in LIGHT or t.low in FILLER or t.low.isdigit():
+                continue
+            if any(x.i0 <= i < x.i1 for x in self.G.mentions):
+                continue
+            left.append(t.text)
+        unused = [x for x in self.G.mentions if x.kind in ("col", "table") and not self._mention_used(x)]
+        for x in unused:
+            left.append(x.text)
+        if left:
+            self.Q.unresolved.append("words not grounded: " + ", ".join(dict.fromkeys(left)))
+
+    def _mention_used(self, x) -> bool:
+        if getattr(x, "used_as_measure", False) or getattr(x, "null", False) or getattr(x, "cmp", False):
+            return True
+        if x.kind == "table" and x.cands[0].path is None:
+            return True
+        cols = {(c.table, c.column) for c in self.Q.cols()}
+        for e in x.cands:
+            if x.kind == "col" and (e.table, e.column) in cols:
+                return True
+            if x.kind == "table" and any(c.table == e.table for c in self.Q.cols()):
+                return True
+        for f in self.Q.filters:
+            if isinstance(f, Exists) and any(e.table in {st[0].child for st in f.path.steps} | {st[0].parent for st in f.path.steps}
+                                             for e in x.cands):
+                return True
+        return any(ev.span and x.text.lower() in ev.span.lower() and "no condition" in ev.grounded_to for ev in self.Q.evidence)

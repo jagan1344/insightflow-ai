@@ -1,0 +1,438 @@
+### FD01 [direct_kpi] CLARIFY
+Q: How much did we take in delivery fees on orders that were actually delivered?
+REF: SELECT SUM(dlv_fee) FROM orders WHERE order_status = 'DELIVERED'
+SQL: 
+WHY: 'delivered' could mean the value 'DELIVERED' of order_status -> 1064, or just ordinary wording -> 1200. Which did you mean?
+
+### FD02 [breakdown] CLARIFY
+Q: Give me the number of orders for each type of cuisine. Skip restaurants that don't have a cuisine on file.
+REF: SELECT r.cuisine, COUNT(*) FROM orders o JOIN restaurants r ON r.restaurant_id = o.restaurant_id WHERE r.cuisine IS NOT NULL GROUP BY r.cuisine
+SQL: SELECT j_restaurant_id.cuisine AS cuisine, COUNT(*) AS order_count FROM "orders" LEFT JOIN restaurants AS j_restaurant_id ON j_restaurant_id.restaurant_id = orders.restaurant_id GROUP BY j_restaurant_id.cuisine ORDER BY order_count DESC
+WHY: plan requires items not in the dataset: unsupported_negative_existence:don't
+
+### FD03 [top_n] CLARIFY
+Q: Which 3 restaurants brought in the most food sales (before fees and tips) on delivered orders?
+REF: SELECT r.rest_nm, SUM(o.subtotal_amt) AS s FROM orders o JOIN restaurants r ON r.restaurant_id = o.restaurant_id WHERE o.order_status = 'DELIVERED' GROUP BY r.rest_nm ORDER BY s DESC LIMIT 3
+SQL: 
+WHY: 'delivered' could mean the value 'DELIVERED' of order_status -> 3 groups (Burger Barn: 489.86, Taco Loco (Downtown): 395.85, Green Bowl: 376.03), or just ordina
+
+### FD04 [trend] CLARIFY
+Q: Show monthly order volume for January through June 2025, going by when the order was placed.
+REF: SELECT strftime('%Y-%m', order_ts) AS m, COUNT(*) FROM orders WHERE order_ts >= '2025-01-01' AND order_ts < '2025-07-01' GROUP BY m
+SQL: SELECT substr("orders"."order_ts",1,7) AS month, COUNT(*) AS row_count FROM "orders" WHERE "orders"."order_ts" >= '2025-01-01' AND "orders"."order_ts" < '2025-07-01' GROUP BY substr("orders"."order_ts",1,7) ORDER BY month
+WHY: I don't know how 'volume' maps to this data, so the answer could ignore part of your question
+
+### FD05 [multi_table_join] CLARIFY
+Q: Total tips broken out by the kind of vehicle the courier rides (bike, car, scooter). Leave out couriers whose vehicle isn't recorded.
+REF: SELECT c.vehicle_cd, SUM(o.tip_amt) FROM orders o JOIN couriers c ON c.courier_id = o.courier_id WHERE c.vehicle_cd IS NOT NULL GROUP BY c.vehicle_cd
+SQL: SELECT SUM("orders"."tip_amt") AS sum_tip_amt FROM "orders" LEFT JOIN couriers AS j_courier_id ON j_courier_id.courier_id = orders.courier_id WHERE j_courier_id.vehicle_cd = 'BIKE'
+WHY: the question mentions 'car' (in couriers.vehicle_cd) but the query I generated does not use it, so the answer would ignore part of your question
+
+### FD06 [related_numeric_threshold] CLARIFY
+Q: How many delivered orders came from restaurants whose average prep time is 15 minutes or more?
+REF: SELECT COUNT(*) FROM orders o JOIN restaurants r ON r.restaurant_id = o.restaurant_id WHERE o.order_status = 'DELIVERED' AND r.avg_prep_min >= 15
+SQL: 
+WHY: 'delivered' could mean the value 'DELIVERED' of order_status -> 1064, or just ordinary wording -> 1200. Which did you mean?
+
+### FD07 [fk_inference] CLARIFY
+Q: What's the average star rating customers give each courier? List by courier name.
+REF: SELECT c.courier_nm, AVG(o.cust_rating) FROM orders o JOIN couriers c ON c.courier_id = o.courier_id WHERE o.cust_rating IS NOT NULL GROUP BY c.courier_nm
+SQL: SELECT j_courier_id.courier_nm AS courier_nm, COUNT(*) AS row_count FROM "orders" LEFT JOIN couriers AS j_courier_id ON j_courier_id.courier_id = orders.courier_id GROUP BY j_courier_id.courier_nm ORDER BY row_count DESC
+WHY: the question is about 'customers', but the query's base table is 'orders' and does not involve them, so it would answer at the wrong grain
+
+### FD08 [abbreviation] CLARIFY
+Q: avg tkt size (subtotal) for GOLD-tier custs, delivered orders only?
+REF: SELECT AVG(o.subtotal_amt) FROM orders o JOIN customers c ON c.cust_id = o.cust_id WHERE c.loyalty_tier = 'GOLD' AND o.order_status = 'DELIVERED'
+SQL: 
+WHY: This question can be read more than one way and the answer depends on it: via orders.cust_id=customers.cust_id -> 5,279.39; via orders.cust_rating=customers.cus
+
+### FD09 [negation_exclusion] CLARIFY
+Q: How many orders didn't use the SAVE10 promo?
+REF: SELECT COUNT(*) FROM orders WHERE promo_cd IS NULL OR promo_cd <> 'SAVE10'
+SQL: SELECT COUNT(*) AS row_count FROM "orders" WHERE "orders"."promo_cd" = 'SAVE10'
+WHY: the answer may not mean what you asked: the question excludes 'SAVE10' but the query keeps only rows equal to it
+
+### FD10 [boolean_flag] CLARIFY
+Q: How many delivered orders showed up late?
+REF: SELECT COUNT(*) FROM orders WHERE order_status = 'DELIVERED' AND is_late = 1
+SQL: 
+WHY: 'delivered' could mean the value 'DELIVERED' of order_status -> 405, or just ordinary wording -> 427. Which did you mean?
+
+### FD11 [boolean_flag] CLARIFY
+Q: Of the delivered orders, how many had a problem with the drop-off, i.e. weren't marked as delivered OK?
+REF: SELECT COUNT(*) FROM orders WHERE order_status = 'DELIVERED' AND delivered_ok = 0
+SQL: SELECT COUNT(*) AS order_count FROM "orders" WHERE "orders"."order_status" = 'DELIVERED' AND "orders"."delivered_ok" = 1
+WHY: I don't know how 'problem' maps to this data, so the answer could ignore part of your question
+
+### FD12 [distinct_count] CLARIFY
+Q: How many different customers have ordered from Mama's Kitchen?
+REF: SELECT COUNT(DISTINCT o.cust_id) FROM orders o JOIN restaurants r ON r.restaurant_id = o.restaurant_id WHERE r.rest_nm = 'Mama''s Kitchen'
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset — optionally with a breakdown, tim
+
+### FD13 [join_fanout] CLARIFY
+Q: What's the total delivery fee on delivered orders that had at least one drink in them?
+REF: SELECT SUM(o.dlv_fee) FROM orders o WHERE o.order_status = 'DELIVERED' AND EXISTS (SELECT 1 FROM order_items i WHERE i.order_id = o.order_id AND i.item_cat = 'DRINK')
+SQL: 
+WHY: 'delivered' could mean the value 'DELIVERED' of order_status -> 478, or just ordinary wording -> 542. Which did you mean?
+
+### FD14 [null_condition] CLARIFY
+Q: How many orders never got a courier assigned?
+REF: SELECT COUNT(*) FROM orders WHERE courier_id IS NULL
+SQL: SELECT COUNT(*) AS row_count FROM "orders"
+WHY: plan requires items not in the dataset: unsupported_negative_existence:never
+
+### FD15 [period_comparison] CLARIFY
+Q: Compare delivered order counts for Q1 vs Q2 2025 (by order date).
+REF: SELECT CASE WHEN order_ts < '2025-04-01' THEN 'Q1' ELSE 'Q2' END AS q, COUNT(*) FROM orders WHERE order_status = 'DELIVERED' AND order_ts >= '2025-01-01' AND order_ts < '2025-07-01' GROUP BY q
+SQL: SELECT '2025-02' AS period, COUNT(*) AS row_count FROM "orders" WHERE "order_ts" >= '2025-02-01' AND "order_ts" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, COUNT(*) AS row_count FROM "orders" WHERE "order_ts" >= '2025-05-01' AND "order_ts" < '2025-06-01' ORDER BY period
+WHY: plan → SQL fidelity check failed: the generated SQL does not fully implement the analytical plan
+
+### FD16 [ratio] CLARIFY
+Q: What percentage of delivered orders arrived late?
+REF: SELECT 100.0 * SUM(is_late) / COUNT(*) FROM orders WHERE order_status = 'DELIVERED'
+SQL: 
+WHY: 'delivered' could mean the value 'DELIVERED' of order_status -> 405, or just ordinary wording -> 427. Which did you mean?
+
+### FD17 [share_of_total] CLARIFY
+Q: What share of delivered food sales came from restaurants in each city? Give percentages.
+REF: SELECT r.city, 100.0 * SUM(o.subtotal_amt) / (SELECT SUM(subtotal_amt) FROM orders WHERE order_status = 'DELIVERED') FROM orders o JOIN restaurants r ON r.restaurant_id = o.restaurant_id WHERE o.order_status = 'DELIVERED' GROUP BY r.city
+SQL: 
+WHY: this is computed as 100 x (total delivered food sales for restaurants in each city? Give percentages.) / (total delivered food sales), but a part could not be a
+
+### FD18 [multi_table_join] CLARIFY
+Q: What were total food sales at Closed Corner Cafe?
+REF: SELECT SUM(o.subtotal_amt) FROM orders o JOIN restaurants r ON r.restaurant_id = o.restaurant_id WHERE r.rest_nm = 'Closed Corner Cafe'
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset — optionally with a breakdown, tim
+
+### LS01 [direct_kpi] ANSWER
+Q: What's the total monthly rent across all of our active leases?
+REF: SELECT SUM(monthly_rent) FROM leases WHERE lease_status = 'ACTIVE'
+SQL: SELECT substr("leases"."monthly_rent",1,7) AS month, COUNT(*) AS row_count FROM "leases" WHERE "leases"."lease_status" = 'ACTIVE' AND "leases"."monthly_rent" IS NOT NULL GROUP BY substr("leases"."monthly_rent",1,7) ORDER BY month
+WHY: confidence 1.00 ≥ 0.70
+
+### LS02 [breakdown] CLARIFY
+Q: How many leases have we written for each unit type?
+REF: SELECT u.unit_type, COUNT(*) FROM leases l JOIN units u ON u.unit_id = l.unit_id GROUP BY u.unit_type
+SQL: SELECT j_unit_id.unit_type AS unit_type, COUNT(*) AS row_count FROM "leases" LEFT JOIN units AS j_unit_id ON j_unit_id.unit_id = leases.unit_id GROUP BY j_unit_id.unit_type ORDER BY row_count DESC
+WHY: I don't know how 'written' maps to this data, so the answer could ignore part of your question
+
+### LS03 [top_n] CLARIFY
+Q: Which three buildings had the highest average monthly rent on leases signed during 2024?
+REF: SELECT u.bldg_name, AVG(l.monthly_rent) AS a FROM leases l JOIN units u ON u.unit_id = l.unit_id WHERE l.signed_dt BETWEEN '2024-01-01' AND '2024-12-31' GROUP BY u.bldg_name ORDER BY a DESC LIMIT 3
+SQL: 
+WHY: This question can be read more than one way and the answer depends on it: by signed_dt -> 7.17; by start_dt -> 7.42; by end_dt -> 6.83; by monthly_rent -> None.
+
+### LS04 [trend] CLARIFY
+Q: How many leases began in each year from 2019 to 2025?
+REF: SELECT strftime('%Y', start_dt), COUNT(*) FROM leases WHERE start_dt BETWEEN '2019-01-01' AND '2025-12-31' GROUP BY 1
+SQL: 
+WHY: This question can be read more than one way and the answer depends on it: by signed_dt -> 7 groups (2019: 111, 2020: 89, 2021: 97, 2022: 97, 2023: 96, 2024: 86,
+
+### LS05 [related_numeric_threshold] ANSWER
+Q: How many leases are for units of at least 900 square feet?
+REF: SELECT COUNT(*) FROM leases l JOIN units u ON u.unit_id = l.unit_id WHERE u.sq_ft >= 900
+SQL: SELECT COUNT(*) AS row_count FROM "leases" LEFT JOIN units AS j_unit_id ON j_unit_id.unit_id = leases.unit_id WHERE j_unit_id.sq_ft >= 900
+WHY: confidence 0.98 ≥ 0.70
+
+### LS06 [fk_inference] CLARIFY
+Q: How many leases did each leasing agent sign? Show the agents' names.
+REF: SELECT s.staff_name, COUNT(*) FROM leases l JOIN staff s ON s.staff_id = l.leasing_agent_id GROUP BY s.staff_name
+SQL: SELECT COUNT(*) AS row_count FROM "leases"
+WHY: plan requires items not in the dataset: dimension:leasing
+
+### LS07 [fk_inference] CLARIFY
+Q: Total monthly rent on active leases, by property manager.
+REF: SELECT s.staff_name, SUM(l.monthly_rent) FROM leases l JOIN staff s ON s.staff_id = l.prop_mgr_id WHERE l.lease_status = 'ACTIVE' GROUP BY s.staff_name
+SQL: SELECT substr("leases"."monthly_rent",1,7) AS month, COUNT(*) AS row_count FROM "leases" WHERE "leases"."lease_status" = 'ACTIVE' AND "leases"."monthly_rent" IS NOT NULL GROUP BY substr("leases"."monthly_rent",1,7) ORDER BY month
+WHY: plan requires items not in the dataset: dimension:property
+
+### LS08 [abbreviation] CLARIFY
+Q: avg sec dep on 2BR units where pets ok?
+REF: SELECT AVG(l.security_dep) FROM leases l JOIN units u ON u.unit_id = l.unit_id WHERE u.unit_type = '2BR' AND l.pets_ok = 1
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset — optionally with a breakdown, ti
+
+### LS09 [negation_exclusion] CLARIFY
+Q: Leaving out leases that came with a move-in concession, what's the average monthly rent?
+REF: SELECT AVG(monthly_rent) FROM leases WHERE concession_amt IS NULL OR concession_amt = 0
+SQL: SELECT AVG(v) AS avg_per_month_sum_concession_amt FROM (SELECT substr("leases"."monthly_rent",1,7) AS bucket, SUM("leases"."concession_amt") AS v FROM "leases" WHERE "leases"."monthly_rent" IS NOT NULL GROUP BY substr("leases"."monthly_rent",1,7))
+WHY: I don't know how 'move' maps to this data, so the answer could ignore part of your question
+
+### LS10 [boolean_flag] ANSWER
+Q: How many leases are not in good standing?
+REF: SELECT COUNT(*) FROM leases WHERE in_good_standing = 0
+SQL: SELECT COUNT(*) AS row_count FROM "leases" WHERE "leases"."in_good_standing" = 0
+WHY: confidence 0.98 ≥ 0.70
+
+### LS11 [null_condition] ANSWER
+Q: How many of our leases are month-to-month?
+REF: SELECT COUNT(*) FROM leases WHERE end_dt IS NULL
+SQL: SELECT COUNT(*) AS row_count FROM "leases"
+WHY: confidence 0.98 ≥ 0.70
+
+### LS12 [distinct_count] ANSWER
+Q: How many unique tenants have ever signed a lease with us?
+REF: SELECT COUNT(DISTINCT tenant_id) FROM leases
+SQL: SELECT COUNT(DISTINCT "leases"."tenant_id") AS distinct_tenant_id FROM "leases" WHERE "leases"."signed_dt" IS NULL
+WHY: confidence 0.98 ≥ 0.70
+
+### LS13 [join_fanout] CLARIFY
+Q: What's the total monthly rent across leases that have had at least one late rent payment?
+REF: SELECT SUM(l.monthly_rent) FROM leases l WHERE EXISTS (SELECT 1 FROM rent_payments p WHERE p.lease_id = l.lease_id AND p.is_late = 1)
+SQL: SELECT "leases"."lease_status" AS lease_status, COUNT(*) AS row_count FROM "leases" WHERE "leases"."monthly_rent" IS NOT NULL AND "leases"."lease_status" IS NOT NULL GROUP BY "leases"."lease_status" ORDER BY row_count ASC LIMIT 5
+WHY: the question is about 'payment', but the query's base table is 'leases' and does not involve them, so it would answer at the wrong grain
+
+### LS14 [multi_table_join] CLARIFY
+Q: How much in late fees have we charged on Oak & Elm Residences leases?
+REF: SELECT SUM(p.late_fee) FROM rent_payments p JOIN leases l ON l.lease_id = p.lease_id JOIN units u ON u.unit_id = l.unit_id WHERE u.bldg_name = 'Oak & Elm Residences'
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset — optionally with a breakdown, ti
+
+### LS15 [period_comparison] CLARIFY
+Q: Leases signed in 2023 versus 2024: how many in each year?
+REF: SELECT strftime('%Y', signed_dt) AS y, COUNT(*) FROM leases WHERE signed_dt >= '2023-01-01' AND signed_dt < '2025-01-01' GROUP BY y
+SQL: SELECT substr("leases"."signed_dt",1,4) AS year, COUNT(*) AS row_count FROM "leases" WHERE "leases"."signed_dt" IS NOT NULL GROUP BY substr("leases"."signed_dt",1,4) ORDER BY year
+WHY: the question names 2023, 2024 but the generated query has no such time constraint, so the answer would cover all periods
+
+### LS16 [ratio] WARN
+Q: What percent of our leases are renewals?
+REF: SELECT 100.0 * SUM(is_renewal) / COUNT(*) FROM leases
+SQL: SELECT 100.0 * (SELECT COUNT(*) AS row_count FROM "leases" WHERE "leases"."is_renewal" = 1) / NULLIF((SELECT COUNT(*) AS row_count FROM "leases"), 0) AS value
+WHY: answer rests on: computed as 100 x (number of leases that are renewals) / (number of leases)
+
+### LS17 [share_of_total] CLARIFY
+Q: For active leases, what percentage of total monthly rent does each building account for?
+REF: SELECT u.bldg_name, 100.0 * SUM(l.monthly_rent) / (SELECT SUM(monthly_rent) FROM leases WHERE lease_status = 'ACTIVE') FROM leases l JOIN units u ON u.unit_id = l.unit_id WHERE l.lease_status = 'ACTIVE' GROUP BY u.bldg_name
+SQL: SELECT substr("leases"."monthly_rent",1,7) AS month, COUNT(*) AS row_count FROM "leases" WHERE "leases"."lease_status" = 'ACTIVE' AND "leases"."monthly_rent" IS NOT NULL GROUP BY substr("leases"."monthly_rent",1,7) ORDER BY month
+WHY: plan requires items not in the dataset: dimension:building
+
+### LS18 [direct_kpi] CLARIFY
+Q: How much monthly rent comes from leases with a security deposit over $10,000?
+REF: SELECT SUM(monthly_rent) FROM leases WHERE security_dep > 10000
+SQL: SELECT substr("leases"."monthly_rent",1,7) AS month, COUNT(*) AS row_count FROM "leases" WHERE "leases"."monthly_rent" IS NOT NULL GROUP BY substr("leases"."monthly_rent",1,7) ORDER BY month
+WHY: the question mentions column(s) 'security (security_dep)' that the generated query does not use, so it would ignore part of your question
+
+### TC01 [direct_kpi] CLARIFY
+Q: What's the total monthly recurring charge we billed for January through June 2025?
+REF: SELECT SUM(mrc_amt) FROM monthly_bills WHERE bill_period BETWEEN '2025-01' AND '2025-06'
+SQL: SELECT substr("monthly_bills"."bill_period",1,7) AS month, COUNT(*) AS row_count FROM "monthly_bills" WHERE "monthly_bills"."bill_period" >= '2025-01-01' AND "monthly_bills"."bill_period" < '2025-07-01' GROUP BY substr("monthly_bills"."bill_period",1,7) ORDER BY month
+WHY: I don't know how 'recurring', 'charge' maps to this data, so the answer could ignore part of your question
+
+### TC02 [breakdown] CLARIFY
+Q: Overage charges by customer region. Show subscribers with no region as their own blank group.
+REF: SELECT s.region, SUM(b.ovg_amt) FROM monthly_bills b JOIN subscribers s ON s.sub_id = b.sub_id GROUP BY s.region
+SQL: SELECT COUNT(*) AS null_region FROM "monthly_bills" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE j_sub_id.region IS NULL
+WHY: the question mentions column(s) 'customer (cust_name)' that the generated query does not use, so it would ignore part of your question
+
+### TC03 [top_n] CLARIFY
+Q: Top 5 subscribers by total mobile data used in H1 2025, in GB.
+REF: SELECT s.cust_name, SUM(b.data_mb) / 1024.0 AS gb FROM monthly_bills b JOIN subscribers s ON s.sub_id = b.sub_id WHERE b.bill_period BETWEEN '2025-01' AND '2025-06' GROUP BY s.sub_id ORDER BY gb DESC LIMIT 5
+SQL: 
+WHY: This question can be read more than one way and the answer depends on it: by bill_period -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien
+
+### TC04 [trend] CLARIFY
+Q: Monthly overage revenue by usage month.
+REF: SELECT bill_period, SUM(ovg_amt) FROM monthly_bills GROUP BY bill_period
+SQL: SELECT substr("monthly_bills"."bill_period",1,7) AS month, COUNT(*) AS row_count FROM "monthly_bills" GROUP BY substr("monthly_bills"."bill_period",1,7) ORDER BY month
+WHY: plan requires items not in the dataset: dimension:usage, ambiguous_date_column:bill_period|stmt_dt|due_dt|paid_dt|activation_dt|churn_dt
+
+### TC05 [fk_inference] CLARIFY
+Q: Average recurring charge per bill for each plan, by plan name.
+REF: SELECT p.plan_name, AVG(b.mrc_amt) FROM monthly_bills b JOIN plans p ON p.plan_cd = b.plan_cd GROUP BY p.plan_name
+SQL: SELECT j_plan_cd.plan_name AS plan_name, COUNT(*) AS row_count FROM "monthly_bills" LEFT JOIN plans AS j_plan_cd ON j_plan_cd.plan_cd = monthly_bills.plan_cd GROUP BY j_plan_cd.plan_name ORDER BY row_count DESC
+WHY: I don't know how 'recurring', 'charge' maps to this data, so the answer could ignore part of your question
+
+### TC06 [related_numeric_threshold] CLARIFY
+Q: How many bills were on plans with a data allowance of 5 GB or less?
+REF: SELECT COUNT(*) FROM monthly_bills b JOIN plans p ON p.plan_cd = b.plan_cd WHERE p.data_cap_gb <= 5
+SQL: SELECT COUNT(*) AS row_count FROM "monthly_bills"
+WHY: the question contains the number(s) 5 but the generated query does not use them, so a threshold or quantity would be ignored
+
+### TC07 [abbreviation] CLARIFY
+Q: sum of roam chgs for POSTPAID subs, Q2 bill periods
+REF: SELECT SUM(b.roam_amt) FROM monthly_bills b JOIN subscribers s ON s.sub_id = b.sub_id WHERE s.acct_type = 'POSTPAID' AND b.bill_period BETWEEN '2025-04' AND '2025-06'
+SQL: SELECT SUM("monthly_bills"."roam_amt") AS sum_roam_amt FROM "monthly_bills" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE "monthly_bills"."bill_period" >= '2025-04-01' AND "monthly_bills"."bill_period" < '2025-07-01' AND j_sub_id.acct_type = 'POSTPAID'
+WHY: I don't know how 'chgs' maps to this data, so the answer could ignore part of your question
+
+### TC08 [negation_exclusion] WARN
+Q: Total tax billed to subscribers outside the NORTH region.
+REF: SELECT SUM(b.tax_amt) FROM monthly_bills b JOIN subscribers s ON s.sub_id = b.sub_id WHERE s.region IS NULL OR s.region <> 'NORTH'
+SQL: SELECT SUM("monthly_bills"."tax_amt") AS sum_tax_amt FROM "monthly_bills" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE (j_sub_id.region IS NULL OR j_sub_id.region NOT IN ('NORTH')) AND "monthly_bills"."bill_period" IS NOT NULL
+WHY: answer rests on: relationship inferred from names and values, not declared: monthly_bills.sub_id->subscribers.sub_id
+
+### TC09 [boolean_flag] CLARIFY
+Q: How many bills went over the data allowance?
+REF: SELECT COUNT(*) FROM monthly_bills WHERE cap_ok = 0
+SQL: SELECT COUNT(*) AS row_count FROM "monthly_bills"
+WHY: I don't know how 'allowance' maps to this data, so the answer could ignore part of your question
+
+### TC10 [null_condition] ANSWER
+Q: How many bills haven't been paid yet?
+REF: SELECT COUNT(*) FROM monthly_bills WHERE paid_dt IS NULL
+SQL: SELECT COUNT(*) AS row_count FROM "monthly_bills" WHERE "monthly_bills"."paid_dt" IS NULL
+WHY: confidence 0.98 ≥ 0.70
+
+### TC11 [distinct_count] ANSWER
+Q: How many unique subscribers were billed for March 2025 usage?
+REF: SELECT COUNT(DISTINCT sub_id) FROM monthly_bills WHERE bill_period = '2025-03'
+SQL: SELECT COUNT(DISTINCT "monthly_bills"."sub_id") AS distinct_sub_id FROM "monthly_bills" WHERE "monthly_bills"."bill_period" >= '2025-03-01' AND "monthly_bills"."bill_period" < '2025-04-01'
+WHY: confidence 0.98 ≥ 0.70
+
+### TC12 [join_fanout] CLARIFY
+Q: What's the total recurring charge on bills that got at least one outage credit?
+REF: SELECT SUM(b.mrc_amt) FROM monthly_bills b WHERE EXISTS (SELECT 1 FROM bill_adjustments a WHERE a.bill_id = b.bill_id AND a.reason_cd = 'OUTAGE')
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset — optionally with a brea
+
+### TC13 [multi_table_join] CLARIFY
+Q: Add up the adjustment amounts posted against Unlimited Max bills.
+REF: SELECT SUM(a.adj_amt) FROM bill_adjustments a JOIN monthly_bills b ON b.bill_id = a.bill_id JOIN plans p ON p.plan_cd = b.plan_cd WHERE p.plan_name = 'Unlimited Max'
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset — optionally with a brea
+
+### TC14 [period_comparison] CLARIFY
+Q: Compare overage revenue in Q1 vs Q2 2025 by usage month.
+REF: SELECT CASE WHEN bill_period <= '2025-03' THEN 'Q1' ELSE 'Q2' END AS q, SUM(ovg_amt) FROM monthly_bills WHERE bill_period BETWEEN '2025-01' AND '2025-06' GROUP BY q
+SQL: SELECT '2025-02' AS period, COUNT(*) AS row_count FROM "monthly_bills" WHERE "bill_period" >= '2025-02-01' AND "bill_period" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, COUNT(*) AS row_count FROM "monthly_bills" WHERE "bill_period" >= '2025-05-01' AND "bill_period" < '2025-06-01' ORDER BY p
+WHY: plan requires items not in the dataset: dimension:usage, ambiguous_date_column:bill_period|stmt_dt|due_dt|paid_dt|activation_dt|churn_dt
+
+### TC15 [ratio] CLARIFY
+Q: Of the bills that have been paid, what percentage were paid after the due date?
+REF: SELECT 100.0 * SUM(paid_dt > due_dt) / COUNT(*) FROM monthly_bills WHERE paid_dt IS NOT NULL
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset — optionally with a brea
+
+### TC16 [share_of_total] CLARIFY
+Q: What percentage of total recurring revenue does each plan make up?
+REF: SELECT p.plan_name, 100.0 * SUM(b.mrc_amt) / (SELECT SUM(mrc_amt) FROM monthly_bills) FROM monthly_bills b JOIN plans p ON p.plan_cd = b.plan_cd GROUP BY p.plan_name
+SQL: 
+WHY: Could not compile a SQL query for this plan.
+
+### TC17 [fk_inference] CLARIFY
+Q: How much recurring revenue did the Legacy Talk & Text plan bring in?
+REF: SELECT SUM(b.mrc_amt) FROM monthly_bills b JOIN plans p ON p.plan_cd = b.plan_cd WHERE p.plan_name = 'Legacy Talk & Text'
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset — optionally with a brea
+
+### TC18 [abbreviation] CLARIFY
+Q: avg voice mins per bill for PREPAID accts?
+REF: SELECT AVG(b.voice_min) FROM monthly_bills b JOIN subscribers s ON s.sub_id = b.sub_id WHERE s.acct_type = 'PREPAID'
+SQL: 
+WHY: Could not compile a SQL query for this plan.
+
+### WH01 [direct_kpi] CLARIFY
+Q: How many units did we receive in total in the first half of 2025?
+REF: SELECT SUM(qty) FROM inv_moves WHERE move_type = 'RCPT' AND move_ts >= '2025-01-01' AND move_ts < '2025-07-01'
+SQL: 
+WHY: This question can be read more than one way and the answer depends on it: by move_ts -> 63987; by posted_dt -> 63397; by hire_dt -> 4697. Which did you mean?
+
+### WH02 [breakdown] CLARIFY
+Q: Total units moved by product category, with uncategorized items shown as a separate group.
+REF: SELECT i.category, SUM(m.qty) FROM inv_moves m JOIN items i ON i.sku_cd = m.sku_cd GROUP BY i.category
+SQL: SELECT j_sku_cd.category AS category, j_sku_cd.item_desc AS item_desc, SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE "inv_moves"."move_ts" IS NULL GROUP BY j_sku_cd.category, j_sku_cd.item_desc ORDER BY units_sold DESC
+WHY: the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question
+
+### WH03 [top_n] CLARIFY
+Q: Top 5 products by units picked.
+REF: SELECT i.item_desc, SUM(m.qty) AS u FROM inv_moves m JOIN items i ON i.sku_cd = m.sku_cd WHERE m.move_type = 'PICK' GROUP BY i.item_desc ORDER BY u DESC LIMIT 5
+SQL: SELECT j_sku_cd.item_desc AS item_desc, SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE j_sku_cd.item_desc IS NOT NULL GROUP BY j_sku_cd.item_desc ORDER BY units_sold DESC LIMIT 5
+WHY: the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question
+
+### WH04 [trend] CLARIFY
+Q: How many inventory movements happened each month, by movement timestamp?
+REF: SELECT strftime('%Y-%m', move_ts), COUNT(*) FROM inv_moves GROUP BY 1
+SQL: SELECT "inv_moves"."move_type" AS move_type, COUNT(*) AS row_count FROM "inv_moves" GROUP BY "inv_moves"."move_type" ORDER BY row_count DESC
+WHY: I don't know how 'timestamp' maps to this data, so the answer could ignore part of your question
+
+### WH05 [fk_inference] CLARIFY
+Q: How many units were received into each receiving location (where the receipts landed)?
+REF: SELECT l.loc_name, SUM(m.qty) FROM inv_moves m JOIN locations l ON l.loc_id = m.to_loc WHERE m.move_type = 'RCPT' GROUP BY l.loc_name
+SQL: SELECT SUM("inv_moves"."qty") AS units_sold FROM "inv_moves"
+WHY: plan requires items not in the dataset: dimension:receiving
+
+### WH06 [fk_inference] CLARIFY
+Q: Units picked out of each storage location.
+REF: SELECT l.loc_name, SUM(m.qty) FROM inv_moves m JOIN locations l ON l.loc_id = m.from_loc WHERE m.move_type = 'PICK' GROUP BY l.loc_name
+SQL: SELECT SUM("inv_moves"."qty") AS units_sold FROM "inv_moves"
+WHY: plan requires items not in the dataset: dimension:storage
+
+### WH07 [related_numeric_threshold] CLARIFY
+Q: How many moves involved items heavier than 10 kg per unit?
+REF: SELECT COUNT(*) FROM inv_moves m JOIN items i ON i.sku_cd = m.sku_cd WHERE i.unit_wt_kg > 10
+SQL: SELECT COUNT(*) AS row_count FROM "inv_moves"
+WHY: plan requires items not in the dataset: dimension:unit
+
+### WH08 [multi_table_join] WARN
+Q: What's the total value (quantity times unit cost) of moves handled by night-shift operators?
+REF: SELECT SUM(m.qty * m.unit_cost) FROM inv_moves m JOIN operators o ON o.operator_id = m.operator_id WHERE o.shift = 'NIGHT'
+SQL: SELECT SUM("inv_moves"."unit_cost") AS sum_unit_cost, SUM("inv_moves"."qty") AS sum_qty FROM "inv_moves" LEFT JOIN operators AS j_operator_id ON j_operator_id.operator_id = inv_moves.operator_id WHERE j_operator_id.shift = 'NIGHT'
+WHY: answer rests on: 'handled' was not mapped to any column or value and was not applied
+
+### WH09 [abbreviation] CLARIFY
+Q: total qty of XFERs for HARDWARE cat
+REF: SELECT SUM(m.qty) FROM inv_moves m JOIN items i ON i.sku_cd = m.sku_cd WHERE m.move_type = 'XFER' AND i.category = 'HARDWARE'
+SQL: SELECT SUM("inv_moves"."qty") AS sum_qty FROM "inv_moves" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE j_sku_cd.category = 'HARDWARE'
+WHY: plan requires items not in the dataset: value:unrecognised=xfers
+
+### WH10 [negation_exclusion] CLARIFY
+Q: How many moves were not cycle-count corrections?
+REF: SELECT COUNT(*) FROM inv_moves WHERE reason_txt IS NULL OR reason_txt <> 'Cycle count'
+SQL: SELECT COUNT(*) AS row_count FROM "inv_moves"
+WHY: I don't know how 'cycle', 'corrections' maps to this data, so the answer could ignore part of your question
+
+### WH11 [boolean_flag] CLARIFY
+Q: How many moves had a failed barcode scan?
+REF: SELECT COUNT(*) FROM inv_moves WHERE scan_ok = 0
+SQL: SELECT COUNT(*) AS row_count FROM "inv_moves" WHERE "inv_moves"."scan_ok" = 0
+WHY: I don't know how 'barcode' maps to this data, so the answer could ignore part of your question
+
+### WH12 [boolean_flag] CLARIFY
+Q: How many damaged units came in on receipts?
+REF: SELECT SUM(qty) FROM inv_moves WHERE move_type = 'RCPT' AND is_damaged = 1
+SQL: SELECT SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" WHERE "inv_moves"."is_damaged" = 1
+WHY: the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question
+
+### WH13 [null_condition] ANSWER
+Q: How many movements have no operator recorded against them?
+REF: SELECT COUNT(*) FROM inv_moves WHERE operator_id IS NULL
+SQL: SELECT COUNT(DISTINCT "inv_moves"."move_type") AS null_operator_id FROM "inv_moves" WHERE "inv_moves"."operator_id" IS NULL
+WHY: confidence 0.98 ≥ 0.70
+
+### WH14 [distinct_count] CLARIFY
+Q: How many distinct SKUs were picked in May 2025?
+REF: SELECT COUNT(DISTINCT sku_cd) FROM inv_moves WHERE move_type = 'PICK' AND move_ts >= '2025-05-01' AND move_ts < '2025-06-01'
+SQL: 
+WHY: Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset — optionally with a breakd
+
+### WH15 [join_fanout] CLARIFY
+Q: What's the total quantity on moves that logged at least one exception?
+REF: SELECT SUM(m.qty) FROM inv_moves m WHERE EXISTS (SELECT 1 FROM move_exceptions e WHERE e.move_id = m.move_id)
+SQL: SELECT SUM("inv_moves"."qty") AS sum_qty FROM "inv_moves"
+WHY: the question is about 'exception', but the query's base table is 'inv_moves' and does not involve them, so it would answer at the wrong grain
+
+### WH16 [period_comparison] CLARIFY
+Q: Units picked in April vs May 2025, by move date.
+REF: SELECT strftime('%Y-%m', move_ts) AS m, SUM(qty) FROM inv_moves WHERE move_type = 'PICK' AND move_ts >= '2025-04-01' AND move_ts < '2025-06-01' GROUP BY m
+SQL: SELECT '2025-04' AS period, SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" WHERE "move_ts" >= '2025-04-01' AND "move_ts" < '2025-05-01' UNION ALL SELECT '2025-05' AS period, SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" WHERE "move_ts" >= '2025-05-01' AND "move_ts" < '2025-06-01' ORDE
+WHY: plan → SQL fidelity check failed: the generated SQL does not fully implement the analytical plan
+
+### WH17 [ratio] CLARIFY
+Q: What percentage of received units were damaged?
+REF: SELECT 100.0 * SUM(CASE WHEN is_damaged = 1 THEN qty ELSE 0 END) / SUM(qty) FROM inv_moves WHERE move_type = 'RCPT'
+SQL: SELECT SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" WHERE "inv_moves"."is_damaged" = 1
+WHY: the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question
+
+### WH18 [share_of_total] CLARIFY
+Q: What share of picked units did each operator shift handle, in percent?
+REF: SELECT o.shift, 100.0 * SUM(m.qty) / (SELECT SUM(qty) FROM inv_moves WHERE move_type = 'PICK') FROM inv_moves m JOIN operators o ON o.operator_id = m.operator_id WHERE m.move_type = 'PICK' GROUP BY o.shift
+SQL: 
+WHY: this is computed as 100 x (total picked units did each operator shift handle, for percent) / (total picked units did each operator shift handle,), but a part co
+
+### WH19 [multi_table_join] CLARIFY
+Q: How many units of Pallet Wrap (Blue) were moved in 2025?
+REF: SELECT SUM(m.qty) FROM inv_moves m JOIN items i ON i.sku_cd = m.sku_cd WHERE i.item_desc = 'Pallet Wrap (Blue)' AND m.move_ts LIKE '2025-%'
+SQL: SELECT SUM("inv_moves"."qty") AS units_sold FROM "inv_moves" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE "inv_moves"."move_ts" >= '2025-01-01' AND "inv_moves"."move_ts" < '2026-01-01' AND j_sku_cd.item_desc = 'Pallet Wrap (Blue)'
+WHY: the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question
+
