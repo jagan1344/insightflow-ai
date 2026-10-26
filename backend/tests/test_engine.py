@@ -243,3 +243,11 @@ def test_customers_who_ordered_is_a_distinct_count(dbs):
 def test_ratio_with_a_lookup_attribute_is_not_summed_per_row(dbs):
     # credit hours belong to courses; SUM over exam rows would count each course many times
     assert ask(dbs, "school", "Total points earned divided by credit hours").status != "answer"
+
+
+def test_negation_binds_to_the_nearest_condition_only(dbs):
+    # 'without' negates the issues, not the bike type
+    r = ask(dbs, "bikes", "How many rentals without any issue for electric bikes?")
+    exp = ref(dbs, "bikes", "SELECT COUNT(*) FROM rentals r JOIN bikes b ON b.bike_id=r.bike_id WHERE b.bike_type='electric' "
+                            "AND NOT EXISTS (SELECT 1 FROM rental_issues i WHERE i.rental_id=r.rental_id)")[0][0]
+    assert r.status == "answer" and r.rows[0][0] == exp

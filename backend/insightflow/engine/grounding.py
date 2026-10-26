@@ -401,7 +401,10 @@ class Grounder:
             mid = self.ql[seg_s + m.end():seg_e]
             if re.search(r"\b(?:and|but|or|,|which|that)\b|,", mid) and not re.match(r"\s*(?:\w+\s+){0,1}$", mid):
                 continue
-            best = self._span(seg_s + m.start(), seg_s + m.end())
+            sp = self._span(seg_s + m.start(), seg_s + m.end())
+            if any(x.i0 >= sp[1] and x.i1 <= i0 for x in self.G.mentions if x.kind in ("col", "table", "value")):
+                continue                   # "without any complaint for pastry": the negation binds to 'complaint'
+            best = sp
         return best
 
     def _choose_path(self, ents, i0: int, i1: int):
