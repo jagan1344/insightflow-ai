@@ -14,4 +14,11 @@ POST-HOC DEVELOPMENT results (`results/v5_A0_posthoc_dev_*.json`), never held ou
 | s5/s6 unbound-dim cleanup, generic money aliases, agent 'by', null-count fix | done | 47/74, 2 wrong (HO08 date-role policy, IN04 NULL-group convention) |
 | monitor sets P2 (taken at s4) | done | identical to P1 on all six earlier sets |
 | full suite at s6 | 525 passed, 1 failed (fixed: NOT EXISTS scope in negated_value_kept) | |
-| composites, child-of-parent values, tests, freeze, blind eval, ablations, paper | pending | |
+| composites, role words, composite-key attributes, agent rule | done | v5 post-hoc 63/74, 2 wrong |
+| tests | done | 16 mechanism + 55 generalization tests; suite 597 passed |
+| monitor sets P3 (regression found) / P4 (= P1) | done | |
+| freeze | done | da925ad, tree d760e82, `freeze/FREEZE_MANIFEST_v2.json` |
+| blind v6 set authored, sealed (4f4241c), first run (6276b24) | done | 5/73 correct, 10/106 wrong (negative) |
+| v6 ablations + confidence | done | `BLIND_RESULTS_v6.md` |
+| paper Round 8 | done (not compiled) | `paper/ieee_round8/` |
+| final report | done | `FINAL_REPORT.md` |
