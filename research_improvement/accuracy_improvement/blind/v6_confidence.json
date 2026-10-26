@@ -1,0 +1,26 @@
+{
+ "A0": {
+  "answered": 15,
+  "correct": 5,
+  "wrong": 10,
+  "min_conf_answered": 0.835,
+  "wrong_ge_0_9": 9,
+  "wrong_ge_0_7": 10,
+  "mean_conf_correct": 0.979,
+  "mean_conf_wrong": 0.9688,
+  "auroc": 0.45,
+  "ece_5bin": 0.639
+ },
+ "A7": {
+  "answered": 44,
+  "correct": 9,
+  "wrong": 35,
+  "min_conf_answered": 0.8,
+  "wrong_ge_0_9": 32,
+  "wrong_ge_0_7": 35,
+  "mean_conf_correct": 0.9748,
+  "mean_conf_wrong": 0.9695,
+  "auroc": 0.479,
+  "ece_5bin": 0.766
+ }
+}

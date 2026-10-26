@@ -1,0 +1,192 @@
+{
+ "A1": {
+  "counts": {
+   "A0:clarify_unnecessary -> A1:wrong": 1,
+   "A0:clarify_ok -> A1:wrong": 1
+  },
+  "items": {
+   "A0:clarify_unnecessary -> A1:wrong": [
+    "FD09"
+   ],
+   "A0:clarify_ok -> A1:wrong": [
+    "FD20"
+   ]
+  }
+ },
+ "A2": {
+  "counts": {},
+  "items": {}
+ },
+ "A3": {
+  "counts": {},
+  "items": {}
+ },
+ "A4": {
+  "counts": {},
+  "items": {}
+ },
+ "A5": {
+  "counts": {
+   "A0:clarify_unnecessary -> A5:correct": 4,
+   "A0:clarify_unnecessary -> A5:wrong": 19
+  },
+  "items": {
+   "A0:clarify_unnecessary -> A5:correct": [
+    "FD04",
+    "LS02",
+    "WH11",
+    "WH19"
+   ],
+   "A0:clarify_unnecessary -> A5:wrong": [
+    "FD05",
+    "FD07",
+    "FD11",
+    "LS09",
+    "LS13",
+    "LS15",
+    "LS18",
+    "TC01",
+    "TC02",
+    "TC05",
+    "TC06",
+    "TC07",
+    "TC09",
+    "WH02",
+    "WH03",
+    "WH04",
+    "WH10",
+    "WH12",
+    "WH15"
+   ]
+  }
+ },
+ "A6": {
+  "counts": {},
+  "items": {}
+ },
+ "A7": {
+  "counts": {
+   "A0:clarify_unnecessary -> A7:correct": 4,
+   "A0:clarify_unnecessary -> A7:wrong": 23,
+   "A0:clarify_ok -> A7:wrong": 2
+  },
+  "items": {
+   "A0:clarify_unnecessary -> A7:correct": [
+    "FD04",
+    "LS02",
+    "WH11",
+    "WH19"
+   ],
+   "A0:clarify_unnecessary -> A7:wrong": [
+    "FD05",
+    "FD07",
+    "FD09",
+    "FD11",
+    "FD15",
+    "LS09",
+    "LS13",
+    "LS15",
+    "LS18",
+    "TC01",
+    "TC02",
+    "TC05",
+    "TC06",
+    "TC07",
+    "TC09",
+    "WH02",
+    "WH03",
+    "WH04",
+    "WH10",
+    "WH12",
+    "WH15",
+    "WH16",
+    "WH17"
+   ],
+   "A0:clarify_ok -> A7:wrong": [
+    "FD20",
+    "TC21"
+   ]
+  }
+ },
+ "B1": {
+  "counts": {
+   "A7:wrong -> B1:clarify_unnecessary": 2,
+   "A7:wrong -> B1:clarify_ok": 2
+  },
+  "items": {
+   "A7:wrong -> B1:clarify_unnecessary": [
+    "FD09",
+    "WH17"
+   ],
+   "A7:wrong -> B1:clarify_ok": [
+    "FD20",
+    "TC21"
+   ]
+  }
+ },
+ "B2": {
+  "counts": {},
+  "items": {}
+ },
+ "B3": {
+  "counts": {},
+  "items": {}
+ },
+ "B4": {
+  "counts": {
+   "A7:wrong -> B4:clarify_unnecessary": 2
+  },
+  "items": {
+   "A7:wrong -> B4:clarify_unnecessary": [
+    "FD15",
+    "WH16"
+   ]
+  }
+ },
+ "B5": {
+  "counts": {
+   "A7:correct -> B5:clarify_unnecessary": 4,
+   "A7:wrong -> B5:clarify_unnecessary": 22,
+   "A7:wrong -> B5:clarify_ok": 1
+  },
+  "items": {
+   "A7:correct -> B5:clarify_unnecessary": [
+    "FD04",
+    "LS02",
+    "WH11",
+    "WH19"
+   ],
+   "A7:wrong -> B5:clarify_unnecessary": [
+    "FD05",
+    "FD07",
+    "FD11",
+    "FD15",
+    "LS09",
+    "LS13",
+    "LS15",
+    "LS18",
+    "TC01",
+    "TC02",
+    "TC05",
+    "TC06",
+    "TC07",
+    "TC09",
+    "WH02",
+    "WH03",
+    "WH04",
+    "WH10",
+    "WH12",
+    "WH15",
+    "WH16",
+    "WH17"
+   ],
+   "A7:wrong -> B5:clarify_ok": [
+    "TC21"
+   ]
+  }
+ },
+ "B6": {
+  "counts": {},
+  "items": {}
+ }
+}
