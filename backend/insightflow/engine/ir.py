@@ -108,6 +108,7 @@ class Query:
     evidence: List[Evidence] = field(default_factory=list)
     assumptions: List[str] = field(default_factory=list)
     ambiguities: List[str] = field(default_factory=list)
+    choices: List[Tuple[str, Tuple[str, ...]]] = field(default_factory=list)   # structured ambiguities: (key, readings)
     unresolved: List[str] = field(default_factory=list)
     unsupported: List[str] = field(default_factory=list)
 

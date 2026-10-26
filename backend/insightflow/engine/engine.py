@@ -2,6 +2,8 @@
 with an evidence chain at every step."""
 from __future__ import annotations
 
+import itertools
+import re
 import sqlite3
 import time
 from dataclasses import dataclass, field
@@ -50,6 +52,49 @@ def _lexicon(m: S.SchemaModel) -> L.Lexicon:
     return _LEX[id(m)]
 
 
+# ambiguities that are not a choice between enumerable readings (they always need the user)
+_UNSTRUCTURED = re.compile(r"time series or the stored value|does not say which value of|operand of the expression|"
+                           r" describes |'how many' with the money|several periods are named")
+MAX_READINGS = 8
+
+
+def _execute(db_path: str, sql: str, params, timeout_s: float, max_rows: int):
+    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    deadline = time.perf_counter() + timeout_s
+    con.set_progress_handler(lambda: 1 if time.perf_counter() > deadline else 0, 10000)
+    try:
+        cur = con.execute(sql, params)
+        return [d[0] for d in cur.description], [tuple(x) for x in cur.fetchmany(max_rows + 1)]
+    finally:
+        con.close()
+
+
+def _same(a, b) -> bool:
+    def norm(rows):
+        return sorted((tuple(round(v, 9) if isinstance(v, float) else v for v in r) for r in rows), key=repr)
+    return norm(a) == norm(b)
+
+
+def _readings(question, m, q, db_path, timeout_s, max_rows):
+    """Every combination of the structured choices, each grounded, verified and executed.
+    Returns [(label, query, sql, params, columns, rows)] or None when some reading cannot be evaluated."""
+    keys = [k for k, _ in q.choices]
+    combos = list(itertools.product(*[range(len(c)) for _, c in q.choices]))
+    if not combos or len(combos) > MAX_READINGS:
+        return None
+    out = []
+    for combo in combos:
+        g = Grounder(m, _lexicon(m), prefer=dict(zip(keys, combo))).ground(question)
+        q2 = g.query
+        if q2.unsupported or q2.ambiguities or q2.unresolved or verify(q2, m):
+            return None
+        sql, params = Compiler(m).compile(q2)
+        cols, rows = _execute(db_path, sql, params, timeout_s, max_rows)
+        label = ", ".join(f"{c[i]}" for (_k, c), i in zip(q.choices, combo))
+        out.append((label, q2, sql, params, cols, rows))
+    return out
+
+
 def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, max_rows: int = 10000) -> EngineResult:
     t0 = time.perf_counter()
     r = EngineResult("error", question)
@@ -58,8 +103,27 @@ def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, ma
         g = Grounder(m, _lexicon(m)).ground(question)
         q = g.query
         r.query = q
+        rd = None
+        if not q.unsupported and q.ambiguities and q.choices and not q.unresolved and \
+                not any(_UNSTRUCTURED.search(a) for a in q.ambiguities):
+            rd = _readings(question, m, q, db_path, timeout_s, max_rows)
         if q.unsupported:
             r.status, r.message = "unsupported", "; ".join(q.unsupported)
+        elif rd and all(_same(rd[0][5], x[5]) for x in rd[1:]):
+            label, q2, r.sql, r.params, r.columns, rows = rd[0]
+            r.query = q = q2
+            r.rows = rows[:max_rows]
+            q.assumptions.append(f"the question can be read {len(rd)} ways ({' | '.join(x[0] for x in rd)}); "
+                                 f"all give the same result")
+            r.status = "answer"
+        elif rd:
+            def show(x):
+                rows = x[5]
+                return f"{x[0]}: {rows[0][0]:,.2f}" if len(rows) == 1 and len(rows[0]) == 1 and isinstance(rows[0][0], (int, float)) \
+                    else f"{x[0]}: {len(rows)} rows"
+            r.status = "clarify"
+            r.message = "; ".join(q.ambiguities) + ". The readings give different results — " + \
+                "; ".join(show(x) for x in rd) + ". Which did you mean?"
         elif q.ambiguities:
             r.status, r.message = "clarify", "; ".join(q.ambiguities)
         elif q.unresolved:
@@ -70,18 +134,10 @@ def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, ma
                 r.status, r.message = "clarify", "; ".join(r.violations)
             else:
                 r.sql, r.params = Compiler(m).compile(q)
-                con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-                deadline = time.perf_counter() + timeout_s
-                con.set_progress_handler(lambda: 1 if time.perf_counter() > deadline else 0, 10000)
-                try:
-                    cur = con.execute(r.sql, r.params)
-                    r.columns = [d[0] for d in cur.description]
-                    r.rows = [tuple(x) for x in cur.fetchmany(max_rows + 1)]
-                    if len(r.rows) > max_rows:
-                        r.rows = r.rows[:max_rows]
-                        r.message = f"showing the first {max_rows} rows"
-                finally:
-                    con.close()
+                r.columns, r.rows = _execute(db_path, r.sql, r.params, timeout_s, max_rows)
+                if len(r.rows) > max_rows:
+                    r.rows = r.rows[:max_rows]
+                    r.message = f"showing the first {max_rows} rows"
                 r.status = "answer"
         r.reliability = dict(
             grounding="complete" if q and not (q.unresolved or q.ambiguities) else "incomplete",

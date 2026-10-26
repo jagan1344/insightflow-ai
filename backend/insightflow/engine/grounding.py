@@ -109,8 +109,9 @@ class Grounding:
 
 
 class Grounder:
-    def __init__(self, model: SchemaModel, lex: L.Lexicon):
+    def __init__(self, model: SchemaModel, lex: L.Lexicon, prefer: Optional[Dict[str, int]] = None):
         self.m, self.lex = model, lex
+        self.prefer = dict(prefer or {})      # reading chosen for a structured ambiguity (key -> index)
 
     # ------------------------------------------------------------------ helpers
     def _tok(self, q: str) -> List[Tok]:
@@ -410,7 +411,13 @@ class Grounder:
                     if j not in self.used:
                         self.used[j] = "context"
             return w, None
-        return None, [f"{getattr(e, 'table', '')}.{getattr(e, 'column', '')}" + (f" via {e.path.role}" if e.path is not None and e.path.role else "") for e in ents]
+        labels = [f"{getattr(e, 'table', '')}.{getattr(e, 'column', '')}" + (f" via {e.path.role}" if e.path is not None and e.path.role else "") for e in ents]
+        key = f"path:{i0}:{i1}"
+        if key in self.prefer and self.prefer[key] < len(ents):
+            return ents[self.prefer[key]], None
+        if key not in {k for k, _ in self.Q.choices}:
+            self.Q.choices.append((key, tuple(labels)))
+        return None, labels
 
     def _pred_for(self, e, p) -> object:
         """Wrap a predicate on a column of `e`'s table: EXISTS when the table is reached one-to-many."""
@@ -684,6 +691,8 @@ class Grounder:
                 for _c, j in hits:
                     self.used[j] = "date role"
         role_default = None     # several date columns: never pick one silently (see GROUNDING_DESIGN.md, date roles)
+        if role_col is None and "date" in self.prefer and len(anchor_dates) > 1 and self.prefer["date"] < len(anchor_dates):
+            role_col = Col(m.anchor, anchor_dates[self.prefer["date"]].name, None)   # one reading of a date ambiguity
         periods = self.G.periods
         bucketed = any(re.search(rx, ql) for rx, _u in BUCKET_CUES)
         comparing = len(periods) >= 2 and re.search(COMPARE, ql) and not bucketed   # "2023 vs 2024, each year": a series
@@ -905,6 +914,7 @@ class Grounder:
             if role_col is None:
                 if len(anchor_dates) > 1:
                     Q.ambiguities.append("the question gives a period but not which date: " + ", ".join(c.name for c in anchor_dates))
+                    Q.choices.append(("date", tuple(c.name for c in anchor_dates)))
                 elif not anchor_dates:
                     Q.unsupported.append("no date column on the base table")
             elif comparing and measure is not None and isinstance(measure.expr, Agg) and measure.expr.where is None:
@@ -952,6 +962,8 @@ class Grounder:
                     if role_col is None:
                         if len(anchor_dates) > 1:
                             Q.ambiguities.append(f"'{mt.group(0)}' does not say which date: " + ", ".join(c.name for c in anchor_dates))
+                            if ("date", tuple(c.name for c in anchor_dates)) not in Q.choices:
+                                Q.choices.append(("date", tuple(c.name for c in anchor_dates)))
                         else:
                             Q.unsupported.append("no date column for a time series")
                     else:

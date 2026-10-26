@@ -201,3 +201,23 @@ def test_database_opened_read_only(dbs):
     with pytest.raises(sqlite3.OperationalError):
         con.execute("DELETE FROM orders")
     con.close()
+
+
+# ---------------------------------------------------------------- readings of an ambiguity
+def test_ambiguity_that_does_not_change_the_result_is_answered(tmp_path):
+    p = tmp_path / "ev.db"
+    con = sqlite3.connect(p)
+    con.executescript("CREATE TABLE events (event_id INTEGER PRIMARY KEY, created_dt TEXT NOT NULL, updated_dt TEXT NOT NULL, amt REAL NOT NULL);")
+    con.executemany("INSERT INTO events VALUES (?,?,?,?)", [(i, f"2025-0{1 + i % 5}-01", f"2025-0{1 + i % 5}-15", i * 1.5) for i in range(1, 40)])
+    con.commit(); con.close()
+    r = answer("Total amount in 2025", str(p), "events")
+    assert r.status == "answer"
+    assert any("all give the same result" in a for a in r.query.assumptions)
+
+
+def test_ambiguity_that_changes_the_result_shows_each_reading(dbs):
+    r = ask(dbs, "bikes", "Total fare in 2025")
+    assert r.status == "clarify"
+    a = ref(dbs, "bikes", "SELECT SUM(fare_amt) FROM rentals WHERE start_ts >= '2025-01-01' AND start_ts < '2026-01-01'")[0][0]
+    b = ref(dbs, "bikes", "SELECT SUM(fare_amt) FROM rentals WHERE end_ts >= '2025-01-01' AND end_ts < '2026-01-01'")[0][0]
+    assert a != b and f"{a:,.2f}" in r.message and f"{b:,.2f}" in r.message
