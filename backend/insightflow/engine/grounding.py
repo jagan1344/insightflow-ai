@@ -682,13 +682,10 @@ class Grounder:
                 role_col = Col(m.anchor, hits[0][0].name, None)
                 for _c, j in hits:
                     self.used[j] = "date role"
-        role_default = None
-        if role_col is None and not named and len(anchor_dates) > 1:
-            req = [c for c in anchor_dates if c.not_null]
-            if len(req) == 1:
-                role_col = role_default = Col(m.anchor, req[0].name, None)
+        role_default = None     # several date columns: never pick one silently (see GROUNDING_DESIGN.md, date roles)
         periods = self.G.periods
-        comparing = len(periods) >= 2 and re.search(COMPARE, ql)
+        bucketed = any(re.search(rx, ql) for rx, _u in BUCKET_CUES)
+        comparing = len(periods) >= 2 and re.search(COMPARE, ql) and not bucketed   # "2023 vs 2024, each year": a series
 
         # ---------------- measures
         aggs = []
@@ -785,7 +782,7 @@ class Grounder:
                 cm = meas_free[0]
             if cm is not None and cue and cue[2] == "count" and any(cue[1] <= x.i0 < cm.i0 for x in tabs_m):
                 cm = None                              # "how many tickets have ... <measure>": rows are counted
-            if cm is not None and ent(cm) is None and cue:
+            if cm is not None and ent(cm) is None:
                 # ambiguous measure words; still ambiguous
                 Q.ambiguities.append(f"'{cm.text}' could be " + " or ".join(cm.amb))
                 cm = None
@@ -928,7 +925,13 @@ class Grounder:
                 measure = None
             else:
                 lo = min(p.lo for p in periods); hi = max(p.hi for p in periods)
-                if len(periods) > 1 and not re.search(r"\b(?:from|through|to|until|between|thru)\b", ql):
+                if bucketed and len(periods) > 1:
+                    for mt in re.finditer(r"\b(?:vs\.?|versus|compared?\s+(?:to|with)|and)\b", ql):
+                        a, b = self._span(mt.start(), mt.end())
+                        if a >= 0 and self._free(a, b):
+                            take(a, b, "periods shown as a series")
+                    Q.assumptions.append("the named periods are shown as one series over their full range")
+                if len(periods) > 1 and not bucketed and not re.search(r"\b(?:from|through|to|until|between|thru)\b", ql):
                     Q.ambiguities.append("several periods are named; a comparison or a range?")
                 filters.append(BoolOp("and", (Cmp(role_col, ">=", Lit(lo)), Cmp(role_col, "<", Lit(hi)))))
                 self._ev(periods[0].i0, periods[-1].i1, f"{role_col.column} in [{lo}, {hi})", "period on the chosen date column")
@@ -1065,6 +1068,11 @@ class Grounder:
                     te = tes[0]
                 if te.path is None:
                     continue
+                if not te.path.fans_out and len(te.path.steps) == 1 and te.path.steps[0][0].nullable and len(tes) == 1 \
+                        and a > 0 and participle(self.t[a - 1].low):
+                    fk = te.path.steps[0][0]       # "handled by each adjuster": only rows that have one
+                    self.extra.append(IsNull(Col(self.m.anchor, fk.child_col, None), True))
+                    self._ev(x.i0, x.i1, f"{self.m.anchor}.{fk.child_col} IS NOT NULL", "the verb says the link exists")
                 if te.path.fans_out:
                     self.Q.unsupported.append(f"grouping by {te.table} (one-to-many) would count rows more than once")
                     continue

@@ -20,7 +20,7 @@ Q = {
         ("BK08", "How many rentals had no rider?", "answer", "SELECT COUNT(*) FROM rentals WHERE rdr_id IS NULL", "scalar"),
         ("BK09", "Total distance in km for electric bikes", "answer",
          "SELECT SUM(r.dist_km) FROM rentals r JOIN bikes b ON b.bike_id=r.bike_id WHERE b.bike_type='electric'", "scalar"),
-        ("BK10", "Monthly rentals in 2025", "answer",
+        ("BK10", "Monthly rentals in 2025", "either",
          "SELECT strftime('%Y-%m', start_ts), COUNT(*) FROM rentals WHERE start_ts >= '2025-01-01' AND start_ts < '2026-01-01' GROUP BY 1", "rowset"),
         ("BK11", "Top 3 start stations by number of rentals", "answer",
          "SELECT s.stn_nm, COUNT(*) FROM rentals r JOIN stations s ON s.station_id=r.start_stn_id GROUP BY 1 ORDER BY 2 DESC LIMIT 3", "ordered"),
@@ -70,7 +70,7 @@ Q = {
          "SELECT COUNT(*) FROM exam_results e WHERE EXISTS (SELECT 1 FROM accommodations a WHERE a.result_id=e.result_id AND a.accom_type='extra time')", "scalar"),
         ("SC13", "Average score for exams without any accommodation", "answer",
          "SELECT AVG(score_pct) FROM exam_results e WHERE NOT EXISTS (SELECT 1 FROM accommodations a WHERE a.result_id=e.result_id)", "scalar"),
-        ("SC14", "Monthly average score", "answer",
+        ("SC14", "Monthly average score", "either",
          "SELECT strftime('%Y-%m', exam_dt), AVG(score_pct) FROM exam_results GROUP BY 1", "rowset"),
         ("SC15", "Average score in Geometry", "answer",
          "SELECT AVG(e.score_pct) FROM exam_results e JOIN courses c ON c.crs_cd=e.crs_cd WHERE c.crs_title='Geometry'", "scalar"),
@@ -86,7 +86,7 @@ Q = {
         ("SC22", "Average score for exams graded by Mr. Chen", "clarify", None, None),
         ("SC23", "Which students are struggling?", "clarify", None, None),
         ("SC24", "Will scores improve next term?", "unsupported", None, None),
-        ("SC25", "Number of exams in the first quarter of 2025", "answer",
+        ("SC25", "Number of exams in the first quarter of 2025", "either",
          "SELECT COUNT(*) FROM exam_results WHERE exam_dt >= '2025-01-01' AND exam_dt < '2025-04-01'", "scalar"),
         ("SC26", "Average credit hours", "either", "SELECT AVG(credit_hrs) FROM courses", "scalar"),
     ],
@@ -109,7 +109,7 @@ Q = {
          "SELECT COUNT(*) FROM orders o WHERE EXISTS (SELECT 1 FROM order_lines l WHERE l.order_id=o.order_id AND l.product_cat='Electronics')", "scalar"),
         ("SH13", "Gross amount of orders that were never returned", "answer",
          "SELECT SUM(gross_amt) FROM orders o WHERE NOT EXISTS (SELECT 1 FROM returns r WHERE r.order_id=o.order_id)", "scalar"),
-        ("SH14", "Monthly gross amount", "answer", "SELECT strftime('%Y-%m', order_dt), SUM(gross_amt) FROM orders GROUP BY 1", "rowset"),
+        ("SH14", "Monthly gross amount", "either", "SELECT strftime('%Y-%m', order_dt), SUM(gross_amt) FROM orders GROUP BY 1", "rowset"),
         ("SH15", "Top 5 customers by gross amount", "answer",
          "SELECT c.cust_nm, SUM(o.gross_amt) FROM orders o JOIN customers c ON c.cust_id=o.cust_id GROUP BY o.cust_id ORDER BY 2 DESC LIMIT 5", "ordered"),
         ("SH16", "Total gross amount for D'Angelo & Sons", "answer",
@@ -117,7 +117,7 @@ Q = {
         ("SH17", "Number of orders with promo code VIP20", "answer", "SELECT COUNT(*) FROM orders WHERE promo_cd='VIP20'", "scalar"),
         ("SH18", "Percentage of orders that are gifts", "answer", "SELECT 100.0*SUM(is_gift)/COUNT(*) FROM orders", "scalar"),
         ("SH19", "Average gross amount for Express orders", "answer", "SELECT AVG(gross_amt) FROM orders WHERE ship_mode='Express'", "scalar"),
-        ("SH20", "Total gross amount in the second half of 2025", "answer",
+        ("SH20", "Total gross amount in the second half of 2025", "either",
          "SELECT SUM(gross_amt) FROM orders WHERE order_dt >= '2025-07-01' AND order_dt < '2026-01-01'", "scalar"),
         ("SH21", "Number of orders over 500 in gross amount", "answer", "SELECT COUNT(*) FROM orders WHERE gross_amt > 500", "scalar"),
         ("SH22", "Total quantity", "either", "SELECT SUM(qty) FROM order_lines", "scalar"),   # qty lives on order lines (different grain)
@@ -171,3 +171,6 @@ Q = {
 
 # expect == "either": a clarification/abstention is acceptable; an answer must match the reference (flagged before
 # any engine run).
+
+# Label history: BK10, SC14, SC25, SH14, SH20 were 'answer' (assuming the base table's mandatory date) and became
+# 'either' when that default was withdrawn: the engine asks which date column is meant when several exist.

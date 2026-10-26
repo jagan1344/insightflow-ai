@@ -1,0 +1,6174 @@
+{
+ "engine_commit": "4db2aaa629da21915b4bb9c6cdb43b539273d991",
+ "diagnostic_only": true,
+ "records": [
+  {
+   "id": "FD01",
+   "db": "food@orders",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How much did we take in delivery fees on orders that were actually delivered?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED'))",
+   "rows": [
+    [
+     3314.54
+    ]
+   ],
+   "expected": [
+    [
+     3314.54
+    ]
+   ],
+   "latency_ms": 55.0,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "delivery fees",
+      "grounded_to": "SUM(orders.dlv_fee)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "FD02",
+   "db": "food@orders",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Give me the number of orders for each type of cuisine. Skip restaurants that don't have a cuisine on file.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "'cuisine' is missing either when restaurants has no row or when the value is empty; these cannot be told apart",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "American",
+     147
+    ],
+    [
+     "BBQ",
+     89
+    ],
+    [
+     "British",
+     99
+    ],
+    [
+     "Chinese",
+     101
+    ],
+    [
+     "Indian",
+     100
+    ],
+    [
+     "Italian",
+     222
+    ],
+    [
+     "Japanese",
+     57
+    ],
+    [
+     "Mexican",
+     135
+    ],
+    [
+     "Vietnamese",
+     74
+    ]
+   ],
+   "latency_ms": 3.3,
+   "trace": {
+    "status": "unsupported",
+    "message": "'cuisine' is missing either when restaurants has no row or when the value is empty; these cannot be told apart",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "cuisine",
+      "grounded_to": "group by restaurants.cuisine",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: type, Skip"
+    ],
+    "unsupported": [
+     "'cuisine' is missing either when restaurants has no row or when the value is empty; these cannot be told apart"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD03",
+   "db": "food@orders",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which 3 restaurants brought in the most food sales (before fees and tips) on delivered orders?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: brought, food, sales, fees",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Taco Loco (Downtown)",
+     3432.01
+    ],
+    [
+     "Burger Barn",
+     3189.51
+    ],
+    [
+     "Pizza Planet (Westside)",
+     2936.01
+    ]
+   ],
+   "latency_ms": 2.5,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: brought, food, sales, fees",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "tips",
+      "grounded_to": "SUM(orders.tip_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "restaurants",
+      "grounded_to": "group by restaurants.rest_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "tip_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: brought, food, sales, fees"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD04",
+   "db": "food@orders",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show monthly order volume for January through June 2025, going by when the order was placed.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: order_ts, dlv_ts; 'monthly' does not say which date: order_ts, dlv_ts",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "2025-01",
+     222
+    ],
+    [
+     "2025-02",
+     187
+    ],
+    [
+     "2025-03",
+     194
+    ],
+    [
+     "2025-04",
+     198
+    ],
+    [
+     "2025-05",
+     224
+    ],
+    [
+     "2025-06",
+     175
+    ]
+   ],
+   "latency_ms": 2.3,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: order_ts, dlv_ts; 'monthly' does not say which date: order_ts, dlv_ts",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "volume",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting orders rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: order_ts, dlv_ts",
+     "'monthly' does not say which date: order_ts, dlv_ts"
+    ],
+    "unresolved": [
+     "words not grounded: going"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD05",
+   "db": "food@orders",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total tips broken out by the kind of vehicle the courier rides (bike, car, scooter). Leave out couriers whose vehicle isn't recorded.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "'vehicle' is missing either when couriers has no row or when the value is empty; these cannot be told apart",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "BIKE",
+     1604.83
+    ],
+    [
+     "CAR",
+     1061.53
+    ],
+    [
+     "SCTR",
+     806.01
+    ]
+   ],
+   "latency_ms": 3.2,
+   "trace": {
+    "status": "unsupported",
+    "message": "'vehicle' is missing either when couriers has no row or when the value is empty; these cannot be told apart",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "bike",
+      "grounded_to": "couriers.vehicle_cd IN ('BIKE',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "tips",
+      "grounded_to": "SUM(orders.tip_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "vehicle",
+      "grounded_to": "group by couriers.vehicle_cd",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: kind, rides, car, scooter, Leave, out"
+    ],
+    "unsupported": [
+     "'vehicle' is missing either when couriers has no row or when the value is empty; these cannot be told apart"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD06",
+   "db": "food@orders",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many delivered orders came from restaurants whose average prep time is 15 minutes or more?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: minutes, restaurants, average prep",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     516
+    ]
+   ],
+   "latency_ms": 2.5,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: minutes, restaurants, average prep",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: minutes, restaurants, average prep"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD07",
+   "db": "food@orders",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What's the average star rating customers give each courier? List by courier name.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: star",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Anna Novak",
+     3.808219178082192
+    ],
+    [
+     "Diego Ruiz",
+     3.4761904761904763
+    ],
+    [
+     "Hannah Kim",
+     3.661764705882353
+    ],
+    [
+     "Kwame Asante",
+     3.4057971014492754
+    ],
+    [
+     "Lucia Ferreira",
+     3.5277777777777777
+    ],
+    [
+     "Mei Chen",
+     3.632183908045977
+    ],
+    [
+     "Ravi Menon",
+     3.5324675324675323
+    ],
+    [
+     "Sofia Brandt",
+     3.550724637681159
+    ],
+    [
+     "Tom O'Hara",
+     3.4216867469879517
+    ],
+    [
+     "Yusuf Demir",
+     3.4324324324324325
+    ]
+   ],
+   "latency_ms": 2.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: star",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "rating customers",
+      "grounded_to": "AVG(orders.cust_rating)",
+      "reason": "measure column"
+     },
+     {
+      "span": "courier",
+      "grounded_to": "group by couriers.courier_nm",
+      "reason": "entity label"
+     },
+     {
+      "span": "courier name",
+      "grounded_to": "group by couriers.courier_nm",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: star"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD08",
+   "db": "food@orders",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "avg tkt size (subtotal) for GOLD-tier custs, delivered orders only?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: tkt, size, tier",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     26.798934010152287
+    ]
+   ],
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: tkt, size, tier",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "GOLD",
+      "grounded_to": "customers.loyalty_tier IN ('GOLD',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "subtotal",
+      "grounded_to": "AVG(orders.subtotal_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: tkt, size, tier"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD09",
+   "db": "food@orders",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many orders didn't use the SAVE10 promo?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE ((t0.\"promo_cd\" IS NULL OR t0.\"promo_cd\" NOT IN ('SAVE10')))",
+   "rows": [
+    [
+     1030
+    ]
+   ],
+   "expected": [
+    [
+     1030
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE ((t0.\"promo_cd\" IS NULL OR t0.\"promo_cd\" NOT IN ('SAVE10')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "SAVE10",
+      "grounded_to": "orders.promo_cd NOT IN ('SAVE10',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "rows with no promo_cd are kept when excluding SAVE10"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "FD10",
+   "db": "food@orders",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many delivered orders showed up late?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: up",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     405
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: up",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "late",
+      "grounded_to": "orders.is_late = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: up"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD11",
+   "db": "food@orders",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Of the delivered orders, how many had a problem with the drop-off, i.e. weren't marked as delivered OK?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: problem, dropoff, marked, OK",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     84
+    ]
+   ],
+   "latency_ms": 2.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: problem, dropoff, marked, OK",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status NOT IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "how many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "rows with no order_status are kept when excluding DELIVERED",
+     "counting orders rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: problem, dropoff, marked, OK"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD12",
+   "db": "food@orders",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many different customers have ordered from Mama's Kitchen?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(DISTINCT t0.\"cust_id\") AS \"distinct_cust_id\" FROM \"orders\" AS t0 LEFT JOIN \"restaurants\" AS j1 ON j1.\"restaurant_id\" = t0.\"restaurant_id\" WHERE (j1.\"rest_nm\" IN ('Mama''s Kitchen'))",
+   "rows": [
+    [
+     74
+    ]
+   ],
+   "expected": [
+    [
+     74
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"cust_id\") AS \"distinct_cust_id\" FROM \"orders\" AS t0 LEFT JOIN \"restaurants\" AS j1 ON j1.\"restaurant_id\" = t0.\"restaurant_id\" WHERE (j1.\"rest_nm\" IN ('Mama''s Kitchen'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Mama's Kitchen",
+      "grounded_to": "restaurants.rest_nm IN (\"Mama's Kitchen\",)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "FD13",
+   "db": "food@orders",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total delivery fee on delivered orders that had at least one drink in them?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED')) AND (EXISTS (SELECT 1 FROM \"order_items\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"item_cat\" IN ('DRINK')))",
+   "rows": [
+    [
+     1466.74
+    ]
+   ],
+   "expected": [
+    [
+     1466.74
+    ]
+   ],
+   "latency_ms": 3.6,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"dlv_fee\") AS \"sum_dlv_fee\" FROM \"orders\" AS t0 WHERE (t0.\"order_status\" IN ('DELIVERED')) AND (EXISTS (SELECT 1 FROM \"order_items\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"item_cat\" IN ('DRINK')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "drink",
+      "grounded_to": "order_items.item_cat IN ('DRINK',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "delivery fee",
+      "grounded_to": "SUM(orders.dlv_fee)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "FD14",
+   "db": "food@orders",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many orders never got a courier assigned?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: assigned",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     51
+    ]
+   ],
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: assigned",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "courier",
+      "grounded_to": "orders.courier_id IS NULL",
+      "reason": "no linked couriers"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: assigned"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD15",
+   "db": "food@orders",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Compare delivered order counts for Q1 vs Q2 2025 (by order date).",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: order_ts, dlv_ts",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Q1",
+     534
+    ],
+    [
+     "Q2",
+     530
+    ]
+   ],
+   "latency_ms": 2.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: order_ts, dlv_ts",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [
+     "counting orders rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: order_ts, dlv_ts"
+    ],
+    "unresolved": [
+     "words not grounded: Compare, counts, date"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD16",
+   "db": "food@orders",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of delivered orders arrived late?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: arrived",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     38.06390977443609
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: arrived",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "late",
+      "grounded_to": "orders.is_late = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting orders rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: arrived"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD17",
+   "db": "food@orders",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What share of delivered food sales came from restaurants in each city? Give percentages.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: share, food, sales, percentages",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Lakeside",
+     21.5834537588534
+    ],
+    [
+     "Riverton",
+     36.437960434800544
+    ],
+    [
+     "Springfield",
+     41.97858580634606
+    ]
+   ],
+   "latency_ms": 2.9,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: share, food, sales, percentages",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "delivered",
+      "grounded_to": "orders.order_status IN ('DELIVERED',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "city",
+      "grounded_to": "group by restaurants.city",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: share, food, sales, percentages"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD18",
+   "db": "food@orders",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What were total food sales at Closed Corner Cafe?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: food, sales",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 2.7,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: food, sales",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Closed Corner Cafe",
+      "grounded_to": "restaurants.rest_nm IN ('Closed Corner Cafe',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: food, sales"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "FD19",
+   "db": "food@orders",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What was our total tip income for March 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: order_ts, dlv_ts",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: order_ts, dlv_ts",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "tip",
+      "grounded_to": "SUM(orders.tip_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: order_ts, dlv_ts"
+    ],
+    "unresolved": [
+     "words not grounded: income"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD20",
+   "db": "food@orders",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which restaurant is doing best?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: best, restaurant",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: best, restaurant",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: best, restaurant"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD21",
+   "db": "food@orders",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our average order value?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, value",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, value",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, value"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD22",
+   "db": "food@orders",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Break down order revenue by item category.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "grouping by order_items.item_cat (one-to-many) would count rows more than once",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "unsupported",
+    "message": "grouping by order_items.item_cat (one-to-many) would count rows more than once",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting orders rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Break, down, revenue, item category"
+    ],
+    "unsupported": [
+     "grouping by order_items.item_cat (one-to-many) would count rows more than once"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD23",
+   "db": "food@orders",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many big orders did we get?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: big",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: big",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: big"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD24",
+   "db": "food@orders",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Forecast how many orders we'll get in July 2025.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: order_ts, dlv_ts",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 2.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: order_ts, dlv_ts",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "how many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: order_ts, dlv_ts"
+    ],
+    "unresolved": [
+     "words not grounded: Forecast"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD25",
+   "db": "food@orders",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which customers have never placed an order?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: customers; 'never' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: customers; 'never' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting orders rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: customers",
+     "'never' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "FD26",
+   "db": "food@orders",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average distance a courier travels per delivery?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, distance, travels, courier, delivery",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, distance, travels, courier, delivery",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, distance, travels, courier, delivery"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS01",
+   "db": "lease@leases",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total monthly rent across all of our active leases?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"monthly_rent\") AS \"sum_monthly_rent\" FROM \"leases\" AS t0 WHERE (t0.\"lease_status\" IN ('ACTIVE'))",
+   "rows": [
+    [
+     216300.0
+    ]
+   ],
+   "expected": [
+    [
+     216300.0
+    ]
+   ],
+   "latency_ms": 21.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"monthly_rent\") AS \"sum_monthly_rent\" FROM \"leases\" AS t0 WHERE (t0.\"lease_status\" IN ('ACTIVE'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "active",
+      "grounded_to": "leases.lease_status IN ('ACTIVE',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "monthly rent",
+      "grounded_to": "SUM(leases.monthly_rent)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "LS02",
+   "db": "lease@leases",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many leases have we written for each unit type?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: written",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "1BR",
+     254
+    ],
+    [
+     "2BR",
+     162
+    ],
+    [
+     "3BR",
+     49
+    ],
+    [
+     "STUDIO",
+     90
+    ],
+    [
+     "TH",
+     62
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: written",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "unit type",
+      "grounded_to": "group by units.unit_type",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: written"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS03",
+   "db": "lease@leases",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which three buildings had the highest average monthly rent on leases signed during 2024?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: average",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Harbor View (South)",
+     2431.153846153846
+    ],
+    [
+     "Harbor View (North)",
+     2410.0
+    ],
+    [
+     "The Foundry",
+     2165.3571428571427
+    ]
+   ],
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: average",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "monthly rent",
+      "grounded_to": "MAX(leases.monthly_rent)",
+      "reason": "measure column"
+     },
+     {
+      "span": "buildings",
+      "grounded_to": "group by units.bldg_name",
+      "reason": "grouping"
+     },
+     {
+      "span": "2024",
+      "grounded_to": "signed_dt in [2024-01-01, 2025-01-01)",
+      "reason": "period on the chosen date column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: average"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS04",
+   "db": "lease@leases",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many leases began in each year from 2019 to 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt; 'each year' does not say which date: signed_dt, start_dt, end_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "2019",
+     114
+    ],
+    [
+     "2020",
+     95
+    ],
+    [
+     "2021",
+     93
+    ],
+    [
+     "2022",
+     101
+    ],
+    [
+     "2023",
+     85
+    ],
+    [
+     "2024",
+     89
+    ],
+    [
+     "2025",
+     40
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt; 'each year' does not say which date: signed_dt, start_dt, end_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+     "'each year' does not say which date: signed_dt, start_dt, end_dt"
+    ],
+    "unresolved": [
+     "words not grounded: began"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS05",
+   "db": "lease@leases",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many leases are for units of at least 900 square feet?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: feet",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     238
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: feet",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "at least 900",
+      "grounded_to": "units.sq_ft >= 900",
+      "reason": "comparison"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: feet"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS06",
+   "db": "lease@leases",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many leases did each leasing agent sign? Show the agents' names.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "leasing_agent_id has no lookup table that names its values; words not grounded: agents, names, leasing agent, sign",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Chloe Dubois",
+     103
+    ],
+    [
+     "Marcus Webb",
+     183
+    ],
+    [
+     "Nora O'Connell",
+     70
+    ],
+    [
+     "Paula Grant",
+     169
+    ],
+    [
+     "Raj Iyer",
+     92
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "leasing_agent_id has no lookup table that names its values; words not grounded: agents, names, leasing agent, sign",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "leasing_agent_id has no lookup table that names its values",
+     "words not grounded: agents, names, leasing agent, sign"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS07",
+   "db": "lease@leases",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total monthly rent on active leases, by property manager.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "prop_mgr_id has no lookup table that names its values; words not grounded: property manager",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Chloe Dubois",
+     39255.0
+    ],
+    [
+     "Janet Ross",
+     47330.0
+    ],
+    [
+     "Nora O'Connell",
+     45610.0
+    ],
+    [
+     "Raj Iyer",
+     45280.0
+    ],
+    [
+     "Victor Hale",
+     38825.0
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "prop_mgr_id has no lookup table that names its values; words not grounded: property manager",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "active",
+      "grounded_to": "leases.lease_status IN ('ACTIVE',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "monthly rent",
+      "grounded_to": "SUM(leases.monthly_rent)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "prop_mgr_id has no lookup table that names its values",
+     "words not grounded: property manager"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS08",
+   "db": "lease@leases",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "avg sec dep on 2BR units where pets ok?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: avg, sec, dep",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     3115.073529411765
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: avg, sec, dep",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "2BR",
+      "grounded_to": "units.unit_type IN ('2BR',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "pets ok",
+      "grounded_to": "leases.pets_ok = 1",
+      "reason": "0/1 column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: avg, sec, dep"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS09",
+   "db": "lease@leases",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Leaving out leases that came with a move-in concession, what's the average monthly rent?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: Leaving, out, movein, concession",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     1961.4814814814815
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: Leaving, out, movein, concession",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "monthly rent",
+      "grounded_to": "AVG(leases.monthly_rent)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Leaving, out, movein, concession"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS10",
+   "db": "lease@leases",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many leases are not in good standing?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"leases\" AS t0 WHERE (t0.\"in_good_standing\" = 0)",
+   "rows": [
+    [
+     65
+    ]
+   ],
+   "expected": [
+    [
+     65
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"leases\" AS t0 WHERE (t0.\"in_good_standing\" = 0)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "in good standing",
+      "grounded_to": "leases.in_good_standing = 0",
+      "reason": "0/1 column (negated)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "LS11",
+   "db": "lease@leases",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many of our leases are month-to-month?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: month",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     18
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: month",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: month"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS12",
+   "db": "lease@leases",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many unique tenants have ever signed a lease with us?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(DISTINCT t0.\"tenant_id\") AS \"distinct_tenant_id\" FROM \"leases\" AS t0 WHERE (t0.\"signed_dt\" IS NOT NULL)",
+   "rows": [
+    [
+     384
+    ]
+   ],
+   "expected": [
+    [
+     384
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"tenant_id\") AS \"distinct_tenant_id\" FROM \"leases\" AS t0 WHERE (t0.\"signed_dt\" IS NOT NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "signed",
+      "grounded_to": "leases.signed_dt IS NOT NULL",
+      "reason": "event has happened (date present)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "LS13",
+   "db": "lease@leases",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total monthly rent across leases that have had at least one late rent payment?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"monthly_rent\") AS \"sum_monthly_rent\" FROM \"leases\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rent_payments\" AS x0_0 WHERE x0_0.\"lease_id\" = t0.\"lease_id\" AND x0_0.\"is_late\" = 1))",
+   "rows": [
+    [
+     241020.0
+    ]
+   ],
+   "expected": [
+    [
+     241020.0
+    ]
+   ],
+   "latency_ms": 29.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"monthly_rent\") AS \"sum_monthly_rent\" FROM \"leases\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rent_payments\" AS x0_0 WHERE x0_0.\"lease_id\" = t0.\"lease_id\" AND x0_0.\"is_late\" = 1))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "late",
+      "grounded_to": "rent_payments.is_late = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "monthly rent",
+      "grounded_to": "SUM(leases.monthly_rent)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "LS14",
+   "db": "lease@leases",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How much in late fees have we charged on Oak & Elm Residences leases?",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "a measure on the one-to-many table rent_payments (needs that table as the base)",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     1850.0
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "unsupported",
+    "message": "a measure on the one-to-many table rent_payments (needs that table as the base)",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Oak & Elm Residences",
+      "grounded_to": "units.bldg_name IN ('Oak & Elm Residences',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: charged, late fees"
+    ],
+    "unsupported": [
+     "a measure on the one-to-many table rent_payments (needs that table as the base)"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS15",
+   "db": "lease@leases",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Leases signed in 2023 versus 2024: how many in each year?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"signed_dt\",1,4) AS \"year\", COUNT(*) AS \"row_count\" FROM \"leases\" AS t0 WHERE ((t0.\"signed_dt\" >= '2023-01-01' AND t0.\"signed_dt\" < '2025-01-01')) GROUP BY substr(t0.\"signed_dt\",1,4) ORDER BY \"year\"",
+   "rows": [
+    [
+     "2023",
+     96
+    ],
+    [
+     "2024",
+     86
+    ]
+   ],
+   "expected": [
+    [
+     "2023",
+     96
+    ],
+    [
+     "2024",
+     86
+    ]
+   ],
+   "latency_ms": 3.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"signed_dt\",1,4) AS \"year\", COUNT(*) AS \"row_count\" FROM \"leases\" AS t0 WHERE ((t0.\"signed_dt\" >= '2023-01-01' AND t0.\"signed_dt\" < '2025-01-01')) GROUP BY substr(t0.\"signed_dt\",1,4) ORDER BY \"year\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "how many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "2023 versus 2024",
+      "grounded_to": "signed_dt in [2023-01-01, 2025-01-01)",
+      "reason": "period on the chosen date column"
+     },
+     {
+      "span": "each year",
+      "grounded_to": "year of signed_dt",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [
+     "counting leases rows",
+     "the named periods are shown as one series over their full range"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "LS16",
+   "db": "lease@leases",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percent of our leases are renewals?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_renewal\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"leases\" AS t0",
+   "rows": [
+    [
+     25.60777957860616
+    ]
+   ],
+   "expected": [
+    [
+     25.60777957860616
+    ]
+   ],
+   "latency_ms": 2.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_renewal\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"leases\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "renewals",
+      "grounded_to": "leases.is_renewal = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "percent",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting leases rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "LS17",
+   "db": "lease@leases",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "For active leases, what percentage of total monthly rent does each building account for?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: account",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Cedar Ridge",
+     15.423023578363384
+    ],
+    [
+     "Harbor View (North)",
+     18.546000924641703
+    ],
+    [
+     "Harbor View (South)",
+     18.009708737864077
+    ],
+    [
+     "Oak & Elm Residences",
+     17.25150254276468
+    ],
+    [
+     "St. Mary's Lofts",
+     14.680998613037447
+    ],
+    [
+     "The Foundry",
+     16.08876560332871
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: account",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "active",
+      "grounded_to": "leases.lease_status IN ('ACTIVE',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "monthly rent",
+      "grounded_to": "SUM(leases.monthly_rent)",
+      "reason": "measure column"
+     },
+     {
+      "span": "building",
+      "grounded_to": "group by units.bldg_name",
+      "reason": "grouping"
+     },
+     {
+      "span": "percentage",
+      "grounded_to": "share of the grand total per group",
+      "reason": "percentage with grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: account"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS18",
+   "db": "lease@leases",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How much monthly rent comes from leases with a security deposit over $10,000?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: security deposit",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: security deposit",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "monthly rent",
+      "grounded_to": "SUM(leases.monthly_rent)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: security deposit"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "LS19",
+   "db": "lease@leases",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many leases did we have in 2024?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: signed_dt, start_dt, end_dt"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS20",
+   "db": "lease@leases",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which staff member is responsible for the most leases?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: staff, member, responsible",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: staff, member, responsible",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting leases rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: staff, member, responsible"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS21",
+   "db": "lease@leases",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show me rent collected by month for 2025.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt; 'by month' does not say which date: signed_dt, start_dt, end_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt; 'by month' does not say which date: signed_dt, start_dt, end_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+     "'by month' does not say which date: signed_dt, start_dt, end_dt"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: rent, collected"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS22",
+   "db": "lease@leases",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our late payment rate?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: rate",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: rate",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "late",
+      "grounded_to": "rent_payments.is_late = 1",
+      "reason": "0/1 column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: rate"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS23",
+   "db": "lease@leases",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Who are our top-paying tenants?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: top, paying, tenants",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: top, paying, tenants",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: top, paying, tenants"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS24",
+   "db": "lease@leases",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Project our occupancy rate for 2026.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.5,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: signed_dt, start_dt, end_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: signed_dt, start_dt, end_dt"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Project, occupancy, rate"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS25",
+   "db": "lease@leases",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which units have never been leased?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: units; 'never' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: units; 'never' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting leases rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: units",
+     "'never' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "LS26",
+   "db": "lease@leases",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average tenant satisfaction score by building?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, satisfaction, score, tenant",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, satisfaction, score, tenant",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "building",
+      "grounded_to": "group by units.bldg_name",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, satisfaction, score, tenant"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC01",
+   "db": "telecom@monthly_bills",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total monthly recurring charge we billed for January through June 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     71687.96
+    ]
+   ],
+   "latency_ms": 38.0,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "recurring",
+      "grounded_to": "SUM(monthly_bills.mrc_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "words not grounded: charge"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC02",
+   "db": "telecom@monthly_bills",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Overage charges by customer region. Show subscribers with no region as their own blank group.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: Overage, charges, blank, group",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null,
+     850.0
+    ],
+    [
+     "EAST",
+     1540.0
+    ],
+    [
+     "NORTH",
+     1770.0
+    ],
+    [
+     "SOUTH",
+     1720.0
+    ],
+    [
+     "WEST",
+     950.0
+    ]
+   ],
+   "latency_ms": 2.8,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Overage, charges, blank, group",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "region",
+      "grounded_to": "subscribers.region IS NULL",
+      "reason": "missing-value phrasing"
+     },
+     {
+      "span": "customer",
+      "grounded_to": "group by subscribers.cust_name",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Overage, charges, blank, group"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC03",
+   "db": "telecom@monthly_bills",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Top 5 subscribers by total mobile data used in H1 2025, in GB.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Dmitri Rossi",
+     422.6513671875
+    ],
+    [
+     "Priya Wright",
+     405.86328125
+    ],
+    [
+     "Elena Park",
+     403.283203125
+    ],
+    [
+     "Xin Lopez",
+     383.6474609375
+    ],
+    [
+     "Liam Nguyen",
+     370.6103515625
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "data",
+      "grounded_to": "SUM(monthly_bills.data_mb)",
+      "reason": "measure column"
+     },
+     {
+      "span": "subscribers",
+      "grounded_to": "group by subscribers.cust_name",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "words not grounded: mobile, GB"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC04",
+   "db": "telecom@monthly_bills",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Monthly overage revenue by usage month.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'monthly' does not say which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "2025-01",
+     1310.0
+    ],
+    [
+     "2025-02",
+     770.0
+    ],
+    [
+     "2025-03",
+     1250.0
+    ],
+    [
+     "2025-04",
+     900.0
+    ],
+    [
+     "2025-05",
+     1360.0
+    ],
+    [
+     "2025-06",
+     1240.0
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "'monthly' does not say which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "'monthly' does not say which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: overage, revenue, usage, month"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC05",
+   "db": "telecom@monthly_bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Average recurring charge per bill for each plan, by plan name.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: charge",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Basic 2GB",
+     25.0
+    ],
+    [
+     "Basic 5GB",
+     35.0
+    ],
+    [
+     "Family Share (4 lines)",
+     139.810325203252
+    ],
+    [
+     "Prepaid 10",
+     29.908459459459458
+    ],
+    [
+     "Unlimited Max",
+     85.0
+    ],
+    [
+     "Unlimited Standard",
+     64.57208163265307
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: charge",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "recurring",
+      "grounded_to": "AVG(monthly_bills.mrc_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "plan",
+      "grounded_to": "group by plans.plan_name",
+      "reason": "entity label"
+     },
+     {
+      "span": "plan name",
+      "grounded_to": "group by plans.plan_name",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: charge"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC06",
+   "db": "telecom@monthly_bills",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills were on plans with a data allowance of 5 GB or less?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: allowance, GB, plans, data",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     298
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: allowance, GB, plans, data",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: allowance, GB, plans, data"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC07",
+   "db": "telecom@monthly_bills",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "sum of roam chgs for POSTPAID subs, Q2 bill periods",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: chgs, Q2, bill periods",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     1770.19
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: chgs, Q2, bill periods",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "POSTPAID",
+      "grounded_to": "subscribers.acct_type IN ('POSTPAID',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "roam",
+      "grounded_to": "SUM(monthly_bills.roam_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: chgs, Q2, bill periods"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC08",
+   "db": "telecom@monthly_bills",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Total tax billed to subscribers outside the NORTH region.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: outside",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     5156.79
+    ]
+   ],
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: outside",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "NORTH",
+      "grounded_to": "subscribers.region IN ('NORTH',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "tax",
+      "grounded_to": "SUM(monthly_bills.tax_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: outside"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC09",
+   "db": "telecom@monthly_bills",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills went over the data allowance?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: allowance, data",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     244
+    ]
+   ],
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: allowance, data",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: allowance, data"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC10",
+   "db": "telecom@monthly_bills",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills haven't been paid yet?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"monthly_bills\" AS t0 WHERE (t0.\"paid_dt\" IS NULL)",
+   "rows": [
+    [
+     116
+    ]
+   ],
+   "expected": [
+    [
+     116
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"monthly_bills\" AS t0 WHERE (t0.\"paid_dt\" IS NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "paid",
+      "grounded_to": "monthly_bills.paid_dt IS NULL",
+      "reason": "event has not happened (no date)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "TC11",
+   "db": "telecom@monthly_bills",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many unique subscribers were billed for March 2025 usage?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     214
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "words not grounded: usage"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC12",
+   "db": "telecom@monthly_bills",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total recurring charge on bills that got at least one outage credit?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: charge, credit",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     4734.67
+    ]
+   ],
+   "latency_ms": 2.4,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: charge, credit",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "outage",
+      "grounded_to": "bill_adjustments.reason_cd IN ('OUTAGE',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "recurring",
+      "grounded_to": "SUM(monthly_bills.mrc_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: charge, credit"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC13",
+   "db": "telecom@monthly_bills",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Add up the adjustment amounts posted against Unlimited Max bills.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "a measure on the one-to-many table bill_adjustments (needs that table as the base)",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     -679.21
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "unsupported",
+    "message": "a measure on the one-to-many table bill_adjustments (needs that table as the base)",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Unlimited Max",
+      "grounded_to": "plans.plan_name IN ('Unlimited Max',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: up, posted, against, Add, adjustment amounts"
+    ],
+    "unsupported": [
+     "a measure on the one-to-many table bill_adjustments (needs that table as the base)"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC14",
+   "db": "telecom@monthly_bills",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Compare overage revenue in Q1 vs Q2 2025 by usage month.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Q1",
+     3330.0
+    ],
+    [
+     "Q2",
+     3500.0
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Compare, overage, revenue, usage, month"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC15",
+   "db": "telecom@monthly_bills",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Of the bills that have been paid, what percentage were paid after the due date?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: due date",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     23.353819139596137
+    ]
+   ],
+   "latency_ms": 2.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: due date",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "paid",
+      "grounded_to": "monthly_bills.paid_dt IS NOT NULL",
+      "reason": "event has happened (date present)"
+     },
+     {
+      "span": "paid",
+      "grounded_to": "monthly_bills.paid_dt IS NOT NULL",
+      "reason": "event has happened (date present)"
+     },
+     {
+      "span": "percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting monthly_bills rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: due date"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC16",
+   "db": "telecom@monthly_bills",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What percentage of total recurring revenue does each plan make up?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Basic 2GB",
+     5.0217637661889105
+    ],
+    [
+     "Basic 5GB",
+     7.518696305488397
+    ],
+    [
+     "Family Share (4 lines)",
+     23.988226195863287
+    ],
+    [
+     "Prepaid 10",
+     15.436525184982246
+    ],
+    [
+     "Unlimited Max",
+     25.96670347433516
+    ],
+    [
+     "Unlimited Standard",
+     22.068085073141987
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "clarify",
+    "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "plan",
+      "grounded_to": "group by plans.plan_name",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: percentage, revenue, up, recurring"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC17",
+   "db": "telecom@monthly_bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How much recurring revenue did the Legacy Talk & Text plan bring in?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "clarify",
+    "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Legacy Talk & Text",
+      "grounded_to": "plans.plan_name IN ('Legacy Talk & Text',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: revenue, bring, recurring"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC18",
+   "db": "telecom@monthly_bills",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "avg voice mins per bill for PREPAID accts?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: accts",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     766.4297297297297
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: accts",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "PREPAID",
+      "grounded_to": "subscribers.acct_type IN ('PREPAID',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "voice mins",
+      "grounded_to": "AVG(monthly_bills.voice_min)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: accts"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "TC19",
+   "db": "telecom@monthly_bills",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many bills did we have in March 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC20",
+   "db": "telecom@monthly_bills",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our ARPU?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: ARPU",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: ARPU",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: ARPU"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC21",
+   "db": "telecom@monthly_bills",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which region is performing best?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: performing, best, region",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: performing, best, region",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: performing, best, region"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC22",
+   "db": "telecom@monthly_bills",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average bill amount by adjustment reason?",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "grouping by bill_adjustments.reason_cd (one-to-many) would count rows more than once",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "unsupported",
+    "message": "grouping by bill_adjustments.reason_cd (one-to-many) would count rows more than once",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, reason"
+    ],
+    "unsupported": [
+     "grouping by bill_adjustments.reason_cd (one-to-many) would count rows more than once"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC23",
+   "db": "telecom@monthly_bills",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How much revenue did we have for May 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: stmt_dt, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: stmt_dt, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: revenue"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC24",
+   "db": "telecom@monthly_bills",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Break down total recurring charges by add-on.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "clarify",
+    "message": "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "'recurring' could be monthly_bills.mrc_amt or plans.list_mrc via plan_cd"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Break, down, charges, recurring, addon"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC25",
+   "db": "telecom@monthly_bills",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average monthly data usage for each add-on?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: usage",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: usage",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "data",
+      "grounded_to": "AVG(monthly_bills.data_mb)",
+      "reason": "measure column"
+     },
+     {
+      "span": "monthly",
+      "grounded_to": "month of added_dt",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: usage"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC26",
+   "db": "telecom@monthly_bills",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which plans don't have any bills?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: plans; 'not' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: plans; 'not' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting monthly_bills rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: plans",
+     "'not' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "TC27",
+   "db": "telecom@monthly_bills",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's each subscriber's probability of churning next quarter?",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "relative dates (last/this/next period) are not resolved against a reference date",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "subscriber",
+      "grounded_to": "group by subscribers.cust_name",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: probability, next, quarter, churning"
+    ],
+    "unsupported": [
+     "relative dates (last/this/next period) are not resolved against a reference date"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH01",
+   "db": "warehouse@inv_moves",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many units did we receive in total in the first half of 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     27614
+    ]
+   ],
+   "latency_ms": 28.7,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: units, receive"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH02",
+   "db": "warehouse@inv_moves",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total units moved by product category, with uncategorized items shown as a separate group.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: units, product, uncategorized, shown, separate, group, category, items",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null,
+     8088
+    ],
+    [
+     "CLEANING",
+     12810
+    ],
+    [
+     "ELECTRICAL",
+     13642
+    ],
+    [
+     "HARDWARE",
+     16477
+    ],
+    [
+     "PACKAGING",
+     12970
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: units, product, uncategorized, shown, separate, group, category, items",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: units, product, uncategorized, shown, separate, group, category, items"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH03",
+   "db": "warehouse@inv_moves",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Top 5 products by units picked.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; 'top 5' ranks something, but no group was grounded; words not grounded: products, units, picked",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Smoke Alarm",
+     370
+    ],
+    [
+     "Ladder 6ft",
+     322
+    ],
+    [
+     "Misc Spare Part B",
+     283
+    ],
+    [
+     "Hand Saw",
+     271
+    ],
+    [
+     "Toolbox Steel",
+     262
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; 'top 5' ranks something, but no group was grounded; words not grounded: products, units, picked",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "'top 5' ranks something, but no group was grounded",
+     "words not grounded: products, units, picked"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 3,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH04",
+   "db": "warehouse@inv_moves",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many inventory movements happened each month, by movement timestamp?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"move_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"inv_moves\" AS t0 GROUP BY substr(t0.\"move_ts\",1,7) ORDER BY \"month\"",
+   "rows": [
+    [
+     "2025-01",
+     219
+    ],
+    [
+     "2025-02",
+     215
+    ],
+    [
+     "2025-03",
+     252
+    ],
+    [
+     "2025-04",
+     221
+    ],
+    [
+     "2025-05",
+     246
+    ],
+    [
+     "2025-06",
+     247
+    ]
+   ],
+   "expected": [
+    [
+     "2025-01",
+     219
+    ],
+    [
+     "2025-02",
+     215
+    ],
+    [
+     "2025-03",
+     252
+    ],
+    [
+     "2025-04",
+     221
+    ],
+    [
+     "2025-05",
+     246
+    ],
+    [
+     "2025-06",
+     247
+    ]
+   ],
+   "latency_ms": 2.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"move_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"inv_moves\" AS t0 GROUP BY substr(t0.\"move_ts\",1,7) ORDER BY \"month\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "each month",
+      "grounded_to": "month of move_ts",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "WH05",
+   "db": "warehouse@inv_moves",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many units were received into each receiving location (where the receipts landed)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Receiving Dock 1",
+     14304
+    ],
+    [
+     "Receiving Dock 2",
+     13310
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "clarify",
+    "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [
+     "'location' could be inv_moves.from_loc or inv_moves.to_loc",
+     "'location' could be inv_moves.from_loc or inv_moves.to_loc"
+    ],
+    "unresolved": [
+     "words not grounded: units, received, receiving, receipts, landed, location"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH06",
+   "db": "warehouse@inv_moves",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Units picked out of each storage location.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Aisle A Bay 1",
+     1349
+    ],
+    [
+     "Aisle A Bay 2",
+     1301
+    ],
+    [
+     "Aisle B Bay 1",
+     1048
+    ],
+    [
+     "Aisle B Bay 2",
+     1355
+    ],
+    [
+     "Aisle C Bay 1",
+     1128
+    ],
+    [
+     "Overflow (Yard)",
+     1225
+    ]
+   ],
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "'location' could be inv_moves.from_loc or inv_moves.to_loc",
+     "'location' could be inv_moves.from_loc or inv_moves.to_loc"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Units, picked, out, storage, location"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH07",
+   "db": "warehouse@inv_moves",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many moves involved items heavier than 10 kg per unit?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: unit",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     768
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: unit",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "heavier than 10",
+      "grounded_to": "items.unit_wt_kg > 10",
+      "reason": "comparison"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: unit"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH08",
+   "db": "warehouse@inv_moves",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total value (quantity times unit cost) of moves handled by night-shift operators?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: value",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     888646.76
+    ]
+   ],
+   "latency_ms": 2.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: value",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "night",
+      "grounded_to": "operators.shift IN ('NIGHT',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "quantity times unit cost",
+      "grounded_to": "SUM(qty * unit_cost)",
+      "reason": "product computed per row, then aggregated"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: value"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH09",
+   "db": "warehouse@inv_moves",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "total qty of XFERs for HARDWARE cat",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"qty\") AS \"sum_qty\" FROM \"inv_moves\" AS t0 LEFT JOIN \"items\" AS j1 ON j1.\"sku_cd\" = t0.\"sku_cd\" WHERE (t0.\"move_type\" IN ('XFER')) AND (j1.\"category\" IN ('HARDWARE'))",
+   "rows": [
+    [
+     2211
+    ]
+   ],
+   "expected": [
+    [
+     2211
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"qty\") AS \"sum_qty\" FROM \"inv_moves\" AS t0 LEFT JOIN \"items\" AS j1 ON j1.\"sku_cd\" = t0.\"sku_cd\" WHERE (t0.\"move_type\" IN ('XFER')) AND (j1.\"category\" IN ('HARDWARE'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "XFERs",
+      "grounded_to": "inv_moves.move_type IN ('XFER',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "HARDWARE",
+      "grounded_to": "items.category IN ('HARDWARE',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "qty",
+      "grounded_to": "SUM(inv_moves.qty)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "WH10",
+   "db": "warehouse@inv_moves",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many moves were not cycle-count corrections?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: cycle, count, corrections; 'not' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     1349
+    ]
+   ],
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: cycle, count, corrections; 'not' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: cycle, count, corrections",
+     "'not' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH11",
+   "db": "warehouse@inv_moves",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many moves had a failed barcode scan?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: barcode",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     82
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: barcode",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "scan",
+      "grounded_to": "inv_moves.scan_ok = 0",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: barcode"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH12",
+   "db": "warehouse@inv_moves",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many damaged units came in on receipts?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: units, receipts",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     595
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: units, receipts",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "damaged",
+      "grounded_to": "inv_moves.is_damaged = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: units, receipts"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH13",
+   "db": "warehouse@inv_moves",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many movements have no operator recorded against them?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: movements, against",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     55
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: movements, against",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "operator",
+      "grounded_to": "inv_moves.operator_id IS NULL",
+      "reason": "no linked operators"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: movements, against"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH14",
+   "db": "warehouse@inv_moves",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many distinct SKUs were picked in May 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     44
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: picked"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH15",
+   "db": "warehouse@inv_moves",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total quantity on moves that logged at least one exception?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"qty\") AS \"sum_qty\" FROM \"inv_moves\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"move_exceptions\" AS x0_0 WHERE x0_0.\"move_id\" = t0.\"move_id\"))",
+   "rows": [
+    [
+     6766
+    ]
+   ],
+   "expected": [
+    [
+     6766
+    ]
+   ],
+   "latency_ms": 11.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"qty\") AS \"sum_qty\" FROM \"inv_moves\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"move_exceptions\" AS x0_0 WHERE x0_0.\"move_id\" = t0.\"move_id\"))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "exception",
+      "grounded_to": "EXISTS move_exceptions",
+      "reason": "related rows (one-to-many)"
+     },
+     {
+      "span": "quantity",
+      "grounded_to": "SUM(inv_moves.qty)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "WH16",
+   "db": "warehouse@inv_moves",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Units picked in April vs May 2025, by move date.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "2025-04",
+     1434
+    ],
+    [
+     "2025-05",
+     1447
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: Units, picked, date"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH17",
+   "db": "warehouse@inv_moves",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of received units were damaged?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: percentage, received, units",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     2.1547041355834
+    ]
+   ],
+   "latency_ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: percentage, received, units",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "damaged",
+      "grounded_to": "inv_moves.is_damaged = 1",
+      "reason": "0/1 column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: percentage, received, units"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH18",
+   "db": "warehouse@inv_moves",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What share of picked units did each operator shift handle, in percent?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: share, picked, units, percent",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "DAY",
+     44.77450715635971
+    ],
+    [
+     "NIGHT",
+     29.74615176883608
+    ],
+    [
+     "SWING",
+     25.479341074804214
+    ]
+   ],
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: share, picked, units, percent",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "shift",
+      "grounded_to": "group by operators.shift",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: share, picked, units, percent"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH19",
+   "db": "warehouse@inv_moves",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How many units of Pallet Wrap (Blue) were moved in 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Pallet Wrap (Blue",
+      "grounded_to": "items.item_desc IN ('Pallet Wrap (Blue)',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: units"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "WH20",
+   "db": "warehouse@inv_moves",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many units did we receive in March 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: units, receive"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH21",
+   "db": "warehouse@inv_moves",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Total units by location.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.5,
+   "trace": {
+    "status": "clarify",
+    "message": "'location' could be inv_moves.from_loc or inv_moves.to_loc; 'location' could be inv_moves.from_loc or inv_moves.to_loc",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "'location' could be inv_moves.from_loc or inv_moves.to_loc",
+     "'location' could be inv_moves.from_loc or inv_moves.to_loc"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: units, location"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH22",
+   "db": "warehouse@inv_moves",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Who's our most productive operator?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: productive, operator",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: productive, operator",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: productive, operator"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH23",
+   "db": "warehouse@inv_moves",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Break down units moved by exception code.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: Break, down, units, exception code",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: Break, down, units, exception code",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Break, down, units, exception code"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH24",
+   "db": "warehouse@inv_moves",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What was the value of stock moved per zone in Q2 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: value, stock, zone"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH25",
+   "db": "warehouse@inv_moves",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Predict which SKUs will stock out next month.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "relative dates (last/this/next period) are not resolved against a reference date",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Predict, stock, out, next, month, SKUs"
+    ],
+    "unsupported": [
+     "relative dates (last/this/next period) are not resolved against a reference date"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH26",
+   "db": "warehouse@inv_moves",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which SKUs haven't moved at all in 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: move_ts, posted_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: move_ts, posted_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting inv_moves rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: move_ts, posted_dt"
+    ],
+    "unresolved": [
+     "words not grounded: SKUs",
+     "'not' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "WH27",
+   "db": "warehouse@inv_moves",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What was the inbound freight cost per receipt?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: inbound, freight, cost, receipt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: inbound, freight, cost, receipt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: inbound, freight, cost, receipt"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  }
+ ],
+ "summary": {
+  "n": 106,
+  "answerable": 73,
+  "clarify_or_unsupported": 33,
+  "correct": 14,
+  "correct_rate": 0.192,
+  "correct_ci95": [
+   0.118,
+   0.297
+  ],
+  "answered_answerable": 14,
+  "coverage": 0.192,
+  "accuracy_when_answered": 1.0,
+  "accuracy_when_answered_ci95": [
+   0.785,
+   1.0
+  ],
+  "silent_wrong_answerable": 0,
+  "answered_clarify_items": 0,
+  "silent_wrong_total": 0,
+  "silent_wrong_rate_all": 0.0,
+  "silent_wrong_ci95": [
+   -0.0,
+   0.035
+  ],
+  "unnecessary_clarify": 59,
+  "correct_clarify": 33,
+  "errors": 0,
+  "latency_ms_p50": 1.7,
+  "latency_ms_p95": 11.3,
+  "latency_ms_max": 55.0,
+  "clarify_items_refused": "20/20",
+  "unsupported_items_refused": "13/13",
+  "by_category": {
+   "direct_kpi": {
+    "n": 5,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "breakdown": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "top_n": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "trend": {
+    "n": 4,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "multi_table_join": {
+    "n": 6,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 6,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "related_numeric_threshold": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "fk_inference": {
+    "n": 7,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 7,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "abbreviation": {
+    "n": 5,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "negation_exclusion": {
+    "n": 4,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "boolean_flag": {
+    "n": 6,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 5,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "distinct_count": {
+    "n": 4,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 2,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "join_fanout": {
+    "n": 7,
+    "correct": 3,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 1,
+    "correct_clarify": 3,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "null_condition": {
+    "n": 4,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "period_comparison": {
+    "n": 4,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "ratio": {
+    "n": 7,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 3,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "share_of_total": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "date_role_ambiguity": {
+    "n": 6,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 6,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "ambiguous": {
+    "n": 8,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 8,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "unsupported_metric": {
+    "n": 7,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 7,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "anti_join": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 4,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "many_to_many": {
+    "n": 2,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 2,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   }
+  }
+ }
+}

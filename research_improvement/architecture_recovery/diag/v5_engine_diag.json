@@ -1,0 +1,6402 @@
+{
+ "engine_commit": "4db2aaa629da21915b4bb9c6cdb43b539273d991",
+ "diagnostic_only": true,
+ "records": [
+  {
+   "id": "HO01",
+   "db": "hotel@bookings",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total amount across all bookings, cancelled ones included?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bookings\" AS t0",
+   "rows": [
+    [
+     726609.61
+    ]
+   ],
+   "expected": [
+    [
+     726609.61
+    ]
+   ],
+   "latency_ms": 47.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bookings\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "cancelled",
+      "grounded_to": "is_cancelled: no condition",
+      "reason": "inclusion phrase ('... included')"
+     },
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO02",
+   "db": "hotel@bookings",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many room nights have we sold in total, leaving out cancelled bookings?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: sold, nights",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     2941
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: sold, nights",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "cancelled",
+      "grounded_to": "bookings.is_cancelled = 0",
+      "reason": "0/1 column (negated)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "'room' counted as distinct room_id values on bookings"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: sold, nights"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO03",
+   "db": "hotel@bookings",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Break down the total booking amount by hotel.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: Break, down",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Bay & Pier Lodge",
+     144531.62
+    ],
+    [
+     "Captain's Inn",
+     89513.03
+    ],
+    [
+     "Grand Palace (Annex)",
+     123416.28
+    ],
+    [
+     "Harbour View Hotel",
+     194048.49
+    ],
+    [
+     "Sierra Mountain Retreat",
+     175100.19
+    ]
+   ],
+   "latency_ms": 8.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: Break, down",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "hotel",
+      "grounded_to": "group by hotels.hotel_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Break, down"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO04",
+   "db": "hotel@bookings",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What's the total booking amount for each city our hotels are in?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j2.\"city\" AS \"city\", SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bookings\" AS t0 LEFT JOIN \"rooms\" AS j1 ON j1.\"room_id\" = t0.\"room_id\" LEFT JOIN \"hotels\" AS j2 ON j2.\"hotel_id\" = j1.\"hotel_id\" GROUP BY j2.\"city\"",
+   "rows": [
+    [
+     "Granada",
+     175100.19
+    ],
+    [
+     "Lisbon",
+     338580.11
+    ],
+    [
+     "Madrid",
+     123416.28
+    ],
+    [
+     "Porto",
+     89513.03
+    ]
+   ],
+   "expected": [
+    [
+     "Granada",
+     175100.19
+    ],
+    [
+     "Lisbon",
+     338580.11
+    ],
+    [
+     "Madrid",
+     123416.28
+    ],
+    [
+     "Porto",
+     89513.03
+    ]
+   ],
+   "latency_ms": 6.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j2.\"city\" AS \"city\", SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bookings\" AS t0 LEFT JOIN \"rooms\" AS j1 ON j1.\"room_id\" = t0.\"room_id\" LEFT JOIN \"hotels\" AS j2 ON j2.\"hotel_id\" = j1.\"hotel_id\" GROUP BY j2.\"city\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "city",
+      "grounded_to": "group by hotels.city",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO05",
+   "db": "hotel@bookings",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many bookings were there for each type of room?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"room_type\" AS \"room_type\", COUNT(*) AS \"row_count\" FROM \"bookings\" AS t0 LEFT JOIN \"rooms\" AS j1 ON j1.\"room_id\" = t0.\"room_id\" GROUP BY j1.\"room_type\"",
+   "rows": [
+    [
+     "Deluxe",
+     206
+    ],
+    [
+     "Family (2+2)",
+     320
+    ],
+    [
+     "Standard",
+     163
+    ],
+    [
+     "Suite",
+     261
+    ]
+   ],
+   "expected": [
+    [
+     "Deluxe",
+     206
+    ],
+    [
+     "Family (2+2)",
+     320
+    ],
+    [
+     "Standard",
+     163
+    ],
+    [
+     "Suite",
+     261
+    ]
+   ],
+   "latency_ms": 3.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"room_type\" AS \"room_type\", COUNT(*) AS \"row_count\" FROM \"bookings\" AS t0 LEFT JOIN \"rooms\" AS j1 ON j1.\"room_id\" = t0.\"room_id\" GROUP BY j1.\"room_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "type of room",
+      "grounded_to": "group by rooms.room_type",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO06",
+   "db": "hotel@bookings",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which three hotels sold the most room nights, not counting cancelled bookings?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: sold, counting, room",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Harbour View Hotel",
+     760
+    ],
+    [
+     "Bay & Pier Lodge",
+     681
+    ],
+    [
+     "Sierra Mountain Retreat",
+     640
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: sold, counting, room",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "cancelled",
+      "grounded_to": "bookings.is_cancelled = 0",
+      "reason": "0/1 column (negated)"
+     },
+     {
+      "span": "nights",
+      "grounded_to": "SUM(bookings.nts_cnt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "hotels",
+      "grounded_to": "group by hotels.hotel_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "nts_cnt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: sold, counting, room"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO07",
+   "db": "hotel@bookings",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show total booking amount per check-in month for guests checking in during 2025.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: month, checking, guests",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "2025-01",
+     42348.9
+    ],
+    [
+     "2025-02",
+     47433.3
+    ],
+    [
+     "2025-03",
+     52159.28
+    ],
+    [
+     "2025-04",
+     38845.75
+    ],
+    [
+     "2025-05",
+     48368.21
+    ],
+    [
+     "2025-06",
+     54310.76
+    ],
+    [
+     "2025-07",
+     43874.7
+    ],
+    [
+     "2025-08",
+     45946.44
+    ],
+    [
+     "2025-09",
+     57016.62
+    ],
+    [
+     "2025-10",
+     51865.8
+    ],
+    [
+     "2025-11",
+     37868.15
+    ],
+    [
+     "2025-12",
+     28667.01
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: month, checking, guests",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "2025",
+      "grounded_to": "checkin_dt in [2025-01-01, 2026-01-01)",
+      "reason": "period on the chosen date column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: month, checking, guests"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO08",
+   "db": "hotel@bookings",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many bookings did we have in March 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: booked_on, checkin_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: booked_on, checkin_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: booked_on, checkin_dt"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "HO09",
+   "db": "hotel@bookings",
+   "category": "date_role_ambiguity",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many reservations were made during March 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: booked_on, checkin_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     81
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: booked_on, checkin_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "counting bookings rows"
+    ],
+    "ambiguities": [
+     "the question gives a period but not which date: booked_on, checkin_dt"
+    ],
+    "unresolved": [
+     "words not grounded: reservations"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO10",
+   "db": "hotel@bookings",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bookings ended up cancelled?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: ended, up",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     119
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: ended, up",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "cancelled",
+      "grounded_to": "bookings.is_cancelled = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: ended, up"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO11",
+   "db": "hotel@bookings",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total value of bookings where the payment didn't go through?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'payment' does not say which value of payment_ok is meant",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     67606.12
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "'payment' does not say which value of payment_ok is meant",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "'payment' does not say which value of payment_ok is meant"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: value, payment",
+     "'not' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 3,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO12",
+   "db": "hotel@bookings",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total booking amount if we leave out bookings that came through online travel agencies?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: if, leave, out, online, travel, agencies",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     455499.99
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: if, leave, out, online, travel, agencies",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: if, leave, out, online, travel, agencies"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO13",
+   "db": "hotel@bookings",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bookings don't have a check-in date yet?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"bookings\" AS t0 WHERE (t0.\"checkin_dt\" IS NULL)",
+   "rows": [
+    [
+     45
+    ]
+   ],
+   "expected": [
+    [
+     45
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"bookings\" AS t0 WHERE (t0.\"checkin_dt\" IS NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "checkin date",
+      "grounded_to": "bookings.checkin_dt IS NULL",
+      "reason": "missing-value phrasing"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO14",
+   "db": "hotel@bookings",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many different guests have booked with us?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(DISTINCT t0.\"guest_id\") AS \"distinct_guest_id\" FROM \"bookings\" AS t0",
+   "rows": [
+    [
+     287
+    ]
+   ],
+   "expected": [
+    [
+     287
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"guest_id\") AS \"distinct_guest_id\" FROM \"bookings\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO15",
+   "db": "hotel@bookings",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total booking amount for rooms bigger than 40 square metres?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: metres",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     382124.03
+    ]
+   ],
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: metres",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "bigger than 40",
+      "grounded_to": "rooms.sq_m > 40",
+      "reason": "comparison"
+     },
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: metres"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO16",
+   "db": "hotel@bookings",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total booking amount of bookings that included at least one breakfast add-on?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bookings\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"booking_addons\" AS x0_0 WHERE x0_0.\"bk_id\" = t0.\"bk_id\" AND x0_0.\"addon_type\" IN ('Breakfast')))",
+   "rows": [
+    [
+     147587.66
+    ]
+   ],
+   "expected": [
+    [
+     147587.66
+    ]
+   ],
+   "latency_ms": 25.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bookings\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"booking_addons\" AS x0_0 WHERE x0_0.\"bk_id\" = t0.\"bk_id\" AND x0_0.\"addon_type\" IN ('Breakfast')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "breakfast",
+      "grounded_to": "booking_addons.addon_type IN ('Breakfast',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO17",
+   "db": "hotel@bookings",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show me total booking amount by add-on type.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "grouping by booking_addons.addon_type (one-to-many) would count rows more than once",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "unsupported",
+    "message": "grouping by booking_addons.addon_type (one-to-many) would count rows more than once",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: addon type"
+    ],
+    "unsupported": [
+     "grouping by booking_addons.addon_type (one-to-many) would count rows more than once"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "HO18",
+   "db": "hotel@bookings",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of bookings were cancelled?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_cancelled\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"bookings\" AS t0",
+   "rows": [
+    [
+     12.526315789473685
+    ]
+   ],
+   "expected": [
+    [
+     12.526315789473685
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_cancelled\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"bookings\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "cancelled",
+      "grounded_to": "bookings.is_cancelled = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting bookings rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO19",
+   "db": "hotel@bookings",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What share of total booking amount came from Captain's Inn?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((100.0) * (((SUM(CASE WHEN j2.\"hotel_nm\" IN ('Captain''s Inn') THEN t0.\"amt\" END)) * 1.0 / NULLIF((SUM(t0.\"amt\")), 0)))) AS \"percent\" FROM \"bookings\" AS t0 LEFT JOIN \"rooms\" AS j1 ON j1.\"room_id\" = t0.\"room_id\" LEFT JOIN \"hotels\" AS j2 ON j2.\"hotel_id\" = j1.\"hotel_id\"",
+   "rows": [
+    [
+     12.319274169798001
+    ]
+   ],
+   "expected": [
+    [
+     12.319274169798001
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((SUM(CASE WHEN j2.\"hotel_nm\" IN ('Captain''s Inn') THEN t0.\"amt\" END)) * 1.0 / NULLIF((SUM(t0.\"amt\")), 0)))) AS \"percent\" FROM \"bookings\" AS t0 LEFT JOIN \"rooms\" AS j1 ON j1.\"room_id\" = t0.\"room_id\" LEFT JOIN \"hotels\" AS j2 ON j2.\"hotel_id\" = j1.\"hotel_id\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Captain's Inn",
+      "grounded_to": "hotels.hotel_nm IN (\"Captain's Inn\",)",
+      "reason": "stored value"
+     },
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bookings.amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "share",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "HO20",
+   "db": "hotel@bookings",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "By how much did the value of bookings made in Q2 2025 differ from those made in Q1 2025 (Q2 minus Q1)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: booked_on, checkin_dt",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     7049.220000000001
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: booked_on, checkin_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: booked_on, checkin_dt"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: value, differ, Q2, minus, Q1"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO21",
+   "db": "hotel@bookings",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which hotel is doing best?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: best, hotel",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: best, hotel",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: best, hotel"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "HO22",
+   "db": "hotel@bookings",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our add-on attach rate?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: attach, rate, addon",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: attach, rate, addon",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting bookings rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: attach, rate, addon"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "HO23",
+   "db": "hotel@bookings",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which guests have never made a booking?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: guests; 'never' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: guests; 'never' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting bookings rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: guests",
+     "'never' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "HO24",
+   "db": "hotel@bookings",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What will our booking revenue be next quarter?",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "relative dates (last/this/next period) are not resolved against a reference date",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: revenue, next, quarter"
+    ],
+    "unsupported": [
+     "relative dates (last/this/next period) are not resolved against a reference date"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "HO25",
+   "db": "hotel@bookings",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How much have bookings at Old Town B&B brought in?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: brought",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: brought",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Old Town B&B",
+      "grounded_to": "hotels.hotel_nm IN ('Old Town B&B',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: brought"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "HO26",
+   "db": "hotel@bookings",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average length of stay per guest?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, length, stay",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, length, stay",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "guest",
+      "grounded_to": "group by guests.guest_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, length, stay"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN01",
+   "db": "insurance@claims",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total amount claimed across all claims?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"claim_amt\") AS \"sum_claim_amt\" FROM \"claims\" AS t0",
+   "rows": [
+    [
+     4675289.19
+    ]
+   ],
+   "expected": [
+    [
+     4675289.19
+    ]
+   ],
+   "latency_ms": 24.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"claim_amt\") AS \"sum_claim_amt\" FROM \"claims\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount claimed",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN02",
+   "db": "insurance@claims",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What's the total claimed amount for each insurance product?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: insurance",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Auto (Comprehensive)",
+     1714458.46
+    ],
+    [
+     "Auto (Third Party)",
+     568065.81
+    ],
+    [
+     "Home & Contents",
+     1778159.2
+    ],
+    [
+     "Renter's Basic",
+     378364.81
+    ],
+    [
+     "Travel",
+     236240.91
+    ]
+   ],
+   "latency_ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: insurance",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "product",
+      "grounded_to": "group by products.product_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: insurance"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN03",
+   "db": "insurance@claims",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many claims are there in each status?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT t0.\"status\" AS \"status\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 GROUP BY t0.\"status\"",
+   "rows": [
+    [
+     "Closed",
+     688
+    ],
+    [
+     "Denied",
+     155
+    ],
+    [
+     "Open",
+     257
+    ]
+   ],
+   "expected": [
+    [
+     "Closed",
+     688
+    ],
+    [
+     "Denied",
+     155
+    ],
+    [
+     "Open",
+     257
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"status\" AS \"status\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 GROUP BY t0.\"status\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "status",
+      "grounded_to": "group by claims.status",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN04",
+   "db": "insurance@claims",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total claimed amount handled by each adjuster?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", SUM(t0.\"claim_amt\") AS \"sum_claim_amt\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" WHERE (t0.\"adj_id\" IS NOT NULL) GROUP BY j1.\"adj_nm\"",
+   "rows": [
+    [
+     "Daniel Kim",
+     620401.7
+    ],
+    [
+     "Grace Mbeki",
+     585120.91
+    ],
+    [
+     "Hannah Vogel",
+     445692.24
+    ],
+    [
+     "Lee & Partners (external)",
+     589673.46
+    ],
+    [
+     "Marta Novak",
+     490929.03
+    ],
+    [
+     "Priya Raman",
+     531880.89
+    ],
+    [
+     "Sean O'Brien",
+     528541.93
+    ],
+    [
+     "Tomas Ruiz",
+     549211.13
+    ]
+   ],
+   "expected": [
+    [
+     "Daniel Kim",
+     620401.7
+    ],
+    [
+     "Grace Mbeki",
+     585120.91
+    ],
+    [
+     "Hannah Vogel",
+     445692.24
+    ],
+    [
+     "Lee & Partners (external)",
+     589673.46
+    ],
+    [
+     "Marta Novak",
+     490929.03
+    ],
+    [
+     "Priya Raman",
+     531880.89
+    ],
+    [
+     "Sean O'Brien",
+     528541.93
+    ],
+    [
+     "Tomas Ruiz",
+     549211.13
+    ]
+   ],
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", SUM(t0.\"claim_amt\") AS \"sum_claim_amt\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" WHERE (t0.\"adj_id\" IS NOT NULL) GROUP BY j1.\"adj_nm\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "adjuster",
+      "grounded_to": "claims.adj_id IS NOT NULL",
+      "reason": "the verb says the link exists"
+     },
+     {
+      "span": "adjuster",
+      "grounded_to": "group by adjusters.adj_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN05",
+   "db": "insurance@claims",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Who are the top 3 adjusters by number of claims handled?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" GROUP BY j1.\"adj_nm\" ORDER BY \"row_count\" DESC, \"adj_nm\" LIMIT 3",
+   "rows": [
+    [
+     "Lee & Partners (external)",
+     137
+    ],
+    [
+     "Marta Novak",
+     131
+    ],
+    [
+     "Hannah Vogel",
+     129
+    ]
+   ],
+   "expected": [
+    [
+     "Lee & Partners (external)",
+     137
+    ],
+    [
+     "Marta Novak",
+     131
+    ],
+    [
+     "Hannah Vogel",
+     129
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"adj_nm\" AS \"adj_nm\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 LEFT JOIN \"adjusters\" AS j1 ON j1.\"adj_id\" = t0.\"adj_id\" GROUP BY j1.\"adj_nm\" ORDER BY \"row_count\" DESC, \"adj_nm\" LIMIT 3",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "adjusters",
+      "grounded_to": "group by adjusters.adj_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "counting claims rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN06",
+   "db": "insurance@claims",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims were filed on policies with a deductible of 1,000 or more?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: filed",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     583
+    ]
+   ],
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: filed",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "of 1000 or more",
+      "grounded_to": "policies.deductible >= 1000",
+      "reason": "comparison"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: filed"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN07",
+   "db": "insurance@claims",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "On average, how many days pass between the loss and the date the claim is reported?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, days, pass, date, loss",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     11.408181818181818
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, days, pass, date, loss",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, days, pass, date, loss"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN08",
+   "db": "insurance@claims",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the average annual premium of policies that have had at least one claim?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "prem_amt describes policies; aggregate it over policies itself, or once per claims row (weighted by claims)?",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     874.4647597254004
+    ]
+   ],
+   "latency_ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "prem_amt describes policies; aggregate it over policies itself, or once per claims row (weighted by claims)?",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "prem_amt describes policies; aggregate it over policies itself, or once per claims row (weighted by claims)?"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, annual, premium, policies"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN09",
+   "db": "insurance@claims",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims are flagged as suspected fraud?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: flagged",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     61
+    ]
+   ],
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: flagged",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "suspected fraud",
+      "grounded_to": "claims.is_fraud_susp = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: flagged"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN10",
+   "db": "insurance@claims",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims have incomplete paperwork?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: incomplete, paperwork",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     195
+    ]
+   ],
+   "latency_ms": 0.4,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: incomplete, paperwork",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: incomplete, paperwork"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN11",
+   "db": "insurance@claims",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims haven't been assigned to an adjuster?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: assigned, adjuster; 'not' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     85
+    ]
+   ],
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: assigned, adjuster; 'not' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: assigned, adjuster",
+     "'not' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN12",
+   "db": "insurance@claims",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total claimed amount for claims where the cause of loss wasn't recorded?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: cause",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     667557.43
+    ]
+   ],
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: cause",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "loss",
+      "grounded_to": "claims.loss_dt IS NULL",
+      "reason": "missing-value phrasing"
+     },
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: cause"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN13",
+   "db": "insurance@claims",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Excluding theft, what is the total amount claimed?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"claim_amt\") AS \"sum_claim_amt\" FROM \"claims\" AS t0 WHERE ((t0.\"cause\" IS NULL OR t0.\"cause\" NOT IN ('Theft')))",
+   "rows": [
+    [
+     3967259.49
+    ]
+   ],
+   "expected": [
+    [
+     3967259.49
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"claim_amt\") AS \"sum_claim_amt\" FROM \"claims\" AS t0 WHERE ((t0.\"cause\" IS NULL OR t0.\"cause\" NOT IN ('Theft')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "theft",
+      "grounded_to": "claims.cause NOT IN ('Theft',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "amount claimed",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "rows with no cause are kept when excluding Theft"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN14",
+   "db": "insurance@claims",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many distinct policies have filed a claim?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: filed",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     437
+    ]
+   ],
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: filed",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: filed"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN15",
+   "db": "insurance@claims",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many claims were there per month of loss, for losses that happened in 2025?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"loss_dt\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 WHERE ((t0.\"loss_dt\" >= '2025-01-01' AND t0.\"loss_dt\" < '2026-01-01')) GROUP BY substr(t0.\"loss_dt\",1,7) ORDER BY \"month\"",
+   "rows": [
+    [
+     "2025-01",
+     65
+    ],
+    [
+     "2025-02",
+     61
+    ],
+    [
+     "2025-03",
+     62
+    ],
+    [
+     "2025-04",
+     67
+    ],
+    [
+     "2025-05",
+     56
+    ],
+    [
+     "2025-06",
+     42
+    ],
+    [
+     "2025-07",
+     58
+    ],
+    [
+     "2025-08",
+     49
+    ],
+    [
+     "2025-09",
+     65
+    ],
+    [
+     "2025-10",
+     74
+    ],
+    [
+     "2025-11",
+     69
+    ],
+    [
+     "2025-12",
+     48
+    ]
+   ],
+   "expected": [
+    [
+     "2025-01",
+     65
+    ],
+    [
+     "2025-02",
+     61
+    ],
+    [
+     "2025-03",
+     62
+    ],
+    [
+     "2025-04",
+     67
+    ],
+    [
+     "2025-05",
+     56
+    ],
+    [
+     "2025-06",
+     42
+    ],
+    [
+     "2025-07",
+     58
+    ],
+    [
+     "2025-08",
+     49
+    ],
+    [
+     "2025-09",
+     65
+    ],
+    [
+     "2025-10",
+     74
+    ],
+    [
+     "2025-11",
+     69
+    ],
+    [
+     "2025-12",
+     48
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"loss_dt\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"claims\" AS t0 WHERE ((t0.\"loss_dt\" >= '2025-01-01' AND t0.\"loss_dt\" < '2026-01-01')) GROUP BY substr(t0.\"loss_dt\",1,7) ORDER BY \"month\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "2025",
+      "grounded_to": "loss_dt in [2025-01-01, 2026-01-01)",
+      "reason": "period on the chosen date column"
+     },
+     {
+      "span": "per month",
+      "grounded_to": "month of loss_dt",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN16",
+   "db": "insurance@claims",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many claims did we get in Q2 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: loss_dt, rpt_dt, closed_dt"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN17",
+   "db": "insurance@claims",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Using the date of loss, how much did total claimed amount change from Q1 2025 to Q2 2025 (Q2 minus Q1)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: Q2, Q1",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     -7690.270000000019
+    ]
+   ],
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: Q2, Q1",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "Q1 2025 to Q2 2025",
+      "grounded_to": "loss_dt: q1 2025 vs q2 2025",
+      "reason": "period comparison"
+     }
+    ],
+    "assumptions": [
+     "difference = q1 2025 minus q2 2025"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Q2, Q1"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN18",
+   "db": "insurance@claims",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of claims were denied?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"status\" IN ('Denied') THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"claims\" AS t0",
+   "rows": [
+    [
+     14.09090909090909
+    ]
+   ],
+   "expected": [
+    [
+     14.090909090909092
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"status\" IN ('Denied') THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"claims\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "denied",
+      "grounded_to": "claims.status IN ('Denied',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "counting claims rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "IN19",
+   "db": "insurance@claims",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our loss ratio?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: ratio, loss",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.5,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: ratio, loss",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: ratio, loss"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN20",
+   "db": "insurance@claims",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What share of the total claimed amount comes from Home & Contents policies?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: policies",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     38.03313822390524
+    ]
+   ],
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: policies",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Home & Contents",
+      "grounded_to": "products.product_nm IN ('Home & Contents',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "share",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: policies"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN21",
+   "db": "insurance@claims",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What's the total amount claimed on Pet Care policies?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: policies",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: policies",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Pet Care",
+      "grounded_to": "products.product_nm IN ('Pet Care',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "amount claimed",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: policies"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN22",
+   "db": "insurance@claims",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show total claimed amount by region.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'region' could be policies.region via policy_no or adjusters.region via adj_id; 'region' could be policies.region via policy_no or adjusters.region via adj_id",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "'region' could be policies.region via policy_no or adjusters.region via adj_id; 'region' could be policies.region via policy_no or adjusters.region via adj_id",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "'region' could be policies.region via policy_no or adjusters.region via adj_id",
+     "'region' could be policies.region via policy_no or adjusters.region via adj_id"
+    ],
+    "unresolved": [
+     "words not grounded: region"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN23",
+   "db": "insurance@claims",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Give me the total claimed amount by payment month.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "grouping by claim_payments (one-to-many) would count rows more than once",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "unsupported",
+    "message": "grouping by claim_payments (one-to-many) would count rows more than once",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "claimed amount",
+      "grounded_to": "SUM(claims.claim_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: month, payment"
+    ],
+    "unsupported": [
+     "grouping by claim_payments (one-to-many) would count rows more than once"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN24",
+   "db": "insurance@claims",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which policies have never had a claim?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: policies; 'never' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: policies; 'never' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting claims rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: policies",
+     "'never' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN25",
+   "db": "insurance@claims",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average customer satisfaction score on settled claims?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, customer, satisfaction, score, settled",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, customer, satisfaction, score, settled",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, customer, satisfaction, score, settled"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN26",
+   "db": "insurance@claims",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How much have we paid out on claims in total?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: paid, out",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     2363554.56
+    ]
+   ],
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: paid, out",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: paid, out"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "IN27",
+   "db": "insurance@claims",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average time to settle a claim?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, settle",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.6,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, settle",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, settle"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "IN28",
+   "db": "insurance@claims",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average claim?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.5,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN01",
+   "db": "energy@bills",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many kilowatt-hours have we billed in total?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: kilowatt, hours",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     652537.4
+    ]
+   ],
+   "latency_ms": 38.5,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: kilowatt, hours",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: kilowatt, hours"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN02",
+   "db": "energy@bills",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the average bill amount?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT AVG(t0.\"amt\") AS \"avg_amt\" FROM \"bills\" AS t0",
+   "rows": [
+    [
+     110.076016
+    ]
+   ],
+   "expected": [
+    [
+     110.076016
+    ]
+   ],
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"amt\") AS \"avg_amt\" FROM \"bills\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "AVG(bills.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN03",
+   "db": "energy@bills",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total kWh billed for each meter type.",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"meter_type\" AS \"meter_type\", SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" GROUP BY j1.\"meter_type\"",
+   "rows": [
+    [
+     "Analog",
+     161089.3
+    ],
+    [
+     "Smart",
+     323221.7
+    ],
+    [
+     "Smart (3-phase)",
+     168226.4
+    ]
+   ],
+   "expected": [
+    [
+     "Analog",
+     161089.3
+    ],
+    [
+     "Smart",
+     323221.7
+    ],
+    [
+     "Smart (3-phase)",
+     168226.4
+    ]
+   ],
+   "latency_ms": 2.0,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"meter_type\" AS \"meter_type\", SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" GROUP BY j1.\"meter_type\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     },
+     {
+      "span": "meter type",
+      "grounded_to": "group by meters.meter_type",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN04",
+   "db": "energy@bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Break down billed amount by tariff.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: Break, down",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Commercial Flat",
+     35551.42
+    ],
+    [
+     "Farm & Rural",
+     6963.05
+    ],
+    [
+     "Green Saver's Plan",
+     28762.59
+    ],
+    [
+     "Residential Standard",
+     38720.68
+    ],
+    [
+     "Time-of-Use (TOU)",
+     27597.28
+    ]
+   ],
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: Break, down",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bills.amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "tariff",
+      "grounded_to": "group by tariffs.tariff_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Break, down"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN05",
+   "db": "energy@bills",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Who are our top 5 customers by total billed amount?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j2.\"cust_nm\" AS \"cust_nm\", SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" LEFT JOIN \"customers\" AS j2 ON j2.\"cust_id\" = j1.\"cust_id\" GROUP BY j2.\"cust_nm\" ORDER BY \"sum_amt\" DESC, \"cust_nm\" LIMIT 5",
+   "rows": [
+    [
+     "Jansen 118",
+     2624.9
+    ],
+    [
+     "Cole 146",
+     2366.17
+    ],
+    [
+     "Baker's Dozen 015",
+     2205.59
+    ],
+    [
+     "Lowe 175",
+     2094.88
+    ],
+    [
+     "Jansen 078",
+     1945.22
+    ]
+   ],
+   "expected": [
+    [
+     "Jansen 118",
+     2624.9
+    ],
+    [
+     "Cole 146",
+     2366.17
+    ],
+    [
+     "Baker's Dozen 015",
+     2205.59
+    ],
+    [
+     "Lowe 175",
+     2094.88
+    ],
+    [
+     "Jansen 078",
+     1945.22
+    ]
+   ],
+   "latency_ms": 2.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j2.\"cust_nm\" AS \"cust_nm\", SUM(t0.\"amt\") AS \"sum_amt\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" LEFT JOIN \"customers\" AS j2 ON j2.\"cust_id\" = j1.\"cust_id\" GROUP BY j2.\"cust_nm\" ORDER BY \"sum_amt\" DESC, \"cust_nm\" LIMIT 5",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bills.amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "customers",
+      "grounded_to": "group by customers.cust_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN06",
+   "db": "energy@bills",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show monthly kWh for the 2025 billing periods.",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"period_start\",1,7) AS \"month\", SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 WHERE ((t0.\"period_start\" >= '2025-01-01' AND t0.\"period_start\" < '2026-01-01')) GROUP BY substr(t0.\"period_start\",1,7) ORDER BY \"month\"",
+   "rows": [
+    [
+     "2025-01",
+     31424.2
+    ],
+    [
+     "2025-02",
+     28161.1
+    ],
+    [
+     "2025-03",
+     17800.8
+    ],
+    [
+     "2025-04",
+     29246.7
+    ],
+    [
+     "2025-05",
+     25257.8
+    ],
+    [
+     "2025-06",
+     25501.7
+    ],
+    [
+     "2025-07",
+     25292.6
+    ],
+    [
+     "2025-08",
+     26541.5
+    ],
+    [
+     "2025-09",
+     23611.4
+    ],
+    [
+     "2025-10",
+     21902.3
+    ],
+    [
+     "2025-11",
+     27640.4
+    ],
+    [
+     "2025-12",
+     28208.3
+    ]
+   ],
+   "expected": [
+    [
+     "2025-01",
+     31424.2
+    ],
+    [
+     "2025-02",
+     28161.1
+    ],
+    [
+     "2025-03",
+     17800.8
+    ],
+    [
+     "2025-04",
+     29246.7
+    ],
+    [
+     "2025-05",
+     25257.8
+    ],
+    [
+     "2025-06",
+     25501.7
+    ],
+    [
+     "2025-07",
+     25292.6
+    ],
+    [
+     "2025-08",
+     26541.5
+    ],
+    [
+     "2025-09",
+     23611.4
+    ],
+    [
+     "2025-10",
+     21902.3
+    ],
+    [
+     "2025-11",
+     27640.4
+    ],
+    [
+     "2025-12",
+     28208.3
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"period_start\",1,7) AS \"month\", SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 WHERE ((t0.\"period_start\" >= '2025-01-01' AND t0.\"period_start\" < '2026-01-01')) GROUP BY substr(t0.\"period_start\",1,7) ORDER BY \"month\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     },
+     {
+      "span": "2025",
+      "grounded_to": "period_start in [2025-01-01, 2026-01-01)",
+      "reason": "period on the chosen date column"
+     },
+     {
+      "span": "monthly",
+      "grounded_to": "month of period_start",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [
+     "kwh is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN07",
+   "db": "energy@bills",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills were issued while the meter was faulty?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: issued, while",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     78
+    ]
+   ],
+   "latency_ms": 1.6,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: issued, while",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "meter",
+      "grounded_to": "bills.meter_ok = 0",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: issued, while"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN08",
+   "db": "energy@bills",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total billed amount for meters whose installation date is unknown?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'meters' does not say which value of meter_ok is meant",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     23736.45
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "'meters' does not say which value of meter_ok is meant",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "amount",
+      "grounded_to": "SUM(bills.amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "'meters' does not say which value of meter_ok is meant"
+    ],
+    "unresolved": [
+     "words not grounded: installation, date, unknown, meters"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN09",
+   "db": "energy@bills",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Leaving out Commercial-segment customers, how many kWh did we bill?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" LEFT JOIN \"customers\" AS j2 ON j2.\"cust_id\" = j1.\"cust_id\" WHERE ((j2.\"segment\" IS NULL OR j2.\"segment\" NOT IN ('Commercial')))",
+   "rows": [
+    [
+     422597.7
+    ]
+   ],
+   "expected": [
+    [
+     422597.7
+    ]
+   ],
+   "latency_ms": 2.3,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" LEFT JOIN \"customers\" AS j2 ON j2.\"cust_id\" = j1.\"cust_id\" WHERE ((j2.\"segment\" IS NULL OR j2.\"segment\" NOT IN ('Commercial')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Commercial",
+      "grounded_to": "customers.segment NOT IN ('Commercial',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "how many kWh",
+      "grounded_to": "SUM(kwh)",
+      "reason": "'how many <quantity>' sums the quantity"
+     },
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "rows with no segment are kept when excluding Commercial"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN10",
+   "db": "energy@bills",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total billed for customers on tariffs priced above 0.20 per kWh?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: priced, customers, tariffs",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     67483.27
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: priced, customers, tariffs",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "above 0.20",
+      "grounded_to": "bills.kwh > 0.2",
+      "reason": "comparison"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: priced, customers, tariffs"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN11",
+   "db": "energy@bills",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many distinct customers received at least one bill?",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "counting customers from bills",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     233
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "unsupported",
+    "message": "counting customers from bills",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: received"
+    ],
+    "unsupported": [
+     "counting customers from bills"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN12",
+   "db": "energy@bills",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the overall average price per kWh we billed?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: price",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     0.21086150770821716
+    ]
+   ],
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: price",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "kWh",
+      "grounded_to": "AVG(bills.kwh)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: price"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN13",
+   "db": "energy@bills",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of the kWh we billed came from analog meters?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'meters' does not say which value of meter_ok is meant",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     24.6866003389231
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "'meters' does not say which value of meter_ok is meant",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "analog",
+      "grounded_to": "meters.meter_type IN ('Analog',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     },
+     {
+      "span": "percentage",
+      "grounded_to": "100 * (with condition) / (all)",
+      "reason": "percentage of rows or of a total"
+     }
+    ],
+    "assumptions": [
+     "kwh is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [
+     "'meters' does not say which value of meter_ok is meant"
+    ],
+    "unresolved": [
+     "words not grounded: meters"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN14",
+   "db": "energy@bills",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How did total kWh for 2025 billing periods compare with 2024 (2025 minus 2024)?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(CASE WHEN (t0.\"period_start\" >= '2025-01-01' AND t0.\"period_start\" < '2026-01-01') THEN t0.\"kwh\" END) AS \"sum_kwh_2025\", SUM(CASE WHEN (t0.\"period_start\" >= '2024-01-01' AND t0.\"period_start\" < '2025-01-01') THEN t0.\"kwh\" END) AS \"sum_kwh_2024\", ((SUM(CASE WHEN (t0.\"period_start\" >= '2025-01-01' AND t0.\"period_start\" < '2026-01-01') THEN t0.\"kwh\" END)) - (SUM(CASE WHEN (t0.\"period_start\" >= '2024-01-01' AND t0.\"period_start\" < '2025-01-01') THEN t0.\"kwh\" END))) AS \"difference\" FROM \"bills\" AS t0",
+   "rows": [
+    [
+     310588.8,
+     341948.6,
+     -31359.79999999999
+    ]
+   ],
+   "expected": [
+    [
+     -31359.79999999999
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(CASE WHEN (t0.\"period_start\" >= '2025-01-01' AND t0.\"period_start\" < '2026-01-01') THEN t0.\"kwh\" END) AS \"sum_kwh_2025\", SUM(CASE WHEN (t0.\"period_start\" >= '2024-01-01' AND t0.\"period_start\" < '2025-01-01') THEN t0.\"kwh\" END) AS \"sum_kwh_2024\", ((SUM(CASE WHEN (t0.\"period_start\" >= '2025-01-01' AND t0.\"period_start\" < '2026-01-01') THEN t0.\"kwh\" END)) - (SUM(CASE WHEN (t0.\"period_start\" >= '2024-01-01' AND t0.\"period_start\" < '2025-01-01') THEN t0.\"kwh\" END))) AS \"difference\" FROM \"bills\" AS t0",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     },
+     {
+      "span": "2025 billing periods compare with 2024",
+      "grounded_to": "period_start: 2025 vs 2024",
+      "reason": "period comparison"
+     }
+    ],
+    "assumptions": [
+     "difference = 2025 minus 2024"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN15",
+   "db": "energy@bills",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many bills fall in March 2025?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "the question gives a period but not which date: period_start, due_dt, paid_dt",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "clarify",
+    "message": "the question gives a period but not which date: period_start, due_dt, paid_dt",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "the question gives a period but not which date: period_start, due_dt, paid_dt"
+    ],
+    "unresolved": [
+     "words not grounded: fall"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN16",
+   "db": "energy@bills",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Break down total kWh by the customer programs people are enrolled in.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "grouping by customer_programs (one-to-many) would count rows more than once",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "unsupported",
+    "message": "grouping by customer_programs (one-to-many) would count rows more than once",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Break, down, people, customer programs, enrolled"
+    ],
+    "unsupported": [
+     "grouping by customer_programs (one-to-many) would count rows more than once"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN17",
+   "db": "energy@bills",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many kWh were billed to customers enrolled in Budget Billing?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" LEFT JOIN \"customers\" AS j2 ON j2.\"cust_id\" = j1.\"cust_id\" WHERE (EXISTS (SELECT 1 FROM \"customer_programs\" AS x2_0 WHERE x2_0.\"cust_id\" = j2.\"cust_id\" AND x2_0.\"program_nm\" IN ('Budget Billing')))",
+   "rows": [
+    [
+     226533.6
+    ]
+   ],
+   "expected": [
+    [
+     226533.6
+    ]
+   ],
+   "latency_ms": 2.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"kwh\") AS \"sum_kwh\" FROM \"bills\" AS t0 LEFT JOIN \"meters\" AS j1 ON j1.\"meter_id\" = t0.\"meter_id\" LEFT JOIN \"customers\" AS j2 ON j2.\"cust_id\" = j1.\"cust_id\" WHERE (EXISTS (SELECT 1 FROM \"customer_programs\" AS x2_0 WHERE x2_0.\"cust_id\" = j2.\"cust_id\" AND x2_0.\"program_nm\" IN ('Budget Billing')))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "Budget Billing",
+      "grounded_to": "customer_programs.program_nm IN ('Budget Billing',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many kWh",
+      "grounded_to": "SUM(kwh)",
+      "reason": "'how many <quantity>' sums the quantity"
+     },
+     {
+      "span": "kWh",
+      "grounded_to": "SUM(bills.kwh)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "EN18",
+   "db": "energy@bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What did we bill customers on the EV Night Owl tariff?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: customers",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: customers",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "EV Night Owl",
+      "grounded_to": "tariffs.tariff_nm IN ('EV Night Owl',)",
+      "reason": "stored value"
+     }
+    ],
+    "assumptions": [
+     "counting bills rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: customers"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN19",
+   "db": "energy@bills",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which meters have never received a bill?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'meters' does not say which value of meter_ok is meant",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "'meters' does not say which value of meter_ok is meant",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "'meters' does not say which value of meter_ok is meant"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: received, meters",
+     "'never' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 3,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN20",
+   "db": "energy@bills",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What were the CO2 emissions associated with the electricity we billed?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: CO2, emissions, associated, electricity",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.3,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: CO2, emissions, associated, electricity",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting bills rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: CO2, emissions, associated, electricity"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN21",
+   "db": "energy@bills",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show me the problem bills.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: problem",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.8,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: problem",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting bills rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: problem"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN22",
+   "db": "energy@bills",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our collection rate?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "rate_per_kwh describes tariffs; aggregate it over tariffs itself, or once per bills row (weighted by bills)?",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "rate_per_kwh describes tariffs; aggregate it over tariffs itself, or once per bills row (weighted by bills)?",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [
+     "rate_per_kwh describes tariffs; aggregate it over tariffs itself, or once per bills row (weighted by bills)?"
+    ],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: collection, rate"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN23",
+   "db": "energy@bills",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Forecast next January's total electricity demand.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: Forecast, next, January, electricity, demand",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Forecast, next, January, electricity, demand",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: Forecast, next, January, electricity, demand"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "EN24",
+   "db": "energy@bills",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills came from working meters with actual (not estimated) readings?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: working, actual, readings",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     1001
+    ]
+   ],
+   "latency_ms": 1.4,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: working, actual, readings",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "meters",
+      "grounded_to": "bills.meter_ok = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "estimated",
+      "grounded_to": "bills.is_estimated = 0",
+      "reason": "0/1 column (negated)"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: working, actual, readings"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "EN25",
+   "db": "energy@bills",
+   "category": "period_comparison",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How did consumption this winter compare with last winter?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: consumption, winter, compare",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: consumption, winter, compare",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: consumption, winter, compare"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI01",
+   "db": "rides@trips",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total fare revenue from completed trips?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: revenue",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     20309.69
+    ]
+   ],
+   "latency_ms": 22.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: revenue",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: revenue"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI02",
+   "db": "rides@trips",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many hours in total did completed trips last?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: hours",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     383.76666666666665
+    ]
+   ],
+   "latency_ms": 1.2,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: hours",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: hours"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI03",
+   "db": "rides@trips",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many trips are there in each status?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT t0.\"status\" AS \"status\", COUNT(*) AS \"row_count\" FROM \"trips\" AS t0 GROUP BY t0.\"status\"",
+   "rows": [
+    [
+     "cancelled_driver",
+     59
+    ],
+    [
+     "cancelled_rider",
+     148
+    ],
+    [
+     "completed",
+     1243
+    ]
+   ],
+   "expected": [
+    [
+     "cancelled_driver",
+     59
+    ],
+    [
+     "cancelled_rider",
+     148
+    ],
+    [
+     "completed",
+     1243
+    ]
+   ],
+   "latency_ms": 1.8,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"status\" AS \"status\", COUNT(*) AS \"row_count\" FROM \"trips\" AS t0 GROUP BY t0.\"status\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "status",
+      "grounded_to": "group by trips.status",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI04",
+   "db": "rides@trips",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Break down completed-trip fares by pickup zone.",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: Break, down",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Airport (JFK)",
+     4957.3
+    ],
+    [
+     "Arts & Theatre District",
+     2820.2400000000002
+    ],
+    [
+     "Downtown Core",
+     4763.44
+    ],
+    [
+     "Harbourfront",
+     2171.41
+    ],
+    [
+     "St. Mary's Park",
+     1760.79
+    ],
+    [
+     "Tech Park",
+     1777.51
+    ],
+    [
+     "University Hill",
+     2059.0
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: Break, down",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "fares",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "pickup zone",
+      "grounded_to": "group by zones.zone_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "fare_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Break, down"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI05",
+   "db": "rides@trips",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which 3 drop-off zones received the most completed trips?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: received",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     "Tech Park",
+     361
+    ],
+    [
+     "Arts & Theatre District",
+     191
+    ],
+    [
+     "University Hill",
+     172
+    ]
+   ],
+   "latency_ms": 1.0,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: received",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "dropoff zones",
+      "grounded_to": "group by zones.zone_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [
+     "counting trips rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: received"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI06",
+   "db": "rides@trips",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which zone generates the most fare revenue?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: generates, revenue, zone",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: generates, revenue, zone",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "fare_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: generates, revenue, zone"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI07",
+   "db": "rides@trips",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average fare in the Arts & Theatre District?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "fare",
+      "grounded_to": "AVG(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "'Arts & Theatre District' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI08",
+   "db": "rides@trips",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total completed-trip fares by vehicle class.",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT j1.\"vehicle_cls\" AS \"vehicle_cls\", SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"trips\" AS t0 LEFT JOIN \"drivers\" AS j1 ON j1.\"driver_id\" = t0.\"driver_id\" WHERE (t0.\"status\" IN ('completed')) GROUP BY j1.\"vehicle_cls\"",
+   "rows": [
+    [
+     "Comfort",
+     4973.61
+    ],
+    [
+     "Economy",
+     9387.92
+    ],
+    [
+     "Green (EV)",
+     3733.83
+    ],
+    [
+     "XL",
+     2214.33
+    ]
+   ],
+   "expected": [
+    [
+     "Comfort",
+     4973.61
+    ],
+    [
+     "Economy",
+     9387.92
+    ],
+    [
+     "Green (EV)",
+     3733.83
+    ],
+    [
+     "XL",
+     2214.33
+    ]
+   ],
+   "latency_ms": 2.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"vehicle_cls\" AS \"vehicle_cls\", SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"trips\" AS t0 LEFT JOIN \"drivers\" AS j1 ON j1.\"driver_id\" = t0.\"driver_id\" WHERE (t0.\"status\" IN ('completed')) GROUP BY j1.\"vehicle_cls\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "fares",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     },
+     {
+      "span": "vehicle class",
+      "grounded_to": "group by drivers.vehicle_cls",
+      "reason": "grouping"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI09",
+   "db": "rides@trips",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total fare on completed trips where the payment failed?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed')) AND (t0.\"payment_ok\" = 0)",
+   "rows": [
+    [
+     956.92
+    ]
+   ],
+   "expected": [
+    [
+     956.92
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed')) AND (t0.\"payment_ok\" = 0)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "payment",
+      "grounded_to": "trips.payment_ok = 0",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI10",
+   "db": "rides@trips",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many trips have no payment method recorded?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"trips\" AS t0 WHERE (t0.\"pay_method\" IS NULL)",
+   "rows": [
+    [
+     271
+    ]
+   ],
+   "expected": [
+    [
+     271
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"trips\" AS t0 WHERE (t0.\"pay_method\" IS NULL)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "payment method",
+      "grounded_to": "trips.pay_method IS NULL",
+      "reason": "missing-value phrasing"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI11",
+   "db": "rides@trips",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "For how many completed trips is the tip field left blank (not recorded at all, as opposed to a zero tip)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: field, left, blank, opposed, zero, tip; 'not' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     644
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: field, left, blank, opposed, zero, tip; 'not' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "how many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: field, left, blank, opposed, zero, tip",
+     "'not' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI12",
+   "db": "rides@trips",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many completed trips were not paid in cash?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: paid",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     1039
+    ]
+   ],
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: paid",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "cash",
+      "grounded_to": "trips.pay_method NOT IN ('Cash',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [
+     "rows with no pay_method are kept when excluding Cash"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: paid"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI13",
+   "db": "rides@trips",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many unique riders took at least one completed trip?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(DISTINCT t0.\"rider_id\") AS \"distinct_rider_id\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed'))",
+   "rows": [
+    [
+     399
+    ]
+   ],
+   "expected": [
+    [
+     399
+    ]
+   ],
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"rider_id\") AS \"distinct_rider_id\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT_DISTINCT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI14",
+   "db": "rides@trips",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total fare from completed trips driven by drivers rated 4.8 or higher?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"trips\" AS t0 LEFT JOIN \"drivers\" AS j1 ON j1.\"driver_id\" = t0.\"driver_id\" WHERE (t0.\"status\" IN ('completed')) AND (j1.\"rating\" >= 4.8)",
+   "rows": [
+    [
+     7327.88
+    ]
+   ],
+   "expected": [
+    [
+     7327.88
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"trips\" AS t0 LEFT JOIN \"drivers\" AS j1 ON j1.\"driver_id\" = t0.\"driver_id\" WHERE (t0.\"status\" IN ('completed')) AND (j1.\"rating\" >= 4.8)",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "4.8 or higher",
+      "grounded_to": "drivers.rating >= 4.8",
+      "reason": "comparison"
+     },
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI15",
+   "db": "rides@trips",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Across completed trips, what is the overall fare per kilometre (total fare divided by total distance)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: divided",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     3.2355521073627056
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: divided",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "fare per kilometre",
+      "grounded_to": "SUM(fare_amt) / SUM(dist_km)",
+      "reason": "ratio of totals as stated"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: divided"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI16",
+   "db": "rides@trips",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of completed-trip fare revenue came from trips that started at Airport (JFK)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'Airport (JFK)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     24.40854587145348
+    ]
+   ],
+   "latency_ms": 1.7,
+   "trace": {
+    "status": "clarify",
+    "message": "'Airport (JFK)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "fare_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [
+     "'Airport (JFK)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd"
+    ],
+    "unresolved": [
+     "the percentage has no condition for its numerator",
+     "words not grounded: revenue, started"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI17",
+   "db": "rides@trips",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many more (or fewer) completed trips were requested in March 2025 than in February 2025?",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-03-01' AND t0.\"req_ts\" < '2025-04-01') THEN 1 END) AS \"row_count_march_2025\", COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-02-01' AND t0.\"req_ts\" < '2025-03-01') THEN 1 END) AS \"row_count_february_2025\", ((COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-03-01' AND t0.\"req_ts\" < '2025-04-01') THEN 1 END)) - (COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-02-01' AND t0.\"req_ts\" < '2025-03-01') THEN 1 END))) AS \"difference\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed'))",
+   "rows": [
+    [
+     141,
+     127,
+     14
+    ]
+   ],
+   "expected": [
+    [
+     14
+    ]
+   ],
+   "latency_ms": 2.2,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-03-01' AND t0.\"req_ts\" < '2025-04-01') THEN 1 END) AS \"row_count_march_2025\", COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-02-01' AND t0.\"req_ts\" < '2025-03-01') THEN 1 END) AS \"row_count_february_2025\", ((COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-03-01' AND t0.\"req_ts\" < '2025-04-01') THEN 1 END)) - (COUNT(CASE WHEN (t0.\"req_ts\" >= '2025-02-01' AND t0.\"req_ts\" < '2025-03-01') THEN 1 END))) AS \"difference\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed'))",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "March 2025 than in February 2025",
+      "grounded_to": "req_ts: march 2025 vs february 2025",
+      "reason": "period comparison"
+     }
+    ],
+    "assumptions": [
+     "difference = march 2025 minus february 2025"
+    ],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI18",
+   "db": "rides@trips",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show the number of completed trips per month in 2025.",
+   "action": "ANSWER",
+   "status": "answer",
+   "message": "",
+   "sql": "SELECT substr(t0.\"req_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed')) AND ((t0.\"req_ts\" >= '2025-01-01' AND t0.\"req_ts\" < '2026-01-01')) GROUP BY substr(t0.\"req_ts\",1,7) ORDER BY \"month\"",
+   "rows": [
+    [
+     "2025-01",
+     135
+    ],
+    [
+     "2025-02",
+     127
+    ],
+    [
+     "2025-03",
+     141
+    ],
+    [
+     "2025-04",
+     139
+    ],
+    [
+     "2025-05",
+     139
+    ],
+    [
+     "2025-06",
+     154
+    ],
+    [
+     "2025-07",
+     145
+    ],
+    [
+     "2025-08",
+     138
+    ],
+    [
+     "2025-09",
+     125
+    ]
+   ],
+   "expected": [
+    [
+     "2025-01",
+     135
+    ],
+    [
+     "2025-02",
+     127
+    ],
+    [
+     "2025-03",
+     141
+    ],
+    [
+     "2025-04",
+     139
+    ],
+    [
+     "2025-05",
+     139
+    ],
+    [
+     "2025-06",
+     154
+    ],
+    [
+     "2025-07",
+     145
+    ],
+    [
+     "2025-08",
+     138
+    ],
+    [
+     "2025-09",
+     125
+    ]
+   ],
+   "latency_ms": 1.9,
+   "trace": {
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"req_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"trips\" AS t0 WHERE (t0.\"status\" IN ('completed')) AND ((t0.\"req_ts\" >= '2025-01-01' AND t0.\"req_ts\" < '2026-01-01')) GROUP BY substr(t0.\"req_ts\",1,7) ORDER BY \"month\"",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "number of",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "2025",
+      "grounded_to": "req_ts in [2025-01-01, 2026-01-01)",
+      "reason": "period on the chosen date column"
+     },
+     {
+      "span": "per month",
+      "grounded_to": "month of req_ts",
+      "reason": "time series"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct"
+  },
+  {
+   "id": "RI19",
+   "db": "rides@trips",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the total fare revenue broken down by the languages drivers speak?",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "grouping by driver_languages (one-to-many) would count rows more than once",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "unsupported",
+    "message": "grouping by driver_languages (one-to-many) would count rows more than once",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: revenue, broken, down, speak, languages drivers"
+    ],
+    "unsupported": [
+     "grouping by driver_languages (one-to-many) would count rows more than once"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI20",
+   "db": "rides@trips",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many completed trips were driven by Spanish-speaking drivers?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: speaking",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     319
+    ]
+   ],
+   "latency_ms": 3.9,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: speaking",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "completed",
+      "grounded_to": "trips.status IN ('completed',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "Spanish",
+      "grounded_to": "driver_languages.lang IN ('Spanish',)",
+      "reason": "stored value"
+     },
+     {
+      "span": "How many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     },
+     {
+      "span": "drivers",
+      "grounded_to": "group by drivers.driver_nm",
+      "reason": "entity label"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: speaking"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI21",
+   "db": "rides@trips",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which riders have never taken a trip?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: riders; 'never' is not attached to any condition",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.7,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: riders; 'never' is not attached to any condition",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [
+     "counting trips rows"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: riders",
+     "'never' is not attached to any condition"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI22",
+   "db": "rides@trips",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average wait between a ride request and the driver arriving?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "no measure could be grounded; words not grounded: average, wait, ride, arriving, request, driver",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 4.2,
+   "trace": {
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: average, wait, ride, arriving, request, driver",
+    "sql": "",
+    "violations": [],
+    "evidence": [],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "no measure could be grounded",
+     "words not grounded: average, wait, ride, arriving, request, driver"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI23",
+   "db": "rides@trips",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What fare revenue did we make on trips picked up in Old Mill (Closed)?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'Old Mill (Closed)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+   "sql": "",
+   "rows": [],
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "latency_ms": 1.1,
+   "trace": {
+    "status": "clarify",
+    "message": "'Old Mill (Closed)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "fare_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [
+     "'Old Mill (Closed)' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd"
+    ],
+    "unresolved": [
+     "words not grounded: revenue, picked, up"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "unnecessary_clarify"
+  },
+  {
+   "id": "RI24",
+   "db": "rides@trips",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our tip rate?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "words not grounded: rate",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.5,
+   "trace": {
+    "status": "clarify",
+    "message": "words not grounded: rate",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "tip",
+      "grounded_to": "SUM(trips.tip_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [
+     "tip_amt is summed (no aggregation word was given)"
+    ],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: rate"
+    ],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI25",
+   "db": "rides@trips",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What was the total fare for trips between Downtown Core and Harbourfront?",
+   "action": "CLARIFY",
+   "status": "clarify",
+   "message": "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd; 'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 1.5,
+   "trace": {
+    "status": "clarify",
+    "message": "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd; 'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "fare",
+      "grounded_to": "SUM(trips.fare_amt)",
+      "reason": "measure column"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [
+     "'Downtown Core' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd",
+     "'Harbourfront' could be zones.zone_nm via pickup_zone_cd or zones.zone_nm via dropoff_zone_cd"
+    ],
+    "unresolved": [],
+    "unsupported": [],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  },
+  {
+   "id": "RI26",
+   "db": "rides@trips",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Predict how many surge-priced trips we'll have next week.",
+   "action": "CLARIFY",
+   "status": "unsupported",
+   "message": "relative dates (last/this/next period) are not resolved against a reference date",
+   "sql": "",
+   "rows": [],
+   "expected": null,
+   "latency_ms": 0.9,
+   "trace": {
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "violations": [],
+    "evidence": [
+     {
+      "span": "surge",
+      "grounded_to": "trips.is_surge = 1",
+      "reason": "0/1 column"
+     },
+     {
+      "span": "how many",
+      "grounded_to": "COUNT",
+      "reason": "count"
+     }
+    ],
+    "assumptions": [],
+    "ambiguities": [],
+    "unresolved": [
+     "words not grounded: Predict, priced, next, week"
+    ],
+    "unsupported": [
+     "relative dates (last/this/next period) are not resolved against a reference date"
+    ],
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   "outcome": "correct_clarify"
+  }
+ ],
+ "summary": {
+  "n": 105,
+  "answerable": 74,
+  "clarify_or_unsupported": 31,
+  "correct": 30,
+  "correct_rate": 0.405,
+  "correct_ci95": [
+   0.301,
+   0.519
+  ],
+  "answered_answerable": 30,
+  "coverage": 0.405,
+  "accuracy_when_answered": 1.0,
+  "accuracy_when_answered_ci95": [
+   0.886,
+   1.0
+  ],
+  "silent_wrong_answerable": 0,
+  "answered_clarify_items": 0,
+  "silent_wrong_total": 0,
+  "silent_wrong_rate_all": 0.0,
+  "silent_wrong_ci95": [
+   0.0,
+   0.035
+  ],
+  "unnecessary_clarify": 44,
+  "correct_clarify": 31,
+  "errors": 0,
+  "latency_ms_p50": 1.3,
+  "latency_ms_p95": 8.6,
+  "latency_ms_max": 47.2,
+  "clarify_items_refused": "19/19",
+  "unsupported_items_refused": "12/12",
+  "by_category": {
+   "direct_kpi": {
+    "n": 4,
+    "correct": 3,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 1,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "abbreviation": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "breakdown": {
+    "n": 3,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 1,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "fk_inference": {
+    "n": 7,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 5,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "multi_table_join": {
+    "n": 6,
+    "correct": 3,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "top_n": {
+    "n": 4,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 2,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "trend": {
+    "n": 4,
+    "correct": 3,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 1,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "date_role_ambiguity": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 1,
+    "correct_clarify": 3,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "boolean_flag": {
+    "n": 6,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 5,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "negation_exclusion": {
+    "n": 5,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "null_condition": {
+    "n": 6,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 4,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "distinct_count": {
+    "n": 4,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 2,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "related_numeric_threshold": {
+    "n": 4,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "join_fanout": {
+    "n": 6,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 2,
+    "correct_clarify": 2,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "ratio": {
+    "n": 9,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 2,
+    "correct_clarify": 5,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "share_of_total": {
+    "n": 4,
+    "correct": 1,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 3,
+    "correct_clarify": 0,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "period_comparison": {
+    "n": 5,
+    "correct": 2,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 2,
+    "correct_clarify": 1,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "ambiguous": {
+    "n": 8,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 8,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "anti_join": {
+    "n": 4,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 4,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "unsupported_metric": {
+    "n": 6,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 6,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   },
+   "many_to_many": {
+    "n": 2,
+    "correct": 0,
+    "silent_wrong": 0,
+    "unnecessary_clarify": 0,
+    "correct_clarify": 2,
+    "wrong_answer_to_clarify_item": 0,
+    "error": 0
+   }
+  }
+ }
+}

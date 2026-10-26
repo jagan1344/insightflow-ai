@@ -141,6 +141,8 @@ def build(m: SchemaModel) -> Lexicon:
                 core = [w for w in c.words if w not in GENERIC]          # no_show needs both words
             if set(core) <= set(tw) and len(c.words) > len(core):
                 core = [w for w in c.words if w not in FUNCTION and w not in ("is", "has")]   # order_dt needs "order date"
+                if set(core) <= set(tw):
+                    core = list(c.words)          # booked_on: the table noun alone ("bookings") never names it
             if c.kind == "id":
                 if p is None and c.name not in fkp and not c.pk:
                     cols.append(ColEntry(t, c.name, p, c.words, core, c.kind, rw))   # proctor_id: no lookup
