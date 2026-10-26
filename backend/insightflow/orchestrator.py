@@ -265,7 +265,12 @@ class Orchestrator:
         # (research_improvement/architecture_recovery). 'typed+legacy' falls back to the legacy
         # planner only when the typed engine abstains; 'legacy' skips it.
         from .config import engine_mode
-        if ds.kind != "demo" and not _nested and engine_mode() != "legacy":
+        # the typed engine reads SQLite files (read-only URI); other databases (e.g. the optional PostgreSQL
+        # deployment) stay on the legacy path, which runs through SQLAlchemy
+        _sqlite = settings.database_url.startswith("sqlite")
+        if ds.kind != "demo" and not _nested and engine_mode() != "legacy" and not _sqlite:
+            self._extra_notes.append("typed_engine_skipped: database is not SQLite")
+        if ds.kind != "demo" and not _nested and engine_mode() != "legacy" and _sqlite:
             _er = self._typed_engine_response(question, ds)
             _tr = _er.plan_trace or {}
             # the legacy planner may only try questions the typed engine could not word-ground; it never

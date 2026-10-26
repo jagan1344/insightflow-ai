@@ -251,3 +251,23 @@ def test_negation_binds_to_the_nearest_condition_only(dbs):
     exp = ref(dbs, "bikes", "SELECT COUNT(*) FROM rentals r JOIN bikes b ON b.bike_id=r.bike_id WHERE b.bike_type='electric' "
                             "AND NOT EXISTS (SELECT 1 FROM rental_issues i WHERE i.rental_id=r.rental_id)")[0][0]
     assert r.status == "answer" and r.rows[0][0] == exp
+
+
+def test_non_sqlite_database_stays_on_the_legacy_path(monkeypatch):
+    # closure fix: the typed engine opens SQLite files; with a PostgreSQL DATABASE_URL it must not be called
+    import types
+    from insightflow import orchestrator as O
+    from insightflow.config import settings
+    monkeypatch.setattr(settings, "database_url", "postgresql+psycopg2://u:p@localhost:5432/x")
+    monkeypatch.setenv("INSIGHTFLOW_ENGINE", "typed")
+    called = []
+    monkeypatch.setattr(O.Orchestrator, "_typed_engine_response", lambda self, q, ds: called.append(q))
+    ds = types.SimpleNamespace(kind="uploaded", columns={"x": 1}, table="t", id="t", name="t", rel=None)
+    monkeypatch.setattr(O, "build_catalog", lambda ds: None)
+    monkeypatch.setattr(O, "_schema_change_notes", lambda ds: [])
+    o = O.Orchestrator()
+    try:
+        o.ask("Total amount", _ds_override=ds)
+    except Exception:
+        pass                       # the legacy path may fail without a real PostgreSQL server; only routing is tested
+    assert called == [] and "typed_engine_skipped: database is not SQLite" in o._extra_notes
