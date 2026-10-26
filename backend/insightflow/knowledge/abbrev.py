@@ -12,6 +12,8 @@ ABBREV = {
     "pmt": "payment", "wo": "workorder", "po": "purchaseorder", "sku": "sku", "yr": "year", "mth": "month",
     "wk": "week", "cnt": "count", "ref": "reference", "src": "source", "dst": "destination", "dest": "destination",
     "ctry": "country", "st": "state", "veh": "vehicle", "temp": "temperature", "pax": "passenger", "apt": "airport", "carr": "carrier", "flt": "flight", "sup": "supplier", "vend": "vendor",
+    "cls": "class", "pay": "payment", "rtg": "rating", "lang": "language", "rpt": "report", "req": "request",
+    "dist": "distance", "dur": "duration", "prem": "premium", "nts": "nights", "hrs": "hours", "mins": "minutes",
 }
 
 

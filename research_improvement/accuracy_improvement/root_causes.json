@@ -1,0 +1,2008 @@
+[
+ {
+  "id": "HO01",
+  "question": "What is the total amount across all bookings, cancelled ones included?",
+  "category": "direct_kpi",
+  "reference_sql": "SELECT SUM(amt) FROM bookings",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE \"bookings\".\"is_cancelled\" = 1",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "is_cancelled",
+     "value": 1,
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": [
+    "value_filter_removed_redundant_breakdown=cancelled:is_cancelled"
+   ]
+  },
+  "final_reason": "I don't know how 'ones' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: inclusion phrase read as a filter",
+  "note": "'cancelled ones included' compiled to is_cancelled = 1; veto caught it",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO02",
+  "question": "How many room nights have we sold in total, leaving out cancelled bookings?",
+  "category": "abbreviation",
+  "reference_sql": "SELECT SUM(nts_cnt) FROM bookings WHERE is_cancelled = 0",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'room nights' not linked to nts_cnt",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO03",
+  "question": "Break down the total booking amount by hotel.",
+  "category": "breakdown",
+  "reference_sql": "SELECT h.hotel_nm, SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id GROUP BY h.hotel_nm",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT j_room_id_hotel_id.hotel_nm AS hotel_nm, SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id GROUP BY j_room_id_hotel_id.hotel_nm ORDER BY sum_amt DESC",
+  "sql_matches_reference": true,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "hotel_nm",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'break' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "coverage audit",
+  "failure_class": "Excessively strict coverage audit",
+  "note": "SQL correct; 'break' (from 'break down') flagged",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO05",
+  "question": "How many bookings were there for each type of room?",
+  "category": "multi_table_join",
+  "reference_sql": "SELECT r.room_type, COUNT(*) FROM bookings b JOIN rooms r ON r.room_id = b.room_id GROUP BY r.room_type",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [
+    {
+     "column": "addon_type",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [],
+   "unavailable": [
+    "fanout_dimension:addon_type=grouping by a one-to-many table would double-count the measure"
+   ],
+   "notes": []
+  },
+  "final_reason": "Could not compile a SQL query for this plan.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: dimension binding",
+  "failure_class": "Wrong measure selection",
+  "note": "'type of room' bound to booking_addons.addon_type instead of rooms.room_type (wrong dimension)",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO06",
+  "question": "Which three hotels sold the most room nights, not counting cancelled bookings?",
+  "category": "top_n",
+  "reference_sql": "SELECT h.hotel_nm, SUM(b.nts_cnt) AS n FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id WHERE b.is_cancelled = 0 GROUP BY h.hotel_nm ORDER BY n DESC LIMIT 3",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'room nights' not linked to nts_cnt",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO07",
+  "question": "Show total booking amount per check-in month for guests checking in during 2025.",
+  "category": "trend",
+  "reference_sql": "SELECT strftime('%Y-%m', checkin_dt) AS m, SUM(amt) FROM bookings WHERE checkin_dt >= '2025-01-01' AND checkin_dt < '2026-01-01' GROUP BY m",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT substr(\"bookings\".\"checkin_dt\",1,7) AS month, SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE \"bookings\".\"checkin_dt\" >= '2025-01-01' AND \"bookings\".\"checkin_dt\" < '2026-01-01' GROUP BY substr(\"bookings\".\"checkin_dt\",1,7) ORDER BY month",
+  "sql_matches_reference": true,
+  "plan": {
+   "intent_kind": "trend",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "checkin_dt",
+     "is_time": true,
+     "time_unit": "month"
+    }
+   ],
+   "filters": [
+    {
+     "kind": "time_range",
+     "column": "checkin_dt",
+     "value": null,
+     "lo": "2025-01",
+     "hi": "2025-12",
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [
+    "dimension:check"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: dimension:check",
+  "semantic_findings": null,
+  "earliest_lost_stage": "plan validation",
+  "failure_class": "Excessively strict coverage audit",
+  "note": "SQL correct; 'check' from 'check-in' reported as unbound dimension",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO09",
+  "question": "How many reservations were made during March 2025?",
+  "category": "date_role_ambiguity",
+  "reference_sql": "SELECT COUNT(*) FROM bookings WHERE booked_on BETWEEN '2025-03-01' AND '2025-03-31'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Missing business synonym",
+  "note": "'reservations' not recognised as the bookings rows",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO11",
+  "question": "What is the total value of bookings where the payment didn't go through?",
+  "category": "boolean_flag",
+  "reference_sql": "SELECT SUM(amt) FROM bookings WHERE payment_ok = 0",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Missing business synonym",
+  "note": "'value of bookings' -> amt and 'payment didn't go through' -> payment_ok = 0 not recognised",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO12",
+  "question": "What's the total booking amount if we leave out bookings that came through online travel agencies?",
+  "category": "negation_exclusion",
+  "reference_sql": "SELECT SUM(amt) FROM bookings WHERE channel IS NOT 'OTA'",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'leave', 'came', 'online', 'travel', 'agencies' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Missing business synonym",
+  "note": "'online travel agencies' not linked to value 'OTA'; exclusion lost",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO13",
+  "question": "How many bookings don't have a check-in date yet?",
+  "category": "null_condition",
+  "reference_sql": "SELECT COUNT(*) FROM bookings WHERE checkin_dt IS NULL",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"bookings\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [
+    "unsupported_negative_existence:don't"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: unsupported_negative_existence:don't",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: null-state phrasing",
+  "note": "'don't have a check-in date yet' treated as negative existence instead of checkin_dt IS NULL",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO14",
+  "question": "How many different guests have booked with us?",
+  "category": "distinct_count",
+  "reference_sql": "SELECT COUNT(DISTINCT guest_id) FROM bookings",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Missing business synonym",
+  "note": "'different guests' not read as COUNT(DISTINCT guest_id)",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO15",
+  "question": "What is the total booking amount for rooms bigger than 40 square metres?",
+  "category": "related_numeric_threshold",
+  "reference_sql": "SELECT SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id WHERE r.sq_m > 40",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question contains the number(s) 40 but the generated query does not use them, so a threshold or quantity would be ignored",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Unit terminology mismatch",
+  "note": "'square metres' not linked to rooms.sq_m; threshold dropped",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO16",
+  "question": "What is the total booking amount of bookings that included at least one breakfast add-on?",
+  "category": "join_fanout",
+  "reference_sql": "SELECT SUM(b.amt) FROM bookings b WHERE EXISTS (SELECT 1 FROM booking_addons a WHERE a.bk_id = b.bk_id AND a.addon_type = 'Breakfast')",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE EXISTS (SELECT 1 FROM \"booking_addons\" AS \"x1_0\" WHERE \"x1_0\".\"bk_id\" = \"bookings\".\"bk_id\" AND \"x1_0\".\"addon_type\" = 'Breakfast')",
+  "sql_matches_reference": true,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "addon_type",
+     "value": "Breakfast",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'least' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "coverage audit",
+  "failure_class": "Excessively strict coverage audit",
+  "note": "SQL correct (EXISTS); 'least' from 'at least one' flagged",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO18",
+  "question": "What percentage of bookings were cancelled?",
+  "category": "ratio",
+  "reference_sql": "SELECT 100.0 * SUM(CASE WHEN is_cancelled = 1 THEN 1 ELSE 0 END) / COUNT(*) FROM bookings",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "percentage of rows meeting a condition not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO19",
+  "question": "What share of total booking amount came from Captain's Inn?",
+  "category": "share_of_total",
+  "reference_sql": "SELECT 100.0 * SUM(CASE WHEN h.hotel_nm = 'Captain''s Inn' THEN b.amt ELSE 0 END) / SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id WHERE j_room_id_hotel_id.hotel_nm = 'Captain''s Inn'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "hotel_nm",
+     "value": "Captain's Inn",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'came' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "share of a total for one value not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO20",
+  "question": "By how much did the value of bookings made in Q2 2025 differ from those made in Q1 2025 (Q2 minus Q1)?",
+  "category": "period_comparison",
+  "reference_sql": "SELECT SUM(CASE WHEN booked_on BETWEEN '2025-04-01' AND '2025-06-30' THEN amt ELSE 0 END) - SUM(CASE WHEN booked_on BETWEEN '2025-01-01' AND '2025-03-31' THEN amt ELSE 0 END) FROM bookings",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "difference between two explicit periods not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "HO25",
+  "question": "How much have bookings at Old Town B&B brought in?",
+  "category": "fk_inference",
+  "reference_sql": "SELECT SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id WHERE h.hotel_nm = 'Old Town B&B'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Missing business synonym",
+  "note": "'brought in' (revenue) not linked to amt",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN01",
+  "question": "What is the total amount claimed across all claims?",
+  "category": "direct_kpi",
+  "reference_sql": "SELECT SUM(claim_amt) FROM claims",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'amount claimed' not linked to claim_amt (word order / stem)",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN02",
+  "question": "What's the total claimed amount for each insurance product?",
+  "category": "multi_table_join",
+  "reference_sql": "SELECT pr.product_nm, SUM(c.claim_amt) FROM claims c JOIN policies p ON p.policy_no = c.policy_no JOIN products pr ON pr.product_cd = p.product_cd GROUP BY pr.product_nm",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [
+    "dimension:insurance"
+   ],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'claimed amount' not linked to claim_amt; 'insurance product' read as a dimension word",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN04",
+  "question": "Total claimed amount handled by each adjuster?",
+  "category": "fk_inference",
+  "reference_sql": "SELECT a.adj_nm, SUM(c.claim_amt) FROM claims c JOIN adjusters a ON a.adj_id = c.adj_id GROUP BY a.adj_nm",
+  "action": "WARN",
+  "generated_sql": "SELECT j_adj_id.adj_nm AS adj_nm, COUNT(*) AS row_count FROM \"claims\" LEFT JOIN adjusters AS j_adj_id ON j_adj_id.adj_id = claims.adj_id GROUP BY j_adj_id.adj_nm ORDER BY row_count DESC",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [
+    {
+     "column": "adj_nm",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "answer rests on: 'handled' was not mapped to any column or value and was not applied; relationship inferred from names and values, not declared: claims.adj_id->adjusters.adj_id",
+  "semantic_findings": [],
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Wrong measure selection",
+  "note": "'claimed amount' unbound -> fallback to COUNT(*) (wrong answer)",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN06",
+  "question": "How many claims were filed on policies with a deductible of 1,000 or more?",
+  "category": "related_numeric_threshold",
+  "reference_sql": "SELECT COUNT(*) FROM claims c JOIN policies p ON p.policy_no = c.policy_no WHERE p.deductible >= 1000",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"claims\" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no WHERE j_policy_no.deductible = 1",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "cmp",
+     "column": "deductible",
+     "value": 1,
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question contains the number(s) 000 but the generated query does not use them, so a threshold or quantity would be ignored",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: number parsing",
+  "note": "'1,000' parsed as 1",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN07",
+  "question": "On average, how many days pass between the loss and the date the claim is reported?",
+  "category": "abbreviation",
+  "reference_sql": "SELECT AVG(julianday(rpt_dt) - julianday(loss_dt)) FROM claims",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_claim_amt",
+     "formula": "SUM(\"claim_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question mentions column(s) 'loss (loss_dt)' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "average date difference not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN08",
+  "question": "What's the average annual premium of policies that have had at least one claim?",
+  "category": "join_fanout",
+  "reference_sql": "SELECT AVG(prem_amt) FROM policies p WHERE EXISTS (SELECT 1 FROM claims c WHERE c.policy_no = p.policy_no)",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "average_at_grain",
+   "measures": [
+    {
+     "kpi_id": "sum_claim_amt",
+     "formula": "SUM(\"claim_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [
+    "ambiguous_date_column:loss_dt|rpt_dt|closed_dt|start_dt"
+   ],
+   "notes": []
+  },
+  "final_reason": "This question can be read more than one way and the answer depends on it: by loss_dt -> 2,337,644.60; by rpt_dt -> 1,558,429.73; by closed_dt -> 1,168,822.30. Which did you mean?",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "measure of a parent entity (policies) filtered by existence of children; anchor is claims",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN10",
+  "question": "How many claims have incomplete paperwork?",
+  "category": "boolean_flag",
+  "reference_sql": "SELECT COUNT(*) FROM claims WHERE docs_ok = 0",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"claims\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'incomplete', 'paperwork' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Missing business synonym",
+  "note": "'incomplete paperwork' -> docs_ok = 0 not recognised",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN11",
+  "question": "How many claims haven't been assigned to an adjuster?",
+  "category": "null_condition",
+  "reference_sql": "SELECT COUNT(*) FROM claims WHERE adj_id IS NULL",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"claims\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [
+    "unsupported_negative_existence:haven't"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: unsupported_negative_existence:haven't",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: null-state phrasing",
+  "note": "'haven't been assigned to an adjuster' -> adj_id IS NULL not recognised",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN12",
+  "question": "What's the total claimed amount for claims where the cause of loss wasn't recorded?",
+  "category": "null_condition",
+  "reference_sql": "SELECT SUM(claim_amt) FROM claims WHERE cause IS NULL",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT \"claims\".\"cause\" AS cause, COUNT(*) AS row_count FROM \"claims\" GROUP BY \"claims\".\"cause\" ORDER BY row_count DESC",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [
+    {
+     "column": "cause",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [],
+   "unavailable": [
+    "value:cause=claims where the"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: value:cause=claims where the",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: null-state phrasing",
+  "note": "'cause ... wasn't recorded' -> cause IS NULL not recognised",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN13",
+  "question": "Excluding theft, what is the total amount claimed?",
+  "category": "negation_exclusion",
+  "reference_sql": "SELECT SUM(claim_amt) FROM claims WHERE cause IS NOT 'Theft'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'amount claimed' not linked to claim_amt",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN14",
+  "question": "How many distinct policies have filed a claim?",
+  "category": "distinct_count",
+  "reference_sql": "SELECT COUNT(DISTINCT policy_no) FROM claims",
+  "action": "ANSWER",
+  "generated_sql": "SELECT COUNT(DISTINCT \"claims\".\"policy_no\") AS distinct_policy_no, SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "distinct_policy_no",
+     "formula": "COUNT(DISTINCT \"policy_no\")",
+     "aggregation": "count_distinct",
+     "unit": "count"
+    },
+    {
+     "kpi_id": "sum_claim_amt",
+     "formula": "SUM(\"claim_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "confidence 0.98 \u2265 0.70",
+  "semantic_findings": [],
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Wrong measure selection",
+  "note": "noun 'claim' in 'filed a claim' added SUM(claim_amt) as a second measure (wrong answer)",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN15",
+  "question": "How many claims were there per month of loss, for losses that happened in 2025?",
+  "category": "trend",
+  "reference_sql": "SELECT strftime('%Y-%m', loss_dt) AS m, COUNT(*) FROM claims WHERE loss_dt BETWEEN '2025-01-01' AND '2025-12-31' GROUP BY m",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT substr(\"claims\".\"loss_dt\",1,7) AS month, COUNT(*) AS row_count FROM \"claims\" WHERE \"claims\".\"loss_dt\" >= '2025-01-01' AND \"claims\".\"loss_dt\" < '2026-01-01' GROUP BY substr(\"claims\".\"loss_dt\",1,7) ORDER BY month",
+  "sql_matches_reference": true,
+  "plan": {
+   "intent_kind": "trend",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [
+    {
+     "column": "loss_dt",
+     "is_time": true,
+     "time_unit": "month"
+    }
+   ],
+   "filters": [
+    {
+     "kind": "time_range",
+     "column": "loss_dt",
+     "value": null,
+     "lo": "2025-01",
+     "hi": "2025-12",
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [
+    "dimension:for"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: dimension:for",
+  "semantic_findings": null,
+  "earliest_lost_stage": "plan validation",
+  "failure_class": "Excessively strict coverage audit",
+  "note": "SQL correct; function word 'for' reported as unbound dimension",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN17",
+  "question": "Using the date of loss, how much did total claimed amount change from Q1 2025 to Q2 2025 (Q2 minus Q1)?",
+  "category": "period_comparison",
+  "reference_sql": "SELECT SUM(CASE WHEN loss_dt BETWEEN '2025-04-01' AND '2025-06-30' THEN claim_amt ELSE 0 END) - SUM(CASE WHEN loss_dt BETWEEN '2025-01-01' AND '2025-03-31' THEN claim_amt ELSE 0 END) FROM claims",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT '2025-02' AS period, COUNT(*) AS row_count FROM \"claims\" WHERE \"loss_dt\" >= '2025-02-01' AND \"loss_dt\" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, COUNT(*) AS row_count FROM \"claims\" WHERE \"loss_dt\" >= '2025-05-01' AND \"loss_dt\" < '2025-06-01' ORDER BY period",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "comparison",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'minus' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "difference between two explicit periods not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN18",
+  "question": "What percentage of claims were denied?",
+  "category": "ratio",
+  "reference_sql": "SELECT 100.0 * SUM(status = 'Denied') / COUNT(*) FROM claims",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "percentage of rows meeting a condition not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN20",
+  "question": "What share of the total claimed amount comes from Home & Contents policies?",
+  "category": "share_of_total",
+  "reference_sql": "SELECT 100.0 * SUM(CASE WHEN pr.product_nm = 'Home & Contents' THEN c.claim_amt ELSE 0 END) / SUM(c.claim_amt) FROM claims c JOIN policies p ON p.policy_no = c.policy_no JOIN products pr ON pr.product_cd = p.product_cd",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "share of a total for one value not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN21",
+  "question": "What's the total amount claimed on Pet Care policies?",
+  "category": "multi_table_join",
+  "reference_sql": "SELECT SUM(c.claim_amt) FROM claims c JOIN policies p ON p.policy_no = c.policy_no JOIN products pr ON pr.product_cd = p.product_cd WHERE pr.product_nm = 'Pet Care'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'amount claimed' not linked to claim_amt",
+  "label_dispute": ""
+ },
+ {
+  "id": "IN26",
+  "question": "How much have we paid out on claims in total?",
+  "category": "multi_table_join",
+  "reference_sql": "SELECT SUM(pmt_amt) FROM claim_payments",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Unsupported query capability",
+  "note": "measure on a one-to-many child table (claim_payments.pmt_amt)",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN01",
+  "question": "How many kilowatt-hours have we billed in total?",
+  "category": "abbreviation",
+  "reference_sql": "SELECT SUM(kwh) FROM bills",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Unit terminology mismatch",
+  "note": "'kilowatt-hours' not linked to kwh",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN02",
+  "question": "What's the average bill amount?",
+  "category": "direct_kpi",
+  "reference_sql": "SELECT AVG(amt) FROM bills",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the query may answer a different question than the one asked: question asks for an average but the query does not compute one",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: aggregation",
+  "failure_class": "Wrong aggregation operator",
+  "note": "'average bill amount' compiled to SUM; wording audit caught it",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN04",
+  "question": "Break down billed amount by tariff.",
+  "category": "fk_inference",
+  "reference_sql": "SELECT t.tariff_nm, SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id JOIN tariffs t ON t.tariff_cd = c.tariff_cd GROUP BY t.tariff_nm",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT j_meter_id_cust_id_tariff_cd.tariff_nm AS tariff_nm, SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id LEFT JOIN tariffs AS j_meter_id_cust_id_tariff_cd ON j_meter_id_cust_id_tariff_cd.tariff_cd = j_meter_id_cust_id.tariff_cd GROUP BY j_meter_id_cust_id_tariff_cd.tariff_nm ORDER BY sum_amt DESC",
+  "sql_matches_reference": true,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "tariff_nm",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'break' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "coverage audit",
+  "failure_class": "Excessively strict coverage audit",
+  "note": "SQL correct; 'break' flagged",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN05",
+  "question": "Who are our top 5 customers by total billed amount?",
+  "category": "top_n",
+  "reference_sql": "SELECT c.cust_nm, SUM(b.amt) AS v FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id GROUP BY c.cust_id ORDER BY v DESC LIMIT 5",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT j_meter_id_cust_id.cust_nm AS cust_nm, SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id WHERE j_meter_id_cust_id.cust_nm IS NOT NULL GROUP BY j_meter_id_cust_id.cust_nm ORDER BY sum_amt DESC LIMIT 5",
+  "sql_matches_reference": true,
+  "plan": {
+   "intent_kind": "top_n",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "cust_nm",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [],
+   "unavailable": [
+    "dimension:total"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: dimension:total",
+  "semantic_findings": null,
+  "earliest_lost_stage": "plan validation",
+  "failure_class": "Excessively strict coverage audit",
+  "note": "SQL correct; 'total' reported as unbound dimension",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN08",
+  "question": "What's the total billed amount for meters whose installation date is unknown?",
+  "category": "null_condition",
+  "reference_sql": "SELECT SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id WHERE m.install_dt IS NULL",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_amt",
+     "formula": "SUM(\"amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question mentions column(s) 'installation (install_dt)' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: null-state phrasing",
+  "note": "'installation date is unknown' on a related table not recognised",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN09",
+  "question": "Leaving out Commercial-segment customers, how many kWh did we bill?",
+  "category": "negation_exclusion",
+  "reference_sql": "SELECT SUM(b.kwh) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id WHERE c.segment IS NOT 'Commercial'",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id WHERE j_meter_id_cust_id.segment = 'Commercial'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "segment",
+     "value": "Commercial",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": [
+    "value_filter_removed_redundant_breakdown=segment:segment"
+   ]
+  },
+  "final_reason": "the question mentions column(s) 'kwh' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Incorrect wording audit",
+  "note": "'Leaving out' not an exclusion cue (filter kept Commercial) and 'how many kWh' counted rows; veto caught it",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN10",
+  "question": "What's the total billed for customers on tariffs priced above 0.20 per kWh?",
+  "category": "related_numeric_threshold",
+  "reference_sql": "SELECT SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id JOIN tariffs t ON t.tariff_cd = c.tariff_cd WHERE t.rate_per_kwh > 0.20",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "ratio",
+   "measures": [
+    {
+     "kpi_id": "sum_kwh",
+     "formula": "SUM(\"kwh\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question is about 'customers', 'tariffs', but the query's base table is 'bills' and does not involve them, so it would answer at the wrong grain",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Other: intent misclassified",
+  "note": "'priced above 0.20 per kWh' read as a ratio request; threshold on tariffs.rate_per_kwh lost",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN12",
+  "question": "What's the overall average price per kWh we billed?",
+  "category": "ratio",
+  "reference_sql": "SELECT SUM(amt) / SUM(kwh) FROM bills",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "ratio",
+   "measures": [
+    {
+     "kpi_id": "sum_kwh",
+     "formula": "SUM(\"kwh\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the answer may not mean what you asked: the question asks for a grouped breakdown but the plan is a single figure; 'per kwh' asks for a ratio of two measures, which this query does not compute",
+  "semantic_findings": [
+   {
+    "rule": "shape_breakdown_expected",
+    "severity": "violation",
+    "detail": "the question asks for a grouped breakdown but the plan is a single figure"
+   },
+   {
+    "rule": "ratio_unsupported",
+    "severity": "violation",
+    "detail": "'per kwh' asks for a ratio of two measures, which this query does not compute"
+   }
+  ],
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Ambiguous metric definition",
+  "note": "price per kWh = SUM(amt)/SUM(kwh) per author; flagged borderline by the author",
+  "label_dispute": "borderline"
+ },
+ {
+  "id": "EN13",
+  "question": "What percentage of the kWh we billed came from analog meters?",
+  "category": "share_of_total",
+  "reference_sql": "SELECT 100.0 * SUM(CASE WHEN m.meter_type = 'Analog' THEN b.kwh ELSE 0 END) / SUM(b.kwh) FROM bills b JOIN meters m ON m.meter_id = b.meter_id",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id WHERE j_meter_id.meter_type = 'Analog'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_kwh",
+     "formula": "SUM(\"kwh\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "meter_type",
+     "value": "Analog",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'came' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "share of a total for one value not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN14",
+  "question": "How did total kWh for 2025 billing periods compare with 2024 (2025 minus 2024)?",
+  "category": "period_comparison",
+  "reference_sql": "SELECT SUM(CASE WHEN period_start LIKE '2025-%' THEN kwh ELSE 0 END) - SUM(CASE WHEN period_start LIKE '2024-%' THEN kwh ELSE 0 END) FROM bills",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_kwh",
+     "formula": "SUM(\"kwh\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question mentions column(s) 'periods (period_start)' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "difference between two explicit periods not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN17",
+  "question": "How many kWh were billed to customers enrolled in Budget Billing?",
+  "category": "join_fanout",
+  "reference_sql": "SELECT SUM(b.kwh) FROM bills b JOIN meters m ON m.meter_id = b.meter_id WHERE EXISTS (SELECT 1 FROM customer_programs p WHERE p.cust_id = m.cust_id AND p.program_nm = 'Budget Billing')",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"bills\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [
+    "value:unrecognised=budget billing"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: value:unrecognised=budget billing",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Missing schema relationship",
+  "note": "value in a child of a parent table (customer_programs under customers) not reachable",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN18",
+  "question": "What did we bill customers on the EV Night Owl tariff?",
+  "category": "fk_inference",
+  "reference_sql": "SELECT SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id JOIN tariffs t ON t.tariff_cd = c.tariff_cd WHERE t.tariff_nm = 'EV Night Owl'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Missing business synonym",
+  "note": "verb 'bill' ('what did we bill') not linked to bills.amt",
+  "label_dispute": ""
+ },
+ {
+  "id": "EN24",
+  "question": "How many bills came from working meters with actual (not estimated) readings?",
+  "category": "negation_exclusion",
+  "reference_sql": "SELECT COUNT(*) FROM bills WHERE meter_ok = 1 AND is_estimated = 0",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"bills\" WHERE \"bills\".\"is_estimated\" = 0",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "is_estimated",
+     "value": 0,
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'came', 'working', 'actual', 'readings' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Missing business synonym",
+  "note": "'working meters' -> meter_ok = 1 not recognised",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI02",
+  "question": "How many hours in total did completed trips last?",
+  "category": "abbreviation",
+  "reference_sql": "SELECT SUM(dur_min) / 60.0 FROM trips WHERE status = 'completed'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Unsupported query capability",
+  "note": "unit conversion minutes -> hours",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI04",
+  "question": "Break down completed-trip fares by pickup zone.",
+  "category": "fk_inference",
+  "reference_sql": "SELECT z.zone_nm, SUM(t.fare_amt) FROM trips t JOIN zones z ON z.zone_cd = t.pickup_zone_cd WHERE t.status = 'completed' GROUP BY z.zone_nm",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT j_pickup_zone_cd.zone_nm AS pickup_zone_cd, COUNT(*) AS row_count FROM \"trips\" LEFT JOIN zones AS j_pickup_zone_cd ON j_pickup_zone_cd.zone_cd = trips.pickup_zone_cd WHERE \"trips\".\"status\" = 'completed' GROUP BY j_pickup_zone_cd.zone_nm ORDER BY row_count DESC",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [
+    {
+     "column": "pickup_zone_cd",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question mentions column(s) 'fares (fare_amt)' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "plural 'fares' not linked to fare_amt -> COUNT(*); veto caught it",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI05",
+  "question": "Which 3 drop-off zones received the most completed trips?",
+  "category": "top_n",
+  "reference_sql": "SELECT z.zone_nm, COUNT(*) AS n FROM trips t JOIN zones z ON z.zone_cd = t.dropoff_zone_cd WHERE t.status = 'completed' GROUP BY z.zone_nm ORDER BY n DESC LIMIT 3",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: dimension binding",
+  "failure_class": "Missing business synonym",
+  "note": "'drop-off zones' not linked to role dropoff_zone_cd",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI08",
+  "question": "Total completed-trip fares by vehicle class.",
+  "category": "multi_table_join",
+  "reference_sql": "SELECT d.vehicle_cls, SUM(t.fare_amt) FROM trips t JOIN drivers d ON d.driver_id = t.driver_id WHERE t.status = 'completed' GROUP BY d.vehicle_cls",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT j_driver_id.vehicle_cls AS vehicle_cls, COUNT(*) AS row_count FROM \"trips\" LEFT JOIN drivers AS j_driver_id ON j_driver_id.driver_id = trips.driver_id WHERE \"trips\".\"status\" = 'completed' GROUP BY j_driver_id.vehicle_cls ORDER BY row_count DESC",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [
+    {
+     "column": "vehicle_cls",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question mentions column(s) 'fares (fare_amt)' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: measure binding",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "plural 'fares' not linked to fare_amt -> COUNT(*); veto caught it",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI10",
+  "question": "How many trips have no payment method recorded?",
+  "category": "null_condition",
+  "reference_sql": "SELECT COUNT(*) FROM trips WHERE pay_method IS NULL",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS null_payment_ok FROM \"trips\" WHERE \"trips\".\"payment_ok\" IS NULL",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "null_count",
+   "measures": [
+    {
+     "kpi_id": "null_payment_ok",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "null",
+     "column": "payment_ok",
+     "value": null,
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question mentions column(s) 'method (pay_method)' that the generated query does not use, so it would ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Column abbreviation mismatch",
+  "note": "'payment method' bound to payment_ok instead of pay_method",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI11",
+  "question": "For how many completed trips is the tip field left blank (not recorded at all, as opposed to a zero tip)?",
+  "category": "null_condition",
+  "reference_sql": "SELECT COUNT(*) FROM trips WHERE status = 'completed' AND tip_amt IS NULL",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"trips\".\"tip_amt\") AS sum_tip_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_tip_amt",
+     "formula": "SUM(\"tip_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "I don't know how 'blank', 'zero' maps to this data, so the answer could ignore part of your question",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: null-state phrasing",
+  "note": "'left blank' -> tip_amt IS NULL not recognised; SUM computed instead",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI12",
+  "question": "How many completed trips were not paid in cash?",
+  "category": "negation_exclusion",
+  "reference_sql": "SELECT COUNT(*) FROM trips WHERE status = 'completed' AND pay_method IS NOT 'Cash'",
+  "action": "WARN",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"trips\" WHERE \"trips\".\"status\" = 'completed' AND \"trips\".\"pay_method\" = 'Cash'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    },
+    {
+     "kind": "eq",
+     "column": "pay_method",
+     "value": "Cash",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "answer rests on: 'paid' was not mapped to any column or value and was not applied",
+  "semantic_findings": [],
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: negation of a value filter",
+  "note": "'not paid in cash' kept only cash trips (wrong answer)",
+  "label_dispute": "borderline (NULL methods counted as not cash)"
+ },
+ {
+  "id": "RI14",
+  "question": "What's the total fare from completed trips driven by drivers rated 4.8 or higher?",
+  "category": "related_numeric_threshold",
+  "reference_sql": "SELECT SUM(t.fare_amt) FROM trips t JOIN drivers d ON d.driver_id = t.driver_id WHERE t.status = 'completed' AND d.rating >= 4.8",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT j_driver_id.driver_nm AS driver_nm, SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" LEFT JOIN drivers AS j_driver_id ON j_driver_id.driver_id = trips.driver_id WHERE \"trips\".\"status\" = 'completed' GROUP BY j_driver_id.driver_nm ORDER BY sum_fare_amt DESC",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "breakdown",
+   "measures": [
+    {
+     "kpi_id": "sum_fare_amt",
+     "formula": "SUM(\"fare_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [
+    {
+     "column": "driver_nm",
+     "is_time": false,
+     "time_unit": ""
+    }
+   ],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [],
+   "notes": []
+  },
+  "final_reason": "the question contains the number(s) 4.8 but the generated query does not use them, so a threshold or quantity would be ignored",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Other: comparator phrasing",
+  "note": "'rated 4.8 or higher' not parsed; 'drivers' read as grouping",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI15",
+  "question": "Across completed trips, what is the overall fare per kilometre (total fare divided by total distance)?",
+  "category": "ratio",
+  "reference_sql": "SELECT SUM(fare_amt) / SUM(dist_km) FROM trips WHERE status = 'completed'",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "ratio",
+   "measures": [
+    {
+     "kpi_id": "sum_fare_amt",
+     "formula": "SUM(\"fare_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [
+    "dimension:total",
+    "dimension:kilometre"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: dimension:total, dimension:kilometre",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "explicit ratio 'total fare divided by total distance' not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI16",
+  "question": "What percentage of completed-trip fare revenue came from trips that started at Airport (JFK)?",
+  "category": "share_of_total",
+  "reference_sql": "SELECT 100.0 * SUM(CASE WHEN z.zone_nm = 'Airport (JFK)' THEN t.fare_amt ELSE 0 END) / SUM(t.fare_amt) FROM trips t JOIN zones z ON z.zone_cd = t.pickup_zone_cd WHERE t.status = 'completed'",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_fare_amt",
+     "formula": "SUM(\"fare_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [
+    "ambiguous_value:airport (jfk)=dropoff_zone_cd|pickup_zone_cd|zone_nm"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: ambiguous_value:airport (jfk)=dropoff_zone_cd|pickup_zone_cd|zone_nm",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "share of a total for one value; role phrase 'started at' unresolved",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI17",
+  "question": "How many more (or fewer) completed trips were requested in March 2025 than in February 2025?",
+  "category": "period_comparison",
+  "reference_sql": "SELECT SUM(CASE WHEN req_ts LIKE '2025-03-%' THEN 1 ELSE 0 END) - SUM(CASE WHEN req_ts LIKE '2025-02-%' THEN 1 ELSE 0 END) FROM trips WHERE status = 'completed'",
+  "action": "CLARIFY",
+  "generated_sql": "",
+  "sql_matches_reference": null,
+  "plan": {
+   "intent_kind": "ambiguous",
+   "measures": [],
+   "dims": [],
+   "filters": [],
+   "unavailable": [],
+   "notes": [
+    "No specific KPI or dimension bound from the question."
+   ]
+  },
+  "final_reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: intent",
+  "failure_class": "Unsupported query capability",
+  "note": "difference between two explicit periods not implemented",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI20",
+  "question": "How many completed trips were driven by Spanish-speaking drivers?",
+  "category": "join_fanout",
+  "reference_sql": "SELECT COUNT(*) FROM trips t WHERE t.status = 'completed' AND EXISTS (SELECT 1 FROM driver_languages l WHERE l.driver_id = t.driver_id AND l.lang = 'Spanish')",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT COUNT(*) AS row_count FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "row_count",
+     "formula": "COUNT(*)",
+     "aggregation": "count",
+     "unit": "count"
+    }
+   ],
+   "dims": [],
+   "filters": [
+    {
+     "kind": "eq",
+     "column": "status",
+     "value": "completed",
+     "lo": null,
+     "hi": null,
+     "kpi_id": "",
+     "threshold": 0.0
+    }
+   ],
+   "unavailable": [
+    "dimension:spanish",
+    "value:unrecognised=spanish-speaking"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: dimension:spanish, value:unrecognised=spanish-speaking",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: filters",
+  "failure_class": "Missing schema relationship",
+  "note": "value in a child of a parent table (driver_languages under drivers) not reachable",
+  "label_dispute": ""
+ },
+ {
+  "id": "RI23",
+  "question": "What fare revenue did we make on trips picked up in Old Mill (Closed)?",
+  "category": "fk_inference",
+  "reference_sql": "SELECT SUM(t.fare_amt) FROM trips t JOIN zones z ON z.zone_cd = t.pickup_zone_cd WHERE z.zone_nm = 'Old Mill (Closed)'",
+  "action": "CLARIFY",
+  "generated_sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\"",
+  "sql_matches_reference": false,
+  "plan": {
+   "intent_kind": "direct_kpi",
+   "measures": [
+    {
+     "kpi_id": "sum_fare_amt",
+     "formula": "SUM(\"fare_amt\")",
+     "aggregation": "sum",
+     "unit": ""
+    }
+   ],
+   "dims": [],
+   "filters": [],
+   "unavailable": [
+    "ambiguous_value:old mill (closed)=dropoff_zone_cd|pickup_zone_cd|zone_nm"
+   ],
+   "notes": []
+  },
+  "final_reason": "plan requires items not in the dataset: ambiguous_value:old mill (closed)=dropoff_zone_cd|pickup_zone_cd|zone_nm",
+  "semantic_findings": null,
+  "earliest_lost_stage": "planner: dimension binding",
+  "failure_class": "Missing business synonym",
+  "note": "role phrase 'picked up in' not linked to pickup_zone_cd",
+  "label_dispute": ""
+ }
+]

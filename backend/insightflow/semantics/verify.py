@@ -6,6 +6,7 @@ from typing import List
 from .preserve import SemanticFinding, preserve
 from .spec import SemanticSpec, build_spec
 from .typecheck import typecheck
+from .wording import check_wording
 
 
 @dataclass
@@ -26,4 +27,5 @@ def verify_semantics(question, plan, sql, result, explanation, ds, catalog=None)
     spec = build_spec(question, plan, ds, catalog)
     findings = typecheck(spec, question, ds)
     findings += preserve(spec, sql, list(result.columns), list(result.rows), explanation or "", ds)
+    findings += check_wording(question, sql, plan, ds, catalog)
     return SemanticReport(spec, findings)

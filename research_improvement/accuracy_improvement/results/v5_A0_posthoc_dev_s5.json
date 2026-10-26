@@ -1,0 +1,8728 @@
+{
+ "config": "A0",
+ "ablate": "",
+ "label": "posthoc_dev_s5",
+ "head": "0cde65b6e2ed45564135ef95532b0d29bb679953+worktree",
+ "frozen_tree": "00db6e20d39f69a6181577f764abaffd27cf08e1",
+ "n": 105,
+ "records": [
+  {
+   "id": "HO01",
+   "db": "hotel@bookings",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total amount across all bookings, cancelled ones included?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\"",
+   "rows": [
+    [
+     726609.61
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     726609.61
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 332.3,
+   "error": null
+  },
+  {
+   "id": "HO02",
+   "db": "hotel@bookings",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many room nights have we sold in total, leaving out cancelled bookings?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bookings\".\"nts_cnt\") AS sum_nts_cnt FROM \"bookings\" WHERE \"bookings\".\"is_cancelled\" = 0",
+   "rows": [
+    [
+     2941
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     2941
+    ]
+   ],
+   "reason": "answer rests on: 'sold' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 303.2,
+   "error": null
+  },
+  {
+   "id": "HO03",
+   "db": "hotel@bookings",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Break down the total booking amount by hotel.",
+   "action": "WARN",
+   "confidence": 1.0,
+   "sql": "SELECT j_room_id_hotel_id.hotel_nm AS hotel_nm, SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id GROUP BY j_room_id_hotel_id.hotel_nm ORDER BY sum_amt DESC",
+   "rows": [
+    [
+     "Harbour View Hotel",
+     194048.49
+    ],
+    [
+     "Sierra Mountain Retreat",
+     175100.19
+    ],
+    [
+     "Bay & Pier Lodge",
+     144531.62
+    ],
+    [
+     "Grand Palace (Annex)",
+     123416.28
+    ],
+    [
+     "Captain's Inn",
+     89513.03
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     "Bay & Pier Lodge",
+     144531.62
+    ],
+    [
+     "Captain's Inn",
+     89513.03
+    ],
+    [
+     "Grand Palace (Annex)",
+     123416.28
+    ],
+    [
+     "Harbour View Hotel",
+     194048.49
+    ],
+    [
+     "Sierra Mountain Retreat",
+     175100.19
+    ]
+   ],
+   "reason": "answer rests on: relationship inferred from names and values, not declared: rooms.hotel_id->hotels.hotel_id",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 272.9,
+   "error": null
+  },
+  {
+   "id": "HO04",
+   "db": "hotel@bookings",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What's the total booking amount for each city our hotels are in?",
+   "action": "WARN",
+   "confidence": 1.0,
+   "sql": "SELECT j_room_id_hotel_id.city AS city, SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id GROUP BY j_room_id_hotel_id.city ORDER BY sum_amt DESC",
+   "rows": [
+    [
+     "Lisbon",
+     338580.11
+    ],
+    [
+     "Granada",
+     175100.19
+    ],
+    [
+     "Madrid",
+     123416.28
+    ],
+    [
+     "Porto",
+     89513.03
+    ]
+   ],
+   "n_rows": 4,
+   "expected": [
+    [
+     "Granada",
+     175100.19
+    ],
+    [
+     "Lisbon",
+     338580.11
+    ],
+    [
+     "Madrid",
+     123416.28
+    ],
+    [
+     "Porto",
+     89513.03
+    ]
+   ],
+   "reason": "answer rests on: relationship inferred from names and values, not declared: rooms.hotel_id->hotels.hotel_id",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 268.8,
+   "error": null
+  },
+  {
+   "id": "HO05",
+   "db": "hotel@bookings",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many bookings were there for each type of room?",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT j_room_id.room_type AS room_type, COUNT(*) AS row_count FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id GROUP BY j_room_id.room_type ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Family (2+2)",
+     320
+    ],
+    [
+     "Suite",
+     261
+    ],
+    [
+     "Deluxe",
+     206
+    ],
+    [
+     "Standard",
+     163
+    ]
+   ],
+   "n_rows": 4,
+   "expected": [
+    [
+     "Deluxe",
+     206
+    ],
+    [
+     "Family (2+2)",
+     320
+    ],
+    [
+     "Standard",
+     163
+    ],
+    [
+     "Suite",
+     261
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 338.2,
+   "error": null
+  },
+  {
+   "id": "HO06",
+   "db": "hotel@bookings",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which three hotels sold the most room nights, not counting cancelled bookings?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bookings\".\"nts_cnt\") AS sum_nts_cnt FROM \"bookings\" WHERE \"bookings\".\"is_cancelled\" = 0",
+   "rows": [
+    [
+     2941
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     "Harbour View Hotel",
+     760
+    ],
+    [
+     "Bay & Pier Lodge",
+     681
+    ],
+    [
+     "Sierra Mountain Retreat",
+     640
+    ]
+   ],
+   "reason": "the question is about 'hotels', but the query's base table is 'bookings' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 341.7,
+   "error": null
+  },
+  {
+   "id": "HO07",
+   "db": "hotel@bookings",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show total booking amount per check-in month for guests checking in during 2025.",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT substr(\"bookings\".\"checkin_dt\",1,7) AS month, SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE \"bookings\".\"checkin_dt\" >= '2025-01-01' AND \"bookings\".\"checkin_dt\" < '2026-01-01' GROUP BY substr(\"bookings\".\"checkin_dt\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-01",
+     42348.9
+    ],
+    [
+     "2025-02",
+     47433.3
+    ],
+    [
+     "2025-03",
+     52159.28
+    ],
+    [
+     "2025-04",
+     38845.75
+    ],
+    [
+     "2025-05",
+     48368.21
+    ],
+    [
+     "2025-06",
+     54310.76
+    ],
+    [
+     "2025-07",
+     43874.7
+    ],
+    [
+     "2025-08",
+     45946.44
+    ],
+    [
+     "2025-09",
+     57016.62
+    ],
+    [
+     "2025-10",
+     51865.8
+    ],
+    [
+     "2025-11",
+     37868.15
+    ],
+    [
+     "2025-12",
+     28667.01
+    ]
+   ],
+   "n_rows": 12,
+   "expected": [
+    [
+     "2025-01",
+     42348.9
+    ],
+    [
+     "2025-02",
+     47433.3
+    ],
+    [
+     "2025-03",
+     52159.28
+    ],
+    [
+     "2025-04",
+     38845.75
+    ],
+    [
+     "2025-05",
+     48368.21
+    ],
+    [
+     "2025-06",
+     54310.76
+    ],
+    [
+     "2025-07",
+     43874.7
+    ],
+    [
+     "2025-08",
+     45946.44
+    ],
+    [
+     "2025-09",
+     57016.62
+    ],
+    [
+     "2025-10",
+     51865.8
+    ],
+    [
+     "2025-11",
+     37868.15
+    ],
+    [
+     "2025-12",
+     28667.01
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 297.9,
+   "error": null
+  },
+  {
+   "id": "HO08",
+   "db": "hotel@bookings",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many bookings did we have in March 2025?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"bookings\" WHERE \"bookings\".\"booked_on\" >= '2025-03-01' AND \"bookings\".\"booked_on\" < '2025-04-01'",
+   "rows": [
+    [
+     81
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 263.4,
+   "error": null
+  },
+  {
+   "id": "HO09",
+   "db": "hotel@bookings",
+   "category": "date_role_ambiguity",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many reservations were made during March 2025?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"bookings\" WHERE \"bookings\".\"booked_on\" >= '2025-03-01' AND \"bookings\".\"booked_on\" < '2025-04-01'",
+   "rows": [
+    [
+     81
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     81
+    ]
+   ],
+   "reason": "answer rests on: 'reservations' read as 'bookings' (business synonym)",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 258.5,
+   "error": null
+  },
+  {
+   "id": "HO10",
+   "db": "hotel@bookings",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bookings ended up cancelled?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"bookings\" WHERE \"bookings\".\"is_cancelled\" = 1",
+   "rows": [
+    [
+     119
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     119
+    ]
+   ],
+   "reason": "answer rests on: 'ended' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 313.9,
+   "error": null
+  },
+  {
+   "id": "HO11",
+   "db": "hotel@bookings",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total value of bookings where the payment didn't go through?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE \"bookings\".\"payment_ok\" = 0",
+   "rows": [
+    [
+     67606.12
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     67606.12
+    ]
+   ],
+   "reason": "answer rests on: 'value of bookings' read as 'amt' (revenue word)",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 267.0,
+   "error": null
+  },
+  {
+   "id": "HO12",
+   "db": "hotel@bookings",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total booking amount if we leave out bookings that came through online travel agencies?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE (\"bookings\".\"channel\" IS NULL OR \"bookings\".\"channel\" NOT IN ('OTA'))",
+   "rows": [
+    [
+     455499.99
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     455499.99
+    ]
+   ],
+   "reason": "answer rests on: 'online travel agencies' read as 'OTA' (acronym)",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 316.7,
+   "error": null
+  },
+  {
+   "id": "HO13",
+   "db": "hotel@bookings",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bookings don't have a check-in date yet?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"bookings\" WHERE \"bookings\".\"checkin_dt\" IS NULL",
+   "rows": [
+    [
+     45
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     45
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 270.9,
+   "error": null
+  },
+  {
+   "id": "HO14",
+   "db": "hotel@bookings",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many different guests have booked with us?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT \"bookings\".\"guest_id\") AS distinct_guest_id FROM \"bookings\" WHERE \"bookings\".\"booked_on\" IS NOT NULL",
+   "rows": [
+    [
+     287
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     287
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 257.2,
+   "error": null
+  },
+  {
+   "id": "HO15",
+   "db": "hotel@bookings",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total booking amount for rooms bigger than 40 square metres?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id WHERE j_room_id.sq_m > 40",
+   "rows": [
+    [
+     382124.03
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     382124.03
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 324.8,
+   "error": null
+  },
+  {
+   "id": "HO16",
+   "db": "hotel@bookings",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total booking amount of bookings that included at least one breakfast add-on?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" WHERE EXISTS (SELECT 1 FROM \"booking_addons\" AS \"x1_0\" WHERE \"x1_0\".\"bk_id\" = \"bookings\".\"bk_id\" AND \"x1_0\".\"addon_type\" = 'Breakfast')",
+   "rows": [
+    [
+     147587.66
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     147587.66
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 351.6,
+   "error": null
+  },
+  {
+   "id": "HO17",
+   "db": "hotel@bookings",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show me total booking amount by add-on type.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 208.5,
+   "error": null
+  },
+  {
+   "id": "HO18",
+   "db": "hotel@bookings",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of bookings were cancelled?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     12.526315789473685
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 203.2,
+   "error": null
+  },
+  {
+   "id": "HO19",
+   "db": "hotel@bookings",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What share of total booking amount came from Captain's Inn?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id WHERE j_room_id_hotel_id.hotel_nm = 'Captain''s Inn'",
+   "rows": [
+    [
+     89513.03
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     12.319274169798001
+    ]
+   ],
+   "reason": "the query may answer a different question than the one asked: the question asks for a percentage/share/ratio but the query returns a plain total or count",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "semantic_audit_violations": 1.0
+   },
+   "latency_ms": 241.8,
+   "error": null
+  },
+  {
+   "id": "HO20",
+   "db": "hotel@bookings",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "By how much did the value of bookings made in Q2 2025 differ from those made in Q1 2025 (Q2 minus Q1)?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     7049.220000000001
+    ]
+   ],
+   "reason": "This question can be read more than one way and the answer depends on it: by booked_on -> 158,630.88; by checkin_dt -> 141,524.72. Which did you mean?",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 399.4,
+   "error": null
+  },
+  {
+   "id": "HO21",
+   "db": "hotel@bookings",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which hotel is doing best?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_room_id_hotel_id.hotel_nm AS hotel_nm, COUNT(*) AS row_count FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id WHERE j_room_id_hotel_id.hotel_nm IS NOT NULL GROUP BY j_room_id_hotel_id.hotel_nm ORDER BY row_count DESC LIMIT 1",
+   "rows": [
+    [
+     "Harbour View Hotel",
+     227
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "the answer may not mean what you asked: the question asks who is doing best or performing, but names no measure; the query picked one by default",
+   "semantic_findings": [
+    {
+     "rule": "vague_metric",
+     "severity": "violation",
+     "detail": "the question asks who is doing best or performing, but names no measure; the query picked one by default"
+    }
+   ],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0,
+    "semantic_violations": 1.0
+   },
+   "latency_ms": 307.2,
+   "error": null
+  },
+  {
+   "id": "HO22",
+   "db": "hotel@bookings",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our add-on attach rate?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 174.3,
+   "error": null
+  },
+  {
+   "id": "HO23",
+   "db": "hotel@bookings",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which guests have never made a booking?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_guest_id.guest_nm AS guest_nm, COUNT(*) AS row_count FROM \"bookings\" LEFT JOIN guests AS j_guest_id ON j_guest_id.guest_id = bookings.guest_id GROUP BY j_guest_id.guest_nm ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Sean Garcia #177",
+     8
+    ],
+    [
+     "Rui Smith #280",
+     8
+    ],
+    [
+     "Maria Muller #176",
+     8
+    ],
+    [
+     "Joao Silva #031",
+     8
+    ],
+    [
+     "Joao Lopez #034",
+     8
+    ],
+    [
+     "Ines Lopez #179",
+     8
+    ],
+    [
+     "Aoife Ferreira #128",
+     8
+    ],
+    [
+     "Ana O'Neill #148",
+     8
+    ],
+    [
+     "Sean Lopez #277",
+     7
+    ],
+    [
+     "Sean Dubois #245",
+     7
+    ],
+    [
+     "Sean Costa #240",
+     7
+    ],
+    [
+     "Pedro Garcia #208",
+     7
+    ],
+    [
+     "Noah O'Neill #223",
+     7
+    ],
+    [
+     "Ines Garcia #138",
+     7
+    ],
+    [
+     "Ana Silva #173",
+     7
+    ],
+    [
+     "Tom Dubois #002",
+     6
+    ],
+    [
+     "Rui Smith #099",
+     6
+    ],
+    [
+     "Rui Lopez #202",
+     6
+    ],
+    [
+     "Rui Brown #083",
+     6
+    ],
+    [
+     "Pedro Smith #264",
+     6
+    ],
+    [
+     "Pedro Garcia #098",
+     6
+    ],
+    [
+     "Noah O'Neill #204",
+     6
+    ],
+    [
+     "Noah Martin #259",
+     6
+    ],
+    [
+     "Liam Silva #293",
+     6
+    ],
+    [
+     "Liam Muller #051",
+     6
+    ],
+    [
+     "Joao Costa #184",
+     6
+    ],
+    [
+     "Ines Brown #085",
+     6
+    ],
+    [
+     "Emma Garcia #289",
+     6
+    ],
+    [
+     "Claire Muller #298",
+     6
+    ],
+    [
+     "Claire Garcia #032",
+     6
+    ],
+    [
+     "Aoife Dubois #213",
+     6
+    ],
+    [
+     "Ana Smith #270",
+     6
+    ],
+    [
+     "Ana Dubois #065",
+     6
+    ],
+    [
+     "Tom Smith #057",
+     5
+    ],
+    [
+     "Tom Silva #067",
+     5
+    ],
+    [
+     "Tom Muller #004",
+     5
+    ],
+    [
+     "Tom Garcia #011",
+     5
+    ],
+    [
+     "Tom Brown #286",
+     5
+    ],
+    [
+     "Sofia O'Neill #080",
+     5
+    ],
+    [
+     "Sofia Muller #283",
+     5
+    ],
+    [
+     "Sofia Costa #095",
+     5
+    ],
+    [
+     "Rui Costa #275",
+     5
+    ],
+    [
+     "Pedro Ferreira #167",
+     5
+    ],
+    [
+     "Pedro Dubois #288",
+     5
+    ],
+    [
+     "Noah Smith #097",
+     5
+    ],
+    [
+     "Noah Garcia #049",
+     5
+    ],
+    [
+     "Noah Costa #102",
+     5
+    ],
+    [
+     "Maria Muller #072",
+     5
+    ],
+    [
+     "Maria Ferreira #142",
+     5
+    ],
+    [
+     "Maria Costa #122",
+     5
+    ],
+    [
+     "Luis Santos #174",
+     5
+    ],
+    [
+     "Luis Brown #106",
+     5
+    ],
+    [
+     "Liam Martin #227",
+     5
+    ],
+    [
+     "Liam Dubois #154",
+     5
+    ],
+    [
+     "Joao Muller #144",
+     5
+    ],
+    [
+     "Joao Garcia #220",
+     5
+    ],
+    [
+     "Ines Garcia #088",
+     5
+    ],
+    [
+     "Emma Silva #105",
+     5
+    ],
+    [
+     "Emma Silva #039",
+     5
+    ],
+    [
+     "Emma O'Neill #026",
+     5
+    ],
+    [
+     "Claire Smith #263",
+     5
+    ],
+    [
+     "Claire Ferreira #295",
+     5
+    ],
+    [
+     "Ana O'Neill #001",
+     5
+    ],
+    [
+     "Tom Santos #292",
+     4
+    ],
+    [
+     "Tom Santos #120",
+     4
+    ],
+    [
+     "Sofia O'Neill #271",
+     4
+    ],
+    [
+     "Sofia Martin #207",
+     4
+    ],
+    [
+     "Sofia Martin #194",
+     4
+    ],
+    [
+     "Sean O'Neill #209",
+     4
+    ],
+    [
+     "Sean Martin #253",
+     4
+    ],
+    [
+     "Sean Martin #135",
+     4
+    ],
+    [
+     "Sean Lopez #041",
+     4
+    ],
+    [
+     "Sean Garcia #247",
+     4
+    ],
+    [
+     "Sean Costa #169",
+     4
+    ],
+    [
+     "Rui Santos #291",
+     4
+    ],
+    [
+     "Rui Costa #024",
+     4
+    ],
+    [
+     "Pedro Muller #256",
+     4
+    ],
+    [
+     "Pedro Muller #183",
+     4
+    ],
+    [
+     "Pedro Lopez #224",
+     4
+    ],
+    [
+     "Pedro Lopez #196",
+     4
+    ],
+    [
+     "Pedro Garcia #175",
+     4
+    ],
+    [
+     "Pedro Ferreira #071",
+     4
+    ],
+    [
+     "Pedro Dubois #265",
+     4
+    ],
+    [
+     "Pedro Dubois #210",
+     4
+    ],
+    [
+     "Maria Santos #212",
+     4
+    ],
+    [
+     "Maria Lopez #109",
+     4
+    ],
+    [
+     "Maria Brown #242",
+     4
+    ],
+    [
+     "Luis Garcia #107",
+     4
+    ],
+    [
+     "Luis Ferreira #113",
+     4
+    ],
+    [
+     "Liam Santos #045",
+     4
+    ],
+    [
+     "Liam Muller #241",
+     4
+    ],
+    [
+     "Liam Lopez #076",
+     4
+    ],
+    [
+     "Liam Brown #229",
+     4
+    ],
+    [
+     "Joao Garcia #200",
+     4
+    ],
+    [
+     "Ines Smith #251",
+     4
+    ],
+    [
+     "Ines Martin #042",
+     4
+    ],
+    [
+     "Ines Lopez #255",
+     4
+    ],
+    [
+     "Ines Garcia #300",
+     4
+    ],
+    [
+     "Ines Garcia #069",
+     4
+    ],
+    [
+     "Emma Smith #276",
+     4
+    ],
+    [
+     "Emma Silva #216",
+     4
+    ],
+    [
+     "Emma O'Neill #008",
+     4
+    ],
+    [
+     "Emma Dubois #130",
+     4
+    ],
+    [
+     "Emma Dubois #021",
+     4
+    ],
+    [
+     "Claire Smith #282",
+     4
+    ],
+    [
+     "Claire Muller #005",
+     4
+    ],
+    [
+     "Aoife Martin #191",
+     4
+    ],
+    [
+     "Ana Santos #124",
+     4
+    ],
+    [
+     "Ana O'Neill #268",
+     4
+    ],
+    [
+     "Ana Muller #017",
+     4
+    ],
+    [
+     "Ana Martin #160",
+     4
+    ],
+    [
+     "Ana Dubois #100",
+     4
+    ],
+    [
+     "Ana Brown #246",
+     4
+    ],
+    [
+     "Ana Brown #151",
+     4
+    ],
+    [
+     "Tom Santos #203",
+     3
+    ],
+    [
+     "Tom Santos #022",
+     3
+    ],
+    [
+     "Tom Muller #119",
+     3
+    ],
+    [
+     "Tom Martin #093",
+     3
+    ],
+    [
+     "Tom Garcia #003",
+     3
+    ],
+    [
+     "Tom Dubois #244",
+     3
+    ],
+    [
+     "Tom Dubois #061",
+     3
+    ],
+    [
+     "Sofia Smith #152",
+     3
+    ],
+    [
+     "Sean Lopez #084",
+     3
+    ],
+    [
+     "Sean Ferreira #052",
+     3
+    ],
+    [
+     "Sean Dubois #285",
+     3
+    ],
+    [
+     "Rui Smith #141",
+     3
+    ],
+    [
+     "Rui Smith #081",
+     3
+    ],
+    [
+     "Rui O'Neill #056",
+     3
+    ],
+    [
+     "Rui Lopez #258",
+     3
+    ],
+    [
+     "Rui Ferreira #030",
+     3
+    ],
+    [
+     "Rui Costa #274",
+     3
+    ],
+    [
+     "Rui Costa #226",
+     3
+    ],
+    [
+     "Pedro Muller #211",
+     3
+    ],
+    [
+     "Pedro Muller #078",
+     3
+    ],
+    [
+     "Noah Lopez #198",
+     3
+    ],
+    [
+     "Noah Lopez #118",
+     3
+    ],
+    [
+     "Noah Lopez #096",
+     3
+    ],
+    [
+     "Noah Garcia #294",
+     3
+    ],
+    [
+     "Noah Garcia #013",
+     3
+    ],
+    [
+     "Noah Brown #187",
+     3
+    ],
+    [
+     "Maria Silva #214",
+     3
+    ],
+    [
+     "Maria Santos #035",
+     3
+    ],
+    [
+     "Maria Dubois #189",
+     3
+    ],
+    [
+     "Maria Dubois #182",
+     3
+    ],
+    [
+     "Maria Brown #215",
+     3
+    ],
+    [
+     "Luis Silva #111",
+     3
+    ],
+    [
+     "Luis Muller #163",
+     3
+    ],
+    [
+     "Luis Martin #087",
+     3
+    ],
+    [
+     "Luis Dubois #115",
+     3
+    ],
+    [
+     "Luis Brown #297",
+     3
+    ],
+    [
+     "Luis Brown #158",
+     3
+    ],
+    [
+     "Liam O'Neill #116",
+     3
+    ],
+    [
+     "Liam Muller #159",
+     3
+    ],
+    [
+     "Liam Martin #201",
+     3
+    ],
+    [
+     "Liam Martin #054",
+     3
+    ],
+    [
+     "Liam Garcia #133",
+     3
+    ],
+    [
+     "Liam Dubois #117",
+     3
+    ],
+    [
+     "Liam Brown #058",
+     3
+    ],
+    [
+     "Liam Brown #044",
+     3
+    ],
+    [
+     "Joao Dubois #181",
+     3
+    ],
+    [
+     "Joao Dubois #132",
+     3
+    ],
+    [
+     "Joao Costa #059",
+     3
+    ],
+    [
+     "Ines Smith #086",
+     3
+    ],
+    [
+     "Ines Santos #129",
+     3
+    ],
+    [
+     "Ines Lopez #037",
+     3
+    ],
+    [
+     "Emma Santos #104",
+     3
+    ],
+    [
+     "Emma Martin #165",
+     3
+    ],
+    [
+     "Emma Lopez #101",
+     3
+    ],
+    [
+     "Emma Dubois #273",
+     3
+    ],
+    [
+     "Claire Smith #121",
+     3
+    ],
+    [
+     "Claire Silva #040",
+     3
+    ],
+    [
+     "Claire Santos #166",
+     3
+    ],
+    [
+     "Claire Muller #062",
+     3
+    ],
+    [
+     "Claire Lopez #108",
+     3
+    ],
+    [
+     "Claire Ferreira #127",
+     3
+    ],
+    [
+     "Claire Dubois #260",
+     3
+    ],
+    [
+     "Claire Brown #162",
+     3
+    ],
+    [
+     "Aoife Silva #249",
+     3
+    ],
+    [
+     "Aoife Silva #136",
+     3
+    ],
+    [
+     "Aoife O'Neill #149",
+     3
+    ],
+    [
+     "Aoife Muller #225",
+     3
+    ],
+    [
+     "Aoife Ferreira #217",
+     3
+    ],
+    [
+     "Aoife Brown #155",
+     3
+    ],
+    [
+     "Ana Silva #125",
+     3
+    ],
+    [
+     "Ana Silva #060",
+     3
+    ],
+    [
+     "Ana Santos #046",
+     3
+    ],
+    [
+     "Ana Ferreira #239",
+     3
+    ],
+    [
+     "Ana Ferreira #140",
+     3
+    ],
+    [
+     "Ana Dubois #103",
+     3
+    ],
+    [
+     "Tom Smith #267",
+     2
+    ],
+    [
+     "Tom Smith #047",
+     2
+    ],
+    [
+     "Tom Silva #126",
+     2
+    ],
+    [
+     "Tom Santos #171",
+     2
+    ],
+    [
+     "Tom Martin #272",
+     2
+    ],
+    [
+     "Tom Garcia #266",
+     2
+    ],
+    [
+     "Tom Ferreira #197",
+     2
+    ],
+    [
+     "Sofia Garcia #073",
+     2
+    ],
+    [
+     "Sofia Garcia #070",
+     2
+    ],
+    [
+     "Sofia Ferreira #257",
+     2
+    ],
+    [
+     "Sean Smith #186",
+     2
+    ],
+    [
+     "Sean Muller #278",
+     2
+    ],
+    [
+     "Sean Lopez #234",
+     2
+    ],
+    [
+     "Sean Ferreira #016",
+     2
+    ],
+    [
+     "Rui Martin #077",
+     2
+    ],
+    [
+     "Rui Lopez #290",
+     2
+    ],
+    [
+     "Rui Dubois #206",
+     2
+    ],
+    [
+     "Pedro Silva #230",
+     2
+    ],
+    [
+     "Pedro Santos #074",
+     2
+    ],
+    [
+     "Pedro Muller #233",
+     2
+    ],
+    [
+     "Pedro Muller #018",
+     2
+    ],
+    [
+     "Pedro Dubois #048",
+     2
+    ],
+    [
+     "Noah O'Neill #112",
+     2
+    ],
+    [
+     "Noah Muller #296",
+     2
+    ],
+    [
+     "Noah Muller #053",
+     2
+    ],
+    [
+     "Noah Ferreira #079",
+     2
+    ],
+    [
+     "Maria Garcia #146",
+     2
+    ],
+    [
+     "Maria Ferreira #252",
+     2
+    ],
+    [
+     "Maria Brown #023",
+     2
+    ],
+    [
+     "Luis Garcia #254",
+     2
+    ],
+    [
+     "Luis Dubois #221",
+     2
+    ],
+    [
+     "Liam Muller #164",
+     2
+    ],
+    [
+     "Liam Martin #082",
+     2
+    ],
+    [
+     "Liam Ferreira #092",
+     2
+    ],
+    [
+     "Ines Santos #068",
+     2
+    ],
+    [
+     "Ines O'Neill #143",
+     2
+    ],
+    [
+     "Ines Muller #038",
+     2
+    ],
+    [
+     "Ines Garcia #231",
+     2
+    ],
+    [
+     "Ines Dubois #029",
+     2
+    ],
+    [
+     "Ines Costa #250",
+     2
+    ],
+    [
+     "Ines Brown #205",
+     2
+    ],
+    [
+     "Emma Smith #094",
+     2
+    ],
+    [
+     "Emma Silva #027",
+     2
+    ],
+    [
+     "Emma Dubois #178",
+     2
+    ],
+    [
+     "Claire Silva #261",
+     2
+    ],
+    [
+     "Claire Silva #147",
+     2
+    ],
+    [
+     "Claire Dubois #172",
+     2
+    ],
+    [
+     "Aoife Santos #161",
+     2
+    ],
+    [
+     "Aoife Dubois #050",
+     2
+    ],
+    [
+     "Aoife Brown #238",
+     2
+    ],
+    [
+     "Ana Lopez #137",
+     2
+    ],
+    [
+     "Ana Brown #033",
+     2
+    ],
+    [
+     "Tom Muller #284",
+     1
+    ],
+    [
+     "Tom Dubois #219",
+     1
+    ],
+    [
+     "Tom Costa #232",
+     1
+    ],
+    [
+     "Sofia O'Neill #228",
+     1
+    ],
+    [
+     "Sofia Garcia #114",
+     1
+    ],
+    [
+     "Sean Santos #243",
+     1
+    ],
+    [
+     "Sean Santos #188",
+     1
+    ],
+    [
+     "Sean Muller #218",
+     1
+    ],
+    [
+     "Sean Martin #199",
+     1
+    ],
+    [
+     "Sean Garcia #299",
+     1
+    ],
+    [
+     "Rui Ferreira #090",
+     1
+    ],
+    [
+     "Pedro Costa #009",
+     1
+    ],
+    [
+     "Noah Santos #089",
+     1
+    ],
+    [
+     "Noah Martin #131",
+     1
+    ],
+    [
+     "Noah Brown #170",
+     1
+    ],
+    [
+     "Maria Smith #153",
+     1
+    ],
+    [
+     "Maria Silva #287",
+     1
+    ],
+    [
+     "Luis Silva #075",
+     1
+    ],
+    [
+     "Luis Silva #028",
+     1
+    ],
+    [
+     "Luis O'Neill #185",
+     1
+    ],
+    [
+     "Luis Martin #091",
+     1
+    ],
+    [
+     "Luis Garcia #012",
+     1
+    ],
+    [
+     "Luis Dubois #248",
+     1
+    ],
+    [
+     "Liam Silva #222",
+     1
+    ],
+    [
+     "Liam Silva #134",
+     1
+    ],
+    [
+     "Liam O'Neill #236",
+     1
+    ],
+    [
+     "Liam Lopez #036",
+     1
+    ],
+    [
+     "Liam Garcia #180",
+     1
+    ],
+    [
+     "Liam Costa #193",
+     1
+    ],
+    [
+     "Joao Lopez #190",
+     1
+    ],
+    [
+     "Joao Dubois #014",
+     1
+    ],
+    [
+     "Ines Ferreira #192",
+     1
+    ],
+    [
+     "Ines Brown #006",
+     1
+    ],
+    [
+     "Emma Silva #020",
+     1
+    ],
+    [
+     "Emma Dubois #025",
+     1
+    ],
+    [
+     "Emma Dubois #019",
+     1
+    ],
+    [
+     "Emma Dubois #015",
+     1
+    ],
+    [
+     "Claire Garcia #007",
+     1
+    ],
+    [
+     "Claire Dubois #281",
+     1
+    ],
+    [
+     "Claire Costa #269",
+     1
+    ],
+    [
+     "Claire Brown #110",
+     1
+    ],
+    [
+     "Aoife Martin #139",
+     1
+    ],
+    [
+     "Aoife Brown #055",
+     1
+    ],
+    [
+     "Ana Silva #123",
+     1
+    ],
+    [
+     "Ana Brown #043",
+     1
+    ],
+    [
+     "Ana Brown #010",
+     1
+    ]
+   ],
+   "n_rows": 287,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 225.8,
+   "error": null
+  },
+  {
+   "id": "HO24",
+   "db": "hotel@bookings",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What will our booking revenue be next quarter?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 6.7,
+   "error": null
+  },
+  {
+   "id": "HO25",
+   "db": "hotel@bookings",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How much have bookings at Old Town B&B brought in?",
+   "action": "WARN",
+   "confidence": 0.899,
+   "sql": "SELECT SUM(\"bookings\".\"amt\") AS sum_amt FROM \"bookings\" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id WHERE j_room_id_hotel_id.hotel_nm = 'Old Town B&B'",
+   "rows": [
+    [
+     null
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset.",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 273.4,
+   "error": null
+  },
+  {
+   "id": "HO26",
+   "db": "hotel@bookings",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average length of stay per guest?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_guest_id.guest_nm AS guest_nm, COUNT(*) AS row_count FROM \"bookings\" LEFT JOIN guests AS j_guest_id ON j_guest_id.guest_id = bookings.guest_id GROUP BY j_guest_id.guest_nm ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Sean Garcia #177",
+     8
+    ],
+    [
+     "Rui Smith #280",
+     8
+    ],
+    [
+     "Maria Muller #176",
+     8
+    ],
+    [
+     "Joao Silva #031",
+     8
+    ],
+    [
+     "Joao Lopez #034",
+     8
+    ],
+    [
+     "Ines Lopez #179",
+     8
+    ],
+    [
+     "Aoife Ferreira #128",
+     8
+    ],
+    [
+     "Ana O'Neill #148",
+     8
+    ],
+    [
+     "Sean Lopez #277",
+     7
+    ],
+    [
+     "Sean Dubois #245",
+     7
+    ],
+    [
+     "Sean Costa #240",
+     7
+    ],
+    [
+     "Pedro Garcia #208",
+     7
+    ],
+    [
+     "Noah O'Neill #223",
+     7
+    ],
+    [
+     "Ines Garcia #138",
+     7
+    ],
+    [
+     "Ana Silva #173",
+     7
+    ],
+    [
+     "Tom Dubois #002",
+     6
+    ],
+    [
+     "Rui Smith #099",
+     6
+    ],
+    [
+     "Rui Lopez #202",
+     6
+    ],
+    [
+     "Rui Brown #083",
+     6
+    ],
+    [
+     "Pedro Smith #264",
+     6
+    ],
+    [
+     "Pedro Garcia #098",
+     6
+    ],
+    [
+     "Noah O'Neill #204",
+     6
+    ],
+    [
+     "Noah Martin #259",
+     6
+    ],
+    [
+     "Liam Silva #293",
+     6
+    ],
+    [
+     "Liam Muller #051",
+     6
+    ],
+    [
+     "Joao Costa #184",
+     6
+    ],
+    [
+     "Ines Brown #085",
+     6
+    ],
+    [
+     "Emma Garcia #289",
+     6
+    ],
+    [
+     "Claire Muller #298",
+     6
+    ],
+    [
+     "Claire Garcia #032",
+     6
+    ],
+    [
+     "Aoife Dubois #213",
+     6
+    ],
+    [
+     "Ana Smith #270",
+     6
+    ],
+    [
+     "Ana Dubois #065",
+     6
+    ],
+    [
+     "Tom Smith #057",
+     5
+    ],
+    [
+     "Tom Silva #067",
+     5
+    ],
+    [
+     "Tom Muller #004",
+     5
+    ],
+    [
+     "Tom Garcia #011",
+     5
+    ],
+    [
+     "Tom Brown #286",
+     5
+    ],
+    [
+     "Sofia O'Neill #080",
+     5
+    ],
+    [
+     "Sofia Muller #283",
+     5
+    ],
+    [
+     "Sofia Costa #095",
+     5
+    ],
+    [
+     "Rui Costa #275",
+     5
+    ],
+    [
+     "Pedro Ferreira #167",
+     5
+    ],
+    [
+     "Pedro Dubois #288",
+     5
+    ],
+    [
+     "Noah Smith #097",
+     5
+    ],
+    [
+     "Noah Garcia #049",
+     5
+    ],
+    [
+     "Noah Costa #102",
+     5
+    ],
+    [
+     "Maria Muller #072",
+     5
+    ],
+    [
+     "Maria Ferreira #142",
+     5
+    ],
+    [
+     "Maria Costa #122",
+     5
+    ],
+    [
+     "Luis Santos #174",
+     5
+    ],
+    [
+     "Luis Brown #106",
+     5
+    ],
+    [
+     "Liam Martin #227",
+     5
+    ],
+    [
+     "Liam Dubois #154",
+     5
+    ],
+    [
+     "Joao Muller #144",
+     5
+    ],
+    [
+     "Joao Garcia #220",
+     5
+    ],
+    [
+     "Ines Garcia #088",
+     5
+    ],
+    [
+     "Emma Silva #105",
+     5
+    ],
+    [
+     "Emma Silva #039",
+     5
+    ],
+    [
+     "Emma O'Neill #026",
+     5
+    ],
+    [
+     "Claire Smith #263",
+     5
+    ],
+    [
+     "Claire Ferreira #295",
+     5
+    ],
+    [
+     "Ana O'Neill #001",
+     5
+    ],
+    [
+     "Tom Santos #292",
+     4
+    ],
+    [
+     "Tom Santos #120",
+     4
+    ],
+    [
+     "Sofia O'Neill #271",
+     4
+    ],
+    [
+     "Sofia Martin #207",
+     4
+    ],
+    [
+     "Sofia Martin #194",
+     4
+    ],
+    [
+     "Sean O'Neill #209",
+     4
+    ],
+    [
+     "Sean Martin #253",
+     4
+    ],
+    [
+     "Sean Martin #135",
+     4
+    ],
+    [
+     "Sean Lopez #041",
+     4
+    ],
+    [
+     "Sean Garcia #247",
+     4
+    ],
+    [
+     "Sean Costa #169",
+     4
+    ],
+    [
+     "Rui Santos #291",
+     4
+    ],
+    [
+     "Rui Costa #024",
+     4
+    ],
+    [
+     "Pedro Muller #256",
+     4
+    ],
+    [
+     "Pedro Muller #183",
+     4
+    ],
+    [
+     "Pedro Lopez #224",
+     4
+    ],
+    [
+     "Pedro Lopez #196",
+     4
+    ],
+    [
+     "Pedro Garcia #175",
+     4
+    ],
+    [
+     "Pedro Ferreira #071",
+     4
+    ],
+    [
+     "Pedro Dubois #265",
+     4
+    ],
+    [
+     "Pedro Dubois #210",
+     4
+    ],
+    [
+     "Maria Santos #212",
+     4
+    ],
+    [
+     "Maria Lopez #109",
+     4
+    ],
+    [
+     "Maria Brown #242",
+     4
+    ],
+    [
+     "Luis Garcia #107",
+     4
+    ],
+    [
+     "Luis Ferreira #113",
+     4
+    ],
+    [
+     "Liam Santos #045",
+     4
+    ],
+    [
+     "Liam Muller #241",
+     4
+    ],
+    [
+     "Liam Lopez #076",
+     4
+    ],
+    [
+     "Liam Brown #229",
+     4
+    ],
+    [
+     "Joao Garcia #200",
+     4
+    ],
+    [
+     "Ines Smith #251",
+     4
+    ],
+    [
+     "Ines Martin #042",
+     4
+    ],
+    [
+     "Ines Lopez #255",
+     4
+    ],
+    [
+     "Ines Garcia #300",
+     4
+    ],
+    [
+     "Ines Garcia #069",
+     4
+    ],
+    [
+     "Emma Smith #276",
+     4
+    ],
+    [
+     "Emma Silva #216",
+     4
+    ],
+    [
+     "Emma O'Neill #008",
+     4
+    ],
+    [
+     "Emma Dubois #130",
+     4
+    ],
+    [
+     "Emma Dubois #021",
+     4
+    ],
+    [
+     "Claire Smith #282",
+     4
+    ],
+    [
+     "Claire Muller #005",
+     4
+    ],
+    [
+     "Aoife Martin #191",
+     4
+    ],
+    [
+     "Ana Santos #124",
+     4
+    ],
+    [
+     "Ana O'Neill #268",
+     4
+    ],
+    [
+     "Ana Muller #017",
+     4
+    ],
+    [
+     "Ana Martin #160",
+     4
+    ],
+    [
+     "Ana Dubois #100",
+     4
+    ],
+    [
+     "Ana Brown #246",
+     4
+    ],
+    [
+     "Ana Brown #151",
+     4
+    ],
+    [
+     "Tom Santos #203",
+     3
+    ],
+    [
+     "Tom Santos #022",
+     3
+    ],
+    [
+     "Tom Muller #119",
+     3
+    ],
+    [
+     "Tom Martin #093",
+     3
+    ],
+    [
+     "Tom Garcia #003",
+     3
+    ],
+    [
+     "Tom Dubois #244",
+     3
+    ],
+    [
+     "Tom Dubois #061",
+     3
+    ],
+    [
+     "Sofia Smith #152",
+     3
+    ],
+    [
+     "Sean Lopez #084",
+     3
+    ],
+    [
+     "Sean Ferreira #052",
+     3
+    ],
+    [
+     "Sean Dubois #285",
+     3
+    ],
+    [
+     "Rui Smith #141",
+     3
+    ],
+    [
+     "Rui Smith #081",
+     3
+    ],
+    [
+     "Rui O'Neill #056",
+     3
+    ],
+    [
+     "Rui Lopez #258",
+     3
+    ],
+    [
+     "Rui Ferreira #030",
+     3
+    ],
+    [
+     "Rui Costa #274",
+     3
+    ],
+    [
+     "Rui Costa #226",
+     3
+    ],
+    [
+     "Pedro Muller #211",
+     3
+    ],
+    [
+     "Pedro Muller #078",
+     3
+    ],
+    [
+     "Noah Lopez #198",
+     3
+    ],
+    [
+     "Noah Lopez #118",
+     3
+    ],
+    [
+     "Noah Lopez #096",
+     3
+    ],
+    [
+     "Noah Garcia #294",
+     3
+    ],
+    [
+     "Noah Garcia #013",
+     3
+    ],
+    [
+     "Noah Brown #187",
+     3
+    ],
+    [
+     "Maria Silva #214",
+     3
+    ],
+    [
+     "Maria Santos #035",
+     3
+    ],
+    [
+     "Maria Dubois #189",
+     3
+    ],
+    [
+     "Maria Dubois #182",
+     3
+    ],
+    [
+     "Maria Brown #215",
+     3
+    ],
+    [
+     "Luis Silva #111",
+     3
+    ],
+    [
+     "Luis Muller #163",
+     3
+    ],
+    [
+     "Luis Martin #087",
+     3
+    ],
+    [
+     "Luis Dubois #115",
+     3
+    ],
+    [
+     "Luis Brown #297",
+     3
+    ],
+    [
+     "Luis Brown #158",
+     3
+    ],
+    [
+     "Liam O'Neill #116",
+     3
+    ],
+    [
+     "Liam Muller #159",
+     3
+    ],
+    [
+     "Liam Martin #201",
+     3
+    ],
+    [
+     "Liam Martin #054",
+     3
+    ],
+    [
+     "Liam Garcia #133",
+     3
+    ],
+    [
+     "Liam Dubois #117",
+     3
+    ],
+    [
+     "Liam Brown #058",
+     3
+    ],
+    [
+     "Liam Brown #044",
+     3
+    ],
+    [
+     "Joao Dubois #181",
+     3
+    ],
+    [
+     "Joao Dubois #132",
+     3
+    ],
+    [
+     "Joao Costa #059",
+     3
+    ],
+    [
+     "Ines Smith #086",
+     3
+    ],
+    [
+     "Ines Santos #129",
+     3
+    ],
+    [
+     "Ines Lopez #037",
+     3
+    ],
+    [
+     "Emma Santos #104",
+     3
+    ],
+    [
+     "Emma Martin #165",
+     3
+    ],
+    [
+     "Emma Lopez #101",
+     3
+    ],
+    [
+     "Emma Dubois #273",
+     3
+    ],
+    [
+     "Claire Smith #121",
+     3
+    ],
+    [
+     "Claire Silva #040",
+     3
+    ],
+    [
+     "Claire Santos #166",
+     3
+    ],
+    [
+     "Claire Muller #062",
+     3
+    ],
+    [
+     "Claire Lopez #108",
+     3
+    ],
+    [
+     "Claire Ferreira #127",
+     3
+    ],
+    [
+     "Claire Dubois #260",
+     3
+    ],
+    [
+     "Claire Brown #162",
+     3
+    ],
+    [
+     "Aoife Silva #249",
+     3
+    ],
+    [
+     "Aoife Silva #136",
+     3
+    ],
+    [
+     "Aoife O'Neill #149",
+     3
+    ],
+    [
+     "Aoife Muller #225",
+     3
+    ],
+    [
+     "Aoife Ferreira #217",
+     3
+    ],
+    [
+     "Aoife Brown #155",
+     3
+    ],
+    [
+     "Ana Silva #125",
+     3
+    ],
+    [
+     "Ana Silva #060",
+     3
+    ],
+    [
+     "Ana Santos #046",
+     3
+    ],
+    [
+     "Ana Ferreira #239",
+     3
+    ],
+    [
+     "Ana Ferreira #140",
+     3
+    ],
+    [
+     "Ana Dubois #103",
+     3
+    ],
+    [
+     "Tom Smith #267",
+     2
+    ],
+    [
+     "Tom Smith #047",
+     2
+    ],
+    [
+     "Tom Silva #126",
+     2
+    ],
+    [
+     "Tom Santos #171",
+     2
+    ],
+    [
+     "Tom Martin #272",
+     2
+    ],
+    [
+     "Tom Garcia #266",
+     2
+    ],
+    [
+     "Tom Ferreira #197",
+     2
+    ],
+    [
+     "Sofia Garcia #073",
+     2
+    ],
+    [
+     "Sofia Garcia #070",
+     2
+    ],
+    [
+     "Sofia Ferreira #257",
+     2
+    ],
+    [
+     "Sean Smith #186",
+     2
+    ],
+    [
+     "Sean Muller #278",
+     2
+    ],
+    [
+     "Sean Lopez #234",
+     2
+    ],
+    [
+     "Sean Ferreira #016",
+     2
+    ],
+    [
+     "Rui Martin #077",
+     2
+    ],
+    [
+     "Rui Lopez #290",
+     2
+    ],
+    [
+     "Rui Dubois #206",
+     2
+    ],
+    [
+     "Pedro Silva #230",
+     2
+    ],
+    [
+     "Pedro Santos #074",
+     2
+    ],
+    [
+     "Pedro Muller #233",
+     2
+    ],
+    [
+     "Pedro Muller #018",
+     2
+    ],
+    [
+     "Pedro Dubois #048",
+     2
+    ],
+    [
+     "Noah O'Neill #112",
+     2
+    ],
+    [
+     "Noah Muller #296",
+     2
+    ],
+    [
+     "Noah Muller #053",
+     2
+    ],
+    [
+     "Noah Ferreira #079",
+     2
+    ],
+    [
+     "Maria Garcia #146",
+     2
+    ],
+    [
+     "Maria Ferreira #252",
+     2
+    ],
+    [
+     "Maria Brown #023",
+     2
+    ],
+    [
+     "Luis Garcia #254",
+     2
+    ],
+    [
+     "Luis Dubois #221",
+     2
+    ],
+    [
+     "Liam Muller #164",
+     2
+    ],
+    [
+     "Liam Martin #082",
+     2
+    ],
+    [
+     "Liam Ferreira #092",
+     2
+    ],
+    [
+     "Ines Santos #068",
+     2
+    ],
+    [
+     "Ines O'Neill #143",
+     2
+    ],
+    [
+     "Ines Muller #038",
+     2
+    ],
+    [
+     "Ines Garcia #231",
+     2
+    ],
+    [
+     "Ines Dubois #029",
+     2
+    ],
+    [
+     "Ines Costa #250",
+     2
+    ],
+    [
+     "Ines Brown #205",
+     2
+    ],
+    [
+     "Emma Smith #094",
+     2
+    ],
+    [
+     "Emma Silva #027",
+     2
+    ],
+    [
+     "Emma Dubois #178",
+     2
+    ],
+    [
+     "Claire Silva #261",
+     2
+    ],
+    [
+     "Claire Silva #147",
+     2
+    ],
+    [
+     "Claire Dubois #172",
+     2
+    ],
+    [
+     "Aoife Santos #161",
+     2
+    ],
+    [
+     "Aoife Dubois #050",
+     2
+    ],
+    [
+     "Aoife Brown #238",
+     2
+    ],
+    [
+     "Ana Lopez #137",
+     2
+    ],
+    [
+     "Ana Brown #033",
+     2
+    ],
+    [
+     "Tom Muller #284",
+     1
+    ],
+    [
+     "Tom Dubois #219",
+     1
+    ],
+    [
+     "Tom Costa #232",
+     1
+    ],
+    [
+     "Sofia O'Neill #228",
+     1
+    ],
+    [
+     "Sofia Garcia #114",
+     1
+    ],
+    [
+     "Sean Santos #243",
+     1
+    ],
+    [
+     "Sean Santos #188",
+     1
+    ],
+    [
+     "Sean Muller #218",
+     1
+    ],
+    [
+     "Sean Martin #199",
+     1
+    ],
+    [
+     "Sean Garcia #299",
+     1
+    ],
+    [
+     "Rui Ferreira #090",
+     1
+    ],
+    [
+     "Pedro Costa #009",
+     1
+    ],
+    [
+     "Noah Santos #089",
+     1
+    ],
+    [
+     "Noah Martin #131",
+     1
+    ],
+    [
+     "Noah Brown #170",
+     1
+    ],
+    [
+     "Maria Smith #153",
+     1
+    ],
+    [
+     "Maria Silva #287",
+     1
+    ],
+    [
+     "Luis Silva #075",
+     1
+    ],
+    [
+     "Luis Silva #028",
+     1
+    ],
+    [
+     "Luis O'Neill #185",
+     1
+    ],
+    [
+     "Luis Martin #091",
+     1
+    ],
+    [
+     "Luis Garcia #012",
+     1
+    ],
+    [
+     "Luis Dubois #248",
+     1
+    ],
+    [
+     "Liam Silva #222",
+     1
+    ],
+    [
+     "Liam Silva #134",
+     1
+    ],
+    [
+     "Liam O'Neill #236",
+     1
+    ],
+    [
+     "Liam Lopez #036",
+     1
+    ],
+    [
+     "Liam Garcia #180",
+     1
+    ],
+    [
+     "Liam Costa #193",
+     1
+    ],
+    [
+     "Joao Lopez #190",
+     1
+    ],
+    [
+     "Joao Dubois #014",
+     1
+    ],
+    [
+     "Ines Ferreira #192",
+     1
+    ],
+    [
+     "Ines Brown #006",
+     1
+    ],
+    [
+     "Emma Silva #020",
+     1
+    ],
+    [
+     "Emma Dubois #025",
+     1
+    ],
+    [
+     "Emma Dubois #019",
+     1
+    ],
+    [
+     "Emma Dubois #015",
+     1
+    ],
+    [
+     "Claire Garcia #007",
+     1
+    ],
+    [
+     "Claire Dubois #281",
+     1
+    ],
+    [
+     "Claire Costa #269",
+     1
+    ],
+    [
+     "Claire Brown #110",
+     1
+    ],
+    [
+     "Aoife Martin #139",
+     1
+    ],
+    [
+     "Aoife Brown #055",
+     1
+    ],
+    [
+     "Ana Silva #123",
+     1
+    ],
+    [
+     "Ana Brown #043",
+     1
+    ],
+    [
+     "Ana Brown #010",
+     1
+    ]
+   ],
+   "n_rows": 287,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: ambiguous_average_per:guest",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 229.1,
+   "error": null
+  },
+  {
+   "id": "IN01",
+   "db": "insurance@claims",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What is the total amount claimed across all claims?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\"",
+   "rows": [
+    [
+     4675289.19
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     4675289.19
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 692.2,
+   "error": null
+  },
+  {
+   "id": "IN02",
+   "db": "insurance@claims",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What's the total claimed amount for each insurance product?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_policy_no_product_cd.product_nm AS product_nm, SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no LEFT JOIN products AS j_policy_no_product_cd ON j_policy_no_product_cd.product_cd = j_policy_no.product_cd GROUP BY j_policy_no_product_cd.product_nm ORDER BY sum_claim_amt DESC",
+   "rows": [
+    [
+     "Home & Contents",
+     1778159.2
+    ],
+    [
+     "Auto (Comprehensive)",
+     1714458.46
+    ],
+    [
+     "Auto (Third Party)",
+     568065.81
+    ],
+    [
+     "Renter's Basic",
+     378364.81
+    ],
+    [
+     "Travel",
+     236240.91
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     "Auto (Comprehensive)",
+     1714458.46
+    ],
+    [
+     "Auto (Third Party)",
+     568065.81
+    ],
+    [
+     "Home & Contents",
+     1778159.2
+    ],
+    [
+     "Renter's Basic",
+     378364.81
+    ],
+    [
+     "Travel",
+     236240.91
+    ]
+   ],
+   "reason": "I don't know how 'insurance' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 644.3,
+   "error": null
+  },
+  {
+   "id": "IN03",
+   "db": "insurance@claims",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many claims are there in each status?",
+   "action": "ANSWER",
+   "confidence": 0.993,
+   "sql": "SELECT \"claims\".\"status\" AS status, COUNT(*) AS row_count FROM \"claims\" GROUP BY \"claims\".\"status\" ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Closed",
+     688
+    ],
+    [
+     "Open",
+     257
+    ],
+    [
+     "Denied",
+     155
+    ]
+   ],
+   "n_rows": 3,
+   "expected": [
+    [
+     "Closed",
+     688
+    ],
+    [
+     "Denied",
+     155
+    ],
+    [
+     "Open",
+     257
+    ]
+   ],
+   "reason": "confidence 0.99 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.9,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 685.4,
+   "error": null
+  },
+  {
+   "id": "IN04",
+   "db": "insurance@claims",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total claimed amount handled by each adjuster?",
+   "action": "WARN",
+   "confidence": 0.9956,
+   "sql": "SELECT j_adj_id.adj_nm AS adj_nm, SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" LEFT JOIN adjusters AS j_adj_id ON j_adj_id.adj_id = claims.adj_id GROUP BY j_adj_id.adj_nm ORDER BY sum_claim_amt DESC",
+   "rows": [
+    [
+     "Daniel Kim",
+     620401.7
+    ],
+    [
+     "Lee & Partners (external)",
+     589673.46
+    ],
+    [
+     "Grace Mbeki",
+     585120.91
+    ],
+    [
+     "Tomas Ruiz",
+     549211.13
+    ],
+    [
+     "Priya Raman",
+     531880.89
+    ],
+    [
+     "Sean O'Brien",
+     528541.93
+    ],
+    [
+     "Marta Novak",
+     490929.03
+    ],
+    [
+     "Hannah Vogel",
+     445692.24
+    ],
+    [
+     null,
+     333837.9
+    ]
+   ],
+   "n_rows": 9,
+   "expected": [
+    [
+     "Daniel Kim",
+     620401.7
+    ],
+    [
+     "Grace Mbeki",
+     585120.91
+    ],
+    [
+     "Hannah Vogel",
+     445692.24
+    ],
+    [
+     "Lee & Partners (external)",
+     589673.46
+    ],
+    [
+     "Marta Novak",
+     490929.03
+    ],
+    [
+     "Priya Raman",
+     531880.89
+    ],
+    [
+     "Sean O'Brien",
+     528541.93
+    ],
+    [
+     "Tomas Ruiz",
+     549211.13
+    ]
+   ],
+   "reason": "answer rests on: 'handled' was not mapped to any column or value and was not applied; relationship inferred from names and values, not declared: claims.adj_id->adjusters.adj_id",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.9444,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 666.7,
+   "error": null
+  },
+  {
+   "id": "IN05",
+   "db": "insurance@claims",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Who are the top 3 adjusters by number of claims handled?",
+   "action": "WARN",
+   "confidence": 0.993,
+   "sql": "SELECT j_adj_id.adj_nm AS adj_nm, COUNT(*) AS row_count FROM \"claims\" LEFT JOIN adjusters AS j_adj_id ON j_adj_id.adj_id = claims.adj_id WHERE j_adj_id.adj_nm IS NOT NULL GROUP BY j_adj_id.adj_nm ORDER BY row_count DESC LIMIT 3",
+   "rows": [
+    [
+     "Lee & Partners (external)",
+     137
+    ],
+    [
+     "Marta Novak",
+     131
+    ],
+    [
+     "Hannah Vogel",
+     129
+    ]
+   ],
+   "n_rows": 3,
+   "expected": [
+    [
+     "Lee & Partners (external)",
+     137
+    ],
+    [
+     "Marta Novak",
+     131
+    ],
+    [
+     "Hannah Vogel",
+     129
+    ]
+   ],
+   "reason": "answer rests on: 'handled' was not mapped to any column or value and was not applied; relationship inferred from names and values, not declared: claims.adj_id->adjusters.adj_id",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.9,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 750.9,
+   "error": null
+  },
+  {
+   "id": "IN06",
+   "db": "insurance@claims",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims were filed on policies with a deductible of 1,000 or more?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"claims\" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no WHERE j_policy_no.deductible >= 1000",
+   "rows": [
+    [
+     583
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     583
+    ]
+   ],
+   "reason": "answer rests on: 'filed' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 688.0,
+   "error": null
+  },
+  {
+   "id": "IN07",
+   "db": "insurance@claims",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "On average, how many days pass between the loss and the date the claim is reported?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     11.408181818181818
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 190.0,
+   "error": null
+  },
+  {
+   "id": "IN08",
+   "db": "insurance@claims",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the average annual premium of policies that have had at least one claim?",
+   "action": "ABSTAIN",
+   "confidence": 0.05,
+   "sql": "SELECT AVG(v) AS avg_per_year_sum_prem_amt FROM (SELECT substr(\"claims\".\"loss_dt\",1,4) AS bucket, SUM(j_policy_no.prem_amt) AS v FROM \"claims\" GROUP BY substr(\"claims\".\"loss_dt\",1,4))",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     874.4647597254004
+    ]
+   ],
+   "reason": "query execution failed",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 0.4,
+    "context_consistency": 0.3,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 3375.8,
+   "error": null
+  },
+  {
+   "id": "IN09",
+   "db": "insurance@claims",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims are flagged as suspected fraud?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"claims\" WHERE \"claims\".\"is_fraud_susp\" = 1",
+   "rows": [
+    [
+     61
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     61
+    ]
+   ],
+   "reason": "answer rests on: 'flagged' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 742.8,
+   "error": null
+  },
+  {
+   "id": "IN10",
+   "db": "insurance@claims",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims have incomplete paperwork?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"claims\" WHERE \"claims\".\"docs_ok\" = 0",
+   "rows": [
+    [
+     195
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     195
+    ]
+   ],
+   "reason": "answer rests on: 'paperwork' read as 'docs' (business synonym)",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 686.9,
+   "error": null
+  },
+  {
+   "id": "IN11",
+   "db": "insurance@claims",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many claims haven't been assigned to an adjuster?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"claims\" WHERE \"claims\".\"adj_id\" IS NULL",
+   "rows": [
+    [
+     85
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     85
+    ]
+   ],
+   "reason": "answer rests on: 'assigned' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 666.4,
+   "error": null
+  },
+  {
+   "id": "IN12",
+   "db": "insurance@claims",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total claimed amount for claims where the cause of loss wasn't recorded?",
+   "action": "WARN",
+   "confidence": 0.899,
+   "sql": "SELECT SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" WHERE \"claims\".\"loss_dt\" IS NULL AND \"claims\".\"cause\" IS NULL",
+   "rows": [
+    [
+     null
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     667557.43
+    ]
+   ],
+   "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset.",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 690.1,
+   "error": null
+  },
+  {
+   "id": "IN13",
+   "db": "insurance@claims",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Excluding theft, what is the total amount claimed?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" WHERE (\"claims\".\"cause\" IS NULL OR \"claims\".\"cause\" NOT IN ('Theft'))",
+   "rows": [
+    [
+     3967259.49
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     3967259.49
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 711.9,
+   "error": null
+  },
+  {
+   "id": "IN14",
+   "db": "insurance@claims",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many distinct policies have filed a claim?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT \"claims\".\"policy_no\") AS distinct_policy_no FROM \"claims\"",
+   "rows": [
+    [
+     437
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     437
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 830.1,
+   "error": null
+  },
+  {
+   "id": "IN15",
+   "db": "insurance@claims",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many claims were there per month of loss, for losses that happened in 2025?",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT substr(\"claims\".\"loss_dt\",1,7) AS month, COUNT(*) AS row_count FROM \"claims\" WHERE \"claims\".\"loss_dt\" >= '2025-01-01' AND \"claims\".\"loss_dt\" < '2026-01-01' GROUP BY substr(\"claims\".\"loss_dt\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-01",
+     65
+    ],
+    [
+     "2025-02",
+     61
+    ],
+    [
+     "2025-03",
+     62
+    ],
+    [
+     "2025-04",
+     67
+    ],
+    [
+     "2025-05",
+     56
+    ],
+    [
+     "2025-06",
+     42
+    ],
+    [
+     "2025-07",
+     58
+    ],
+    [
+     "2025-08",
+     49
+    ],
+    [
+     "2025-09",
+     65
+    ],
+    [
+     "2025-10",
+     74
+    ],
+    [
+     "2025-11",
+     69
+    ],
+    [
+     "2025-12",
+     48
+    ]
+   ],
+   "n_rows": 12,
+   "expected": [
+    [
+     "2025-01",
+     65
+    ],
+    [
+     "2025-02",
+     61
+    ],
+    [
+     "2025-03",
+     62
+    ],
+    [
+     "2025-04",
+     67
+    ],
+    [
+     "2025-05",
+     56
+    ],
+    [
+     "2025-06",
+     42
+    ],
+    [
+     "2025-07",
+     58
+    ],
+    [
+     "2025-08",
+     49
+    ],
+    [
+     "2025-09",
+     65
+    ],
+    [
+     "2025-10",
+     74
+    ],
+    [
+     "2025-11",
+     69
+    ],
+    [
+     "2025-12",
+     48
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 745.5,
+   "error": null
+  },
+  {
+   "id": "IN16",
+   "db": "insurance@claims",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many claims did we get in Q2 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question can be read more than one way and the answer depends on it: by loss_dt -> 165; by rpt_dt -> 178; by closed_dt -> 137; by start_dt -> 0. Which did you mean?",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 1392.8,
+   "error": null
+  },
+  {
+   "id": "IN17",
+   "db": "insurance@claims",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Using the date of loss, how much did total claimed amount change from Q1 2025 to Q2 2025 (Q2 minus Q1)?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT '2025-02' AS period, SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" WHERE \"loss_dt\" >= '2025-02-01' AND \"loss_dt\" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" WHERE \"loss_dt\" >= '2025-05-01' AND \"loss_dt\" < '2025-06-01' ORDER BY period",
+   "rows": [
+    [
+     "2025-02",
+     274487.52
+    ],
+    [
+     "2025-05",
+     255092.37
+    ]
+   ],
+   "n_rows": 2,
+   "expected": [
+    [
+     -7690.270000000019
+    ]
+   ],
+   "reason": "I don't know how 'minus' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.8,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 671.9,
+   "error": null
+  },
+  {
+   "id": "IN18",
+   "db": "insurance@claims",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of claims were denied?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     14.090909090909092
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 186.1,
+   "error": null
+  },
+  {
+   "id": "IN19",
+   "db": "insurance@claims",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our loss ratio?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 190.6,
+   "error": null
+  },
+  {
+   "id": "IN20",
+   "db": "insurance@claims",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What share of the total claimed amount comes from Home & Contents policies?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no LEFT JOIN products AS j_policy_no_product_cd ON j_policy_no_product_cd.product_cd = j_policy_no.product_cd WHERE j_policy_no_product_cd.product_nm = 'Home & Contents'",
+   "rows": [
+    [
+     1778159.2
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     38.03313822390524
+    ]
+   ],
+   "reason": "the query may answer a different question than the one asked: the question asks for a percentage/share/ratio but the query returns a plain total or count",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "semantic_audit_violations": 1.0
+   },
+   "latency_ms": 605.2,
+   "error": null
+  },
+  {
+   "id": "IN21",
+   "db": "insurance@claims",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What's the total amount claimed on Pet Care policies?",
+   "action": "WARN",
+   "confidence": 0.899,
+   "sql": "SELECT SUM(\"claims\".\"claim_amt\") AS sum_claim_amt FROM \"claims\" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no LEFT JOIN products AS j_policy_no_product_cd ON j_policy_no_product_cd.product_cd = j_policy_no.product_cd WHERE j_policy_no_product_cd.product_nm = 'Pet Care'",
+   "rows": [
+    [
+     null
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset.",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 661.9,
+   "error": null
+  },
+  {
+   "id": "IN22",
+   "db": "insurance@claims",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show total claimed amount by region.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 714.9,
+   "error": null
+  },
+  {
+   "id": "IN23",
+   "db": "insurance@claims",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Give me the total claimed amount by payment month.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 464.4,
+   "error": null
+  },
+  {
+   "id": "IN24",
+   "db": "insurance@claims",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which policies have never had a claim?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_policy_no.holder_nm AS holder_nm, COUNT(*) AS row_count FROM \"claims\" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no GROUP BY j_policy_no.holder_nm ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Garcia 215",
+     9
+    ],
+    [
+     "Smith & Sons Ltd 171",
+     6
+    ],
+    [
+     "Patel 017",
+     6
+    ],
+    [
+     "O'Connor 292",
+     6
+    ],
+    [
+     "Murphy 302",
+     6
+    ],
+    [
+     "Murphy 202",
+     6
+    ],
+    [
+     "Lindqvist 008",
+     6
+    ],
+    [
+     "Kowalski 437",
+     6
+    ],
+    [
+     "Kowalski 270",
+     6
+    ],
+    [
+     "Kowalski 047",
+     6
+    ],
+    [
+     "Haddad 481",
+     6
+    ],
+    [
+     "Haddad 319",
+     6
+    ],
+    [
+     "Haddad 281",
+     6
+    ],
+    [
+     "Garcia 193",
+     6
+    ],
+    [
+     "Brown (Trust) 142",
+     6
+    ],
+    [
+     "Smith & Sons Ltd 111",
+     5
+    ],
+    [
+     "Rossi 042",
+     5
+    ],
+    [
+     "Patel 329",
+     5
+    ],
+    [
+     "Okafor 369",
+     5
+    ],
+    [
+     "Okafor 203",
+     5
+    ],
+    [
+     "Nguyen 488",
+     5
+    ],
+    [
+     "Nguyen 165",
+     5
+    ],
+    [
+     "Nguyen 083",
+     5
+    ],
+    [
+     "Murphy 513",
+     5
+    ],
+    [
+     "Murphy 301",
+     5
+    ],
+    [
+     "Murphy 040",
+     5
+    ],
+    [
+     "Lindqvist 318",
+     5
+    ],
+    [
+     "Lindqvist 239",
+     5
+    ],
+    [
+     "Kowalski 342",
+     5
+    ],
+    [
+     "Kowalski 299",
+     5
+    ],
+    [
+     "Brown (Trust) 399",
+     5
+    ],
+    [
+     "Brown (Trust) 382",
+     5
+    ],
+    [
+     "Brown (Trust) 049",
+     5
+    ],
+    [
+     "Brown (Trust) 048",
+     5
+    ],
+    [
+     "Smith & Sons Ltd 445",
+     4
+    ],
+    [
+     "Smith & Sons Ltd 384",
+     4
+    ],
+    [
+     "Smith & Sons Ltd 189",
+     4
+    ],
+    [
+     "Smith & Sons Ltd 164",
+     4
+    ],
+    [
+     "Rossi 448",
+     4
+    ],
+    [
+     "Rossi 251",
+     4
+    ],
+    [
+     "Rossi 204",
+     4
+    ],
+    [
+     "Patel 430",
+     4
+    ],
+    [
+     "Patel 237",
+     4
+    ],
+    [
+     "Patel 234",
+     4
+    ],
+    [
+     "Patel 184",
+     4
+    ],
+    [
+     "Okafor 332",
+     4
+    ],
+    [
+     "Okafor 208",
+     4
+    ],
+    [
+     "Okafor 206",
+     4
+    ],
+    [
+     "Okafor 043",
+     4
+    ],
+    [
+     "Okafor 036",
+     4
+    ],
+    [
+     "O'Connor 519",
+     4
+    ],
+    [
+     "O'Connor 298",
+     4
+    ],
+    [
+     "O'Connor 172",
+     4
+    ],
+    [
+     "Nguyen 449",
+     4
+    ],
+    [
+     "Nguyen 241",
+     4
+    ],
+    [
+     "Nguyen 187",
+     4
+    ],
+    [
+     "Nguyen 162",
+     4
+    ],
+    [
+     "Nguyen 123",
+     4
+    ],
+    [
+     "Nguyen 065",
+     4
+    ],
+    [
+     "Murphy 475",
+     4
+    ],
+    [
+     "Murphy 379",
+     4
+    ],
+    [
+     "Murphy 356",
+     4
+    ],
+    [
+     "Murphy 197",
+     4
+    ],
+    [
+     "Murphy 183",
+     4
+    ],
+    [
+     "Murphy 174",
+     4
+    ],
+    [
+     "Murphy 112",
+     4
+    ],
+    [
+     "Murphy 109",
+     4
+    ],
+    [
+     "Lindqvist 412",
+     4
+    ],
+    [
+     "Lindqvist 350",
+     4
+    ],
+    [
+     "Lindqvist 338",
+     4
+    ],
+    [
+     "Lindqvist 309",
+     4
+    ],
+    [
+     "Lindqvist 269",
+     4
+    ],
+    [
+     "Lindqvist 124",
+     4
+    ],
+    [
+     "Lindqvist 051",
+     4
+    ],
+    [
+     "Kowalski 501",
+     4
+    ],
+    [
+     "Kowalski 364",
+     4
+    ],
+    [
+     "Kowalski 031",
+     4
+    ],
+    [
+     "Haddad 380",
+     4
+    ],
+    [
+     "Haddad 343",
+     4
+    ],
+    [
+     "Haddad 254",
+     4
+    ],
+    [
+     "Haddad 095",
+     4
+    ],
+    [
+     "Haddad 055",
+     4
+    ],
+    [
+     "Garcia 484",
+     4
+    ],
+    [
+     "Garcia 401",
+     4
+    ],
+    [
+     "Garcia 352",
+     4
+    ],
+    [
+     "Garcia 316",
+     4
+    ],
+    [
+     "Garcia 016",
+     4
+    ],
+    [
+     "Brown (Trust) 386",
+     4
+    ],
+    [
+     "Brown (Trust) 353",
+     4
+    ],
+    [
+     "Brown (Trust) 296",
+     4
+    ],
+    [
+     "Brown (Trust) 295",
+     4
+    ],
+    [
+     "Brown (Trust) 288",
+     4
+    ],
+    [
+     "Brown (Trust) 227",
+     4
+    ],
+    [
+     "Brown (Trust) 038",
+     4
+    ],
+    [
+     "Smith & Sons Ltd 485",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 287",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 186",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 181",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 178",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 156",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 154",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 117",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 107",
+     3
+    ],
+    [
+     "Rossi 259",
+     3
+    ],
+    [
+     "Rossi 256",
+     3
+    ],
+    [
+     "Rossi 235",
+     3
+    ],
+    [
+     "Rossi 205",
+     3
+    ],
+    [
+     "Rossi 147",
+     3
+    ],
+    [
+     "Rossi 125",
+     3
+    ],
+    [
+     "Rossi 104",
+     3
+    ],
+    [
+     "Rossi 022",
+     3
+    ],
+    [
+     "Patel 494",
+     3
+    ],
+    [
+     "Patel 403",
+     3
+    ],
+    [
+     "Patel 378",
+     3
+    ],
+    [
+     "Patel 304",
+     3
+    ],
+    [
+     "Patel 293",
+     3
+    ],
+    [
+     "Patel 245",
+     3
+    ],
+    [
+     "Patel 167",
+     3
+    ],
+    [
+     "Patel 103",
+     3
+    ],
+    [
+     "Patel 093",
+     3
+    ],
+    [
+     "Patel 072",
+     3
+    ],
+    [
+     "Okafor 467",
+     3
+    ],
+    [
+     "Okafor 466",
+     3
+    ],
+    [
+     "Okafor 407",
+     3
+    ],
+    [
+     "Okafor 277",
+     3
+    ],
+    [
+     "Okafor 271",
+     3
+    ],
+    [
+     "Okafor 071",
+     3
+    ],
+    [
+     "Okafor 063",
+     3
+    ],
+    [
+     "Okafor 034",
+     3
+    ],
+    [
+     "O'Connor 368",
+     3
+    ],
+    [
+     "O'Connor 191",
+     3
+    ],
+    [
+     "O'Connor 150",
+     3
+    ],
+    [
+     "O'Connor 136",
+     3
+    ],
+    [
+     "O'Connor 135",
+     3
+    ],
+    [
+     "O'Connor 122",
+     3
+    ],
+    [
+     "O'Connor 080",
+     3
+    ],
+    [
+     "O'Connor 064",
+     3
+    ],
+    [
+     "O'Connor 062",
+     3
+    ],
+    [
+     "Nguyen 512",
+     3
+    ],
+    [
+     "Nguyen 504",
+     3
+    ],
+    [
+     "Nguyen 447",
+     3
+    ],
+    [
+     "Nguyen 366",
+     3
+    ],
+    [
+     "Nguyen 152",
+     3
+    ],
+    [
+     "Murphy 507",
+     3
+    ],
+    [
+     "Murphy 490",
+     3
+    ],
+    [
+     "Murphy 335",
+     3
+    ],
+    [
+     "Murphy 274",
+     3
+    ],
+    [
+     "Murphy 068",
+     3
+    ],
+    [
+     "Murphy 011",
+     3
+    ],
+    [
+     "Lindqvist 516",
+     3
+    ],
+    [
+     "Lindqvist 496",
+     3
+    ],
+    [
+     "Lindqvist 424",
+     3
+    ],
+    [
+     "Lindqvist 354",
+     3
+    ],
+    [
+     "Lindqvist 132",
+     3
+    ],
+    [
+     "Lindqvist 045",
+     3
+    ],
+    [
+     "Kowalski 509",
+     3
+    ],
+    [
+     "Kowalski 474",
+     3
+    ],
+    [
+     "Kowalski 453",
+     3
+    ],
+    [
+     "Kowalski 433",
+     3
+    ],
+    [
+     "Kowalski 324",
+     3
+    ],
+    [
+     "Kowalski 196",
+     3
+    ],
+    [
+     "Kowalski 179",
+     3
+    ],
+    [
+     "Kowalski 173",
+     3
+    ],
+    [
+     "Kowalski 170",
+     3
+    ],
+    [
+     "Kowalski 144",
+     3
+    ],
+    [
+     "Kowalski 113",
+     3
+    ],
+    [
+     "Kowalski 032",
+     3
+    ],
+    [
+     "Kowalski 015",
+     3
+    ],
+    [
+     "Haddad 511",
+     3
+    ],
+    [
+     "Haddad 500",
+     3
+    ],
+    [
+     "Haddad 280",
+     3
+    ],
+    [
+     "Haddad 273",
+     3
+    ],
+    [
+     "Haddad 247",
+     3
+    ],
+    [
+     "Haddad 207",
+     3
+    ],
+    [
+     "Haddad 153",
+     3
+    ],
+    [
+     "Haddad 141",
+     3
+    ],
+    [
+     "Haddad 105",
+     3
+    ],
+    [
+     "Haddad 066",
+     3
+    ],
+    [
+     "Haddad 028",
+     3
+    ],
+    [
+     "Garcia 491",
+     3
+    ],
+    [
+     "Garcia 372",
+     3
+    ],
+    [
+     "Garcia 365",
+     3
+    ],
+    [
+     "Garcia 027",
+     3
+    ],
+    [
+     "Garcia 004",
+     3
+    ],
+    [
+     "Brown (Trust) 479",
+     3
+    ],
+    [
+     "Brown (Trust) 300",
+     3
+    ],
+    [
+     "Brown (Trust) 240",
+     3
+    ],
+    [
+     "Brown (Trust) 140",
+     3
+    ],
+    [
+     "Brown (Trust) 130",
+     3
+    ],
+    [
+     "Brown (Trust) 089",
+     3
+    ],
+    [
+     "Brown (Trust) 023",
+     3
+    ],
+    [
+     "Smith & Sons Ltd 440",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 421",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 392",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 357",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 310",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 220",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 194",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 169",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 160",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 157",
+     2
+    ],
+    [
+     "Rossi 422",
+     2
+    ],
+    [
+     "Rossi 413",
+     2
+    ],
+    [
+     "Rossi 390",
+     2
+    ],
+    [
+     "Rossi 351",
+     2
+    ],
+    [
+     "Rossi 331",
+     2
+    ],
+    [
+     "Rossi 185",
+     2
+    ],
+    [
+     "Rossi 133",
+     2
+    ],
+    [
+     "Rossi 076",
+     2
+    ],
+    [
+     "Rossi 010",
+     2
+    ],
+    [
+     "Rossi 007",
+     2
+    ],
+    [
+     "Patel 489",
+     2
+    ],
+    [
+     "Patel 487",
+     2
+    ],
+    [
+     "Patel 435",
+     2
+    ],
+    [
+     "Patel 376",
+     2
+    ],
+    [
+     "Patel 263",
+     2
+    ],
+    [
+     "Patel 238",
+     2
+    ],
+    [
+     "Patel 228",
+     2
+    ],
+    [
+     "Patel 200",
+     2
+    ],
+    [
+     "Patel 151",
+     2
+    ],
+    [
+     "Patel 138",
+     2
+    ],
+    [
+     "Patel 126",
+     2
+    ],
+    [
+     "Patel 069",
+     2
+    ],
+    [
+     "Patel 024",
+     2
+    ],
+    [
+     "Okafor 457",
+     2
+    ],
+    [
+     "Okafor 427",
+     2
+    ],
+    [
+     "Okafor 406",
+     2
+    ],
+    [
+     "Okafor 341",
+     2
+    ],
+    [
+     "Okafor 257",
+     2
+    ],
+    [
+     "Okafor 216",
+     2
+    ],
+    [
+     "Okafor 120",
+     2
+    ],
+    [
+     "Okafor 061",
+     2
+    ],
+    [
+     "Okafor 060",
+     2
+    ],
+    [
+     "Okafor 021",
+     2
+    ],
+    [
+     "O'Connor 470",
+     2
+    ],
+    [
+     "O'Connor 363",
+     2
+    ],
+    [
+     "O'Connor 303",
+     2
+    ],
+    [
+     "O'Connor 121",
+     2
+    ],
+    [
+     "O'Connor 100",
+     2
+    ],
+    [
+     "O'Connor 074",
+     2
+    ],
+    [
+     "O'Connor 018",
+     2
+    ],
+    [
+     "Nguyen 495",
+     2
+    ],
+    [
+     "Nguyen 394",
+     2
+    ],
+    [
+     "Nguyen 367",
+     2
+    ],
+    [
+     "Nguyen 346",
+     2
+    ],
+    [
+     "Nguyen 312",
+     2
+    ],
+    [
+     "Nguyen 149",
+     2
+    ],
+    [
+     "Nguyen 146",
+     2
+    ],
+    [
+     "Nguyen 094",
+     2
+    ],
+    [
+     "Murphy 480",
+     2
+    ],
+    [
+     "Murphy 473",
+     2
+    ],
+    [
+     "Murphy 458",
+     2
+    ],
+    [
+     "Murphy 454",
+     2
+    ],
+    [
+     "Murphy 415",
+     2
+    ],
+    [
+     "Murphy 388",
+     2
+    ],
+    [
+     "Murphy 361",
+     2
+    ],
+    [
+     "Murphy 325",
+     2
+    ],
+    [
+     "Murphy 119",
+     2
+    ],
+    [
+     "Lindqvist 510",
+     2
+    ],
+    [
+     "Lindqvist 459",
+     2
+    ],
+    [
+     "Lindqvist 455",
+     2
+    ],
+    [
+     "Lindqvist 414",
+     2
+    ],
+    [
+     "Lindqvist 252",
+     2
+    ],
+    [
+     "Lindqvist 223",
+     2
+    ],
+    [
+     "Lindqvist 209",
+     2
+    ],
+    [
+     "Lindqvist 102",
+     2
+    ],
+    [
+     "Kowalski 515",
+     2
+    ],
+    [
+     "Kowalski 482",
+     2
+    ],
+    [
+     "Kowalski 426",
+     2
+    ],
+    [
+     "Kowalski 400",
+     2
+    ],
+    [
+     "Kowalski 340",
+     2
+    ],
+    [
+     "Kowalski 199",
+     2
+    ],
+    [
+     "Kowalski 137",
+     2
+    ],
+    [
+     "Kowalski 106",
+     2
+    ],
+    [
+     "Kowalski 101",
+     2
+    ],
+    [
+     "Kowalski 099",
+     2
+    ],
+    [
+     "Kowalski 096",
+     2
+    ],
+    [
+     "Haddad 517",
+     2
+    ],
+    [
+     "Haddad 498",
+     2
+    ],
+    [
+     "Haddad 471",
+     2
+    ],
+    [
+     "Haddad 452",
+     2
+    ],
+    [
+     "Haddad 438",
+     2
+    ],
+    [
+     "Haddad 398",
+     2
+    ],
+    [
+     "Haddad 377",
+     2
+    ],
+    [
+     "Haddad 255",
+     2
+    ],
+    [
+     "Haddad 224",
+     2
+    ],
+    [
+     "Haddad 218",
+     2
+    ],
+    [
+     "Haddad 211",
+     2
+    ],
+    [
+     "Haddad 163",
+     2
+    ],
+    [
+     "Haddad 127",
+     2
+    ],
+    [
+     "Haddad 053",
+     2
+    ],
+    [
+     "Haddad 012",
+     2
+    ],
+    [
+     "Garcia 478",
+     2
+    ],
+    [
+     "Garcia 464",
+     2
+    ],
+    [
+     "Garcia 418",
+     2
+    ],
+    [
+     "Garcia 417",
+     2
+    ],
+    [
+     "Garcia 416",
+     2
+    ],
+    [
+     "Garcia 396",
+     2
+    ],
+    [
+     "Garcia 387",
+     2
+    ],
+    [
+     "Garcia 307",
+     2
+    ],
+    [
+     "Garcia 305",
+     2
+    ],
+    [
+     "Garcia 297",
+     2
+    ],
+    [
+     "Garcia 279",
+     2
+    ],
+    [
+     "Garcia 190",
+     2
+    ],
+    [
+     "Garcia 158",
+     2
+    ],
+    [
+     "Garcia 084",
+     2
+    ],
+    [
+     "Garcia 081",
+     2
+    ],
+    [
+     "Garcia 044",
+     2
+    ],
+    [
+     "Garcia 029",
+     2
+    ],
+    [
+     "Brown (Trust) 483",
+     2
+    ],
+    [
+     "Brown (Trust) 477",
+     2
+    ],
+    [
+     "Brown (Trust) 442",
+     2
+    ],
+    [
+     "Brown (Trust) 436",
+     2
+    ],
+    [
+     "Brown (Trust) 360",
+     2
+    ],
+    [
+     "Brown (Trust) 336",
+     2
+    ],
+    [
+     "Brown (Trust) 321",
+     2
+    ],
+    [
+     "Brown (Trust) 294",
+     2
+    ],
+    [
+     "Brown (Trust) 253",
+     2
+    ],
+    [
+     "Brown (Trust) 250",
+     2
+    ],
+    [
+     "Brown (Trust) 221",
+     2
+    ],
+    [
+     "Brown (Trust) 145",
+     2
+    ],
+    [
+     "Brown (Trust) 079",
+     2
+    ],
+    [
+     "Brown (Trust) 054",
+     2
+    ],
+    [
+     "Brown (Trust) 037",
+     2
+    ],
+    [
+     "Brown (Trust) 020",
+     2
+    ],
+    [
+     "Brown (Trust) 013",
+     2
+    ],
+    [
+     "Smith & Sons Ltd 514",
+     1
+    ],
+    [
+     "Smith & Sons Ltd 508",
+     1
+    ],
+    [
+     "Smith & Sons Ltd 358",
+     1
+    ],
+    [
+     "Smith & Sons Ltd 314",
+     1
+    ],
+    [
+     "Rossi 520",
+     1
+    ],
+    [
+     "Rossi 446",
+     1
+    ],
+    [
+     "Rossi 443",
+     1
+    ],
+    [
+     "Rossi 393",
+     1
+    ],
+    [
+     "Rossi 389",
+     1
+    ],
+    [
+     "Rossi 381",
+     1
+    ],
+    [
+     "Rossi 262",
+     1
+    ],
+    [
+     "Rossi 244",
+     1
+    ],
+    [
+     "Rossi 230",
+     1
+    ],
+    [
+     "Rossi 073",
+     1
+    ],
+    [
+     "Rossi 019",
+     1
+    ],
+    [
+     "Rossi 005",
+     1
+    ],
+    [
+     "Patel 463",
+     1
+    ],
+    [
+     "Patel 423",
+     1
+    ],
+    [
+     "Patel 308",
+     1
+    ],
+    [
+     "Patel 264",
+     1
+    ],
+    [
+     "Patel 242",
+     1
+    ],
+    [
+     "Patel 236",
+     1
+    ],
+    [
+     "Patel 225",
+     1
+    ],
+    [
+     "Patel 057",
+     1
+    ],
+    [
+     "Okafor 425",
+     1
+    ],
+    [
+     "Okafor 286",
+     1
+    ],
+    [
+     "Okafor 249",
+     1
+    ],
+    [
+     "Okafor 143",
+     1
+    ],
+    [
+     "Okafor 075",
+     1
+    ],
+    [
+     "Okafor 003",
+     1
+    ],
+    [
+     "Okafor 001",
+     1
+    ],
+    [
+     "O'Connor 505",
+     1
+    ],
+    [
+     "O'Connor 472",
+     1
+    ],
+    [
+     "O'Connor 469",
+     1
+    ],
+    [
+     "O'Connor 431",
+     1
+    ],
+    [
+     "O'Connor 362",
+     1
+    ],
+    [
+     "O'Connor 333",
+     1
+    ],
+    [
+     "O'Connor 311",
+     1
+    ],
+    [
+     "O'Connor 289",
+     1
+    ],
+    [
+     "O'Connor 261",
+     1
+    ],
+    [
+     "O'Connor 243",
+     1
+    ],
+    [
+     "O'Connor 232",
+     1
+    ],
+    [
+     "O'Connor 052",
+     1
+    ],
+    [
+     "O'Connor 002",
+     1
+    ],
+    [
+     "Nguyen 434",
+     1
+    ],
+    [
+     "Nguyen 395",
+     1
+    ],
+    [
+     "Nguyen 327",
+     1
+    ],
+    [
+     "Nguyen 285",
+     1
+    ],
+    [
+     "Nguyen 284",
+     1
+    ],
+    [
+     "Nguyen 283",
+     1
+    ],
+    [
+     "Nguyen 275",
+     1
+    ],
+    [
+     "Nguyen 198",
+     1
+    ],
+    [
+     "Nguyen 161",
+     1
+    ],
+    [
+     "Nguyen 148",
+     1
+    ],
+    [
+     "Nguyen 090",
+     1
+    ],
+    [
+     "Nguyen 056",
+     1
+    ],
+    [
+     "Nguyen 033",
+     1
+    ],
+    [
+     "Murphy 468",
+     1
+    ],
+    [
+     "Murphy 451",
+     1
+    ],
+    [
+     "Murphy 429",
+     1
+    ],
+    [
+     "Murphy 404",
+     1
+    ],
+    [
+     "Murphy 385",
+     1
+    ],
+    [
+     "Murphy 326",
+     1
+    ],
+    [
+     "Murphy 323",
+     1
+    ],
+    [
+     "Murphy 282",
+     1
+    ],
+    [
+     "Murphy 212",
+     1
+    ],
+    [
+     "Murphy 180",
+     1
+    ],
+    [
+     "Murphy 059",
+     1
+    ],
+    [
+     "Murphy 041",
+     1
+    ],
+    [
+     "Lindqvist 493",
+     1
+    ],
+    [
+     "Lindqvist 444",
+     1
+    ],
+    [
+     "Lindqvist 441",
+     1
+    ],
+    [
+     "Lindqvist 410",
+     1
+    ],
+    [
+     "Lindqvist 291",
+     1
+    ],
+    [
+     "Lindqvist 276",
+     1
+    ],
+    [
+     "Lindqvist 210",
+     1
+    ],
+    [
+     "Lindqvist 087",
+     1
+    ],
+    [
+     "Lindqvist 006",
+     1
+    ],
+    [
+     "Kowalski 497",
+     1
+    ],
+    [
+     "Kowalski 347",
+     1
+    ],
+    [
+     "Kowalski 260",
+     1
+    ],
+    [
+     "Kowalski 192",
+     1
+    ],
+    [
+     "Kowalski 182",
+     1
+    ],
+    [
+     "Kowalski 091",
+     1
+    ],
+    [
+     "Kowalski 039",
+     1
+    ],
+    [
+     "Haddad 506",
+     1
+    ],
+    [
+     "Haddad 486",
+     1
+    ],
+    [
+     "Haddad 371",
+     1
+    ],
+    [
+     "Haddad 334",
+     1
+    ],
+    [
+     "Haddad 266",
+     1
+    ],
+    [
+     "Haddad 248",
+     1
+    ],
+    [
+     "Haddad 177",
+     1
+    ],
+    [
+     "Haddad 128",
+     1
+    ],
+    [
+     "Haddad 118",
+     1
+    ],
+    [
+     "Haddad 114",
+     1
+    ],
+    [
+     "Haddad 085",
+     1
+    ],
+    [
+     "Haddad 030",
+     1
+    ],
+    [
+     "Haddad 009",
+     1
+    ],
+    [
+     "Garcia 492",
+     1
+    ],
+    [
+     "Garcia 461",
+     1
+    ],
+    [
+     "Garcia 405",
+     1
+    ],
+    [
+     "Garcia 267",
+     1
+    ],
+    [
+     "Garcia 082",
+     1
+    ],
+    [
+     "Garcia 058",
+     1
+    ],
+    [
+     "Brown (Trust) 439",
+     1
+    ],
+    [
+     "Brown (Trust) 373",
+     1
+    ],
+    [
+     "Brown (Trust) 339",
+     1
+    ],
+    [
+     "Brown (Trust) 290",
+     1
+    ],
+    [
+     "Brown (Trust) 214",
+     1
+    ],
+    [
+     "Brown (Trust) 213",
+     1
+    ],
+    [
+     "Brown (Trust) 134",
+     1
+    ]
+   ],
+   "n_rows": 437,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 538.6,
+   "error": null
+  },
+  {
+   "id": "IN25",
+   "db": "insurance@claims",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average customer satisfaction score on settled claims?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 238.9,
+   "error": null
+  },
+  {
+   "id": "IN26",
+   "db": "insurance@claims",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How much have we paid out on claims in total?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     2363554.56
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 202.4,
+   "error": null
+  },
+  {
+   "id": "IN27",
+   "db": "insurance@claims",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average time to settle a claim?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 188.9,
+   "error": null
+  },
+  {
+   "id": "IN28",
+   "db": "insurance@claims",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average claim?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 197.0,
+   "error": null
+  },
+  {
+   "id": "EN01",
+   "db": "energy@bills",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many kilowatt-hours have we billed in total?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+   "rows": [
+    [
+     652537.4
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     652537.4
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 212.5,
+   "error": null
+  },
+  {
+   "id": "EN02",
+   "db": "energy@bills",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the average bill amount?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT AVG(\"bills\".\"amt\") AS avg_amt FROM \"bills\"",
+   "rows": [
+    [
+     110.076016
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     110.076016
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 210.7,
+   "error": null
+  },
+  {
+   "id": "EN03",
+   "db": "energy@bills",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total kWh billed for each meter type.",
+   "action": "ANSWER",
+   "confidence": 0.993,
+   "sql": "SELECT j_meter_id.meter_type AS meter_type, SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id GROUP BY j_meter_id.meter_type ORDER BY sum_kwh DESC",
+   "rows": [
+    [
+     "Smart",
+     323221.7
+    ],
+    [
+     "Smart (3-phase)",
+     168226.4
+    ],
+    [
+     "Analog",
+     161089.3
+    ]
+   ],
+   "n_rows": 3,
+   "expected": [
+    [
+     "Analog",
+     161089.3
+    ],
+    [
+     "Smart",
+     323221.7
+    ],
+    [
+     "Smart (3-phase)",
+     168226.4
+    ]
+   ],
+   "reason": "confidence 0.99 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.9,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 206.0,
+   "error": null
+  },
+  {
+   "id": "EN04",
+   "db": "energy@bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Break down billed amount by tariff.",
+   "action": "WARN",
+   "confidence": 1.0,
+   "sql": "SELECT j_meter_id_cust_id_tariff_cd.tariff_nm AS tariff_nm, SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id LEFT JOIN tariffs AS j_meter_id_cust_id_tariff_cd ON j_meter_id_cust_id_tariff_cd.tariff_cd = j_meter_id_cust_id.tariff_cd GROUP BY j_meter_id_cust_id_tariff_cd.tariff_nm ORDER BY sum_amt DESC",
+   "rows": [
+    [
+     "Residential Standard",
+     38720.68
+    ],
+    [
+     "Commercial Flat",
+     35551.42
+    ],
+    [
+     "Green Saver's Plan",
+     28762.59
+    ],
+    [
+     "Time-of-Use (TOU)",
+     27597.28
+    ],
+    [
+     "Farm & Rural",
+     6963.05
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     "Commercial Flat",
+     35551.42
+    ],
+    [
+     "Farm & Rural",
+     6963.05
+    ],
+    [
+     "Green Saver's Plan",
+     28762.59
+    ],
+    [
+     "Residential Standard",
+     38720.68
+    ],
+    [
+     "Time-of-Use (TOU)",
+     27597.28
+    ]
+   ],
+   "reason": "answer rests on: relationship inferred from names and values, not declared: customers.tariff_cd->tariffs.tariff_cd",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 205.9,
+   "error": null
+  },
+  {
+   "id": "EN05",
+   "db": "energy@bills",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Who are our top 5 customers by total billed amount?",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT j_meter_id_cust_id.cust_nm AS cust_nm, SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id WHERE j_meter_id_cust_id.cust_nm IS NOT NULL GROUP BY j_meter_id_cust_id.cust_nm ORDER BY sum_amt DESC LIMIT 5",
+   "rows": [
+    [
+     "Jansen 118",
+     2624.9
+    ],
+    [
+     "Cole 146",
+     2366.17
+    ],
+    [
+     "Baker's Dozen 015",
+     2205.59
+    ],
+    [
+     "Lowe 175",
+     2094.88
+    ],
+    [
+     "Jansen 078",
+     1945.22
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     "Jansen 118",
+     2624.9
+    ],
+    [
+     "Cole 146",
+     2366.17
+    ],
+    [
+     "Baker's Dozen 015",
+     2205.59
+    ],
+    [
+     "Lowe 175",
+     2094.88
+    ],
+    [
+     "Jansen 078",
+     1945.22
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 225.1,
+   "error": null
+  },
+  {
+   "id": "EN06",
+   "db": "energy@bills",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show monthly kWh for the 2025 billing periods.",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT substr(\"bills\".\"period_start\",1,7) AS month, SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\" WHERE \"bills\".\"period_start\" >= '2025-01-01' AND \"bills\".\"period_start\" < '2026-01-01' GROUP BY substr(\"bills\".\"period_start\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-01",
+     31424.2
+    ],
+    [
+     "2025-02",
+     28161.1
+    ],
+    [
+     "2025-03",
+     17800.8
+    ],
+    [
+     "2025-04",
+     29246.7
+    ],
+    [
+     "2025-05",
+     25257.8
+    ],
+    [
+     "2025-06",
+     25501.7
+    ],
+    [
+     "2025-07",
+     25292.6
+    ],
+    [
+     "2025-08",
+     26541.5
+    ],
+    [
+     "2025-09",
+     23611.4
+    ],
+    [
+     "2025-10",
+     21902.3
+    ],
+    [
+     "2025-11",
+     27640.4
+    ],
+    [
+     "2025-12",
+     28208.3
+    ]
+   ],
+   "n_rows": 12,
+   "expected": [
+    [
+     "2025-01",
+     31424.2
+    ],
+    [
+     "2025-02",
+     28161.1
+    ],
+    [
+     "2025-03",
+     17800.8
+    ],
+    [
+     "2025-04",
+     29246.7
+    ],
+    [
+     "2025-05",
+     25257.8
+    ],
+    [
+     "2025-06",
+     25501.7
+    ],
+    [
+     "2025-07",
+     25292.6
+    ],
+    [
+     "2025-08",
+     26541.5
+    ],
+    [
+     "2025-09",
+     23611.4
+    ],
+    [
+     "2025-10",
+     21902.3
+    ],
+    [
+     "2025-11",
+     27640.4
+    ],
+    [
+     "2025-12",
+     28208.3
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 211.1,
+   "error": null
+  },
+  {
+   "id": "EN07",
+   "db": "energy@bills",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills were issued while the meter was faulty?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"bills\" WHERE \"bills\".\"meter_ok\" = 0",
+   "rows": [
+    [
+     78
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     78
+    ]
+   ],
+   "reason": "answer rests on: 'issued' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 233.0,
+   "error": null
+  },
+  {
+   "id": "EN08",
+   "db": "energy@bills",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total billed amount for meters whose installation date is unknown?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id WHERE j_meter_id.install_dt IS NULL",
+   "rows": [
+    [
+     23736.45
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     23736.45
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 221.1,
+   "error": null
+  },
+  {
+   "id": "EN09",
+   "db": "energy@bills",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Leaving out Commercial-segment customers, how many kWh did we bill?",
+   "action": "ANSWER",
+   "confidence": 0.9797,
+   "sql": "SELECT j_meter_id_cust_id.segment AS segment, SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id WHERE (j_meter_id_cust_id.segment IS NULL OR j_meter_id_cust_id.segment NOT IN ('Commercial')) GROUP BY j_meter_id_cust_id.segment ORDER BY sum_kwh DESC",
+   "rows": [
+    [
+     "Residential",
+     275287.3
+    ],
+    [
+     "Small Biz & Farm",
+     92855.0
+    ],
+    [
+     null,
+     54455.4
+    ]
+   ],
+   "n_rows": 3,
+   "expected": [
+    [
+     422597.7
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.8333,
+    "evidence_strength": 0.9,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 293.9,
+   "error": null
+  },
+  {
+   "id": "EN10",
+   "db": "energy@bills",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total billed for customers on tariffs priced above 0.20 per kWh?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bills\".\"amt\") AS sum_amt, SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+   "rows": [
+    [
+     137595.02,
+     652537.4
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     67483.27
+    ]
+   ],
+   "reason": "the question is about 'customers', 'tariffs', but the query's base table is 'bills' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 202.5,
+   "error": null
+  },
+  {
+   "id": "EN11",
+   "db": "energy@bills",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many distinct customers received at least one bill?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT j_meter_id_cust_id.cust_nm) AS distinct_cust_nm FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id",
+   "rows": [
+    [
+     233
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     233
+    ]
+   ],
+   "reason": "answer rests on: a measure stored on a related table is counted once per 'bills' row, so a value shared by several rows is counted several times",
+   "semantic_findings": [
+    {
+     "rule": "assumption",
+     "severity": "note",
+     "detail": "'Distinct Cust Nm' is a related-table measure counted once per bills row"
+    }
+   ],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 200.4,
+   "error": null
+  },
+  {
+   "id": "EN12",
+   "db": "energy@bills",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the overall average price per kWh we billed?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+   "rows": [
+    [
+     652537.4
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     0.21086150770821716
+    ]
+   ],
+   "reason": "the answer may not mean what you asked: the question asks for a grouped breakdown but the plan is a single figure; 'per kwh' asks for a ratio of two measures, which this query does not compute",
+   "semantic_findings": [
+    {
+     "rule": "shape_breakdown_expected",
+     "severity": "violation",
+     "detail": "the question asks for a grouped breakdown but the plan is a single figure"
+    },
+    {
+     "rule": "ratio_unsupported",
+     "severity": "violation",
+     "detail": "'per kwh' asks for a ratio of two measures, which this query does not compute"
+    }
+   ],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0,
+    "semantic_violations": 2.0
+   },
+   "latency_ms": 223.9,
+   "error": null
+  },
+  {
+   "id": "EN13",
+   "db": "energy@bills",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of the kWh we billed came from analog meters?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id WHERE j_meter_id.meter_type = 'Analog'",
+   "rows": [
+    [
+     161089.3
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     24.6866003389231
+    ]
+   ],
+   "reason": "the query may answer a different question than the one asked: the question asks for a percentage/share/ratio but the query returns a plain total or count",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "semantic_audit_violations": 1.0
+   },
+   "latency_ms": 269.4,
+   "error": null
+  },
+  {
+   "id": "EN14",
+   "db": "energy@bills",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How did total kWh for 2025 billing periods compare with 2024 (2025 minus 2024)?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+   "rows": [
+    [
+     652537.4
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     -31359.79999999999
+    ]
+   ],
+   "reason": "the question mentions column(s) 'periods (period_start)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 209.6,
+   "error": null
+  },
+  {
+   "id": "EN15",
+   "db": "energy@bills",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many bills fall in March 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question can be read more than one way and the answer depends on it: by period_start -> 42; by due_dt -> 54; by paid_dt -> 49; by install_dt -> 0. Which did you mean?",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 370.8,
+   "error": null
+  },
+  {
+   "id": "EN16",
+   "db": "energy@bills",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Break down total kWh by the customer programs people are enrolled in.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+   "rows": [
+    [
+     652537.4
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "the question is about 'customer programs', 'customer', but the query's base table is 'bills' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 242.8,
+   "error": null
+  },
+  {
+   "id": "EN17",
+   "db": "energy@bills",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many kWh were billed to customers enrolled in Budget Billing?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"bills\".\"kwh\") AS sum_kwh FROM \"bills\"",
+   "rows": [
+    [
+     652537.4
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     226533.6
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: value:unrecognised=budget billing",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 206.3,
+   "error": null
+  },
+  {
+   "id": "EN18",
+   "db": "energy@bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What did we bill customers on the EV Night Owl tariff?",
+   "action": "WARN",
+   "confidence": 0.899,
+   "sql": "SELECT SUM(\"bills\".\"amt\") AS sum_amt FROM \"bills\" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id LEFT JOIN tariffs AS j_meter_id_cust_id_tariff_cd ON j_meter_id_cust_id_tariff_cd.tariff_cd = j_meter_id_cust_id.tariff_cd WHERE j_meter_id_cust_id_tariff_cd.tariff_nm = 'EV Night Owl'",
+   "rows": [
+    [
+     null
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset.",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 212.2,
+   "error": null
+  },
+  {
+   "id": "EN19",
+   "db": "energy@bills",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which meters have never received a bill?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 120.6,
+   "error": null
+  },
+  {
+   "id": "EN20",
+   "db": "energy@bills",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What were the CO2 emissions associated with the electricity we billed?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 133.6,
+   "error": null
+  },
+  {
+   "id": "EN21",
+   "db": "energy@bills",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show me the problem bills.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 124.2,
+   "error": null
+  },
+  {
+   "id": "EN22",
+   "db": "energy@bills",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our collection rate?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 157.9,
+   "error": null
+  },
+  {
+   "id": "EN23",
+   "db": "energy@bills",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Forecast next January's total electricity demand.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 7.8,
+   "error": null
+  },
+  {
+   "id": "EN24",
+   "db": "energy@bills",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills came from working meters with actual (not estimated) readings?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"bills\" WHERE \"bills\".\"meter_ok\" = 1 AND \"bills\".\"is_estimated\" = 0",
+   "rows": [
+    [
+     1001
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     1001
+    ]
+   ],
+   "reason": "I don't know how 'actual', 'readings' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 208.7,
+   "error": null
+  },
+  {
+   "id": "EN25",
+   "db": "energy@bills",
+   "category": "period_comparison",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How did consumption this winter compare with last winter?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 125.8,
+   "error": null
+  },
+  {
+   "id": "RI01",
+   "db": "rides@trips",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total fare revenue from completed trips?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+   "rows": [
+    [
+     20309.69
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     20309.69
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 146.8,
+   "error": null
+  },
+  {
+   "id": "RI02",
+   "db": "rides@trips",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many hours in total did completed trips last?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     383.76666666666665
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 98.9,
+   "error": null
+  },
+  {
+   "id": "RI03",
+   "db": "rides@trips",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many trips are there in each status?",
+   "action": "ANSWER",
+   "confidence": 0.993,
+   "sql": "SELECT \"trips\".\"status\" AS status, COUNT(*) AS row_count FROM \"trips\" GROUP BY \"trips\".\"status\" ORDER BY row_count DESC",
+   "rows": [
+    [
+     "completed",
+     1243
+    ],
+    [
+     "cancelled_rider",
+     148
+    ],
+    [
+     "cancelled_driver",
+     59
+    ]
+   ],
+   "n_rows": 3,
+   "expected": [
+    [
+     "cancelled_driver",
+     59
+    ],
+    [
+     "cancelled_rider",
+     148
+    ],
+    [
+     "completed",
+     1243
+    ]
+   ],
+   "reason": "confidence 0.99 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.9,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 183.3,
+   "error": null
+  },
+  {
+   "id": "RI04",
+   "db": "rides@trips",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Break down completed-trip fares by pickup zone.",
+   "action": "WARN",
+   "confidence": 1.0,
+   "sql": "SELECT j_pickup_zone_cd.zone_nm AS pickup_zone_cd, SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" LEFT JOIN zones AS j_pickup_zone_cd ON j_pickup_zone_cd.zone_cd = trips.pickup_zone_cd WHERE \"trips\".\"status\" = 'completed' GROUP BY j_pickup_zone_cd.zone_nm ORDER BY sum_fare_amt DESC",
+   "rows": [
+    [
+     "Airport (JFK)",
+     4957.3
+    ],
+    [
+     "Downtown Core",
+     4763.44
+    ],
+    [
+     "Arts & Theatre District",
+     2820.2400000000002
+    ],
+    [
+     "Harbourfront",
+     2171.41
+    ],
+    [
+     "University Hill",
+     2059.0
+    ],
+    [
+     "Tech Park",
+     1777.51
+    ],
+    [
+     "St. Mary's Park",
+     1760.79
+    ]
+   ],
+   "n_rows": 7,
+   "expected": [
+    [
+     "Airport (JFK)",
+     4957.3
+    ],
+    [
+     "Arts & Theatre District",
+     2820.2400000000002
+    ],
+    [
+     "Downtown Core",
+     4763.44
+    ],
+    [
+     "Harbourfront",
+     2171.41
+    ],
+    [
+     "St. Mary's Park",
+     1760.79
+    ],
+    [
+     "Tech Park",
+     1777.51
+    ],
+    [
+     "University Hill",
+     2059.0
+    ]
+   ],
+   "reason": "answer rests on: relationship inferred from names and values, not declared: trips.pickup_zone_cd->zones.zone_cd",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 154.1,
+   "error": null
+  },
+  {
+   "id": "RI05",
+   "db": "rides@trips",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which 3 drop-off zones received the most completed trips?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "Tech Park",
+     361
+    ],
+    [
+     "Arts & Theatre District",
+     191
+    ],
+    [
+     "University Hill",
+     172
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 100.1,
+   "error": null
+  },
+  {
+   "id": "RI06",
+   "db": "rides@trips",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which zone generates the most fare revenue?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_dropoff_zone_cd.zone_nm AS dropoff_zone_cd, SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" LEFT JOIN zones AS j_dropoff_zone_cd ON j_dropoff_zone_cd.zone_cd = trips.dropoff_zone_cd WHERE j_dropoff_zone_cd.zone_nm IS NOT NULL GROUP BY j_dropoff_zone_cd.zone_nm ORDER BY sum_fare_amt DESC LIMIT 1",
+   "rows": [
+    [
+     "Tech Park",
+     5377.73
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "I don't know how 'generates' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 143.0,
+   "error": null
+  },
+  {
+   "id": "RI07",
+   "db": "rides@trips",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average fare in the Arts & Theatre District?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT AVG(\"trips\".\"fare_amt\") AS avg_fare_amt FROM \"trips\"",
+   "rows": [
+    [
+     14.282544827586205
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: ambiguous_value:arts & theatre district=dropoff_zone_cd|pickup_zone_cd|zone_nm",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 123.0,
+   "error": null
+  },
+  {
+   "id": "RI08",
+   "db": "rides@trips",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total completed-trip fares by vehicle class.",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT j_driver_id.vehicle_cls AS vehicle_cls, SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" LEFT JOIN drivers AS j_driver_id ON j_driver_id.driver_id = trips.driver_id WHERE \"trips\".\"status\" = 'completed' GROUP BY j_driver_id.vehicle_cls ORDER BY sum_fare_amt DESC",
+   "rows": [
+    [
+     "Economy",
+     9387.92
+    ],
+    [
+     "Comfort",
+     4973.61
+    ],
+    [
+     "Green (EV)",
+     3733.83
+    ],
+    [
+     "XL",
+     2214.33
+    ]
+   ],
+   "n_rows": 4,
+   "expected": [
+    [
+     "Comfort",
+     4973.61
+    ],
+    [
+     "Economy",
+     9387.92
+    ],
+    [
+     "Green (EV)",
+     3733.83
+    ],
+    [
+     "XL",
+     2214.33
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 137.1,
+   "error": null
+  },
+  {
+   "id": "RI09",
+   "db": "rides@trips",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total fare on completed trips where the payment failed?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed' AND \"trips\".\"payment_ok\" = 0",
+   "rows": [
+    [
+     956.92
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     956.92
+    ]
+   ],
+   "reason": "answer rests on: 'failed' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 167.9,
+   "error": null
+  },
+  {
+   "id": "RI10",
+   "db": "rides@trips",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many trips have no payment method recorded?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS null_pay_method FROM \"trips\" WHERE \"trips\".\"pay_method\" IS NULL",
+   "rows": [
+    [
+     271
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     271
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 132.7,
+   "error": null
+  },
+  {
+   "id": "RI11",
+   "db": "rides@trips",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "For how many completed trips is the tip field left blank (not recorded at all, as opposed to a zero tip)?",
+   "action": "WARN",
+   "confidence": 0.899,
+   "sql": "SELECT SUM(\"trips\".\"tip_amt\") AS sum_tip_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed' AND \"trips\".\"tip_amt\" IS NULL",
+   "rows": [
+    [
+     null
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     644
+    ]
+   ],
+   "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset.",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 1.0
+   },
+   "latency_ms": 146.1,
+   "error": null
+  },
+  {
+   "id": "RI12",
+   "db": "rides@trips",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many completed trips were not paid in cash?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"trips\" WHERE \"trips\".\"status\" = 'completed' AND (\"trips\".\"pay_method\" IS NULL OR \"trips\".\"pay_method\" NOT IN ('Cash'))",
+   "rows": [
+    [
+     1039
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     1039
+    ]
+   ],
+   "reason": "answer rests on: 'paid' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 192.6,
+   "error": null
+  },
+  {
+   "id": "RI13",
+   "db": "rides@trips",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many unique riders took at least one completed trip?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT \"trips\".\"rider_id\") AS distinct_rider_id FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+   "rows": [
+    [
+     399
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     399
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 140.6,
+   "error": null
+  },
+  {
+   "id": "RI14",
+   "db": "rides@trips",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total fare from completed trips driven by drivers rated 4.8 or higher?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" LEFT JOIN drivers AS j_driver_id ON j_driver_id.driver_id = trips.driver_id WHERE \"trips\".\"status\" = 'completed' AND j_driver_id.rating >= 4.8",
+   "rows": [
+    [
+     7327.88
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     7327.88
+    ]
+   ],
+   "reason": "I don't know how 'higher' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 134.6,
+   "error": null
+  },
+  {
+   "id": "RI15",
+   "db": "rides@trips",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Across completed trips, what is the overall fare per kilometre (total fare divided by total distance)?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+   "rows": [
+    [
+     20309.69
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     3.2355521073627056
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:km",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 127.7,
+   "error": null
+  },
+  {
+   "id": "RI16",
+   "db": "rides@trips",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of completed-trip fare revenue came from trips that started at Airport (JFK)?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+   "rows": [
+    [
+     20309.69
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     24.40854587145348
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: ambiguous_value:airport (jfk)=dropoff_zone_cd|pickup_zone_cd|zone_nm",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 124.8,
+   "error": null
+  },
+  {
+   "id": "RI17",
+   "db": "rides@trips",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many more (or fewer) completed trips were requested in March 2025 than in February 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     14
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 101.7,
+   "error": null
+  },
+  {
+   "id": "RI18",
+   "db": "rides@trips",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show the number of completed trips per month in 2025.",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT substr(\"trips\".\"req_ts\",1,7) AS month, COUNT(*) AS row_count FROM \"trips\" WHERE \"trips\".\"req_ts\" >= '2025-01-01' AND \"trips\".\"req_ts\" < '2026-01-01' AND \"trips\".\"status\" = 'completed' GROUP BY substr(\"trips\".\"req_ts\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-01",
+     135
+    ],
+    [
+     "2025-02",
+     127
+    ],
+    [
+     "2025-03",
+     141
+    ],
+    [
+     "2025-04",
+     139
+    ],
+    [
+     "2025-05",
+     139
+    ],
+    [
+     "2025-06",
+     154
+    ],
+    [
+     "2025-07",
+     145
+    ],
+    [
+     "2025-08",
+     138
+    ],
+    [
+     "2025-09",
+     125
+    ]
+   ],
+   "n_rows": 9,
+   "expected": [
+    [
+     "2025-01",
+     135
+    ],
+    [
+     "2025-02",
+     127
+    ],
+    [
+     "2025-03",
+     141
+    ],
+    [
+     "2025-04",
+     139
+    ],
+    [
+     "2025-05",
+     139
+    ],
+    [
+     "2025-06",
+     154
+    ],
+    [
+     "2025-07",
+     145
+    ],
+    [
+     "2025-08",
+     138
+    ],
+    [
+     "2025-09",
+     125
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "latency_ms": 139.6,
+   "error": null
+  },
+  {
+   "id": "RI19",
+   "db": "rides@trips",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the total fare revenue broken down by the languages drivers speak?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\"",
+   "rows": [
+    [
+     20709.69
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "the question is about 'languages', but the query's base table is 'trips' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "latency_ms": 139.8,
+   "error": null
+  },
+  {
+   "id": "RI20",
+   "db": "rides@trips",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many completed trips were driven by Spanish-speaking drivers?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"trips\" WHERE \"trips\".\"status\" = 'completed'",
+   "rows": [
+    [
+     1243
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     319
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: value:unrecognised=spanish-speaking",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 124.7,
+   "error": null
+  },
+  {
+   "id": "RI21",
+   "db": "rides@trips",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which riders have never taken a trip?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_rider_id.rider_tier AS rider_tier, COUNT(*) AS row_count FROM \"trips\" LEFT JOIN riders AS j_rider_id ON j_rider_id.rider_id = trips.rider_id GROUP BY j_rider_id.rider_tier ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Basic",
+     714
+    ],
+    [
+     null,
+     375
+    ],
+    [
+     "Plus",
+     361
+    ]
+   ],
+   "n_rows": 3,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 0.8333,
+    "evidence_strength": 0.9,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 122.1,
+   "error": null
+  },
+  {
+   "id": "RI22",
+   "db": "rides@trips",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average wait between a ride request and the driver arriving?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "failure_category": "AMBIGUITY",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 98.4,
+   "error": null
+  },
+  {
+   "id": "RI23",
+   "db": "rides@trips",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What fare revenue did we make on trips picked up in Old Mill (Closed)?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\"",
+   "rows": [
+    [
+     20709.69
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: ambiguous_value:old mill (closed)=dropoff_zone_cd|pickup_zone_cd|zone_nm",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 126.7,
+   "error": null
+  },
+  {
+   "id": "RI24",
+   "db": "rides@trips",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our tip rate?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"trips\".\"tip_amt\") AS sum_tip_amt FROM \"trips\"",
+   "rows": [
+    [
+     749.09
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "the answer may not mean what you asked: the question asks for a rate, share or percentage but the query divides nothing",
+   "semantic_findings": [
+    {
+     "rule": "rate_not_computed",
+     "severity": "violation",
+     "detail": "the question asks for a rate, share or percentage but the query divides nothing"
+    }
+   ],
+   "failure_category": "NONE",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 1.0,
+    "semantic_violations": 1.0
+   },
+   "latency_ms": 176.5,
+   "error": null
+  },
+  {
+   "id": "RI25",
+   "db": "rides@trips",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What was the total fare for trips between Downtown Core and Harbourfront?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"trips\".\"fare_amt\") AS sum_fare_amt FROM \"trips\"",
+   "rows": [
+    [
+     20709.69
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: ambiguous_value:downtown core=dropoff_zone_cd|pickup_zone_cd|zone_nm, ambiguous_value:harbourfront=dropoff_zone_cd|pickup_zone_cd|zone_nm",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 153.1,
+   "error": null
+  },
+  {
+   "id": "RI26",
+   "db": "rides@trips",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Predict how many surge-priced trips we'll have next week.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "semantic_findings": null,
+   "failure_category": "UNSUPPORTED_DATA",
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "latency_ms": 7.2,
+   "error": null
+  }
+ ]
+}

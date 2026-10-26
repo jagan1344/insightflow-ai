@@ -1,0 +1,420 @@
+### HO01 [direct_kpi] CLARIFY sqlOK=False
+Q: What is the total amount across all bookings, cancelled ones included?
+REF: SELECT SUM(amt) FROM bookings
+SQL: SELECT SUM("bookings"."amt") AS sum_amt FROM "bookings" WHERE "bookings"."is_cancelled" = 1
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[('eq', 'is_cancelled', 1, None, None)] unav=[]
+WHY: I don't know how 'ones' maps to this data, so the answer could ignore part of your question
+
+### HO02 [abbreviation] CLARIFY sqlOK=None
+Q: How many room nights have we sold in total, leaving out cancelled bookings?
+REF: SELECT SUM(nts_cnt) FROM bookings WHERE is_cancelled = 0
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO03 [breakdown] CLARIFY sqlOK=True
+Q: Break down the total booking amount by hotel.
+REF: SELECT h.hotel_nm, SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id GROUP BY h.hotel_nm
+SQL: SELECT j_room_id_hotel_id.hotel_nm AS hotel_nm, SUM("bookings"."amt") AS sum_amt FROM "bookings" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id GROUP BY j_room_id_hotel_id.hotel_nm ORDER BY sum_amt DESC
+PLAN: intent=breakdown meas=['sum_amt'] dims=[{'column': 'hotel_nm', 'is_time': False, 'time_unit': ''}] filt=[] unav=[]
+WHY: I don't know how 'break' maps to this data, so the answer could ignore part of your question
+
+### HO05 [multi_table_join] CLARIFY sqlOK=None
+Q: How many bookings were there for each type of room?
+REF: SELECT r.room_type, COUNT(*) FROM bookings b JOIN rooms r ON r.room_id = b.room_id GROUP BY r.room_type
+SQL: 
+PLAN: intent=breakdown meas=['row_count'] dims=[{'column': 'addon_type', 'is_time': False, 'time_unit': ''}] filt=[] unav=['fanout_dimension:addon_type=grouping by a one-to-many table would double-count the measure']
+WHY: Could not compile a SQL query for this plan.
+
+### HO06 [top_n] CLARIFY sqlOK=None
+Q: Which three hotels sold the most room nights, not counting cancelled bookings?
+REF: SELECT h.hotel_nm, SUM(b.nts_cnt) AS n FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id WHERE b.is_cancelled = 0 GROUP BY h.hotel_nm ORDER BY n DESC LIMIT 3
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO07 [trend] CLARIFY sqlOK=True
+Q: Show total booking amount per check-in month for guests checking in during 2025.
+REF: SELECT strftime('%Y-%m', checkin_dt) AS m, SUM(amt) FROM bookings WHERE checkin_dt >= '2025-01-01' AND checkin_dt < '2026-01-01' GROUP BY m
+SQL: SELECT substr("bookings"."checkin_dt",1,7) AS month, SUM("bookings"."amt") AS sum_amt FROM "bookings" WHERE "bookings"."checkin_dt" >= '2025-01-01' AND "bookings"."checkin_dt" < '2026-01-01' GROUP BY substr("bookings"."checkin_dt",1,7) ORDER BY month
+PLAN: intent=trend meas=['sum_amt'] dims=[{'column': 'checkin_dt', 'is_time': True, 'time_unit': 'month'}] filt=[('time_range', 'checkin_dt', None, '2025-01', '2025-12')] unav=['dimension:check']
+WHY: plan requires items not in the dataset: dimension:check
+
+### HO09 [date_role_ambiguity] CLARIFY sqlOK=None
+Q: How many reservations were made during March 2025?
+REF: SELECT COUNT(*) FROM bookings WHERE booked_on BETWEEN '2025-03-01' AND '2025-03-31'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO11 [boolean_flag] CLARIFY sqlOK=None
+Q: What is the total value of bookings where the payment didn't go through?
+REF: SELECT SUM(amt) FROM bookings WHERE payment_ok = 0
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO12 [negation_exclusion] CLARIFY sqlOK=False
+Q: What's the total booking amount if we leave out bookings that came through online travel agencies?
+REF: SELECT SUM(amt) FROM bookings WHERE channel IS NOT 'OTA'
+SQL: SELECT SUM("bookings"."amt") AS sum_amt FROM "bookings"
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[] unav=[]
+WHY: I don't know how 'leave', 'came', 'online', 'travel', 'agencies' maps to this data, so the answer could ignore part of your question
+
+### HO13 [null_condition] CLARIFY sqlOK=False
+Q: How many bookings don't have a check-in date yet?
+REF: SELECT COUNT(*) FROM bookings WHERE checkin_dt IS NULL
+SQL: SELECT COUNT(*) AS row_count FROM "bookings"
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[] unav=["unsupported_negative_existence:don't"]
+WHY: plan requires items not in the dataset: unsupported_negative_existence:don't
+
+### HO14 [distinct_count] CLARIFY sqlOK=None
+Q: How many different guests have booked with us?
+REF: SELECT COUNT(DISTINCT guest_id) FROM bookings
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO15 [related_numeric_threshold] CLARIFY sqlOK=False
+Q: What is the total booking amount for rooms bigger than 40 square metres?
+REF: SELECT SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id WHERE r.sq_m > 40
+SQL: SELECT SUM("bookings"."amt") AS sum_amt FROM "bookings"
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[] unav=[]
+WHY: the question contains the number(s) 40 but the generated query does not use them, so a threshold or quantity would be ignored
+
+### HO16 [join_fanout] CLARIFY sqlOK=True
+Q: What is the total booking amount of bookings that included at least one breakfast add-on?
+REF: SELECT SUM(b.amt) FROM bookings b WHERE EXISTS (SELECT 1 FROM booking_addons a WHERE a.bk_id = b.bk_id AND a.addon_type = 'Breakfast')
+SQL: SELECT SUM("bookings"."amt") AS sum_amt FROM "bookings" WHERE EXISTS (SELECT 1 FROM "booking_addons" AS "x1_0" WHERE "x1_0"."bk_id" = "bookings"."bk_id" AND "x1_0"."addon_type" = 'Breakfast')
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[('eq', 'addon_type', 'Breakfast', None, None)] unav=[]
+WHY: I don't know how 'least' maps to this data, so the answer could ignore part of your question
+
+### HO18 [ratio] CLARIFY sqlOK=None
+Q: What percentage of bookings were cancelled?
+REF: SELECT 100.0 * SUM(CASE WHEN is_cancelled = 1 THEN 1 ELSE 0 END) / COUNT(*) FROM bookings
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO19 [share_of_total] CLARIFY sqlOK=False
+Q: What share of total booking amount came from Captain's Inn?
+REF: SELECT 100.0 * SUM(CASE WHEN h.hotel_nm = 'Captain''s Inn' THEN b.amt ELSE 0 END) / SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id
+SQL: SELECT SUM("bookings"."amt") AS sum_amt FROM "bookings" LEFT JOIN rooms AS j_room_id ON j_room_id.room_id = bookings.room_id LEFT JOIN hotels AS j_room_id_hotel_id ON j_room_id_hotel_id.hotel_id = j_room_id.hotel_id WHERE j_room_id_hotel_id.hotel_nm = 'Captain''s Inn'
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[('eq', 'hotel_nm', "Captain's Inn", None, None)] unav=[]
+WHY: I don't know how 'came' maps to this data, so the answer could ignore part of your question
+
+### HO20 [period_comparison] CLARIFY sqlOK=None
+Q: By how much did the value of bookings made in Q2 2025 differ from those made in Q1 2025 (Q2 minus Q1)?
+REF: SELECT SUM(CASE WHEN booked_on BETWEEN '2025-04-01' AND '2025-06-30' THEN amt ELSE 0 END) - SUM(CASE WHEN booked_on BETWEEN '2025-01-01' AND '2025-03-31' THEN amt ELSE 0 END) FROM bookings
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### HO25 [fk_inference] CLARIFY sqlOK=None
+Q: How much have bookings at Old Town B&B brought in?
+REF: SELECT SUM(b.amt) FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN hotels h ON h.hotel_id = r.hotel_id WHERE h.hotel_nm = 'Old Town B&B'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN01 [direct_kpi] CLARIFY sqlOK=None
+Q: What is the total amount claimed across all claims?
+REF: SELECT SUM(claim_amt) FROM claims
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN02 [multi_table_join] CLARIFY sqlOK=None
+Q: What's the total claimed amount for each insurance product?
+REF: SELECT pr.product_nm, SUM(c.claim_amt) FROM claims c JOIN policies p ON p.policy_no = c.policy_no JOIN products pr ON pr.product_cd = p.product_cd GROUP BY pr.product_nm
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=['dimension:insurance']
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN04 [fk_inference] WARN sqlOK=False
+Q: Total claimed amount handled by each adjuster?
+REF: SELECT a.adj_nm, SUM(c.claim_amt) FROM claims c JOIN adjusters a ON a.adj_id = c.adj_id GROUP BY a.adj_nm
+SQL: SELECT j_adj_id.adj_nm AS adj_nm, COUNT(*) AS row_count FROM "claims" LEFT JOIN adjusters AS j_adj_id ON j_adj_id.adj_id = claims.adj_id GROUP BY j_adj_id.adj_nm ORDER BY row_count DESC
+PLAN: intent=breakdown meas=['row_count'] dims=[{'column': 'adj_nm', 'is_time': False, 'time_unit': ''}] filt=[] unav=[]
+WHY: answer rests on: 'handled' was not mapped to any column or value and was not applied; relationship inferred from names and values, not declared: claims.adj_id->adjusters.adj_id
+
+### IN06 [related_numeric_threshold] CLARIFY sqlOK=False
+Q: How many claims were filed on policies with a deductible of 1,000 or more?
+REF: SELECT COUNT(*) FROM claims c JOIN policies p ON p.policy_no = c.policy_no WHERE p.deductible >= 1000
+SQL: SELECT COUNT(*) AS row_count FROM "claims" LEFT JOIN policies AS j_policy_no ON j_policy_no.policy_no = claims.policy_no WHERE j_policy_no.deductible = 1
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[('cmp', 'deductible', 1, None, None)] unav=[]
+WHY: the question contains the number(s) 000 but the generated query does not use them, so a threshold or quantity would be ignored
+
+### IN07 [abbreviation] CLARIFY sqlOK=False
+Q: On average, how many days pass between the loss and the date the claim is reported?
+REF: SELECT AVG(julianday(rpt_dt) - julianday(loss_dt)) FROM claims
+SQL: SELECT SUM("claims"."claim_amt") AS sum_claim_amt FROM "claims"
+PLAN: intent=direct_kpi meas=['sum_claim_amt'] dims=[] filt=[] unav=[]
+WHY: the question mentions column(s) 'loss (loss_dt)' that the generated query does not use, so it would ignore part of your question
+
+### IN08 [join_fanout] CLARIFY sqlOK=None
+Q: What's the average annual premium of policies that have had at least one claim?
+REF: SELECT AVG(prem_amt) FROM policies p WHERE EXISTS (SELECT 1 FROM claims c WHERE c.policy_no = p.policy_no)
+SQL: 
+PLAN: intent=average_at_grain meas=['sum_claim_amt'] dims=[] filt=[] unav=['ambiguous_date_column:loss_dt|rpt_dt|closed_dt|start_dt']
+WHY: This question can be read more than one way and the answer depends on it: by loss_dt -> 2,337,644.60; by rpt_dt -> 1,558,429.73; by closed_dt -> 1,168,822.30. Which did you mean?
+
+### IN10 [boolean_flag] CLARIFY sqlOK=False
+Q: How many claims have incomplete paperwork?
+REF: SELECT COUNT(*) FROM claims WHERE docs_ok = 0
+SQL: SELECT COUNT(*) AS row_count FROM "claims"
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[] unav=[]
+WHY: I don't know how 'incomplete', 'paperwork' maps to this data, so the answer could ignore part of your question
+
+### IN11 [null_condition] CLARIFY sqlOK=False
+Q: How many claims haven't been assigned to an adjuster?
+REF: SELECT COUNT(*) FROM claims WHERE adj_id IS NULL
+SQL: SELECT COUNT(*) AS row_count FROM "claims"
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[] unav=["unsupported_negative_existence:haven't"]
+WHY: plan requires items not in the dataset: unsupported_negative_existence:haven't
+
+### IN12 [null_condition] CLARIFY sqlOK=False
+Q: What's the total claimed amount for claims where the cause of loss wasn't recorded?
+REF: SELECT SUM(claim_amt) FROM claims WHERE cause IS NULL
+SQL: SELECT "claims"."cause" AS cause, COUNT(*) AS row_count FROM "claims" GROUP BY "claims"."cause" ORDER BY row_count DESC
+PLAN: intent=breakdown meas=['row_count'] dims=[{'column': 'cause', 'is_time': False, 'time_unit': ''}] filt=[] unav=['value:cause=claims where the']
+WHY: plan requires items not in the dataset: value:cause=claims where the
+
+### IN13 [negation_exclusion] CLARIFY sqlOK=None
+Q: Excluding theft, what is the total amount claimed?
+REF: SELECT SUM(claim_amt) FROM claims WHERE cause IS NOT 'Theft'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN14 [distinct_count] ANSWER sqlOK=False
+Q: How many distinct policies have filed a claim?
+REF: SELECT COUNT(DISTINCT policy_no) FROM claims
+SQL: SELECT COUNT(DISTINCT "claims"."policy_no") AS distinct_policy_no, SUM("claims"."claim_amt") AS sum_claim_amt FROM "claims"
+PLAN: intent=direct_kpi meas=['distinct_policy_no', 'sum_claim_amt'] dims=[] filt=[] unav=[]
+WHY: confidence 0.98 ≥ 0.70
+
+### IN15 [trend] CLARIFY sqlOK=True
+Q: How many claims were there per month of loss, for losses that happened in 2025?
+REF: SELECT strftime('%Y-%m', loss_dt) AS m, COUNT(*) FROM claims WHERE loss_dt BETWEEN '2025-01-01' AND '2025-12-31' GROUP BY m
+SQL: SELECT substr("claims"."loss_dt",1,7) AS month, COUNT(*) AS row_count FROM "claims" WHERE "claims"."loss_dt" >= '2025-01-01' AND "claims"."loss_dt" < '2026-01-01' GROUP BY substr("claims"."loss_dt",1,7) ORDER BY month
+PLAN: intent=trend meas=['row_count'] dims=[{'column': 'loss_dt', 'is_time': True, 'time_unit': 'month'}] filt=[('time_range', 'loss_dt', None, '2025-01', '2025-12')] unav=['dimension:for']
+WHY: plan requires items not in the dataset: dimension:for
+
+### IN17 [period_comparison] CLARIFY sqlOK=False
+Q: Using the date of loss, how much did total claimed amount change from Q1 2025 to Q2 2025 (Q2 minus Q1)?
+REF: SELECT SUM(CASE WHEN loss_dt BETWEEN '2025-04-01' AND '2025-06-30' THEN claim_amt ELSE 0 END) - SUM(CASE WHEN loss_dt BETWEEN '2025-01-01' AND '2025-03-31' THEN claim_amt ELSE 0 END) FROM claims
+SQL: SELECT '2025-02' AS period, COUNT(*) AS row_count FROM "claims" WHERE "loss_dt" >= '2025-02-01' AND "loss_dt" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, COUNT(*) AS row_count FROM "claims" WHERE "loss_dt" >= '2025-05-01' AND "loss_dt" < '2025-06-01' ORDER BY period
+PLAN: intent=comparison meas=['row_count'] dims=[] filt=[] unav=[]
+WHY: I don't know how 'minus' maps to this data, so the answer could ignore part of your question
+
+### IN18 [ratio] CLARIFY sqlOK=None
+Q: What percentage of claims were denied?
+REF: SELECT 100.0 * SUM(status = 'Denied') / COUNT(*) FROM claims
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN20 [share_of_total] CLARIFY sqlOK=None
+Q: What share of the total claimed amount comes from Home & Contents policies?
+REF: SELECT 100.0 * SUM(CASE WHEN pr.product_nm = 'Home & Contents' THEN c.claim_amt ELSE 0 END) / SUM(c.claim_amt) FROM claims c JOIN policies p ON p.policy_no = c.policy_no JOIN products pr ON pr.product_cd = p.product_cd
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN21 [multi_table_join] CLARIFY sqlOK=None
+Q: What's the total amount claimed on Pet Care policies?
+REF: SELECT SUM(c.claim_amt) FROM claims c JOIN policies p ON p.policy_no = c.policy_no JOIN products pr ON pr.product_cd = p.product_cd WHERE pr.product_nm = 'Pet Care'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### IN26 [multi_table_join] CLARIFY sqlOK=None
+Q: How much have we paid out on claims in total?
+REF: SELECT SUM(pmt_amt) FROM claim_payments
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### EN01 [abbreviation] CLARIFY sqlOK=None
+Q: How many kilowatt-hours have we billed in total?
+REF: SELECT SUM(kwh) FROM bills
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### EN02 [direct_kpi] CLARIFY sqlOK=False
+Q: What's the average bill amount?
+REF: SELECT AVG(amt) FROM bills
+SQL: SELECT SUM("bills"."amt") AS sum_amt FROM "bills"
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[] unav=[]
+WHY: the query may answer a different question than the one asked: question asks for an average but the query does not compute one
+
+### EN04 [fk_inference] CLARIFY sqlOK=True
+Q: Break down billed amount by tariff.
+REF: SELECT t.tariff_nm, SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id JOIN tariffs t ON t.tariff_cd = c.tariff_cd GROUP BY t.tariff_nm
+SQL: SELECT j_meter_id_cust_id_tariff_cd.tariff_nm AS tariff_nm, SUM("bills"."amt") AS sum_amt FROM "bills" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id LEFT JOIN tariffs AS j_meter_id_cust_id_tariff_cd ON j_meter_id_cust_id_tariff_cd.tariff_cd = j_meter_id_cust_id.tariff_cd GROUP BY j
+PLAN: intent=breakdown meas=['sum_amt'] dims=[{'column': 'tariff_nm', 'is_time': False, 'time_unit': ''}] filt=[] unav=[]
+WHY: I don't know how 'break' maps to this data, so the answer could ignore part of your question
+
+### EN05 [top_n] CLARIFY sqlOK=True
+Q: Who are our top 5 customers by total billed amount?
+REF: SELECT c.cust_nm, SUM(b.amt) AS v FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id GROUP BY c.cust_id ORDER BY v DESC LIMIT 5
+SQL: SELECT j_meter_id_cust_id.cust_nm AS cust_nm, SUM("bills"."amt") AS sum_amt FROM "bills" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id WHERE j_meter_id_cust_id.cust_nm IS NOT NULL GROUP BY j_meter_id_cust_id.cust_nm ORDER BY sum_amt DESC LIMIT 5
+PLAN: intent=top_n meas=['sum_amt'] dims=[{'column': 'cust_nm', 'is_time': False, 'time_unit': ''}] filt=[] unav=['dimension:total']
+WHY: plan requires items not in the dataset: dimension:total
+
+### EN08 [null_condition] CLARIFY sqlOK=False
+Q: What's the total billed amount for meters whose installation date is unknown?
+REF: SELECT SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id WHERE m.install_dt IS NULL
+SQL: SELECT SUM("bills"."amt") AS sum_amt FROM "bills"
+PLAN: intent=direct_kpi meas=['sum_amt'] dims=[] filt=[] unav=[]
+WHY: the question mentions column(s) 'installation (install_dt)' that the generated query does not use, so it would ignore part of your question
+
+### EN09 [negation_exclusion] CLARIFY sqlOK=False
+Q: Leaving out Commercial-segment customers, how many kWh did we bill?
+REF: SELECT SUM(b.kwh) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id WHERE c.segment IS NOT 'Commercial'
+SQL: SELECT COUNT(*) AS row_count FROM "bills" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id LEFT JOIN customers AS j_meter_id_cust_id ON j_meter_id_cust_id.cust_id = j_meter_id.cust_id WHERE j_meter_id_cust_id.segment = 'Commercial'
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[('eq', 'segment', 'Commercial', None, None)] unav=[]
+WHY: the question mentions column(s) 'kwh' that the generated query does not use, so it would ignore part of your question
+
+### EN10 [related_numeric_threshold] CLARIFY sqlOK=False
+Q: What's the total billed for customers on tariffs priced above 0.20 per kWh?
+REF: SELECT SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id JOIN tariffs t ON t.tariff_cd = c.tariff_cd WHERE t.rate_per_kwh > 0.20
+SQL: SELECT SUM("bills"."kwh") AS sum_kwh FROM "bills"
+PLAN: intent=ratio meas=['sum_kwh'] dims=[] filt=[] unav=[]
+WHY: the question is about 'customers', 'tariffs', but the query's base table is 'bills' and does not involve them, so it would answer at the wrong grain
+
+### EN12 [ratio] CLARIFY sqlOK=False
+Q: What's the overall average price per kWh we billed?
+REF: SELECT SUM(amt) / SUM(kwh) FROM bills
+SQL: SELECT SUM("bills"."kwh") AS sum_kwh FROM "bills"
+PLAN: intent=ratio meas=['sum_kwh'] dims=[] filt=[] unav=[]
+WHY: the answer may not mean what you asked: the question asks for a grouped breakdown but the plan is a single figure; 'per kwh' asks for a ratio of two measures, which this query does not compute
+
+### EN13 [share_of_total] CLARIFY sqlOK=False
+Q: What percentage of the kWh we billed came from analog meters?
+REF: SELECT 100.0 * SUM(CASE WHEN m.meter_type = 'Analog' THEN b.kwh ELSE 0 END) / SUM(b.kwh) FROM bills b JOIN meters m ON m.meter_id = b.meter_id
+SQL: SELECT SUM("bills"."kwh") AS sum_kwh FROM "bills" LEFT JOIN meters AS j_meter_id ON j_meter_id.meter_id = bills.meter_id WHERE j_meter_id.meter_type = 'Analog'
+PLAN: intent=direct_kpi meas=['sum_kwh'] dims=[] filt=[('eq', 'meter_type', 'Analog', None, None)] unav=[]
+WHY: I don't know how 'came' maps to this data, so the answer could ignore part of your question
+
+### EN14 [period_comparison] CLARIFY sqlOK=False
+Q: How did total kWh for 2025 billing periods compare with 2024 (2025 minus 2024)?
+REF: SELECT SUM(CASE WHEN period_start LIKE '2025-%' THEN kwh ELSE 0 END) - SUM(CASE WHEN period_start LIKE '2024-%' THEN kwh ELSE 0 END) FROM bills
+SQL: SELECT SUM("bills"."kwh") AS sum_kwh FROM "bills"
+PLAN: intent=direct_kpi meas=['sum_kwh'] dims=[] filt=[] unav=[]
+WHY: the question mentions column(s) 'periods (period_start)' that the generated query does not use, so it would ignore part of your question
+
+### EN17 [join_fanout] CLARIFY sqlOK=False
+Q: How many kWh were billed to customers enrolled in Budget Billing?
+REF: SELECT SUM(b.kwh) FROM bills b JOIN meters m ON m.meter_id = b.meter_id WHERE EXISTS (SELECT 1 FROM customer_programs p WHERE p.cust_id = m.cust_id AND p.program_nm = 'Budget Billing')
+SQL: SELECT COUNT(*) AS row_count FROM "bills"
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[] unav=['value:unrecognised=budget billing']
+WHY: plan requires items not in the dataset: value:unrecognised=budget billing
+
+### EN18 [fk_inference] CLARIFY sqlOK=None
+Q: What did we bill customers on the EV Night Owl tariff?
+REF: SELECT SUM(b.amt) FROM bills b JOIN meters m ON m.meter_id = b.meter_id JOIN customers c ON c.cust_id = m.cust_id JOIN tariffs t ON t.tariff_cd = c.tariff_cd WHERE t.tariff_nm = 'EV Night Owl'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('energy@bills'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### EN24 [negation_exclusion] CLARIFY sqlOK=False
+Q: How many bills came from working meters with actual (not estimated) readings?
+REF: SELECT COUNT(*) FROM bills WHERE meter_ok = 1 AND is_estimated = 0
+SQL: SELECT COUNT(*) AS row_count FROM "bills" WHERE "bills"."is_estimated" = 0
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[('eq', 'is_estimated', 0, None, None)] unav=[]
+WHY: I don't know how 'came', 'working', 'actual', 'readings' maps to this data, so the answer could ignore part of your question
+
+### RI02 [abbreviation] CLARIFY sqlOK=None
+Q: How many hours in total did completed trips last?
+REF: SELECT SUM(dur_min) / 60.0 FROM trips WHERE status = 'completed'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### RI04 [fk_inference] CLARIFY sqlOK=False
+Q: Break down completed-trip fares by pickup zone.
+REF: SELECT z.zone_nm, SUM(t.fare_amt) FROM trips t JOIN zones z ON z.zone_cd = t.pickup_zone_cd WHERE t.status = 'completed' GROUP BY z.zone_nm
+SQL: SELECT j_pickup_zone_cd.zone_nm AS pickup_zone_cd, COUNT(*) AS row_count FROM "trips" LEFT JOIN zones AS j_pickup_zone_cd ON j_pickup_zone_cd.zone_cd = trips.pickup_zone_cd WHERE "trips"."status" = 'completed' GROUP BY j_pickup_zone_cd.zone_nm ORDER BY row_count DESC
+PLAN: intent=breakdown meas=['row_count'] dims=[{'column': 'pickup_zone_cd', 'is_time': False, 'time_unit': ''}] filt=[('eq', 'status', 'completed', None, None)] unav=[]
+WHY: the question mentions column(s) 'fares (fare_amt)' that the generated query does not use, so it would ignore part of your question
+
+### RI05 [top_n] CLARIFY sqlOK=None
+Q: Which 3 drop-off zones received the most completed trips?
+REF: SELECT z.zone_nm, COUNT(*) AS n FROM trips t JOIN zones z ON z.zone_cd = t.dropoff_zone_cd WHERE t.status = 'completed' GROUP BY z.zone_nm ORDER BY n DESC LIMIT 3
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### RI08 [multi_table_join] CLARIFY sqlOK=False
+Q: Total completed-trip fares by vehicle class.
+REF: SELECT d.vehicle_cls, SUM(t.fare_amt) FROM trips t JOIN drivers d ON d.driver_id = t.driver_id WHERE t.status = 'completed' GROUP BY d.vehicle_cls
+SQL: SELECT j_driver_id.vehicle_cls AS vehicle_cls, COUNT(*) AS row_count FROM "trips" LEFT JOIN drivers AS j_driver_id ON j_driver_id.driver_id = trips.driver_id WHERE "trips"."status" = 'completed' GROUP BY j_driver_id.vehicle_cls ORDER BY row_count DESC
+PLAN: intent=breakdown meas=['row_count'] dims=[{'column': 'vehicle_cls', 'is_time': False, 'time_unit': ''}] filt=[('eq', 'status', 'completed', None, None)] unav=[]
+WHY: the question mentions column(s) 'fares (fare_amt)' that the generated query does not use, so it would ignore part of your question
+
+### RI10 [null_condition] CLARIFY sqlOK=False
+Q: How many trips have no payment method recorded?
+REF: SELECT COUNT(*) FROM trips WHERE pay_method IS NULL
+SQL: SELECT COUNT(*) AS null_payment_ok FROM "trips" WHERE "trips"."payment_ok" IS NULL
+PLAN: intent=null_count meas=['null_payment_ok'] dims=[] filt=[('null', 'payment_ok', None, None, None)] unav=[]
+WHY: the question mentions column(s) 'method (pay_method)' that the generated query does not use, so it would ignore part of your question
+
+### RI11 [null_condition] CLARIFY sqlOK=False
+Q: For how many completed trips is the tip field left blank (not recorded at all, as opposed to a zero tip)?
+REF: SELECT COUNT(*) FROM trips WHERE status = 'completed' AND tip_amt IS NULL
+SQL: SELECT SUM("trips"."tip_amt") AS sum_tip_amt FROM "trips" WHERE "trips"."status" = 'completed'
+PLAN: intent=direct_kpi meas=['sum_tip_amt'] dims=[] filt=[('eq', 'status', 'completed', None, None)] unav=[]
+WHY: I don't know how 'blank', 'zero' maps to this data, so the answer could ignore part of your question
+
+### RI12 [negation_exclusion] WARN sqlOK=False
+Q: How many completed trips were not paid in cash?
+REF: SELECT COUNT(*) FROM trips WHERE status = 'completed' AND pay_method IS NOT 'Cash'
+SQL: SELECT COUNT(*) AS row_count FROM "trips" WHERE "trips"."status" = 'completed' AND "trips"."pay_method" = 'Cash'
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[('eq', 'status', 'completed', None, None), ('eq', 'pay_method', 'Cash', None, None)] unav=[]
+WHY: answer rests on: 'paid' was not mapped to any column or value and was not applied
+
+### RI14 [related_numeric_threshold] CLARIFY sqlOK=False
+Q: What's the total fare from completed trips driven by drivers rated 4.8 or higher?
+REF: SELECT SUM(t.fare_amt) FROM trips t JOIN drivers d ON d.driver_id = t.driver_id WHERE t.status = 'completed' AND d.rating >= 4.8
+SQL: SELECT j_driver_id.driver_nm AS driver_nm, SUM("trips"."fare_amt") AS sum_fare_amt FROM "trips" LEFT JOIN drivers AS j_driver_id ON j_driver_id.driver_id = trips.driver_id WHERE "trips"."status" = 'completed' GROUP BY j_driver_id.driver_nm ORDER BY sum_fare_amt DESC
+PLAN: intent=breakdown meas=['sum_fare_amt'] dims=[{'column': 'driver_nm', 'is_time': False, 'time_unit': ''}] filt=[('eq', 'status', 'completed', None, None)] unav=[]
+WHY: the question contains the number(s) 4.8 but the generated query does not use them, so a threshold or quantity would be ignored
+
+### RI15 [ratio] CLARIFY sqlOK=False
+Q: Across completed trips, what is the overall fare per kilometre (total fare divided by total distance)?
+REF: SELECT SUM(fare_amt) / SUM(dist_km) FROM trips WHERE status = 'completed'
+SQL: SELECT SUM("trips"."fare_amt") AS sum_fare_amt FROM "trips" WHERE "trips"."status" = 'completed'
+PLAN: intent=ratio meas=['sum_fare_amt'] dims=[] filt=[('eq', 'status', 'completed', None, None)] unav=['dimension:total', 'dimension:kilometre']
+WHY: plan requires items not in the dataset: dimension:total, dimension:kilometre
+
+### RI16 [share_of_total] CLARIFY sqlOK=False
+Q: What percentage of completed-trip fare revenue came from trips that started at Airport (JFK)?
+REF: SELECT 100.0 * SUM(CASE WHEN z.zone_nm = 'Airport (JFK)' THEN t.fare_amt ELSE 0 END) / SUM(t.fare_amt) FROM trips t JOIN zones z ON z.zone_cd = t.pickup_zone_cd WHERE t.status = 'completed'
+SQL: SELECT SUM("trips"."fare_amt") AS sum_fare_amt FROM "trips" WHERE "trips"."status" = 'completed'
+PLAN: intent=direct_kpi meas=['sum_fare_amt'] dims=[] filt=[('eq', 'status', 'completed', None, None)] unav=['ambiguous_value:airport (jfk)=dropoff_zone_cd|pickup_zone_cd|zone_nm']
+WHY: plan requires items not in the dataset: ambiguous_value:airport (jfk)=dropoff_zone_cd|pickup_zone_cd|zone_nm
+
+### RI17 [period_comparison] CLARIFY sqlOK=None
+Q: How many more (or fewer) completed trips were requested in March 2025 than in February 2025?
+REF: SELECT SUM(CASE WHEN req_ts LIKE '2025-03-%' THEN 1 ELSE 0 END) - SUM(CASE WHEN req_ts LIKE '2025-02-%' THEN 1 ELSE 0 END) FROM trips WHERE status = 'completed'
+SQL: 
+PLAN: intent=ambiguous meas=[] dims=[] filt=[] unav=[]
+WHY: Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset — optionally with a breakdown, time window, or comparison.
+
+### RI20 [join_fanout] CLARIFY sqlOK=False
+Q: How many completed trips were driven by Spanish-speaking drivers?
+REF: SELECT COUNT(*) FROM trips t WHERE t.status = 'completed' AND EXISTS (SELECT 1 FROM driver_languages l WHERE l.driver_id = t.driver_id AND l.lang = 'Spanish')
+SQL: SELECT COUNT(*) AS row_count FROM "trips" WHERE "trips"."status" = 'completed'
+PLAN: intent=direct_kpi meas=['row_count'] dims=[] filt=[('eq', 'status', 'completed', None, None)] unav=['dimension:spanish', 'value:unrecognised=spanish-speaking']
+WHY: plan requires items not in the dataset: dimension:spanish, value:unrecognised=spanish-speaking
+
+### RI23 [fk_inference] CLARIFY sqlOK=False
+Q: What fare revenue did we make on trips picked up in Old Mill (Closed)?
+REF: SELECT SUM(t.fare_amt) FROM trips t JOIN zones z ON z.zone_cd = t.pickup_zone_cd WHERE z.zone_nm = 'Old Mill (Closed)'
+SQL: SELECT SUM("trips"."fare_amt") AS sum_fare_amt FROM "trips"
+PLAN: intent=direct_kpi meas=['sum_fare_amt'] dims=[] filt=[] unav=['ambiguous_value:old mill (closed)=dropoff_zone_cd|pickup_zone_cd|zone_nm']
+WHY: plan requires items not in the dataset: ambiguous_value:old mill (closed)=dropoff_zone_cd|pickup_zone_cd|zone_nm
+

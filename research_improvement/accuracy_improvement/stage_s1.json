@@ -1,0 +1,446 @@
+[
+ {
+  "id": "HO01",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'ones' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "HO02",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question is about 'room', but the query's base table is 'bookings' and does not involve them, so it would answer at the wrong grain"
+ },
+ {
+  "id": "HO03",
+  "action": "CLARIFY",
+  "sql_matches_reference": true,
+  "reason": "I don't know how 'break' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "HO04",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: relationship inferred from names and values, not declared: rooms.hotel_id->hotels.hotel_id"
+ },
+ {
+  "id": "HO05",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Could not compile a SQL query for this plan."
+ },
+ {
+  "id": "HO06",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question is about 'hotels', but the query's base table is 'bookings' and does not involve them, so it would answer at the wrong grain"
+ },
+ {
+  "id": "HO07",
+  "action": "CLARIFY",
+  "sql_matches_reference": true,
+  "reason": "plan requires items not in the dataset: dimension:checkin"
+ },
+ {
+  "id": "HO09",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: 'reservations' read as 'bookings' (business synonym)"
+ },
+ {
+  "id": "HO10",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: 'ended' was not mapped to any column or value and was not applied"
+ },
+ {
+  "id": "HO11",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: unsupported_negative_existence:didn't"
+ },
+ {
+  "id": "HO12",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'leave', 'came' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "HO13",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: unsupported_negative_existence:don't"
+ },
+ {
+  "id": "HO14",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionall"
+ },
+ {
+  "id": "HO15",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "HO16",
+  "action": "CLARIFY",
+  "sql_matches_reference": true,
+  "reason": "I don't know how 'least' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "HO18",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('hotel@bookings'). Try asking about a specific measure in the dataset \u2014 optionall"
+ },
+ {
+  "id": "HO19",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'came' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "HO20",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "This question can be read more than one way and the answer depends on it: by booked_on -> 158,630.88; by checkin_dt -> 141,524.72. Which did"
+ },
+ {
+  "id": "HO25",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset."
+ },
+ {
+  "id": "IN01",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "IN02",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: dimension:insurance"
+ },
+ {
+  "id": "IN03",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.99 \u2265 0.70"
+ },
+ {
+  "id": "IN04",
+  "action": "WARN",
+  "sql_matches_reference": false,
+  "reason": "answer rests on: 'handled' was not mapped to any column or value and was not applied; relationship inferred from names and values, not decla"
+ },
+ {
+  "id": "IN05",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: 'handled' was not mapped to any column or value and was not applied; relationship inferred from names and values, not decla"
+ },
+ {
+  "id": "IN06",
+  "action": "WARN",
+  "sql_matches_reference": false,
+  "reason": "answer rests on: 'filed' was not mapped to any column or value and was not applied"
+ },
+ {
+  "id": "IN07",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'loss (loss_dt)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "IN08",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "This question can be read more than one way and the answer depends on it: by loss_dt -> 2,337,644.60; by rpt_dt -> 1,558,429.73; by closed_d"
+ },
+ {
+  "id": "IN09",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: 'flagged' was not mapped to any column or value and was not applied"
+ },
+ {
+  "id": "IN10",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'docs (docs_ok)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "IN11",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: unsupported_negative_existence:haven't"
+ },
+ {
+  "id": "IN12",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: value:cause=claims where the"
+ },
+ {
+  "id": "IN13",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "IN14",
+  "action": "ANSWER",
+  "sql_matches_reference": false,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "IN15",
+  "action": "CLARIFY",
+  "sql_matches_reference": true,
+  "reason": "plan requires items not in the dataset: dimension:for"
+ },
+ {
+  "id": "IN17",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'minus' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "IN18",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optiona"
+ },
+ {
+  "id": "IN20",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'comes' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "IN21",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset."
+ },
+ {
+  "id": "IN26",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('insurance@claims'). Try asking about a specific measure in the dataset \u2014 optiona"
+ },
+ {
+  "id": "EN01",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "EN02",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the query may answer a different question than the one asked: question asks for an average but the query does not compute one"
+ },
+ {
+  "id": "EN03",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.99 \u2265 0.70"
+ },
+ {
+  "id": "EN04",
+  "action": "CLARIFY",
+  "sql_matches_reference": true,
+  "reason": "I don't know how 'break' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "EN05",
+  "action": "CLARIFY",
+  "sql_matches_reference": true,
+  "reason": "plan requires items not in the dataset: dimension:total"
+ },
+ {
+  "id": "EN06",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 1.00 \u2265 0.70"
+ },
+ {
+  "id": "EN07",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: 'issued' was not mapped to any column or value and was not applied"
+ },
+ {
+  "id": "EN08",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'installation (install_dt)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "EN09",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'kwh' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "EN10",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question is about 'customers', 'tariffs', but the query's base table is 'bills' and does not involve them, so it would answer at the wro"
+ },
+ {
+  "id": "EN11",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: a measure stored on a related table is counted once per 'bills' row, so a value shared by several rows is counted several t"
+ },
+ {
+  "id": "EN12",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the answer may not mean what you asked: the question asks for a grouped breakdown but the plan is a single figure; 'per kwh' asks for a rati"
+ },
+ {
+  "id": "EN13",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'came' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "EN14",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'periods (period_start)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "EN17",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: value:unrecognised=budget billing"
+ },
+ {
+  "id": "EN18",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "semantic fulfilment check failed: aggregate returned NULL \u2014 the applied filter matched no rows in the dataset."
+ },
+ {
+  "id": "EN24",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'came', 'working', 'actual', 'readings' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "RI01",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "RI02",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally w"
+ },
+ {
+  "id": "RI03",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.99 \u2265 0.70"
+ },
+ {
+  "id": "RI04",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'fares (fare_amt)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "RI05",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally w"
+ },
+ {
+  "id": "RI08",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'fares (fare_amt)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "RI09",
+  "action": "WARN",
+  "sql_matches_reference": true,
+  "reason": "answer rests on: 'failed' was not mapped to any column or value and was not applied"
+ },
+ {
+  "id": "RI10",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question mentions column(s) 'method (pay_method)' that the generated query does not use, so it would ignore part of your question"
+ },
+ {
+  "id": "RI11",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "I don't know how 'blank', 'zero' maps to this data, so the answer could ignore part of your question"
+ },
+ {
+  "id": "RI12",
+  "action": "WARN",
+  "sql_matches_reference": false,
+  "reason": "answer rests on: 'paid' was not mapped to any column or value and was not applied"
+ },
+ {
+  "id": "RI13",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 0.98 \u2265 0.70"
+ },
+ {
+  "id": "RI14",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "the question contains the number(s) 4.8 but the generated query does not use them, so a threshold or quantity would be ignored"
+ },
+ {
+  "id": "RI15",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: dimension:total, dimension:km"
+ },
+ {
+  "id": "RI16",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: ambiguous_value:airport (jfk)=dropoff_zone_cd|pickup_zone_cd|zone_nm"
+ },
+ {
+  "id": "RI17",
+  "action": "CLARIFY",
+  "sql_matches_reference": null,
+  "reason": "Question is too vague or off-scope for the loaded dataset ('rides@trips'). Try asking about a specific measure in the dataset \u2014 optionally w"
+ },
+ {
+  "id": "RI18",
+  "action": "ANSWER",
+  "sql_matches_reference": true,
+  "reason": "confidence 1.00 \u2265 0.70"
+ },
+ {
+  "id": "RI20",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: dimension:spanish, value:unrecognised=spanish-speaking"
+ },
+ {
+  "id": "RI23",
+  "action": "CLARIFY",
+  "sql_matches_reference": false,
+  "reason": "plan requires items not in the dataset: ambiguous_value:old mill (closed)=dropoff_zone_cd|pickup_zone_cd|zone_nm"
+ }
+]

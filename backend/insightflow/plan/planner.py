@@ -404,6 +404,22 @@ def _parse_count_after(ql: str, head: str, default: int = 5) -> int:
 # KPI binding
 # =============================================================================
 
+_MONEY_TOKENS = {"amt", "amount", "price", "fare", "cost", "fee", "revenue", "sales", "value", "usd", "eur",
+                 "gbp", "inr", "premium", "prem", "charge", "spend", "salary", "wage", "tip", "profit", "margin",
+                 "discount", "balance", "total"}
+
+
+def _is_money_kpi(k: KPIDefinition) -> bool:
+    """A money-like measure: 'how many <its noun>' counts records ('how many sales'), whereas for a
+    quantity column ('how many kwh', 'how many room nights') it asks for the summed quantity."""
+    toks = set()
+    for c in (k.required_columns or []):
+        toks |= {t for t in re.split(r"[^a-z0-9]+", c.lower()) if t}
+    if not toks:
+        toks = {t for a in k.aliases for t in a.lower().split()}
+    return bool(toks & _MONEY_TOKENS)
+
+
 def _bind_kpis(question: str, catalog: KPICatalog) -> List[KPIDefinition]:
     """Return every KPI in the catalog whose alias appears in the text,
     longest alias first (so specific ones win). Overlapping matches are
@@ -440,6 +456,10 @@ def _bind_kpis(question: str, catalog: KPICatalog) -> List[KPIDefinition]:
 # =============================================================================
 # Dimension binding
 # =============================================================================
+
+_GROUPING_VERBS = {"grouped", "split", "sorted", "ordered", "broken", "segmented", "categorized",
+                   "categorised", "bucketed", "aggregated", "summarized", "summarised", "totaled",
+                   "totalled", "organized", "organised", "arranged", "ranked", "divided", "classified"}
 
 _STOPWORDS_AFTER_BY = {
     "all", "looking", "doing", "using", "the", "a", "an", "my", "our",
@@ -605,6 +625,12 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
                         r"(?:from|with|who|whose|living|based|born|located)\b",
                         phrase):
                 continue
+            # "trips driven BY drivers rated 4.8": a passive agent, not a grouping
+            # (grouping verbs and "by each X" still group)
+            _pv = re.search(r"([a-z]+)\s*$", ql[:m.start()])
+            if pat.startswith(r"\bby") and _pv and re.fullmatch(r"[a-z]+(?:ed|en|ld|id|ught|ade|one)", _pv.group(1)) \
+                    and _pv.group(1) not in _GROUPING_VERBS and not re.match(r"(?:each|every|all)\b", phrase):
+                continue
             # "by region and category" or "by region, category, month" —
             # split on "and"/comma first and bind each part in ORDER.
             # Otherwise "by region and category" was binding to
@@ -632,6 +658,10 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
                 candidates: list[str] = []
                 for k in range(min(3, len(words)), 0, -1):
                     candidates.append(" ".join(words[:k]))
+                if ds.kind != "demo":
+                    # "each insurance product": the head noun names the column
+                    for k in range(min(3, len(words)) - 1, 0, -1):
+                        candidates.append(" ".join(words[len(words[:3]) - k:len(words[:3])]))
                 col = ""
                 bound_noun = noun
                 for cand in candidates:
@@ -661,7 +691,8 @@ def _find_dim_mentions(question: str, ds: ActiveDataset,
     # "which <dim>" — implicit top/bottom 1. Try progressively longer
     # sub-phrases (up to 3 words) so "which sub category" binds the
     # multi-word dim column, not just "sub".
-    m_which = re.search(r"\bwhich\s+([a-z][a-z_\s]{1,30}?)\b", ql)
+    m_which = re.search(r"\bwhich\s+(?:(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+)?"
+                        r"([a-z][a-z_\s]{1,30}?)\b", ql)
     if m_which:
         phrase = m_which.group(1).strip()
         words = phrase.split()
@@ -1211,6 +1242,81 @@ def _find_null_target_column(question: str, ds: ActiveDataset) -> Optional[str]:
     return None
 
 
+_NULL_AFTER = re.compile(
+    r"^\s*(?:field\s+|value\s+)?(?:(?:is|was|are|were|has\s+been|have\s+been)\s+)?"
+    r"(?:unknown|missing|blank|empty|null|unrecorded|unset|left\s+blank|left\s+empty|"
+    r"not\s+(?:recorded|known|set|entered|given|provided|filled\s+in|captured)|"
+    r"(?:isn't|wasn't|aren't|weren't|hasn't\s+been|haven't\s+been|has\s+not\s+been|was\s+not|is\s+not)\s+"
+    r"(?:recorded|known|set|entered|given|provided|filled\s+in|captured))\b")
+_NULL_BEFORE = re.compile(
+    r"(?:\bno|\bwithout\s+(?:an?\s+|any\s+)?|\bmissing|\b(?:don't|doesn't|do\s+not|does\s+not|didn't)\s+have\s+(?:an?\s+|any\s+)?)"
+    r"\s*$")
+_UNASSIGNED = re.compile(
+    r"\b(?:haven't|hasn't|have\s+not|has\s+not|not|never)\s+(?:been\s+|yet\s+been\s+)?"
+    r"(?:assigned|allocated|linked|attached|given)\s+(?:to\s+)?(?:an?\s+|any\s+)?([a-z]+)\b|"
+    r"\bunassigned\b|\bwithout\s+(?:an?\s+|any\s+)?([a-z]+)\b")
+
+
+def _null_state_columns(ds: ActiveDataset) -> List[Tuple[str, List[str]]]:
+    """(column, core words) for columns a NULL condition may be stated on: the base table's own
+    columns, and related columns reached through a non-nullable many-to-one path."""
+    rel = getattr(ds, "rel", None)
+    out = []
+    from ..knowledge.abbrev import canon
+    for c in ds.columns:
+        if rel is not None:
+            src = rel.source(c)
+            if src is not None and (src.kind != "safe" or src.nullable):
+                continue
+        words = [canon(t) for t in re.split(r"[^a-z0-9]+", c.lower()) if t]
+        core = [w for w in words if w not in ("id", "code", "key", "no", "number", "flag", "is", "has")]
+        bare = [w for w in core if w not in ("amount", "value", "count", "total")]
+        if bare and bare != core:
+            out.append((c, bare))
+        if core:
+            out.append((c, core))
+    return out
+
+
+def _find_null_state_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
+    """'cause ... wasn't recorded' -> cause IS NULL; 'don't have a checkin dt yet' -> checkin_dt IS NULL;
+    'tip field left blank' -> tip_amt IS NULL; 'haven't been assigned to an adjuster' -> adj_id IS NULL
+    (a nullable foreign key whose parent is named). Only one column may match a phrase."""
+    if ds.kind == "demo":
+        return []
+    from ..knowledge.abbrev import canon
+    ql = question.lower()
+    words = [(m.group(0), m.start(), m.end()) for m in re.finditer(r"[a-z][a-z0-9_]*", ql)]
+    canon_w = [canon(w) for w, _s, _e in words]
+    out: List[FilterExpr] = []
+    for col, core in _null_state_columns(ds):
+        n = len(core)
+        for i in range(len(words) - n + 1):
+            if not all(a == b or (min(len(a), len(b)) >= 5 and (a.startswith(b) or b.startswith(a)))
+                       for a, b in zip(canon_w[i:i + n], core)):
+                continue
+            st, en = words[i][1], words[i + n - 1][2]
+            # allow "<col> of <noun>" ("cause of loss wasn't recorded")
+            tail = re.sub(r"^\s+of\s+(?:the\s+)?[a-z]+", "", ql[en:])
+            if _NULL_AFTER.match(tail) or _NULL_BEFORE.search(ql[max(0, st - 30):st]):
+                if not any(f.column == col for f in out):
+                    out.append(FilterExpr(kind="null", column=col))
+                break
+    rel = getattr(ds, "rel", None)
+    if rel is not None:
+        from ..knowledge.rel_context import fk_noun_column
+        for m in _UNASSIGNED.finditer(ql):
+            noun = m.group(1) or m.group(2)
+            if not noun:
+                continue
+            fk = fk_noun_column(rel, noun)
+            if fk and fk not in rel.schema.tables[rel.anchor].not_null \
+                    and not any(f.column == fk for f in out):
+                out.append(FilterExpr(kind="null", column=fk))
+    # a column named with several matches is ambiguous: keep none of its duplicates
+    return out
+
+
 def _find_distinct_count_dim(question: str, ds: ActiveDataset
                               ) -> Optional[Tuple[str, str]]:
     """Detect 'how many distinct X' / 'count of unique X' and bind X to
@@ -1490,6 +1596,15 @@ def _value_index(ds: ActiveDataset) -> dict:
     return idx
 
 
+def _short_code_ok(question: str, start: int, end: int, cands) -> bool:
+    """A stored value of <= 3 letters written in capitals ('US', 'FR') is a code: it matches only when
+    the question writes it in capitals too, so 'with us' never selects country 'US'."""
+    origs = {str(o) for _c, o in cands}
+    if all(len(o) <= 3 and o.isalpha() and o.isupper() for o in origs):
+        return question[start:end].isupper()
+    return True
+
+
 def _value_mentions(question: str, idx: dict) -> list:
     """Non-overlapping, longest-first mentions of known dim values.
     Returns [(lower_value, [(col, orig), ...])]. A value present in
@@ -1502,6 +1617,8 @@ def _value_mentions(question: str, idx: dict) -> list:
                 rf"(?<![a-z0-9]){re.escape(lo)}(?![a-z0-9])", ql):
             span = (m.start(), m.end())
             if any(span[0] < e and s < span[1] for s, e in taken):
+                continue
+            if not _short_code_ok(question, m.start(), m.end(), idx[lo]):
                 continue
             taken.append(span)
             out.append((lo, idx[lo]))
@@ -1567,8 +1684,10 @@ def _find_negative_existence(question: str, ds: ActiveDataset) -> List[str]:
     if _find_date_state_filters(question, ds, False):
         return []           # "invoices not paid": paid_on IS NULL
     # NULL-count questions ("employees with no bonus") are handled elsewhere
-    if _find_null_target_column(question, ds):
+    if _find_null_target_column(question, ds) or _find_null_state_filters(question, ds):
         return []
+    if _find_flag_filters(question, ds) and re.search(r"\b(?:didn't|did\s+not|doesn't|don't|never)\b", m.group(0)):
+        return []           # "payment didn't go through": the flag filter carries the negation
     # exclusion of a known value ("without Texas") is a filter, not an anti-join
     tail = ql[m.end(): m.end() + 40]
     if ds.kind != "demo" and _value_mentions(tail, _value_index(ds)):
@@ -1693,6 +1812,8 @@ _NEG_BEFORE = re.compile(
     r"(?:excluding|exclude|except(?:\s+for)?|without|other\s+than|apart\s+from|"
     r"and\s+not|or\s+not|but\s+not|(?<![a-z])not|isn't|aren't|"
     r"aside\s+from|besides|minus|not\s+including|not\s+counting|but\s+not|"
+    r"leaving\s+out|leave\s+out|left\s+out|omitting|omit|ignoring|disregarding|"
+    r"not\s+[a-z]+\s+(?:in|by|with|via|through|using)|"
     r"not\s+in|not\s+from|not\s+for|not\s+at|not\s+by|outside(?:\s+of)?)"
     r"\s+(?:the\s+|those\s+|any\s+|all\s+)?"
     r"(?:(?!and\b|or\b|but\b|for\b|in\b|by\b)[a-z_]+\s+){0,4}$")
@@ -1710,6 +1831,8 @@ def _classified_mentions(question: str, ds: ActiveDataset) -> list:
         for m in re.finditer(rf"(?<![a-z0-9]){re.escape(lo)}(?![a-z0-9])", ql):
             span = (m.start(), m.end())
             if any(span[0] < e and s < span[1] for s, e in taken):
+                continue
+            if not _short_code_ok(question, m.start(), m.end(), idx[lo]):
                 continue
             taken.append(span)
             found.append((m.start(), m.end(), lo, idx[lo]))
@@ -1746,6 +1869,21 @@ _CMP = [(r"at\s+least|>=|no\s+less\s+than", ">="),
         (r"(?:less|fewer|smaller|lower)\s+than|under|below|<", "<"),
         (r"exactly|equal\s+to|equals?|=|of|is", "=")]
 _CMP_ALT = "|".join(f"(?:{p})" for p, _ in _CMP)
+
+
+_CMP_SUFFIX_GE = re.compile(r"\s*(?:\+|(?:or|and)\s+(?:more|higher|greater|above|over|up|larger|bigger|longer|older))\b")
+_CMP_SUFFIX_LE = re.compile(r"\s*(?:(?:or|and)\s+(?:less|lower|fewer|below|under|smaller|shorter|younger))\b")
+
+
+def _suffix_op(ql: str, end: int, op: str) -> str:
+    """'1000 or more' -> '>=', '4.8 or higher' -> '>=', '10 or less' -> '<='; the words after the
+    number override an '=' read from 'of' / 'is' / nothing."""
+    tail = ql[end:end + 24]
+    if _CMP_SUFFIX_GE.match(tail):
+        return ">=" if op in ("=", ">=", ">") else op
+    if _CMP_SUFFIX_LE.match(tail):
+        return "<=" if op in ("=", "<=", "<") else op
+    return op
 
 
 def _cmp_op(word: str) -> str:
@@ -1789,9 +1927,25 @@ def _find_date_state_filters(question: str, ds: ActiveDataset,
 
 
 # Flag names whose last word states the "good" state; their antonyms select 0.
-_FLAG_POLARITY = {"ok", "good", "valid", "working", "healthy", "passed", "success", "successful"}
+_FLAG_POLARITY = {"ok", "good", "valid", "working", "healthy", "passed", "success", "successful",
+                  "complete", "approved", "cleared", "verified"}
+# words that state the normal (1) condition of a polarity-named flag, and its antonyms (0)
+_FLAG_POSITIVE = ("ok|okay|good|valid|working|functioning|operational|healthy|passed|successful|success|"
+                  "complete|approved|cleared|verified|accepted|went\\s+through|go(?:ne)?\\s+through")
 _FLAG_ANTONYMS = ("faulty|broken|bad|invalid|failed|failing|failure|defective|malfunctioning|"
-                  "unhealthy|not\\s+ok|not\\s+working|not\\s+valid")
+                  "unhealthy|incomplete|declined|rejected|bounced|unsuccessful|unverified|"
+                  "not\\s+ok|not\\s+working|not\\s+valid")
+_FLAG_NEG_BEFORE = re.compile(r"\b(?:not|never|didn't|did\s+not|doesn't|does\s+not|wasn't|was\s+not|weren't|"
+                              r"haven't|hasn't|isn't|aren't|no|without)\s+(?:[a-z']+\s+){0,2}$")
+_FLAG_INCLUDED = re.compile(r"^\s*(?:ones\s+|bookings\s+|rows\s+|records\s+)?(?:included|as\s+well|too)\b")
+_FLAG_INCLUDING = re.compile(r"\b(?:including|incl\.?|as\s+well\s+as|plus|even)\s+(?:the\s+|all\s+)?$")
+
+
+def _near(ql: str, a: re.Match, pat: str, words: int = 4) -> bool:
+    """`pat` occurs within `words` words of match `a`."""
+    lo = ql[:a.start()].split()[-words:]
+    hi = ql[a.end():].split()[:words]
+    return bool(re.search(rf"\b(?:{pat})", " ".join(lo + hi)))
 
 
 def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
@@ -1809,15 +1963,16 @@ def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
             # 'sensor_ok': the noun alone ('sensor') does not say which value is
             # meant; the question must state the polarity word or an antonym.
             subj = [t for t in parts if t not in pol and len(t) >= 3]
-            near = rf"(?:\b{'|'.join(map(re.escape, subj))}\w*)" if subj else None
+            near = "|".join(rf"{re.escape(t[:max(3, len(t) - 1)])}\w*" for t in subj) if subj else None
             anti = re.search(rf"\b(?:{_FLAG_ANTONYMS})\b", ql)
-            word = re.search(rf"\b(?:{'|'.join(map(re.escape, pol))})\b", ql)
-            if anti and (near is None or re.search(near, ql)):
+            word = re.search(rf"\b(?:{'|'.join(map(re.escape, pol))}|{_FLAG_POSITIVE})\b", ql)
+            if anti and (near is None or _near(ql, anti, near)):
                 neg = bool(_NEG_BEFORE.search(ql[max(0, anti.start() - 60): anti.start()])) \
                     or bool(re.search(r"\b(?:without|no|never)\s+(?:an?\s+|any\s+)?$", ql[:anti.start()]))
                 out.append(FilterExpr(kind="eq", column=c, value=1 if neg else 0))
-            elif word and (near is None or re.search(near, ql)):
-                neg = bool(_NEG_BEFORE.search(ql[max(0, word.start() - 60): word.start()]))
+            elif word and (near is None or _near(ql, word, near)):
+                neg = bool(_NEG_BEFORE.search(ql[max(0, word.start() - 60): word.start()])) \
+                    or bool(_FLAG_NEG_BEFORE.search(ql[max(0, word.start() - 40): word.start()]))
                 out.append(FilterExpr(kind="eq", column=c, value=0 if neg else 1))
             continue
         toks = [t for t in parts
@@ -1828,10 +1983,27 @@ def _find_flag_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
             if not m:
                 continue
             before = ql[max(0, m.start() - 24): m.start()]
+            if _FLAG_INCLUDED.match(ql[m.end():]) or _FLAG_INCLUDING.search(ql[:m.start()]):
+                break                     # 'cancelled ones included': all rows, no condition
             neg = bool(m.group(1)) or bool(_NEG_BEFORE.search(ql[max(0, m.start() - 60): m.start()])) \
                 or bool(re.search(r"\b(not|never|without|isn't|aren't|wasn't|weren't|no)\s+(?:\w+\s+){0,2}$", before))
             out.append(FilterExpr(kind="eq", column=c, value=0 if neg else 1))
             break
+    return out
+
+
+def _flag_inclusion_columns(question: str, ds: ActiveDataset) -> List[str]:
+    """Flag columns named only to say they are included ('cancelled ones included',
+    'including cancelled bookings'): no condition applies to them."""
+    ql = question.lower()
+    out = []
+    for c in (getattr(ds, "flag_columns", None) or []):
+        toks = [t for t in re.split(r"[^a-z0-9]+", c.lower()) if len(t) >= 4 and t not in ("flag", "has")]
+        for t in toks:
+            m = re.search(rf"\b{re.escape(t[:max(4, len(t) - 2)])}\w*", ql)
+            if m and (_FLAG_INCLUDED.match(ql[m.end():]) or _FLAG_INCLUDING.search(ql[:m.start()])):
+                out.append(c)
+                break
     return out
 
 
@@ -1892,15 +2064,16 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
             cp = r"\s+".join(re.escape(x) for x in w)
             m_a = re.search(rf"\b(?:with|where|whose|having|had|has|have)\s+(?:an?\s+|the\s+)?{cp}\s*"
                             rf"(?:\b({_CMP_ALT})\b\s*)?(?<![\d.])(\d+(?:\.\d+)?)(?![\d])", ql)
-            if m_a and m_a.group(1):
+            if m_a and (m_a.group(1) or _suffix_op(ql, m_a.end(2), "=") != "="):
                 v = float(m_a.group(2))
                 out.append(FilterExpr(kind="cmp", column=c,
                                       value=int(v) if v == int(v) else v,
-                                      op=_cmp_op(m_a.group(1))))
+                                      op=_suffix_op(ql, m_a.end(2), _cmp_op(m_a.group(1)) if m_a.group(1) else "=")))
     for flat, src in cand:
         words = [w for w in re.split(r"[^a-z0-9]+", flat.lower()) if w]
         colpat = r"\s+".join(
-            rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}(?:s|d|ed)?" for w in words)
+            (rf"{re.escape(w[:-3])}(?:ing|ed|e|es)" if w.endswith("ing") and len(w) > 5 else
+             rf"{re.escape(w[:-1] if w.endswith('s') and len(w) > 3 else w)}(?:s|d|ed)?") for w in words)
         num = r"(\d+(?:\.\d+)?)"
         m1 = re.search(rf"(?:\b({_CMP_ALT})\s*)?(?<![\d.]){num}\s*-?\s*{colpat}\b", ql)
         m2 = re.search(rf"\b{colpat}\s*(?:\b({_CMP_ALT})\b\s*)?(?<![\d.]){num}(?![\d])", ql)
@@ -1915,7 +2088,7 @@ def _find_numeric_filters(question: str, ds: ActiveDataset) -> List[FilterExpr]:
 
         out.append(FilterExpr(kind="cmp", column=flat,
                               value=int(val) if val == int(val) else val,
-                              op=_cmp_op(op_word) if op_word else "="))
+                              op=_suffix_op(ql, m.end(2), _cmp_op(op_word) if op_word else "=")))
     return out
 
 
@@ -2545,6 +2718,12 @@ class Planner:
         # dim mentions (bound + unbound)
         dim_mentions = _find_dim_mentions(question, ds, catalog)
         bound_dims = [(n, c) for n, c in dim_mentions if c]
+        if ds.kind != "demo":
+            # a 0/1 flag named in the question is a condition, not a grouping, unless
+            # the question explicitly groups by it ("by cancelled", "per payment_ok")
+            _flags = set(getattr(ds, "flag_columns", None) or [])
+            bound_dims = [(n, c) for n, c in bound_dims if c not in _flags or re.search(
+                rf"\b(?:by|per|each|split\s+by|broken\s+down\s+by)\s+(?:[a-z]+\s+){{0,2}}{re.escape(n)}", ql_lo)]
         unbound_dims = [n for n, c in dim_mentions if not c]
 
         time_unit = _find_time_unit(question)
@@ -2573,6 +2752,7 @@ class Planner:
         _hm = re.search(r"\b(?:how\s+many|number\s+of)\s+([a-z_]+)", ql_lo)
         if _hm and len(kpis) == 1 and kpis[0].aggregation in (
                 "sum", "derived") and catalog.get("row_count") is not None \
+                and (ds.kind == "demo" or _is_money_kpi(kpis[0])) \
                 and not re.search(r"\b(distinct|unique)\b", ql_lo) \
                 and re.search(rf"\b{re.escape(_hm.group(1))}\b",
                               " ".join(kpis[0].aliases).lower()) \
@@ -2703,6 +2883,7 @@ class Planner:
             + _find_numeric_filters(question, ds) \
             + _find_date_state_filters(question, ds, _has_tf) \
             + _find_flag_filters(question, ds) \
+            + _find_null_state_filters(question, ds) \
             + _find_child_existence(question, ds)
         if ds.kind != "demo" and unbound_dims:
             _vtext = " ".join(str(f.value).lower() for f in value_filters)
@@ -2710,6 +2891,20 @@ class Planner:
                 lo for lo, _c in _value_mentions(question, _value_index(ds)))
             unbound_dims = [n for n in unbound_dims
                             if not re.search(rf"(?<![a-z0-9]){re.escape(n.lower())}(?![a-z0-9])", _vtext)]
+            # function words and words naming an already-used date column are not dimensions
+            from ..reliability.mention_coverage import _FUNCTION_WORDS as _FW
+            _dtoks = {t for d in ds.dates for t in re.split(r"[^a-z0-9]+", d.lower()) if len(t) >= 4}
+            unbound_dims = [n for n in unbound_dims
+                            if n.lower() not in _FW and not any(
+                                n.lower().startswith(t) or t.startswith(n.lower()) for t in _dtoks if len(n) >= 4)]
+        # "how many trips is the tip left blank": the measure's own column is tested for NULL, so
+        # the question counts rows; it does not sum the (NULL) values
+        _nullc = {f.column for f in value_filters if f.kind == "null"}
+        if _nullc and ds.kind != "demo" and _count_cue and catalog.get("row_count") is not None:
+            _keepm = [m for m in measures if not any(('"%s"' % c) in (m.formula or "") or
+                                                      ("{{dim:%s}}" % c) in (m.formula or "") for c in _nullc)]
+            if len(_keepm) != len(measures):
+                measures = _keepm or [_mref(catalog.get("row_count"))]
         filters = _bind_time_filter(question, ds) + metric_filters \
                   + value_filters
         # Early notes list — populated by the value-filter / dim-dedup
@@ -2721,6 +2916,9 @@ class Planner:
         # path fires instead of silently answering with the all-dim
         # total.
         _unknown_values: List[str] = _find_unknown_dim_values(question, ds)
+        _nullcols = {f.column for f in value_filters if f.kind in ("null", "not_null")}
+        _unknown_values = [u for u in _unknown_values
+                           if not (u.startswith("value:") and u[6:].split("=")[0] in _nullcols)]
         _unknown_values += _find_ambiguous_values(question, ds)
         _unknown_values += _find_unknown_proper_nouns(question, ds, catalog)
         _unknown_values += _metric_conflicts
@@ -2775,7 +2973,7 @@ class Planner:
             }
             vf_dim_nouns: set = set()
             for f in value_filters:
-                if f.kind == "not_in":
+                if f.kind == "not_in" and re.search(r"\b(?:by|per|each|across)\b", ql_lo):
                     continue            # "by state excluding X" still groups
                 vf_dim_nouns |= _NOUNS.get(f.column, set())
                 if ds.kind != "demo":

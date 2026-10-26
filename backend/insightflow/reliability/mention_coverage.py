@@ -303,6 +303,11 @@ report calculate compute compare summarize rank sort group order total sum avera
 number amount value values figure figures overall all both highest lowest largest smallest biggest greatest best worst top
 bottom first second third fourth last previous recent latest earlier later year years month months week weeks day days
 quarter quarters half halves date dates time period periods monthly weekly daily yearly annual quarterly percent
+come comes came coming go goes went gone going make makes made making get gets got getting take takes took taken
+bring brings brought happen happens happened break breakdown ones one included include includes including least most
+across altogether whole entire
+didn doesn don haven hasn wasn weren isn aren couldn shouldn wouldn won leave leaving left omit omitting ignoring
+zero opposed field fields
 percentage proportion share ratio rate times daily january february march april june july august september october
 november december monday tuesday wednesday thursday friday saturday sunday excluding exclude except including include
 included between versus against among each every one two three four five six seven eight nine ten hundred thousand
@@ -384,4 +389,13 @@ def words_consumed_by_plan(question: str, plan) -> set:
     if any(f.kind == "eq" and f.value == 0 and
            set(re.split(r"[^a-z0-9]+", str(f.column).lower())) & _FLAG_POLARITY for f in fs):
         out |= {m.group(0) for m in re.finditer(rf"\b(?:{_FLAG_ANTONYMS})\b", ql)}
+    if any(f.kind == "eq" and f.value in (0, 1) and
+           set(re.split(r"[^a-z0-9]+", str(f.column).lower())) & _FLAG_POLARITY for f in fs):
+        from ..plan.planner import _FLAG_POSITIVE
+        out |= {w for m in re.finditer(rf"\b(?:{_FLAG_POSITIVE}|{_FLAG_ANTONYMS})\b", ql) for w in m.group(0).split()}
+    if any(f.kind in ("null", "not_null") for f in fs):
+        out |= {"unknown", "missing", "blank", "empty", "null", "recorded", "unrecorded", "unset", "entered",
+                "known", "assigned", "unassigned", "allocated", "captured", "provided", "filled"}
+    if any(f.kind == "not_in" or (f.kind == "eq" and f.value == 0) for f in fs):
+        out |= {"leave", "leaving", "omitting", "ignoring", "disregarding", "excluding"}
     return out

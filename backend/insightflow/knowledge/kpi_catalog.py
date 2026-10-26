@@ -376,7 +376,7 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
         if _rel is not None and name in _rel.fk_columns:
             for pn in parent_nouns(_rel.fk_columns[name].parent_table):
                 aliases = list(aliases) + [f"distinct {pn}", f"unique {pn}",
-                                           f"number of {pn}"]
+                                           f"different {pn}", f"number of {pn}"]
         if kid not in out:
             out[kid] = KPIDefinition(
                 kpi_id=kid, display_name=disp,
@@ -399,12 +399,28 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
         if core and core != " ".join(toks):
             _cores.setdefault(core, []).append(name)
     _core_of = {n[0]: c for c, n in _cores.items() if len(n) == 1}
+    # a bare core that is the entity noun of a table ('claim' for claim_amt in a 'claims' table)
+    # names rows, not the measure: it must not bind the measure on its own
+    _ent = set()
+    for _t in ([ds.table] + (list(_rel.schema.tables) if _rel is not None else [])):
+        for _w in re.split(r"[^a-z0-9]+", _t.lower()):
+            if _w:
+                _ent |= {_w, _w[:-1] if _w.endswith("s") else _w}
+    _core_of = {n: c for n, c in _core_of.items() if c not in _ent}
     for name, info in ds.columns.items():
         if info.role != "measure":
             continue
         from .abbrev import canon_tokens as _ct
         _long = " ".join(t for t in _ct(name) if len(t) > 1 and t not in ("usd", "eur", "gbp"))
         _exp = {_long} - {name.lower().replace("_", " ")} if _long else set()
+        # the base table's generically named money column ('amt' in bills): "bill amount",
+        # "billed amount", "amount billed", "booking amount"
+        _gtoks = {_c2 for _c2 in _ct(name)}
+        if _gtoks and _gtoks <= {"amount", "total", "value"} and ds.table:
+            _an = [x for x in re.split(r"[^a-z0-9]+", ds.table.lower()) if x][-1]
+            _sg = _an[:-1] if _an.endswith("s") else _an
+            _pp = (_sg[:-3] + "ed") if _sg.endswith("ing") else _sg + ("d" if _sg.endswith("e") else "ed")
+            _exp |= {f"{_sg} amount", f"{_sg} value", f"{_pp} amount", f"amount {_pp}", f"total {_pp}"}
         if name in _core_of:              # 'pax_cnt' -> core 'pax' -> 'passenger(s)'
             _cl = " ".join(_ct(_core_of[name]))
             if _cl and _cl != _core_of[name]:
@@ -441,6 +457,16 @@ def _derive_from_uploaded(ds: ActiveDataset) -> Dict[str, KPIDefinition]:
                                 f"sum of {name.lower().replace('_', ' ')}"}),
             )
 
+    # plural forms of generated measure aliases ('fares' for fare_amt, 'total fares')
+    for _kid, _k in out.items():
+        if not (_kid.startswith("sum_") or _kid.startswith("avg_")):
+            continue
+        _extra = set()
+        for _a in _k.aliases:
+            _w = _a.split(" ")[-1]
+            if len(_w) > 2 and _w.isalpha() and not _w.endswith("s"):
+                _extra.add(_a[: -len(_w)] + (_w[:-1] + "ies" if _w.endswith("y") else _w + "s"))
+        _k.aliases = sorted(set(_k.aliases) | _extra)
     return out
 
 

@@ -229,6 +229,19 @@ class Orchestrator:
             return self._unanswerable_response(question, empty_plan,
                                                 empty_report, safety.reason)
 
+        # 0b. Normalise wording to the schema's own vocabulary (units, compounds,
+        # multi-word column names, synonyms, acronyms). Every rewrite is recorded;
+        # interpretive ones are stated in the answer.
+        _asked_q = question
+        from .knowledge.vocabulary import normalise as _normalise
+        try:
+            question, self._vocab = _normalise(question, ds)
+        except Exception as _e:
+            self._vocab = []
+            self._extra_notes.append(f"vocabulary_error={type(_e).__name__}")
+        for _rw in self._vocab:
+            self._extra_notes.append("vocabulary: " + _rw.describe())
+
         # 1. Plan the question against the active dataset.
         planner = Planner(ds, catalog)
         plan = planner.plan(question)
@@ -569,6 +582,10 @@ class Orchestrator:
                 from .reliability.mention_coverage import unrepresented_column_words
                 _cm = _cm + [c for c in unrepresented_column_words(question, sql, ds)
                              if c not in _cm]
+                from .plan.planner import _flag_inclusion_columns
+                _inc = _flag_inclusion_columns(question, ds)
+                _cm = [c for c in _cm if not any(re.match(rf"\w+ \({re.escape(i)}\)$", c) or c == i
+                                                  for i in _inc)]
             except Exception:
                 _cm = []
             try:
@@ -697,6 +714,9 @@ class Orchestrator:
                 self._extra_notes += [f"{f.severity}:{f.name}:{f.detail}"
                                       for f in _vrep.findings]
 
+        for _rw in getattr(self, "_vocab", []):
+            if _rw.interpretive:
+                _caveats.append(_rw.describe())
         for _w in getattr(self, "_unexplained_soft", []):
             _caveats.append(f"'{_w}' was not mapped to any column or value and was not applied")
         self._unexplained_soft = []
@@ -775,7 +795,8 @@ class Orchestrator:
         _sem_err = None
         if decision.action in (ANSWER, WARN) and ds.kind != "demo" and result.ok and sql \
                 and not _ablated("semantic") \
-                and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend", "ratio"):
+                and plan.intent_kind in ("direct_kpi", "breakdown", "top_n", "trend", "ratio",
+                                     "distinct_count", "null_count"):
             try:
                 from .semantics import verify_semantics
                 _sem = verify_semantics(question, plan, sql, result, explanation, ds, catalog)
@@ -846,7 +867,7 @@ class Orchestrator:
         # Keep `.intent` as the LEGACY intent string so existing test
         # assertions that inspect `resp.intent == 'diagnostic'` still hold.
         response = InsightResponse(
-            question=question, sql=sql,
+            question=_asked_q, sql=sql,
             intent=legacy_intent, decision=decision,
             confidence=confidence, analysis=analysis, evidence=evidence,
             result=result, explanation=explanation,
