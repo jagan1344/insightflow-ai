@@ -19,8 +19,13 @@ or the original manuscript.
 - [x] Readings of structured ambiguities (answer when they agree, ask with each value otherwise).
 - [x] Docs: SEMANTIC_MODEL, TYPED_QUERY_PLAN, GROUNDING_DESIGN, SQL_COMPILER_DESIGN, GENERALIZATION_TESTS.
 
-## In progress / next
-- [ ] Classify the existing-suite failures in typed mode; fix general gaps; decide test policy for legacy specs.
-- [ ] Re-run the comparison after the readings feature.
-- [ ] Freeze; write a new provisional sealed set (new schemas) before running; run once; raw output before scoring.
-- [ ] EVALUATION_RESULTS.md, FINAL_REPORT.md, final summary.
+- [x] Legacy specs run in typed mode: eight silent-wrong families found and fixed; conftest pins legacy specs.
+- [x] Freeze 4e9c5e8 (backend tree 128cdf88); v7 provisional sealed dba1d66; run once 0c81a7a; scored 2a0ca20.
+      typed 38/58 correct, 1 wrong; legacy 28/58, 6 wrong; typed+legacy 44/58, 1 wrong.
+- [x] Post-v7 general bug fix (negation scope, BA25) 8fe5cfd, labelled post-hoc.
+- [x] EVALUATION_RESULTS.md, FINAL_REPORT.md.
+
+## Possible next steps (not started)
+- A set written by someone who has not seen the engine.
+- Coverage gaps recorded from v7: role prefixes (dep_/arr_), unit suffixes (_c), the global 'dep' abbreviation,
+  verbs on nullable dates or ids.

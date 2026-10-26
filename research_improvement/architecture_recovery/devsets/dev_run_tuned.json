@@ -18,7 +18,7 @@
     "abstain": 5,
     "abstain_ok": 25
    },
-   "median_ms": 1.4
+   "median_ms": 1.3
   },
   "full": {
    "n": 107,
@@ -38,7 +38,7 @@
     "abstain": 7,
     "abstain_ok": 25
    },
-   "median_ms": 1.4
+   "median_ms": 1.1
   },
   "metamorphic_agreement": "105/107"
  },
@@ -60,7 +60,7 @@
       900
      ]
     ],
-    "ms": 34.0,
+    "ms": 40.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -89,7 +89,7 @@
       8063.35
      ]
     ],
-    "ms": 1.9,
+    "ms": 2.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -114,7 +114,7 @@
     "message": "words not grounded: ride",
     "sql": "",
     "rows": [],
-    "ms": 1.1,
+    "ms": 1.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -160,7 +160,7 @@
       1488.0
      ]
     ],
-    "ms": 1.4,
+    "ms": 2.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -210,7 +210,7 @@
       183
      ]
     ],
-    "ms": 1.6,
+    "ms": 2.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -239,7 +239,7 @@
       398
      ]
     ],
-    "ms": 2.0,
+    "ms": 2.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -268,7 +268,7 @@
       50
      ]
     ],
-    "ms": 1.4,
+    "ms": 2.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -297,7 +297,7 @@
       100
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -326,7 +326,7 @@
       2972.13
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -351,7 +351,7 @@
     "message": "'Monthly' could mean a monthly time series or the stored value riders.plan_type = 'monthly'; the question gives a period but not which date: start_ts, end_ts",
     "sql": "",
     "rows": [],
-    "ms": 1.1,
+    "ms": 0.8,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 2,
@@ -389,7 +389,7 @@
       180
      ]
     ],
-    "ms": 2.1,
+    "ms": 1.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -418,7 +418,7 @@
       390
      ]
     ],
-    "ms": 15.5,
+    "ms": 12.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -447,7 +447,7 @@
       510
      ]
     ],
-    "ms": 15.0,
+    "ms": 12.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -476,7 +476,7 @@
       127
      ]
     ],
-    "ms": 17.7,
+    "ms": 20.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -505,7 +505,7 @@
       7163.35
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -534,7 +534,7 @@
       55.77777777777778
      ]
     ],
-    "ms": 1.4,
+    "ms": 1.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -572,7 +572,7 @@
       35.55555555555556
      ]
     ],
-    "ms": 1.4,
+    "ms": 1.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -601,7 +601,7 @@
       11.650620567375887
      ]
     ],
-    "ms": 1.6,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -630,7 +630,7 @@
       149
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -855,7 +855,7 @@
       1517.8
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -909,7 +909,7 @@
       1100
      ]
     ],
-    "ms": 23.5,
+    "ms": 24.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -955,7 +955,7 @@
       64.30981308411215
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1022,7 +1022,7 @@
       43
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1051,7 +1051,7 @@
       136
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1109,7 +1109,7 @@
       109
      ]
     ],
-    "ms": 1.1,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1163,7 +1163,7 @@
     "message": "words not grounded: grade, students",
     "sql": "",
     "rows": [],
-    "ms": 1.1,
+    "ms": 0.8,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -1205,7 +1205,7 @@
       353
      ]
     ],
-    "ms": 1.4,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1234,7 +1234,7 @@
       185
      ]
     ],
-    "ms": 9.1,
+    "ms": 9.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1263,7 +1263,7 @@
       101
      ]
     ],
-    "ms": 9.2,
+    "ms": 8.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1292,7 +1292,7 @@
       64.45649202733486
      ]
     ],
-    "ms": 9.1,
+    "ms": 9.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1317,7 +1317,7 @@
     "message": "'monthly' does not say which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 8 rows; graded_dt: 9 rows. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 3.9,
+    "ms": 4.0,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -1346,7 +1346,7 @@
       64.30981308411215
      ]
     ],
-    "ms": 2.3,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1375,7 +1375,7 @@
       100.0
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1429,7 +1429,7 @@
     "message": "words not grounded: language, learners",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.9,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -1530,7 +1530,7 @@
     "message": "grader_id has no lookup table that names its values",
     "sql": "",
     "rows": [],
-    "ms": 1.2,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -1555,7 +1555,7 @@
     "message": "words not grounded: Mr, Chen",
     "sql": "",
     "rows": [],
-    "ms": 1.0,
+    "ms": 0.8,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -1580,7 +1580,7 @@
     "message": "no measure could be grounded; words not grounded: struggling, students",
     "sql": "",
     "rows": [],
-    "ms": 0.6,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -1605,7 +1605,7 @@
     "message": "no aggregation was stated for score_pct, which is not additive; no measure could be grounded; words not grounded: improve, next, term",
     "sql": "",
     "rows": [],
-    "ms": 0.6,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -1630,7 +1630,7 @@
     "message": "the question gives a period but not which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 438.00; graded_dt: 381.00. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 3.0,
+    "ms": 3.1,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -1655,7 +1655,7 @@
     "message": "credit_hrs describes courses; aggregate it over courses itself, or once per exam_results row (weighted by exam_results)?",
     "sql": "",
     "rows": [],
-    "ms": 0.6,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -1684,7 +1684,7 @@
       1000
      ]
     ],
-    "ms": 27.3,
+    "ms": 26.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1713,7 +1713,7 @@
       308995.13
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1755,7 +1755,7 @@
       5864.9
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1784,7 +1784,7 @@
       77
      ]
     ],
-    "ms": 1.0,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1813,7 +1813,7 @@
       601
      ]
     ],
-    "ms": 1.1,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1842,7 +1842,7 @@
       31001.5
      ]
     ],
-    "ms": 1.1,
+    "ms": 2.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1871,7 +1871,7 @@
       39
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1900,7 +1900,7 @@
       284424.67
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1938,7 +1938,7 @@
       308
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.9,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -1976,7 +1976,7 @@
       1318.1200000000001
      ]
     ],
-    "ms": 1.4,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2005,7 +2005,7 @@
       78
      ]
     ],
-    "ms": 3.2,
+    "ms": 3.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2034,7 +2034,7 @@
       504
      ]
     ],
-    "ms": 79.0,
+    "ms": 69.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2063,7 +2063,7 @@
       286413.1
      ]
     ],
-    "ms": 6.5,
+    "ms": 4.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2088,7 +2088,7 @@
     "message": "'monthly' does not say which date: order_dt, ship_dt. The readings give different results \u2014 order_dt: 12 rows; ship_dt: 13 rows. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 5.2,
+    "ms": 3.1,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -2134,7 +2134,7 @@
       4196.05
      ]
     ],
-    "ms": 2.3,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2163,7 +2163,7 @@
       993.78
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2192,7 +2192,7 @@
       200
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2221,7 +2221,7 @@
       9.6
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2250,7 +2250,7 @@
       311.59359420289854
      ]
     ],
-    "ms": 1.6,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2275,7 +2275,7 @@
     "message": "the question gives a period but not which date: order_dt, ship_dt. The readings give different results \u2014 order_dt: 153,687.46; ship_dt: 140,555.24. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 4.6,
+    "ms": 2.9,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -2304,7 +2304,7 @@
       180
      ]
     ],
-    "ms": 2.0,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2329,7 +2329,7 @@
     "message": "a measure on the one-to-many table order_lines (needs that table as the base)",
     "sql": "",
     "rows": [],
-    "ms": 1.1,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -2354,7 +2354,7 @@
     "message": "no measure could be grounded; words not grounded: revenue",
     "sql": "",
     "rows": [],
-    "ms": 1.0,
+    "ms": 0.5,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -2379,7 +2379,7 @@
     "message": "no measure could be grounded; words not grounded: risk, churn, customers",
     "sql": "",
     "rows": [],
-    "ms": 1.4,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -2404,7 +2404,7 @@
     "message": "no measure could be grounded; words not grounded: amount",
     "sql": "",
     "rows": [],
-    "ms": 0.7,
+    "ms": 0.4,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -2442,7 +2442,7 @@
       31.05918853802
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2471,7 +2471,7 @@
       120
      ]
     ],
-    "ms": 1.8,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2500,7 +2500,7 @@
       800
      ]
     ],
-    "ms": 17.2,
+    "ms": 12.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2605,7 +2605,7 @@
     "message": "words not grounded: open",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -2634,7 +2634,7 @@
       169
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2680,7 +2680,7 @@
       132
      ]
     ],
-    "ms": 2.3,
+    "ms": 1.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2709,7 +2709,7 @@
       154
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2734,7 +2734,7 @@
     "message": "'agent' is reached in more than one way: agents.agent_nm via opened_by_agent_id or agents.agent_nm via resolved_by_agent_id",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -2763,7 +2763,7 @@
       148
      ]
     ],
-    "ms": 20.0,
+    "ms": 18.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2792,7 +2792,7 @@
       223
      ]
     ],
-    "ms": 15.4,
+    "ms": 14.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2830,7 +2830,7 @@
       155
      ]
     ],
-    "ms": 1.6,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2859,7 +2859,7 @@
       312
      ]
     ],
-    "ms": 0.9,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -2962,7 +2962,7 @@
       78.875
      ]
     ],
-    "ms": 0.8,
+    "ms": 0.9,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3000,7 +3000,7 @@
       29
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3063,7 +3063,7 @@
       67
      ]
     ],
-    "ms": 0.9,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3092,7 +3092,7 @@
       470
      ]
     ],
-    "ms": 0.7,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3121,7 +3121,7 @@
       17
      ]
     ],
-    "ms": 0.7,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3150,7 +3150,7 @@
       132
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3225,7 +3225,7 @@
     "message": "no measure could be grounded; words not grounded: best, agents",
     "sql": "",
     "rows": [],
-    "ms": 0.5,
+    "ms": 0.4,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -3254,7 +3254,7 @@
       58
      ]
     ],
-    "ms": 1.0,
+    "ms": 0.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3283,7 +3283,7 @@
       40
      ]
     ],
-    "ms": 0.9,
+    "ms": 0.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3339,7 +3339,7 @@
       900
      ]
     ],
-    "ms": 29.0,
+    "ms": 27.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3368,7 +3368,7 @@
       8063.35
      ]
     ],
-    "ms": 2.0,
+    "ms": 1.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3393,7 +3393,7 @@
     "message": "words not grounded: ride",
     "sql": "",
     "rows": [],
-    "ms": 1.1,
+    "ms": 1.0,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -3439,7 +3439,7 @@
       1488.0
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3518,7 +3518,7 @@
       398
      ]
     ],
-    "ms": 2.0,
+    "ms": 1.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3547,7 +3547,7 @@
       50
      ]
     ],
-    "ms": 1.4,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3576,7 +3576,7 @@
       100
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3668,7 +3668,7 @@
       180
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3726,7 +3726,7 @@
       510
      ]
     ],
-    "ms": 13.5,
+    "ms": 12.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3755,7 +3755,7 @@
       127
      ]
     ],
-    "ms": 14.4,
+    "ms": 14.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3813,7 +3813,7 @@
       55.77777777777778
      ]
     ],
-    "ms": 1.6,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3851,7 +3851,7 @@
       35.55555555555556
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3880,7 +3880,7 @@
       11.650620567375887
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3951,7 +3951,7 @@
       1466.25
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -3980,7 +3980,7 @@
       1.003282331525438
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4055,7 +4055,7 @@
     "message": "no measure could be grounded; words not grounded: loyal, riders",
     "sql": "",
     "rows": [],
-    "ms": 3.1,
+    "ms": 0.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -4080,7 +4080,7 @@
     "message": "relative dates (last/this/next period) are not resolved against a reference date",
     "sql": "",
     "rows": [],
-    "ms": 1.2,
+    "ms": 0.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -4105,7 +4105,7 @@
     "message": "relative dates (last/this/next period) are not resolved against a reference date",
     "sql": "",
     "rows": [],
-    "ms": 1.3,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -4134,7 +4134,7 @@
       1517.8
      ]
     ],
-    "ms": 2.1,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4159,7 +4159,7 @@
     "message": "'dock capacity' could be stations.dock_capacity via start_station_id or stations.dock_capacity via end_station_id",
     "sql": "",
     "rows": [],
-    "ms": 1.2,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -4188,7 +4188,7 @@
       1100
      ]
     ],
-    "ms": 35.5,
+    "ms": 22.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4234,7 +4234,7 @@
       64.30981308411215
      ]
     ],
-    "ms": 2.4,
+    "ms": 1.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4272,7 +4272,7 @@
       65.17469879518072
      ]
     ],
-    "ms": 2.1,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4301,7 +4301,7 @@
       43
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4330,7 +4330,7 @@
       136
      ]
     ],
-    "ms": 1.6,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4359,7 +4359,7 @@
       124
      ]
     ],
-    "ms": 1.8,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4388,7 +4388,7 @@
       109
      ]
     ],
-    "ms": 1.5,
+    "ms": 0.9,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4417,7 +4417,7 @@
       0.6162327005511329
      ]
     ],
-    "ms": 2.2,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4442,7 +4442,7 @@
     "message": "words not grounded: grade, students",
     "sql": "",
     "rows": [],
-    "ms": 1.5,
+    "ms": 0.8,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -4484,7 +4484,7 @@
       353
      ]
     ],
-    "ms": 2.1,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4513,7 +4513,7 @@
       185
      ]
     ],
-    "ms": 14.5,
+    "ms": 8.5,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4542,7 +4542,7 @@
       101
      ]
     ],
-    "ms": 14.9,
+    "ms": 8.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4571,7 +4571,7 @@
       64.45649202733486
      ]
     ],
-    "ms": 12.9,
+    "ms": 8.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4596,7 +4596,7 @@
     "message": "'monthly' does not say which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 8 rows; graded_dt: 9 rows. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 3.6,
+    "ms": 3.3,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -4654,7 +4654,7 @@
       100.0
      ]
     ],
-    "ms": 0.9,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4683,7 +4683,7 @@
       12.363636363636363
      ]
     ],
-    "ms": 1.0,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4750,7 +4750,7 @@
       247
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4784,7 +4784,7 @@
       65.15308056872037
      ]
     ],
-    "ms": 1.4,
+    "ms": 2.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4809,7 +4809,7 @@
     "message": "grader_id has no lookup table that names its values",
     "sql": "",
     "rows": [],
-    "ms": 0.7,
+    "ms": 0.8,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -4834,7 +4834,7 @@
     "message": "words not grounded: Mr, Chen",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.9,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -4909,7 +4909,7 @@
     "message": "the question gives a period but not which date: exam_dt, graded_dt. The readings give different results \u2014 exam_dt: 438.00; graded_dt: 381.00. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 2.9,
+    "ms": 2.8,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -4963,7 +4963,7 @@
       1000
      ]
     ],
-    "ms": 24.3,
+    "ms": 23.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -4992,7 +4992,7 @@
       308995.13
      ]
     ],
-    "ms": 1.1,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5034,7 +5034,7 @@
       5864.9
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5063,7 +5063,7 @@
       77
      ]
     ],
-    "ms": 1.0,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5092,7 +5092,7 @@
       601
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5150,7 +5150,7 @@
       39
      ]
     ],
-    "ms": 1.1,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5179,7 +5179,7 @@
       284424.67
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5217,7 +5217,7 @@
       308
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5255,7 +5255,7 @@
       1318.1200000000001
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5284,7 +5284,7 @@
       78
      ]
     ],
-    "ms": 3.6,
+    "ms": 3.3,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5313,7 +5313,7 @@
       504
      ]
     ],
-    "ms": 64.3,
+    "ms": 56.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5342,7 +5342,7 @@
       286413.1
      ]
     ],
-    "ms": 4.1,
+    "ms": 3.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5367,7 +5367,7 @@
     "message": "'monthly' does not say which date: order_date, ship_date. The readings give different results \u2014 order_date: 12 rows; ship_date: 13 rows. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 3.5,
+    "ms": 3.0,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -5413,7 +5413,7 @@
       4196.05
      ]
     ],
-    "ms": 1.5,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5442,7 +5442,7 @@
       993.78
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5471,7 +5471,7 @@
       200
      ]
     ],
-    "ms": 1.8,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5500,7 +5500,7 @@
       9.6
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5529,7 +5529,7 @@
       311.59359420289854
      ]
     ],
-    "ms": 1.8,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5554,7 +5554,7 @@
     "message": "the question gives a period but not which date: order_date, ship_date. The readings give different results \u2014 order_date: 153,687.46; ship_date: 140,555.24. Which did you mean?",
     "sql": "",
     "rows": [],
-    "ms": 4.6,
+    "ms": 2.9,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -5583,7 +5583,7 @@
       180
      ]
     ],
-    "ms": 1.7,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5608,7 +5608,7 @@
     "message": "a measure on the one-to-many table order_lines (needs that table as the base)",
     "sql": "",
     "rows": [],
-    "ms": 1.0,
+    "ms": 0.5,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -5633,7 +5633,7 @@
     "message": "no measure could be grounded; words not grounded: revenue",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.4,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -5658,7 +5658,7 @@
     "message": "no measure could be grounded; words not grounded: risk, churn, customers",
     "sql": "",
     "rows": [],
-    "ms": 1.2,
+    "ms": 0.7,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -5683,7 +5683,7 @@
     "message": "no measure could be grounded; words not grounded: amount",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.4,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -5721,7 +5721,7 @@
       31.05918853802
      ]
     ],
-    "ms": 2.0,
+    "ms": 1.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5750,7 +5750,7 @@
       120
      ]
     ],
-    "ms": 1.9,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5779,7 +5779,7 @@
       800
      ]
     ],
-    "ms": 22.9,
+    "ms": 16.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5821,7 +5821,7 @@
       199
      ]
     ],
-    "ms": 2.7,
+    "ms": 1.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5846,7 +5846,7 @@
     "message": "no measure could be grounded; words not grounded: Average, csat, score",
     "sql": "",
     "rows": [],
-    "ms": 0.9,
+    "ms": 0.5,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -5871,7 +5871,7 @@
     "message": "words not grounded: open",
     "sql": "",
     "rows": [],
-    "ms": 0.9,
+    "ms": 0.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -5900,7 +5900,7 @@
       169
      ]
     ],
-    "ms": 2.4,
+    "ms": 1.6,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5946,7 +5946,7 @@
       132
      ]
     ],
-    "ms": 1.8,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -5975,7 +5975,7 @@
       154
      ]
     ],
-    "ms": 1.6,
+    "ms": 1.1,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6000,7 +6000,7 @@
     "message": "'agent' is reached in more than one way: agents.agent_name via opened_by_agent_id or agents.agent_name via resolved_by_agent_id",
     "sql": "",
     "rows": [],
-    "ms": 0.8,
+    "ms": 0.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 1,
@@ -6029,7 +6029,7 @@
       148
      ]
     ],
-    "ms": 19.3,
+    "ms": 17.4,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6058,7 +6058,7 @@
       223
      ]
     ],
-    "ms": 13.0,
+    "ms": 12.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6096,7 +6096,7 @@
       155
      ]
     ],
-    "ms": 1.3,
+    "ms": 1.2,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6121,7 +6121,7 @@
     "message": "words not grounded: csat, score; 'no' is not attached to any condition",
     "sql": "",
     "rows": [],
-    "ms": 0.7,
+    "ms": 0.6,
     "reliability": {
      "grounding": "incomplete",
      "ambiguities": 0,
@@ -6195,7 +6195,7 @@
       56
      ]
     ],
-    "ms": 0.9,
+    "ms": 0.8,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6224,7 +6224,7 @@
       78.875
      ]
     ],
-    "ms": 1.2,
+    "ms": 1.0,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6354,7 +6354,7 @@
       470
      ]
     ],
-    "ms": 0.9,
+    "ms": 0.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6383,7 +6383,7 @@
       17
      ]
     ],
-    "ms": 0.8,
+    "ms": 0.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6412,7 +6412,7 @@
       132
      ]
     ],
-    "ms": 1.2,
+    "ms": 0.9,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
@@ -6545,7 +6545,7 @@
       40
      ]
     ],
-    "ms": 0.8,
+    "ms": 0.7,
     "reliability": {
      "grounding": "complete",
      "ambiguities": 0,
