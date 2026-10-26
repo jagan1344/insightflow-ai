@@ -1,0 +1,5 @@
+measure,denominator_set,k1_count,k3_count,denominator,k1_pct,k3_pct
+correct_answers,answerable,42,49,54,77.8,90.7
+unanswered_answerable,answerable,11,5,54,20.4,9.3
+silent_wrong,all questions,2,0,66,3.0,0.0
+correct_clarifications,clarification-labelled,11,12,12,91.7,100.0

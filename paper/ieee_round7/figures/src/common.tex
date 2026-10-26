@@ -1,0 +1,14 @@
+% Shared settings for all InsightFlow AI figures (Times, grayscale, sized for IEEE print).
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,patterns,shapes.geometric}
+\tikzset{
+  >={Stealth[length=4pt,width=3.5pt]},
+  stage/.style={draw,rounded corners=1.5pt,fill=gray!8,align=center,inner sep=2.5pt,font=\fontsize{7.5}{8.6}\selectfont},
+  ext/.style={draw,dashed,rounded corners=1.5pt,align=center,inner sep=2.5pt,font=\fontsize{7.5}{8.6}\selectfont},
+  note/.style={align=left,font=\fontsize{7}{8}\selectfont},
+  flow/.style={->,thick},
+  dflow/.style={->,dashed},
+  every node/.append style={execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+}

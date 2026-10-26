@@ -1,0 +1,7 @@
+config,label,correct,wrong_answers,unnecessary_clarify
+A0,Full pipeline (A0),14,7,57
+A1,Semantic layer off (A1),14,8,56
+A5,Coverage + wording checks off (A5),17,28,36
+A7,All six safeguards off (A7),17,32,33
+B1,Only semantic layer on (B1),17,28,36
+B5,Only coverage + wording on (B5),14,8,56

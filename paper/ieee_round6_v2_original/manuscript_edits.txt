@@ -1,0 +1,15 @@
+preamble: graphicx for the figure PDFs
+preamble: build note for figures
+Sec. II: Table I (related work) added and cited
+Sec. III-A: Fig. 1 (architecture) added and cited
+Sec. III-D: "pre-execution type checks" corrected; the package runs after execution (step 12b)
+Sec. III-D: notes do not change the action (corrected); gate conditions, rule table and fail-open/fail-closed history added
+Sec. III-D: Fig. 2 (workflow) and Table II (rules) added
+Sec. V-B: old Table I (K1) replaced by Table III (historical, K1, K3)
+Sec. V-E: old Table II (K1 vs K3) replaced by Fig. 3
+Sec. V-B: references updated to Table III and Fig. 3
+Sec. V-E: references updated
+Sec. V-C: Fig. 4 (A17 recorded trace) added and cited
+Sec. V-D: Table IV (error analysis and limitations) added and cited
+Sec. VII: scope of the semantic layer stated
+Reproducibility: b11793b regression tests (495 passed) stated as implementation checks, not accuracy
