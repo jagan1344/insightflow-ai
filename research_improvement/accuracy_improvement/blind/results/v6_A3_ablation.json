@@ -1,0 +1,7257 @@
+{
+ "config": "A3",
+ "ablate": "result_consistency",
+ "label": "ablation",
+ "head": "e878e59dc1ff6e8a14c4e2742023caf85ea05558",
+ "frozen_tree": "d760e8298357686f3139449e0ff8e237795c21b9",
+ "n": 106,
+ "records": [
+  {
+   "id": "FD01",
+   "db": "food@orders",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How much did we take in delivery fees on orders that were actually delivered?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     3314.54
+    ]
+   ],
+   "reason": "'delivered' could mean the value 'DELIVERED' of order_status -> 1064, or just ordinary wording -> 1200. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "'delivered' could mean the value 'DELIVERED' of order_status -> 1064, or just ordinary wording -> 1200. Which did you mean?"
+   ],
+   "latency_ms": 421.9,
+   "error": null
+  },
+  {
+   "id": "FD02",
+   "db": "food@orders",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Give me the number of orders for each type of cuisine. Skip restaurants that don't have a cuisine on file.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_restaurant_id.cuisine AS cuisine, COUNT(*) AS order_count FROM \"orders\" LEFT JOIN restaurants AS j_restaurant_id ON j_restaurant_id.restaurant_id = orders.restaurant_id GROUP BY j_restaurant_id.cuisine ORDER BY order_count DESC",
+   "rows": [
+    [
+     "Italian",
+     222
+    ],
+    [
+     null,
+     176
+    ],
+    [
+     "American",
+     147
+    ],
+    [
+     "Mexican",
+     135
+    ],
+    [
+     "Chinese",
+     101
+    ],
+    [
+     "Indian",
+     100
+    ],
+    [
+     "British",
+     99
+    ],
+    [
+     "BBQ",
+     89
+    ],
+    [
+     "Vietnamese",
+     74
+    ],
+    [
+     "Japanese",
+     57
+    ]
+   ],
+   "n_rows": 10,
+   "expected": [
+    [
+     "American",
+     147
+    ],
+    [
+     "BBQ",
+     89
+    ],
+    [
+     "British",
+     99
+    ],
+    [
+     "Chinese",
+     101
+    ],
+    [
+     "Indian",
+     100
+    ],
+    [
+     "Italian",
+     222
+    ],
+    [
+     "Japanese",
+     57
+    ],
+    [
+     "Mexican",
+     135
+    ],
+    [
+     "Vietnamese",
+     74
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:don't",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 0.95,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=breakdown",
+    "plan_issues=unbindable:Dataset 'food@orders' cannot satisfy: unsupported_negative_existence:don't"
+   ],
+   "latency_ms": 410.6,
+   "error": null
+  },
+  {
+   "id": "FD03",
+   "db": "food@orders",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which 3 restaurants brought in the most food sales (before fees and tips) on delivered orders?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "Taco Loco (Downtown)",
+     3432.01
+    ],
+    [
+     "Burger Barn",
+     3189.51
+    ],
+    [
+     "Pizza Planet (Westside)",
+     2936.01
+    ]
+   ],
+   "reason": "'delivered' could mean the value 'DELIVERED' of order_status -> 3 groups (Burger Barn: 489.86, Taco Loco (Downtown): 395.85, Green Bowl: 376.03), or just ordinary wording -> 3 groups (Burger Barn: 514.76, Taco Loco (Downtown): 409.49, Green Bowl: 401.59). Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "'delivered' could mean the value 'DELIVERED' of order_status -> 3 groups (Burger Barn: 489.86, Taco Loco (Downtown): 395.85, Green Bowl: 376.03), or just ordinary wording -> 3 groups (Burger Barn: 514.76, Taco Loco (Downtown): 409.49, Green Bowl: 401.59). Which did you mean?"
+   ],
+   "latency_ms": 403.2,
+   "error": null
+  },
+  {
+   "id": "FD04",
+   "db": "food@orders",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Show monthly order volume for January through June 2025, going by when the order was placed.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT substr(\"orders\".\"order_ts\",1,7) AS month, COUNT(*) AS row_count FROM \"orders\" WHERE \"orders\".\"order_ts\" >= '2025-01-01' AND \"orders\".\"order_ts\" < '2025-07-01' GROUP BY substr(\"orders\".\"order_ts\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-01",
+     222
+    ],
+    [
+     "2025-02",
+     187
+    ],
+    [
+     "2025-03",
+     194
+    ],
+    [
+     "2025-04",
+     198
+    ],
+    [
+     "2025-05",
+     224
+    ],
+    [
+     "2025-06",
+     175
+    ]
+   ],
+   "n_rows": 6,
+   "expected": [
+    [
+     "2025-01",
+     222
+    ],
+    [
+     "2025-02",
+     187
+    ],
+    [
+     "2025-03",
+     194
+    ],
+    [
+     "2025-04",
+     198
+    ],
+    [
+     "2025-05",
+     224
+    ],
+    [
+     "2025-06",
+     175
+    ]
+   ],
+   "reason": "I don't know how 'volume' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=trend"
+   ],
+   "latency_ms": 305.5,
+   "error": null
+  },
+  {
+   "id": "FD05",
+   "db": "food@orders",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total tips broken out by the kind of vehicle the courier rides (bike, car, scooter). Leave out couriers whose vehicle isn't recorded.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"orders\".\"tip_amt\") AS sum_tip_amt FROM \"orders\" LEFT JOIN couriers AS j_courier_id ON j_courier_id.courier_id = orders.courier_id WHERE j_courier_id.vehicle_cd = 'BIKE'",
+   "rows": [
+    [
+     1604.83
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     "BIKE",
+     1604.83
+    ],
+    [
+     "CAR",
+     1061.53
+    ],
+    [
+     "SCTR",
+     806.01
+    ]
+   ],
+   "reason": "the question mentions 'car' (in couriers.vehicle_cd) but the query I generated does not use it, so the answer would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 296.1,
+   "error": null
+  },
+  {
+   "id": "FD06",
+   "db": "food@orders",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many delivered orders came from restaurants whose average prep time is 15 minutes or more?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     516
+    ]
+   ],
+   "reason": "'delivered' could mean the value 'DELIVERED' of order_status -> 1064, or just ordinary wording -> 1200. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "'delivered' could mean the value 'DELIVERED' of order_status -> 1064, or just ordinary wording -> 1200. Which did you mean?"
+   ],
+   "latency_ms": 253.3,
+   "error": null
+  },
+  {
+   "id": "FD07",
+   "db": "food@orders",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What's the average star rating customers give each courier? List by courier name.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_courier_id.courier_nm AS courier_nm, COUNT(*) AS row_count FROM \"orders\" LEFT JOIN couriers AS j_courier_id ON j_courier_id.courier_id = orders.courier_id GROUP BY j_courier_id.courier_nm ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Diego Ruiz",
+     134
+    ],
+    [
+     "Mei Chen",
+     132
+    ],
+    [
+     "Ravi Menon",
+     118
+    ],
+    [
+     "Tom O'Hara",
+     116
+    ],
+    [
+     "Anna Novak",
+     115
+    ],
+    [
+     "Yusuf Demir",
+     112
+    ],
+    [
+     "Hannah Kim",
+     111
+    ],
+    [
+     "Lucia Ferreira",
+     110
+    ],
+    [
+     "Kwame Asante",
+     103
+    ],
+    [
+     "Sofia Brandt",
+     98
+    ],
+    [
+     null,
+     51
+    ]
+   ],
+   "n_rows": 11,
+   "expected": [
+    [
+     "Anna Novak",
+     3.808219178082192
+    ],
+    [
+     "Diego Ruiz",
+     3.4761904761904763
+    ],
+    [
+     "Hannah Kim",
+     3.661764705882353
+    ],
+    [
+     "Kwame Asante",
+     3.4057971014492754
+    ],
+    [
+     "Lucia Ferreira",
+     3.5277777777777777
+    ],
+    [
+     "Mei Chen",
+     3.632183908045977
+    ],
+    [
+     "Ravi Menon",
+     3.5324675324675323
+    ],
+    [
+     "Sofia Brandt",
+     3.550724637681159
+    ],
+    [
+     "Tom O'Hara",
+     3.4216867469879517
+    ],
+    [
+     "Yusuf Demir",
+     3.4324324324324325
+    ]
+   ],
+   "reason": "the question is about 'customers', but the query's base table is 'orders' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.9545,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=breakdown"
+   ],
+   "latency_ms": 275.9,
+   "error": null
+  },
+  {
+   "id": "FD08",
+   "db": "food@orders",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "avg tkt size (subtotal) for GOLD-tier custs, delivered orders only?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     26.798934010152287
+    ]
+   ],
+   "reason": "This question can be read more than one way and the answer depends on it: via orders.cust_id=customers.cust_id -> 5,279.39; via orders.cust_rating=customers.cust_id -> 2,028.17. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: via orders.cust_id=customers.cust_id -> 5,279.39; via orders.cust_rating=customers.cust_id -> 2,028.17. Which did you mean?"
+   ],
+   "latency_ms": 636.1,
+   "error": null
+  },
+  {
+   "id": "FD09",
+   "db": "food@orders",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many orders didn't use the SAVE10 promo?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"orders\" WHERE \"orders\".\"promo_cd\" = 'SAVE10'",
+   "rows": [
+    [
+     170
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     1030
+    ]
+   ],
+   "reason": "the answer may not mean what you asked: the question excludes 'SAVE10' but the query keeps only rows equal to it",
+   "semantic_findings": [
+    {
+     "rule": "negated_value_kept",
+     "severity": "violation",
+     "detail": "the question excludes 'SAVE10' but the query keeps only rows equal to it"
+    }
+   ],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0,
+    "semantic_violations": 1.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 468.2,
+   "error": null
+  },
+  {
+   "id": "FD10",
+   "db": "food@orders",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many delivered orders showed up late?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     405
+    ]
+   ],
+   "reason": "'delivered' could mean the value 'DELIVERED' of order_status -> 405, or just ordinary wording -> 427. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "'delivered' could mean the value 'DELIVERED' of order_status -> 405, or just ordinary wording -> 427. Which did you mean?"
+   ],
+   "latency_ms": 345.3,
+   "error": null
+  },
+  {
+   "id": "FD11",
+   "db": "food@orders",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Of the delivered orders, how many had a problem with the drop-off, i.e. weren't marked as delivered OK?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS order_count FROM \"orders\" WHERE \"orders\".\"order_status\" = 'DELIVERED' AND \"orders\".\"delivered_ok\" = 1",
+   "rows": [
+    [
+     980
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     84
+    ]
+   ],
+   "reason": "I don't know how 'problem' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 404.6,
+   "error": null
+  },
+  {
+   "id": "FD12",
+   "db": "food@orders",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many different customers have ordered from Mama's Kitchen?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     74
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 204.9,
+   "error": null
+  },
+  {
+   "id": "FD13",
+   "db": "food@orders",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total delivery fee on delivered orders that had at least one drink in them?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     1466.74
+    ]
+   ],
+   "reason": "'delivered' could mean the value 'DELIVERED' of order_status -> 478, or just ordinary wording -> 542. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "'delivered' could mean the value 'DELIVERED' of order_status -> 478, or just ordinary wording -> 542. Which did you mean?"
+   ],
+   "latency_ms": 266.7,
+   "error": null
+  },
+  {
+   "id": "FD14",
+   "db": "food@orders",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many orders never got a courier assigned?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"orders\"",
+   "rows": [
+    [
+     1200
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     51
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=direct_kpi",
+    "plan_issues=unbindable:Dataset 'food@orders' cannot satisfy: unsupported_negative_existence:never"
+   ],
+   "latency_ms": 276.5,
+   "error": null
+  },
+  {
+   "id": "FD15",
+   "db": "food@orders",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Compare delivered order counts for Q1 vs Q2 2025 (by order date).",
+   "action": "CLARIFY",
+   "confidence": 0.9071,
+   "sql": "SELECT '2025-02' AS period, COUNT(*) AS row_count FROM \"orders\" WHERE \"order_ts\" >= '2025-02-01' AND \"order_ts\" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, COUNT(*) AS row_count FROM \"orders\" WHERE \"order_ts\" >= '2025-05-01' AND \"order_ts\" < '2025-06-01' ORDER BY period",
+   "rows": [
+    [
+     "2025-02",
+     187
+    ],
+    [
+     "2025-05",
+     224
+    ]
+   ],
+   "n_rows": 2,
+   "expected": [
+    [
+     "Q1",
+     534
+    ],
+    [
+     "Q2",
+     530
+    ]
+   ],
+   "reason": "plan \u2192 SQL fidelity check failed: the generated SQL does not fully implement the analytical plan",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.8,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.8571
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=comparison",
+    "fidelity_failed=filter_eq:order_status:equality filter present"
+   ],
+   "latency_ms": 264.4,
+   "error": null
+  },
+  {
+   "id": "FD16",
+   "db": "food@orders",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of delivered orders arrived late?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     38.06390977443609
+    ]
+   ],
+   "reason": "'delivered' could mean the value 'DELIVERED' of order_status -> 405, or just ordinary wording -> 427. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "'delivered' could mean the value 'DELIVERED' of order_status -> 405, or just ordinary wording -> 427. Which did you mean?"
+   ],
+   "latency_ms": 288.8,
+   "error": null
+  },
+  {
+   "id": "FD17",
+   "db": "food@orders",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What share of delivered food sales came from restaurants in each city? Give percentages.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "Lakeside",
+     21.5834537588534
+    ],
+    [
+     "Riverton",
+     36.437960434800544
+    ],
+    [
+     "Springfield",
+     41.97858580634606
+    ]
+   ],
+   "reason": "this is computed as 100 x (total delivered food sales for restaurants in each city? Give percentages.) / (total delivered food sales), but a part could not be answered safely ('What is the total delivered food sales for restaurants in each city? Give percentages.?': Could not compile a SQL query for this plan.; 'What is the total delivered food sales?': Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.)",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "composite=share: 100 x (total delivered food sales for restaurants in each city? Give percentages.) / (total delivered food sales)",
+    "composite_part_a=What is the total delivered food sales for restaurants in each city? Give percentages.?",
+    "composite_part_b=What is the total delivered food sales?",
+    "part_a:Could not compile a SQL query for this plan.",
+    "part_b:Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 647.3,
+   "error": null
+  },
+  {
+   "id": "FD18",
+   "db": "food@orders",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "What were total food sales at Closed Corner Cafe?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 190.7,
+   "error": null
+  },
+  {
+   "id": "FD19",
+   "db": "food@orders",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What was our total tip income for March 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question can be read more than one way and the answer depends on it: by order_ts -> 626.85; by dlv_ts -> 613.19; by hire_dt -> None. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by order_ts -> 626.85; by dlv_ts -> 613.19; by hire_dt -> None. Which did you mean?"
+   ],
+   "latency_ms": 491.8,
+   "error": null
+  },
+  {
+   "id": "FD20",
+   "db": "food@orders",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which restaurant is doing best?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_restaurant_id.rest_nm AS rest_nm, COUNT(*) AS row_count FROM \"orders\" LEFT JOIN restaurants AS j_restaurant_id ON j_restaurant_id.restaurant_id = orders.restaurant_id WHERE j_restaurant_id.rest_nm IS NOT NULL GROUP BY j_restaurant_id.rest_nm ORDER BY row_count DESC LIMIT 1",
+   "rows": [
+    [
+     "Burger Barn",
+     147
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "the answer may not mean what you asked: the question asks who is doing best or performing, but names no measure; the query picked one by default",
+   "semantic_findings": [
+    {
+     "rule": "vague_metric",
+     "severity": "violation",
+     "detail": "the question asks who is doing best or performing, but names no measure; the query picked one by default"
+    }
+   ],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0,
+    "semantic_violations": 1.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=top_n"
+   ],
+   "latency_ms": 394.9,
+   "error": null
+  },
+  {
+   "id": "FD21",
+   "db": "food@orders",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our average order value?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 256.3,
+   "error": null
+  },
+  {
+   "id": "FD22",
+   "db": "food@orders",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Break down order revenue by item category.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 250.7,
+   "error": null
+  },
+  {
+   "id": "FD23",
+   "db": "food@orders",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many big orders did we get?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS order_count FROM \"orders\"",
+   "rows": [
+    [
+     1200
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=food_orders table=orders",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 302.8,
+   "error": null
+  },
+  {
+   "id": "FD24",
+   "db": "food@orders",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Forecast how many orders we'll get in July 2025.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?')."
+   ],
+   "latency_ms": 7.2,
+   "error": null
+  },
+  {
+   "id": "FD25",
+   "db": "food@orders",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which customers have never placed an order?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 192.4,
+   "error": null
+  },
+  {
+   "id": "FD26",
+   "db": "food@orders",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average distance a courier travels per delivery?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('food@orders'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 214.4,
+   "error": null
+  },
+  {
+   "id": "LS01",
+   "db": "lease@leases",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total monthly rent across all of our active leases?",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT substr(\"leases\".\"monthly_rent\",1,7) AS month, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"lease_status\" = 'ACTIVE' AND \"leases\".\"monthly_rent\" IS NOT NULL GROUP BY substr(\"leases\".\"monthly_rent\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "1190.0",
+     1
+    ],
+    [
+     "1245.0",
+     1
+    ],
+    [
+     "1260.0",
+     1
+    ],
+    [
+     "1280.0",
+     1
+    ],
+    [
+     "1325.0",
+     1
+    ],
+    [
+     "1345.0",
+     1
+    ],
+    [
+     "1360.0",
+     1
+    ],
+    [
+     "1415.0",
+     1
+    ],
+    [
+     "1440.0",
+     1
+    ],
+    [
+     "1450.0",
+     1
+    ],
+    [
+     "1465.0",
+     1
+    ],
+    [
+     "1475.0",
+     1
+    ],
+    [
+     "1485.0",
+     1
+    ],
+    [
+     "1515.0",
+     1
+    ],
+    [
+     "1520.0",
+     1
+    ],
+    [
+     "1565.0",
+     1
+    ],
+    [
+     "1575.0",
+     1
+    ],
+    [
+     "1595.0",
+     1
+    ],
+    [
+     "1600.0",
+     1
+    ],
+    [
+     "1610.0",
+     1
+    ],
+    [
+     "1615.0",
+     1
+    ],
+    [
+     "1620.0",
+     2
+    ],
+    [
+     "1630.0",
+     1
+    ],
+    [
+     "1650.0",
+     1
+    ],
+    [
+     "1660.0",
+     2
+    ],
+    [
+     "1665.0",
+     2
+    ],
+    [
+     "1670.0",
+     2
+    ],
+    [
+     "1685.0",
+     1
+    ],
+    [
+     "1730.0",
+     1
+    ],
+    [
+     "1755.0",
+     1
+    ],
+    [
+     "1770.0",
+     1
+    ],
+    [
+     "1775.0",
+     1
+    ],
+    [
+     "1800.0",
+     1
+    ],
+    [
+     "1805.0",
+     1
+    ],
+    [
+     "1810.0",
+     1
+    ],
+    [
+     "1815.0",
+     2
+    ],
+    [
+     "1835.0",
+     1
+    ],
+    [
+     "1840.0",
+     1
+    ],
+    [
+     "1870.0",
+     1
+    ],
+    [
+     "1875.0",
+     1
+    ],
+    [
+     "1910.0",
+     1
+    ],
+    [
+     "1920.0",
+     1
+    ],
+    [
+     "1925.0",
+     1
+    ],
+    [
+     "1935.0",
+     1
+    ],
+    [
+     "1940.0",
+     1
+    ],
+    [
+     "2020.0",
+     1
+    ],
+    [
+     "2050.0",
+     2
+    ],
+    [
+     "2095.0",
+     1
+    ],
+    [
+     "2105.0",
+     1
+    ],
+    [
+     "2115.0",
+     1
+    ],
+    [
+     "2130.0",
+     2
+    ],
+    [
+     "2165.0",
+     1
+    ],
+    [
+     "2170.0",
+     1
+    ],
+    [
+     "2190.0",
+     2
+    ],
+    [
+     "2195.0",
+     1
+    ],
+    [
+     "2205.0",
+     1
+    ],
+    [
+     "2210.0",
+     1
+    ],
+    [
+     "2225.0",
+     1
+    ],
+    [
+     "2230.0",
+     1
+    ],
+    [
+     "2235.0",
+     1
+    ],
+    [
+     "2265.0",
+     1
+    ],
+    [
+     "2280.0",
+     1
+    ],
+    [
+     "2325.0",
+     1
+    ],
+    [
+     "2345.0",
+     1
+    ],
+    [
+     "2395.0",
+     1
+    ],
+    [
+     "2400.0",
+     1
+    ],
+    [
+     "2430.0",
+     1
+    ],
+    [
+     "2450.0",
+     1
+    ],
+    [
+     "2460.0",
+     1
+    ],
+    [
+     "2465.0",
+     1
+    ],
+    [
+     "2490.0",
+     1
+    ],
+    [
+     "2525.0",
+     1
+    ],
+    [
+     "2545.0",
+     2
+    ],
+    [
+     "2590.0",
+     1
+    ],
+    [
+     "2600.0",
+     1
+    ],
+    [
+     "2605.0",
+     1
+    ],
+    [
+     "2615.0",
+     1
+    ],
+    [
+     "2705.0",
+     1
+    ],
+    [
+     "2710.0",
+     1
+    ],
+    [
+     "2750.0",
+     1
+    ],
+    [
+     "2840.0",
+     1
+    ],
+    [
+     "2865.0",
+     1
+    ],
+    [
+     "2950.0",
+     1
+    ],
+    [
+     "2995.0",
+     1
+    ],
+    [
+     "3235.0",
+     1
+    ],
+    [
+     "3270.0",
+     1
+    ],
+    [
+     "3415.0",
+     1
+    ],
+    [
+     "3450.0",
+     1
+    ],
+    [
+     "3585.0",
+     1
+    ],
+    [
+     "3595.0",
+     1
+    ],
+    [
+     "3645.0",
+     1
+    ],
+    [
+     "3755.0",
+     1
+    ],
+    [
+     "3845.0",
+     1
+    ]
+   ],
+   "n_rows": 93,
+   "expected": [
+    [
+     216300.0
+    ]
+   ],
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "pass:breakdown_reconciles:groups sum 102 == total 102",
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=trend"
+   ],
+   "latency_ms": 792.6,
+   "error": null
+  },
+  {
+   "id": "LS02",
+   "db": "lease@leases",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many leases have we written for each unit type?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_unit_id.unit_type AS unit_type, COUNT(*) AS row_count FROM \"leases\" LEFT JOIN units AS j_unit_id ON j_unit_id.unit_id = leases.unit_id GROUP BY j_unit_id.unit_type ORDER BY row_count DESC",
+   "rows": [
+    [
+     "1BR",
+     254
+    ],
+    [
+     "2BR",
+     162
+    ],
+    [
+     "STUDIO",
+     90
+    ],
+    [
+     "TH",
+     62
+    ],
+    [
+     "3BR",
+     49
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     "1BR",
+     254
+    ],
+    [
+     "2BR",
+     162
+    ],
+    [
+     "3BR",
+     49
+    ],
+    [
+     "STUDIO",
+     90
+    ],
+    [
+     "TH",
+     62
+    ]
+   ],
+   "reason": "I don't know how 'written' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=breakdown"
+   ],
+   "latency_ms": 752.5,
+   "error": null
+  },
+  {
+   "id": "LS03",
+   "db": "lease@leases",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Which three buildings had the highest average monthly rent on leases signed during 2024?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "Harbor View (South)",
+     2431.153846153846
+    ],
+    [
+     "Harbor View (North)",
+     2410.0
+    ],
+    [
+     "The Foundry",
+     2165.3571428571427
+    ]
+   ],
+   "reason": "This question can be read more than one way and the answer depends on it: by signed_dt -> 7.17; by start_dt -> 7.42; by end_dt -> 6.83; by monthly_rent -> None. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by signed_dt -> 7.17; by start_dt -> 7.42; by end_dt -> 6.83; by monthly_rent -> None. Which did you mean?"
+   ],
+   "latency_ms": 1885.4,
+   "error": null
+  },
+  {
+   "id": "LS04",
+   "db": "lease@leases",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many leases began in each year from 2019 to 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "2019",
+     114
+    ],
+    [
+     "2020",
+     95
+    ],
+    [
+     "2021",
+     93
+    ],
+    [
+     "2022",
+     101
+    ],
+    [
+     "2023",
+     85
+    ],
+    [
+     "2024",
+     89
+    ],
+    [
+     "2025",
+     40
+    ]
+   ],
+   "reason": "This question can be read more than one way and the answer depends on it: by signed_dt -> 7 groups (2019: 111, 2020: 89, 2021: 97, 2022: 97, 2023: 96, 2024: 86, ...); by start_dt -> 7 groups (2019: 114, 2020: 95, 2021: 93, 2022: 101, 2023: 85, 2024: 89, ...); by end_dt -> 9 groups (2019: 10, 2020: 96, 2021: 94, 2022: 97, 2023: 95, 2024: 82, ...); by monthly_rent -> no rows. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by signed_dt -> 7 groups (2019: 111, 2020: 89, 2021: 97, 2022: 97, 2023: 96, 2024: 86, ...); by start_dt -> 7 groups (2019: 114, 2020: 95, 2021: 93, 2022: 101, 2023: 85, 2024: 89, ...); by end_dt -> 9 groups (2019: 10, 2020: 96, 2021: 94, 2022: 97, 2023: 95, 2024: 82, ...); by monthly_rent -> no rows. Which did you mean?"
+   ],
+   "latency_ms": 1515.2,
+   "error": null
+  },
+  {
+   "id": "LS05",
+   "db": "lease@leases",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many leases are for units of at least 900 square feet?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"leases\" LEFT JOIN units AS j_unit_id ON j_unit_id.unit_id = leases.unit_id WHERE j_unit_id.sq_ft >= 900",
+   "rows": [
+    [
+     238
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     238
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "vocabulary: 'square feet' read as 'sq ft' (unit)",
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 761.8,
+   "error": null
+  },
+  {
+   "id": "LS06",
+   "db": "lease@leases",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many leases did each leasing agent sign? Show the agents' names.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"leases\"",
+   "rows": [
+    [
+     617
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     "Chloe Dubois",
+     103
+    ],
+    [
+     "Marcus Webb",
+     183
+    ],
+    [
+     "Nora O'Connell",
+     70
+    ],
+    [
+     "Paula Grant",
+     169
+    ],
+    [
+     "Raj Iyer",
+     92
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:leasing",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=direct_kpi",
+    "plan_issues=unbindable:Dataset 'lease@leases' cannot satisfy: dimension:leasing"
+   ],
+   "latency_ms": 562.0,
+   "error": null
+  },
+  {
+   "id": "LS07",
+   "db": "lease@leases",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total monthly rent on active leases, by property manager.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT substr(\"leases\".\"monthly_rent\",1,7) AS month, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"lease_status\" = 'ACTIVE' AND \"leases\".\"monthly_rent\" IS NOT NULL GROUP BY substr(\"leases\".\"monthly_rent\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "1190.0",
+     1
+    ],
+    [
+     "1245.0",
+     1
+    ],
+    [
+     "1260.0",
+     1
+    ],
+    [
+     "1280.0",
+     1
+    ],
+    [
+     "1325.0",
+     1
+    ],
+    [
+     "1345.0",
+     1
+    ],
+    [
+     "1360.0",
+     1
+    ],
+    [
+     "1415.0",
+     1
+    ],
+    [
+     "1440.0",
+     1
+    ],
+    [
+     "1450.0",
+     1
+    ],
+    [
+     "1465.0",
+     1
+    ],
+    [
+     "1475.0",
+     1
+    ],
+    [
+     "1485.0",
+     1
+    ],
+    [
+     "1515.0",
+     1
+    ],
+    [
+     "1520.0",
+     1
+    ],
+    [
+     "1565.0",
+     1
+    ],
+    [
+     "1575.0",
+     1
+    ],
+    [
+     "1595.0",
+     1
+    ],
+    [
+     "1600.0",
+     1
+    ],
+    [
+     "1610.0",
+     1
+    ],
+    [
+     "1615.0",
+     1
+    ],
+    [
+     "1620.0",
+     2
+    ],
+    [
+     "1630.0",
+     1
+    ],
+    [
+     "1650.0",
+     1
+    ],
+    [
+     "1660.0",
+     2
+    ],
+    [
+     "1665.0",
+     2
+    ],
+    [
+     "1670.0",
+     2
+    ],
+    [
+     "1685.0",
+     1
+    ],
+    [
+     "1730.0",
+     1
+    ],
+    [
+     "1755.0",
+     1
+    ],
+    [
+     "1770.0",
+     1
+    ],
+    [
+     "1775.0",
+     1
+    ],
+    [
+     "1800.0",
+     1
+    ],
+    [
+     "1805.0",
+     1
+    ],
+    [
+     "1810.0",
+     1
+    ],
+    [
+     "1815.0",
+     2
+    ],
+    [
+     "1835.0",
+     1
+    ],
+    [
+     "1840.0",
+     1
+    ],
+    [
+     "1870.0",
+     1
+    ],
+    [
+     "1875.0",
+     1
+    ],
+    [
+     "1910.0",
+     1
+    ],
+    [
+     "1920.0",
+     1
+    ],
+    [
+     "1925.0",
+     1
+    ],
+    [
+     "1935.0",
+     1
+    ],
+    [
+     "1940.0",
+     1
+    ],
+    [
+     "2020.0",
+     1
+    ],
+    [
+     "2050.0",
+     2
+    ],
+    [
+     "2095.0",
+     1
+    ],
+    [
+     "2105.0",
+     1
+    ],
+    [
+     "2115.0",
+     1
+    ],
+    [
+     "2130.0",
+     2
+    ],
+    [
+     "2165.0",
+     1
+    ],
+    [
+     "2170.0",
+     1
+    ],
+    [
+     "2190.0",
+     2
+    ],
+    [
+     "2195.0",
+     1
+    ],
+    [
+     "2205.0",
+     1
+    ],
+    [
+     "2210.0",
+     1
+    ],
+    [
+     "2225.0",
+     1
+    ],
+    [
+     "2230.0",
+     1
+    ],
+    [
+     "2235.0",
+     1
+    ],
+    [
+     "2265.0",
+     1
+    ],
+    [
+     "2280.0",
+     1
+    ],
+    [
+     "2325.0",
+     1
+    ],
+    [
+     "2345.0",
+     1
+    ],
+    [
+     "2395.0",
+     1
+    ],
+    [
+     "2400.0",
+     1
+    ],
+    [
+     "2430.0",
+     1
+    ],
+    [
+     "2450.0",
+     1
+    ],
+    [
+     "2460.0",
+     1
+    ],
+    [
+     "2465.0",
+     1
+    ],
+    [
+     "2490.0",
+     1
+    ],
+    [
+     "2525.0",
+     1
+    ],
+    [
+     "2545.0",
+     2
+    ],
+    [
+     "2590.0",
+     1
+    ],
+    [
+     "2600.0",
+     1
+    ],
+    [
+     "2605.0",
+     1
+    ],
+    [
+     "2615.0",
+     1
+    ],
+    [
+     "2705.0",
+     1
+    ],
+    [
+     "2710.0",
+     1
+    ],
+    [
+     "2750.0",
+     1
+    ],
+    [
+     "2840.0",
+     1
+    ],
+    [
+     "2865.0",
+     1
+    ],
+    [
+     "2950.0",
+     1
+    ],
+    [
+     "2995.0",
+     1
+    ],
+    [
+     "3235.0",
+     1
+    ],
+    [
+     "3270.0",
+     1
+    ],
+    [
+     "3415.0",
+     1
+    ],
+    [
+     "3450.0",
+     1
+    ],
+    [
+     "3585.0",
+     1
+    ],
+    [
+     "3595.0",
+     1
+    ],
+    [
+     "3645.0",
+     1
+    ],
+    [
+     "3755.0",
+     1
+    ],
+    [
+     "3845.0",
+     1
+    ]
+   ],
+   "n_rows": 93,
+   "expected": [
+    [
+     "Chloe Dubois",
+     39255.0
+    ],
+    [
+     "Janet Ross",
+     47330.0
+    ],
+    [
+     "Nora O'Connell",
+     45610.0
+    ],
+    [
+     "Raj Iyer",
+     45280.0
+    ],
+    [
+     "Victor Hale",
+     38825.0
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:property",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=trend",
+    "plan_issues=unbindable:Dataset 'lease@leases' cannot satisfy: dimension:property"
+   ],
+   "latency_ms": 618.2,
+   "error": null
+  },
+  {
+   "id": "LS08",
+   "db": "lease@leases",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "avg sec dep on 2BR units where pets ok?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     3115.073529411765
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 235.3,
+   "error": null
+  },
+  {
+   "id": "LS09",
+   "db": "lease@leases",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Leaving out leases that came with a move-in concession, what's the average monthly rent?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT AVG(v) AS avg_per_month_sum_concession_amt FROM (SELECT substr(\"leases\".\"monthly_rent\",1,7) AS bucket, SUM(\"leases\".\"concession_amt\") AS v FROM \"leases\" WHERE \"leases\".\"monthly_rent\" IS NOT NULL GROUP BY substr(\"leases\".\"monthly_rent\",1,7))",
+   "rows": [
+    [
+     400.0
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     1961.4814814814815
+    ]
+   ],
+   "reason": "I don't know how 'move' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=average_at_grain"
+   ],
+   "latency_ms": 685.8,
+   "error": null
+  },
+  {
+   "id": "LS10",
+   "db": "lease@leases",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many leases are not in good standing?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"in_good_standing\" = 0",
+   "rows": [
+    [
+     65
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     65
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 854.9,
+   "error": null
+  },
+  {
+   "id": "LS11",
+   "db": "lease@leases",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many of our leases are month-to-month?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"leases\"",
+   "rows": [
+    [
+     617
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     18
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 772.3,
+   "error": null
+  },
+  {
+   "id": "LS12",
+   "db": "lease@leases",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many unique tenants have ever signed a lease with us?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT \"leases\".\"tenant_id\") AS distinct_tenant_id FROM \"leases\" WHERE \"leases\".\"signed_dt\" IS NULL",
+   "rows": [
+    [
+     0
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     384
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 794.1,
+   "error": null
+  },
+  {
+   "id": "LS13",
+   "db": "lease@leases",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total monthly rent across leases that have had at least one late rent payment?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT \"leases\".\"lease_status\" AS lease_status, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"monthly_rent\" IS NOT NULL AND \"leases\".\"lease_status\" IS NOT NULL GROUP BY \"leases\".\"lease_status\" ORDER BY row_count ASC LIMIT 5",
+   "rows": [
+    [
+     "TERMINATED",
+     47
+    ],
+    [
+     "ACTIVE",
+     102
+    ],
+    [
+     "RENEWED",
+     158
+    ],
+    [
+     "EXPIRED",
+     310
+    ]
+   ],
+   "n_rows": 4,
+   "expected": [
+    [
+     241020.0
+    ]
+   ],
+   "reason": "the question is about 'payment', but the query's base table is 'leases' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=bottom_n"
+   ],
+   "latency_ms": 756.1,
+   "error": null
+  },
+  {
+   "id": "LS14",
+   "db": "lease@leases",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How much in late fees have we charged on Oak & Elm Residences leases?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     1850.0
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 259.4,
+   "error": null
+  },
+  {
+   "id": "LS15",
+   "db": "lease@leases",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Leases signed in 2023 versus 2024: how many in each year?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT substr(\"leases\".\"signed_dt\",1,4) AS year, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"signed_dt\" IS NOT NULL GROUP BY substr(\"leases\".\"signed_dt\",1,4) ORDER BY year",
+   "rows": [
+    [
+     "2018",
+     13
+    ],
+    [
+     "2019",
+     111
+    ],
+    [
+     "2020",
+     89
+    ],
+    [
+     "2021",
+     97
+    ],
+    [
+     "2022",
+     97
+    ],
+    [
+     "2023",
+     96
+    ],
+    [
+     "2024",
+     86
+    ],
+    [
+     "2025",
+     28
+    ]
+   ],
+   "n_rows": 8,
+   "expected": [
+    [
+     "2023",
+     96
+    ],
+    [
+     "2024",
+     86
+    ]
+   ],
+   "reason": "the question names 2023, 2024 but the generated query has no such time constraint, so the answer would cover all periods",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=trend"
+   ],
+   "latency_ms": 783.2,
+   "error": null
+  },
+  {
+   "id": "LS16",
+   "db": "lease@leases",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percent of our leases are renewals?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT 100.0 * (SELECT COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"is_renewal\" = 1) / NULLIF((SELECT COUNT(*) AS row_count FROM \"leases\"), 0) AS value",
+   "rows": [
+    [
+     25.60777957860616
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     25.60777957860616
+    ]
+   ],
+   "reason": "answer rests on: computed as 100 x (number of leases that are renewals) / (number of leases)",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0,
+    "composite_parts": 2.0
+   },
+   "notes": [
+    "composite=pct_rows: 100 x (number of leases that are renewals) / (number of leases)",
+    "composite_part_a=How many leases are renewals?",
+    "composite_part_b=How many leases were there?",
+    "part_a:active_dataset=lease_leases table=leases",
+    "part_a:plan_kind=direct_kpi",
+    "part_b:active_dataset=lease_leases table=leases",
+    "part_b:plan_kind=direct_kpi"
+   ],
+   "latency_ms": 1841.0,
+   "error": null
+  },
+  {
+   "id": "LS17",
+   "db": "lease@leases",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "For active leases, what percentage of total monthly rent does each building account for?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT substr(\"leases\".\"monthly_rent\",1,7) AS month, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"lease_status\" = 'ACTIVE' AND \"leases\".\"monthly_rent\" IS NOT NULL GROUP BY substr(\"leases\".\"monthly_rent\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "1190.0",
+     1
+    ],
+    [
+     "1245.0",
+     1
+    ],
+    [
+     "1260.0",
+     1
+    ],
+    [
+     "1280.0",
+     1
+    ],
+    [
+     "1325.0",
+     1
+    ],
+    [
+     "1345.0",
+     1
+    ],
+    [
+     "1360.0",
+     1
+    ],
+    [
+     "1415.0",
+     1
+    ],
+    [
+     "1440.0",
+     1
+    ],
+    [
+     "1450.0",
+     1
+    ],
+    [
+     "1465.0",
+     1
+    ],
+    [
+     "1475.0",
+     1
+    ],
+    [
+     "1485.0",
+     1
+    ],
+    [
+     "1515.0",
+     1
+    ],
+    [
+     "1520.0",
+     1
+    ],
+    [
+     "1565.0",
+     1
+    ],
+    [
+     "1575.0",
+     1
+    ],
+    [
+     "1595.0",
+     1
+    ],
+    [
+     "1600.0",
+     1
+    ],
+    [
+     "1610.0",
+     1
+    ],
+    [
+     "1615.0",
+     1
+    ],
+    [
+     "1620.0",
+     2
+    ],
+    [
+     "1630.0",
+     1
+    ],
+    [
+     "1650.0",
+     1
+    ],
+    [
+     "1660.0",
+     2
+    ],
+    [
+     "1665.0",
+     2
+    ],
+    [
+     "1670.0",
+     2
+    ],
+    [
+     "1685.0",
+     1
+    ],
+    [
+     "1730.0",
+     1
+    ],
+    [
+     "1755.0",
+     1
+    ],
+    [
+     "1770.0",
+     1
+    ],
+    [
+     "1775.0",
+     1
+    ],
+    [
+     "1800.0",
+     1
+    ],
+    [
+     "1805.0",
+     1
+    ],
+    [
+     "1810.0",
+     1
+    ],
+    [
+     "1815.0",
+     2
+    ],
+    [
+     "1835.0",
+     1
+    ],
+    [
+     "1840.0",
+     1
+    ],
+    [
+     "1870.0",
+     1
+    ],
+    [
+     "1875.0",
+     1
+    ],
+    [
+     "1910.0",
+     1
+    ],
+    [
+     "1920.0",
+     1
+    ],
+    [
+     "1925.0",
+     1
+    ],
+    [
+     "1935.0",
+     1
+    ],
+    [
+     "1940.0",
+     1
+    ],
+    [
+     "2020.0",
+     1
+    ],
+    [
+     "2050.0",
+     2
+    ],
+    [
+     "2095.0",
+     1
+    ],
+    [
+     "2105.0",
+     1
+    ],
+    [
+     "2115.0",
+     1
+    ],
+    [
+     "2130.0",
+     2
+    ],
+    [
+     "2165.0",
+     1
+    ],
+    [
+     "2170.0",
+     1
+    ],
+    [
+     "2190.0",
+     2
+    ],
+    [
+     "2195.0",
+     1
+    ],
+    [
+     "2205.0",
+     1
+    ],
+    [
+     "2210.0",
+     1
+    ],
+    [
+     "2225.0",
+     1
+    ],
+    [
+     "2230.0",
+     1
+    ],
+    [
+     "2235.0",
+     1
+    ],
+    [
+     "2265.0",
+     1
+    ],
+    [
+     "2280.0",
+     1
+    ],
+    [
+     "2325.0",
+     1
+    ],
+    [
+     "2345.0",
+     1
+    ],
+    [
+     "2395.0",
+     1
+    ],
+    [
+     "2400.0",
+     1
+    ],
+    [
+     "2430.0",
+     1
+    ],
+    [
+     "2450.0",
+     1
+    ],
+    [
+     "2460.0",
+     1
+    ],
+    [
+     "2465.0",
+     1
+    ],
+    [
+     "2490.0",
+     1
+    ],
+    [
+     "2525.0",
+     1
+    ],
+    [
+     "2545.0",
+     2
+    ],
+    [
+     "2590.0",
+     1
+    ],
+    [
+     "2600.0",
+     1
+    ],
+    [
+     "2605.0",
+     1
+    ],
+    [
+     "2615.0",
+     1
+    ],
+    [
+     "2705.0",
+     1
+    ],
+    [
+     "2710.0",
+     1
+    ],
+    [
+     "2750.0",
+     1
+    ],
+    [
+     "2840.0",
+     1
+    ],
+    [
+     "2865.0",
+     1
+    ],
+    [
+     "2950.0",
+     1
+    ],
+    [
+     "2995.0",
+     1
+    ],
+    [
+     "3235.0",
+     1
+    ],
+    [
+     "3270.0",
+     1
+    ],
+    [
+     "3415.0",
+     1
+    ],
+    [
+     "3450.0",
+     1
+    ],
+    [
+     "3585.0",
+     1
+    ],
+    [
+     "3595.0",
+     1
+    ],
+    [
+     "3645.0",
+     1
+    ],
+    [
+     "3755.0",
+     1
+    ],
+    [
+     "3845.0",
+     1
+    ]
+   ],
+   "n_rows": 93,
+   "expected": [
+    [
+     "Cedar Ridge",
+     15.423023578363384
+    ],
+    [
+     "Harbor View (North)",
+     18.546000924641703
+    ],
+    [
+     "Harbor View (South)",
+     18.009708737864077
+    ],
+    [
+     "Oak & Elm Residences",
+     17.25150254276468
+    ],
+    [
+     "St. Mary's Lofts",
+     14.680998613037447
+    ],
+    [
+     "The Foundry",
+     16.08876560332871
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:building",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=trend",
+    "plan_issues=unbindable:Dataset 'lease@leases' cannot satisfy: dimension:building"
+   ],
+   "latency_ms": 589.4,
+   "error": null
+  },
+  {
+   "id": "LS18",
+   "db": "lease@leases",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How much monthly rent comes from leases with a security deposit over $10,000?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT substr(\"leases\".\"monthly_rent\",1,7) AS month, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"monthly_rent\" IS NOT NULL GROUP BY substr(\"leases\".\"monthly_rent\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "1000.0",
+     1
+    ],
+    [
+     "1015.0",
+     1
+    ],
+    [
+     "1050.0",
+     1
+    ],
+    [
+     "1060.0",
+     1
+    ],
+    [
+     "1065.0",
+     1
+    ],
+    [
+     "1080.0",
+     1
+    ],
+    [
+     "1090.0",
+     1
+    ],
+    [
+     "1100.0",
+     1
+    ],
+    [
+     "1110.0",
+     1
+    ],
+    [
+     "1115.0",
+     2
+    ],
+    [
+     "1145.0",
+     1
+    ],
+    [
+     "1155.0",
+     2
+    ],
+    [
+     "1165.0",
+     1
+    ],
+    [
+     "1185.0",
+     1
+    ],
+    [
+     "1190.0",
+     2
+    ],
+    [
+     "1195.0",
+     2
+    ],
+    [
+     "1205.0",
+     1
+    ],
+    [
+     "1210.0",
+     2
+    ],
+    [
+     "1215.0",
+     1
+    ],
+    [
+     "1220.0",
+     1
+    ],
+    [
+     "1225.0",
+     1
+    ],
+    [
+     "1235.0",
+     3
+    ],
+    [
+     "1240.0",
+     1
+    ],
+    [
+     "1245.0",
+     3
+    ],
+    [
+     "1250.0",
+     1
+    ],
+    [
+     "1255.0",
+     1
+    ],
+    [
+     "1260.0",
+     2
+    ],
+    [
+     "1265.0",
+     2
+    ],
+    [
+     "1275.0",
+     2
+    ],
+    [
+     "1280.0",
+     2
+    ],
+    [
+     "1290.0",
+     5
+    ],
+    [
+     "1305.0",
+     3
+    ],
+    [
+     "1310.0",
+     1
+    ],
+    [
+     "1315.0",
+     2
+    ],
+    [
+     "1320.0",
+     1
+    ],
+    [
+     "1325.0",
+     2
+    ],
+    [
+     "1330.0",
+     1
+    ],
+    [
+     "1335.0",
+     4
+    ],
+    [
+     "1340.0",
+     2
+    ],
+    [
+     "1345.0",
+     3
+    ],
+    [
+     "1350.0",
+     2
+    ],
+    [
+     "1355.0",
+     3
+    ],
+    [
+     "1360.0",
+     2
+    ],
+    [
+     "1375.0",
+     1
+    ],
+    [
+     "1380.0",
+     1
+    ],
+    [
+     "1385.0",
+     3
+    ],
+    [
+     "1390.0",
+     1
+    ],
+    [
+     "1395.0",
+     1
+    ],
+    [
+     "1400.0",
+     1
+    ],
+    [
+     "1405.0",
+     1
+    ],
+    [
+     "1415.0",
+     4
+    ],
+    [
+     "1420.0",
+     2
+    ],
+    [
+     "1425.0",
+     2
+    ],
+    [
+     "1430.0",
+     4
+    ],
+    [
+     "1440.0",
+     4
+    ],
+    [
+     "1445.0",
+     4
+    ],
+    [
+     "1450.0",
+     4
+    ],
+    [
+     "1455.0",
+     1
+    ],
+    [
+     "1460.0",
+     3
+    ],
+    [
+     "1465.0",
+     3
+    ],
+    [
+     "1470.0",
+     2
+    ],
+    [
+     "1475.0",
+     3
+    ],
+    [
+     "1480.0",
+     3
+    ],
+    [
+     "1485.0",
+     4
+    ],
+    [
+     "1490.0",
+     2
+    ],
+    [
+     "1495.0",
+     3
+    ],
+    [
+     "1500.0",
+     2
+    ],
+    [
+     "1505.0",
+     3
+    ],
+    [
+     "1510.0",
+     1
+    ],
+    [
+     "1515.0",
+     1
+    ],
+    [
+     "1520.0",
+     2
+    ],
+    [
+     "1525.0",
+     1
+    ],
+    [
+     "1530.0",
+     2
+    ],
+    [
+     "1535.0",
+     1
+    ],
+    [
+     "1540.0",
+     1
+    ],
+    [
+     "1545.0",
+     6
+    ],
+    [
+     "1550.0",
+     1
+    ],
+    [
+     "1555.0",
+     1
+    ],
+    [
+     "1560.0",
+     3
+    ],
+    [
+     "1565.0",
+     6
+    ],
+    [
+     "1570.0",
+     4
+    ],
+    [
+     "1575.0",
+     3
+    ],
+    [
+     "1580.0",
+     3
+    ],
+    [
+     "1590.0",
+     4
+    ],
+    [
+     "1595.0",
+     5
+    ],
+    [
+     "1600.0",
+     4
+    ],
+    [
+     "1605.0",
+     2
+    ],
+    [
+     "1610.0",
+     4
+    ],
+    [
+     "1615.0",
+     2
+    ],
+    [
+     "1620.0",
+     4
+    ],
+    [
+     "1625.0",
+     4
+    ],
+    [
+     "1630.0",
+     2
+    ],
+    [
+     "1635.0",
+     5
+    ],
+    [
+     "1640.0",
+     1
+    ],
+    [
+     "1645.0",
+     4
+    ],
+    [
+     "1650.0",
+     2
+    ],
+    [
+     "1660.0",
+     2
+    ],
+    [
+     "1665.0",
+     4
+    ],
+    [
+     "1670.0",
+     4
+    ],
+    [
+     "1675.0",
+     4
+    ],
+    [
+     "1680.0",
+     1
+    ],
+    [
+     "1685.0",
+     4
+    ],
+    [
+     "1690.0",
+     1
+    ],
+    [
+     "1695.0",
+     3
+    ],
+    [
+     "1700.0",
+     2
+    ],
+    [
+     "1705.0",
+     1
+    ],
+    [
+     "1710.0",
+     1
+    ],
+    [
+     "1715.0",
+     2
+    ],
+    [
+     "1720.0",
+     3
+    ],
+    [
+     "1725.0",
+     2
+    ],
+    [
+     "1730.0",
+     7
+    ],
+    [
+     "1735.0",
+     2
+    ],
+    [
+     "1740.0",
+     3
+    ],
+    [
+     "1750.0",
+     4
+    ],
+    [
+     "1755.0",
+     8
+    ],
+    [
+     "1760.0",
+     1
+    ],
+    [
+     "1765.0",
+     2
+    ],
+    [
+     "1770.0",
+     3
+    ],
+    [
+     "1775.0",
+     2
+    ],
+    [
+     "1780.0",
+     4
+    ],
+    [
+     "1785.0",
+     3
+    ],
+    [
+     "1790.0",
+     1
+    ],
+    [
+     "1795.0",
+     1
+    ],
+    [
+     "1800.0",
+     4
+    ],
+    [
+     "1805.0",
+     1
+    ],
+    [
+     "1810.0",
+     3
+    ],
+    [
+     "1815.0",
+     2
+    ],
+    [
+     "1825.0",
+     1
+    ],
+    [
+     "1830.0",
+     4
+    ],
+    [
+     "1835.0",
+     1
+    ],
+    [
+     "1840.0",
+     3
+    ],
+    [
+     "1850.0",
+     1
+    ],
+    [
+     "1855.0",
+     3
+    ],
+    [
+     "1860.0",
+     2
+    ],
+    [
+     "1865.0",
+     2
+    ],
+    [
+     "1870.0",
+     3
+    ],
+    [
+     "1875.0",
+     2
+    ],
+    [
+     "1880.0",
+     1
+    ],
+    [
+     "1885.0",
+     1
+    ],
+    [
+     "1890.0",
+     1
+    ],
+    [
+     "1895.0",
+     3
+    ],
+    [
+     "1900.0",
+     2
+    ],
+    [
+     "1910.0",
+     1
+    ],
+    [
+     "1915.0",
+     1
+    ],
+    [
+     "1920.0",
+     2
+    ],
+    [
+     "1925.0",
+     2
+    ],
+    [
+     "1935.0",
+     3
+    ],
+    [
+     "1940.0",
+     1
+    ],
+    [
+     "1945.0",
+     4
+    ],
+    [
+     "1950.0",
+     2
+    ],
+    [
+     "1955.0",
+     6
+    ],
+    [
+     "1960.0",
+     3
+    ],
+    [
+     "1965.0",
+     1
+    ],
+    [
+     "1970.0",
+     1
+    ],
+    [
+     "1975.0",
+     2
+    ],
+    [
+     "1980.0",
+     1
+    ],
+    [
+     "1985.0",
+     2
+    ],
+    [
+     "1995.0",
+     3
+    ],
+    [
+     "2010.0",
+     1
+    ],
+    [
+     "2015.0",
+     3
+    ],
+    [
+     "2020.0",
+     4
+    ],
+    [
+     "2025.0",
+     2
+    ],
+    [
+     "2030.0",
+     3
+    ],
+    [
+     "2035.0",
+     1
+    ],
+    [
+     "2040.0",
+     2
+    ],
+    [
+     "2045.0",
+     1
+    ],
+    [
+     "2050.0",
+     3
+    ],
+    [
+     "2055.0",
+     4
+    ],
+    [
+     "2060.0",
+     2
+    ],
+    [
+     "2065.0",
+     2
+    ],
+    [
+     "2070.0",
+     3
+    ],
+    [
+     "2080.0",
+     2
+    ],
+    [
+     "2090.0",
+     2
+    ],
+    [
+     "2095.0",
+     2
+    ],
+    [
+     "2100.0",
+     2
+    ],
+    [
+     "2105.0",
+     2
+    ],
+    [
+     "2115.0",
+     5
+    ],
+    [
+     "2120.0",
+     1
+    ],
+    [
+     "2125.0",
+     1
+    ],
+    [
+     "2130.0",
+     3
+    ],
+    [
+     "2140.0",
+     1
+    ],
+    [
+     "2150.0",
+     2
+    ],
+    [
+     "2155.0",
+     1
+    ],
+    [
+     "2165.0",
+     3
+    ],
+    [
+     "2170.0",
+     3
+    ],
+    [
+     "2175.0",
+     1
+    ],
+    [
+     "2180.0",
+     2
+    ],
+    [
+     "2185.0",
+     1
+    ],
+    [
+     "2190.0",
+     2
+    ],
+    [
+     "2195.0",
+     1
+    ],
+    [
+     "2200.0",
+     1
+    ],
+    [
+     "2205.0",
+     3
+    ],
+    [
+     "2210.0",
+     2
+    ],
+    [
+     "2220.0",
+     1
+    ],
+    [
+     "2225.0",
+     3
+    ],
+    [
+     "2230.0",
+     3
+    ],
+    [
+     "2235.0",
+     1
+    ],
+    [
+     "2245.0",
+     1
+    ],
+    [
+     "2250.0",
+     1
+    ],
+    [
+     "2255.0",
+     1
+    ],
+    [
+     "2260.0",
+     2
+    ],
+    [
+     "2265.0",
+     2
+    ],
+    [
+     "2270.0",
+     1
+    ],
+    [
+     "2280.0",
+     3
+    ],
+    [
+     "2285.0",
+     2
+    ],
+    [
+     "2290.0",
+     1
+    ],
+    [
+     "2295.0",
+     1
+    ],
+    [
+     "2305.0",
+     1
+    ],
+    [
+     "2310.0",
+     5
+    ],
+    [
+     "2315.0",
+     1
+    ],
+    [
+     "2320.0",
+     2
+    ],
+    [
+     "2325.0",
+     3
+    ],
+    [
+     "2330.0",
+     2
+    ],
+    [
+     "2335.0",
+     2
+    ],
+    [
+     "2345.0",
+     4
+    ],
+    [
+     "2350.0",
+     1
+    ],
+    [
+     "2360.0",
+     2
+    ],
+    [
+     "2375.0",
+     1
+    ],
+    [
+     "2380.0",
+     1
+    ],
+    [
+     "2395.0",
+     1
+    ],
+    [
+     "2400.0",
+     1
+    ],
+    [
+     "2410.0",
+     1
+    ],
+    [
+     "2415.0",
+     3
+    ],
+    [
+     "2425.0",
+     1
+    ],
+    [
+     "2430.0",
+     2
+    ],
+    [
+     "2450.0",
+     1
+    ],
+    [
+     "2455.0",
+     4
+    ],
+    [
+     "2460.0",
+     2
+    ],
+    [
+     "2465.0",
+     3
+    ],
+    [
+     "2475.0",
+     2
+    ],
+    [
+     "2490.0",
+     3
+    ],
+    [
+     "2495.0",
+     2
+    ],
+    [
+     "2510.0",
+     2
+    ],
+    [
+     "2525.0",
+     3
+    ],
+    [
+     "2535.0",
+     2
+    ],
+    [
+     "2540.0",
+     1
+    ],
+    [
+     "2545.0",
+     3
+    ],
+    [
+     "2560.0",
+     2
+    ],
+    [
+     "2565.0",
+     2
+    ],
+    [
+     "2570.0",
+     1
+    ],
+    [
+     "2575.0",
+     1
+    ],
+    [
+     "2590.0",
+     1
+    ],
+    [
+     "2600.0",
+     3
+    ],
+    [
+     "2605.0",
+     3
+    ],
+    [
+     "2615.0",
+     2
+    ],
+    [
+     "2620.0",
+     1
+    ],
+    [
+     "2625.0",
+     1
+    ],
+    [
+     "2630.0",
+     1
+    ],
+    [
+     "2640.0",
+     1
+    ],
+    [
+     "2645.0",
+     1
+    ],
+    [
+     "2705.0",
+     1
+    ],
+    [
+     "2710.0",
+     2
+    ],
+    [
+     "2720.0",
+     1
+    ],
+    [
+     "2730.0",
+     1
+    ],
+    [
+     "2750.0",
+     1
+    ],
+    [
+     "2760.0",
+     1
+    ],
+    [
+     "2765.0",
+     1
+    ],
+    [
+     "2770.0",
+     1
+    ],
+    [
+     "2795.0",
+     1
+    ],
+    [
+     "2805.0",
+     1
+    ],
+    [
+     "2830.0",
+     1
+    ],
+    [
+     "2840.0",
+     2
+    ],
+    [
+     "2845.0",
+     1
+    ],
+    [
+     "2865.0",
+     1
+    ],
+    [
+     "2885.0",
+     1
+    ],
+    [
+     "2890.0",
+     1
+    ],
+    [
+     "2910.0",
+     1
+    ],
+    [
+     "2945.0",
+     1
+    ],
+    [
+     "2950.0",
+     2
+    ],
+    [
+     "2965.0",
+     1
+    ],
+    [
+     "2970.0",
+     1
+    ],
+    [
+     "2990.0",
+     1
+    ],
+    [
+     "2995.0",
+     1
+    ],
+    [
+     "3010.0",
+     2
+    ],
+    [
+     "3020.0",
+     1
+    ],
+    [
+     "3030.0",
+     1
+    ],
+    [
+     "3045.0",
+     1
+    ],
+    [
+     "3055.0",
+     1
+    ],
+    [
+     "3060.0",
+     1
+    ],
+    [
+     "3065.0",
+     1
+    ],
+    [
+     "3095.0",
+     1
+    ],
+    [
+     "3100.0",
+     2
+    ],
+    [
+     "3125.0",
+     1
+    ],
+    [
+     "3130.0",
+     1
+    ],
+    [
+     "3140.0",
+     3
+    ],
+    [
+     "3150.0",
+     1
+    ],
+    [
+     "3155.0",
+     1
+    ],
+    [
+     "3190.0",
+     1
+    ],
+    [
+     "3205.0",
+     1
+    ],
+    [
+     "3210.0",
+     1
+    ],
+    [
+     "3215.0",
+     1
+    ],
+    [
+     "3235.0",
+     1
+    ],
+    [
+     "3265.0",
+     2
+    ],
+    [
+     "3270.0",
+     2
+    ],
+    [
+     "3390.0",
+     1
+    ],
+    [
+     "3405.0",
+     1
+    ],
+    [
+     "3415.0",
+     1
+    ],
+    [
+     "3425.0",
+     1
+    ],
+    [
+     "3435.0",
+     1
+    ],
+    [
+     "3450.0",
+     1
+    ],
+    [
+     "3455.0",
+     1
+    ],
+    [
+     "3485.0",
+     1
+    ],
+    [
+     "3545.0",
+     1
+    ],
+    [
+     "3575.0",
+     1
+    ],
+    [
+     "3580.0",
+     2
+    ],
+    [
+     "3585.0",
+     1
+    ],
+    [
+     "3595.0",
+     1
+    ],
+    [
+     "3610.0",
+     2
+    ],
+    [
+     "3645.0",
+     1
+    ],
+    [
+     "3755.0",
+     1
+    ],
+    [
+     "3845.0",
+     1
+    ],
+    [
+     "975.0",
+     1
+    ]
+   ],
+   "n_rows": 312,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "the question mentions column(s) 'security (security_dep)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "vocabulary: '10,000' read as '10000' (number)",
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=trend"
+   ],
+   "latency_ms": 751.7,
+   "error": null
+  },
+  {
+   "id": "LS19",
+   "db": "lease@leases",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many leases did we have in 2024?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question can be read more than one way and the answer depends on it: by signed_dt -> 86; by start_dt -> 89; by end_dt -> 82; by monthly_rent -> 0. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by signed_dt -> 86; by start_dt -> 89; by end_dt -> 82; by monthly_rent -> 0. Which did you mean?"
+   ],
+   "latency_ms": 1927.5,
+   "error": null
+  },
+  {
+   "id": "LS20",
+   "db": "lease@leases",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which staff member is responsible for the most leases?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 231.2,
+   "error": null
+  },
+  {
+   "id": "LS21",
+   "db": "lease@leases",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Show me rent collected by month for 2025.",
+   "action": "WARN",
+   "confidence": 0.835,
+   "sql": "SELECT substr(\"leases\".\"monthly_rent\",1,7) AS month, COUNT(*) AS row_count FROM \"leases\" WHERE \"leases\".\"monthly_rent\" >= '2025-01-01' AND \"leases\".\"monthly_rent\" < '2026-01-01' GROUP BY substr(\"leases\".\"monthly_rent\",1,7) ORDER BY month",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "answer rests on: 'collected' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.85,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=trend",
+    "result_issues=warning:query executed but returned no rows"
+   ],
+   "latency_ms": 747.0,
+   "error": null
+  },
+  {
+   "id": "LS22",
+   "db": "lease@leases",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our late payment rate?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 240.2,
+   "error": null
+  },
+  {
+   "id": "LS23",
+   "db": "lease@leases",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Who are our top-paying tenants?",
+   "action": "ANSWER",
+   "confidence": 1.0,
+   "sql": "SELECT j_tenant_id.tenant_name AS tenant_name, COUNT(*) AS row_count FROM \"leases\" LEFT JOIN tenants AS j_tenant_id ON j_tenant_id.tenant_id = leases.tenant_id WHERE j_tenant_id.tenant_name IS NOT NULL GROUP BY j_tenant_id.tenant_name ORDER BY row_count DESC LIMIT 5",
+   "rows": [
+    [
+     "Vera Lee",
+     8
+    ],
+    [
+     "Noah Patel",
+     6
+    ],
+    [
+     "Zane Lee",
+     5
+    ],
+    [
+     "Yara Kowalski",
+     5
+    ],
+    [
+     "Sam Park",
+     5
+    ]
+   ],
+   "n_rows": 5,
+   "expected": null,
+   "reason": "confidence 1.00 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=top_n"
+   ],
+   "latency_ms": 816.6,
+   "error": null
+  },
+  {
+   "id": "LS24",
+   "db": "lease@leases",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Project our occupancy rate for 2026.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 291.4,
+   "error": null
+  },
+  {
+   "id": "LS25",
+   "db": "lease@leases",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which units have never been leased?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_unit_id.unit_no AS unit_no, COUNT(*) AS row_count FROM \"leases\" LEFT JOIN units AS j_unit_id ON j_unit_id.unit_id = leases.unit_id GROUP BY j_unit_id.unit_no ORDER BY row_count DESC",
+   "rows": [
+    [
+     "2E",
+     40
+    ],
+    [
+     "1C",
+     39
+    ],
+    [
+     "2C",
+     37
+    ],
+    [
+     "3D",
+     36
+    ],
+    [
+     "2B",
+     36
+    ],
+    [
+     "1D",
+     35
+    ],
+    [
+     "1A",
+     35
+    ],
+    [
+     "3A",
+     34
+    ],
+    [
+     "2A",
+     34
+    ],
+    [
+     "1B",
+     34
+    ],
+    [
+     "3F",
+     33
+    ],
+    [
+     "3E",
+     33
+    ],
+    [
+     "3B",
+     33
+    ],
+    [
+     "2D",
+     33
+    ],
+    [
+     "3C",
+     32
+    ],
+    [
+     "1F",
+     32
+    ],
+    [
+     "1E",
+     32
+    ],
+    [
+     "2F",
+     29
+    ]
+   ],
+   "n_rows": 18,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:never",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=lease_leases table=leases",
+    "plan_kind=breakdown",
+    "plan_issues=unbindable:Dataset 'lease@leases' cannot satisfy: unsupported_negative_existence:never"
+   ],
+   "latency_ms": 571.3,
+   "error": null
+  },
+  {
+   "id": "LS26",
+   "db": "lease@leases",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average tenant satisfaction score by building?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('lease@leases'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 231.2,
+   "error": null
+  },
+  {
+   "id": "TC01",
+   "db": "telecom@monthly_bills",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total monthly recurring charge we billed for January through June 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT substr(\"monthly_bills\".\"bill_period\",1,7) AS month, COUNT(*) AS row_count FROM \"monthly_bills\" WHERE \"monthly_bills\".\"bill_period\" >= '2025-01-01' AND \"monthly_bills\".\"bill_period\" < '2025-07-01' GROUP BY substr(\"monthly_bills\".\"bill_period\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-02",
+     213
+    ],
+    [
+     "2025-03",
+     214
+    ],
+    [
+     "2025-04",
+     211
+    ],
+    [
+     "2025-05",
+     203
+    ],
+    [
+     "2025-06",
+     201
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     71687.96
+    ]
+   ],
+   "reason": "I don't know how 'recurring', 'charge' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=trend"
+   ],
+   "latency_ms": 230.2,
+   "error": null
+  },
+  {
+   "id": "TC02",
+   "db": "telecom@monthly_bills",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Overage charges by customer region. Show subscribers with no region as their own blank group.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS null_region FROM \"monthly_bills\" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE j_sub_id.region IS NULL",
+   "rows": [
+    [
+     83
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     null,
+     850.0
+    ],
+    [
+     "EAST",
+     1540.0
+    ],
+    [
+     "NORTH",
+     1770.0
+    ],
+    [
+     "SOUTH",
+     1720.0
+    ],
+    [
+     "WEST",
+     950.0
+    ]
+   ],
+   "reason": "the question mentions column(s) 'customer (cust_name)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=null_count"
+   ],
+   "latency_ms": 226.9,
+   "error": null
+  },
+  {
+   "id": "TC03",
+   "db": "telecom@monthly_bills",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Top 5 subscribers by total mobile data used in H1 2025, in GB.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "Dmitri Rossi",
+     422.6513671875
+    ],
+    [
+     "Priya Wright",
+     405.86328125
+    ],
+    [
+     "Elena Park",
+     403.283203125
+    ],
+    [
+     "Xin Lopez",
+     383.6474609375
+    ],
+    [
+     "Liam Nguyen",
+     370.6103515625
+    ]
+   ],
+   "reason": "This question can be read more than one way and the answer depends on it: by bill_period -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien: 5, Zane Moreau: 5); by stmt_dt -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien: 5, Zane Moreau: 5); by due_dt -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien: 5, Zane Moreau: 5); by paid_dt -> 5 groups (Zane O'Neil: 5, Zane O'Brien: 5, Zane Kowalski: 5, Zane Johansson: 5, Zane Garcia: 5); by activation_dt -> 5 groups (Carla Patel: 6, Vera Haddad: 4, Priya Lopez: 4, Maya Khan: 4, Kira Kowalski: 4); by churn_dt -> 5 groups (Rosa Lee: 6, Noah Johansson: 5, Ines Silva: 5, Zane Khan: 4, Yara Haddad: 4). Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by bill_period -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien: 5, Zane Moreau: 5); by stmt_dt -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien: 5, Zane Moreau: 5); by due_dt -> 5 groups (Zane Smith: 5, Zane Patel: 5, Zane O'Neil: 5, Zane O'Brien: 5, Zane Moreau: 5); by paid_dt -> 5 groups (Zane O'Neil: 5, Zane O'Brien: 5, Zane Kowalski: 5, Zane Johansson: 5, Zane Garcia: 5); by activation_dt -> 5 groups (Carla Patel: 6, Vera Haddad: 4, Priya Lopez: 4, Maya Khan: 4, Kira Kowalski: 4); by churn_dt -> 5 groups (Rosa Lee: 6, Noah Johansson: 5, Ines Silva: 5, Zane Khan: 4, Yara Haddad: 4). Which did you mean?"
+   ],
+   "latency_ms": 836.4,
+   "error": null
+  },
+  {
+   "id": "TC04",
+   "db": "telecom@monthly_bills",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Monthly overage revenue by usage month.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT substr(\"monthly_bills\".\"bill_period\",1,7) AS month, COUNT(*) AS row_count FROM \"monthly_bills\" GROUP BY substr(\"monthly_bills\".\"bill_period\",1,7) ORDER BY month",
+   "rows": [
+    [
+     "2025-01",
+     213
+    ],
+    [
+     "2025-02",
+     213
+    ],
+    [
+     "2025-03",
+     214
+    ],
+    [
+     "2025-04",
+     211
+    ],
+    [
+     "2025-05",
+     203
+    ],
+    [
+     "2025-06",
+     201
+    ]
+   ],
+   "n_rows": 6,
+   "expected": [
+    [
+     "2025-01",
+     1310.0
+    ],
+    [
+     "2025-02",
+     770.0
+    ],
+    [
+     "2025-03",
+     1250.0
+    ],
+    [
+     "2025-04",
+     900.0
+    ],
+    [
+     "2025-05",
+     1360.0
+    ],
+    [
+     "2025-06",
+     1240.0
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:usage, ambiguous_date_column:bill_period|stmt_dt|due_dt|paid_dt|activation_dt|churn_dt",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=trend",
+    "plan_issues=unbindable:Dataset 'telecom@monthly_bills' cannot satisfy: dimension:usage; unbindable:Dataset 'telecom@monthly_bills' cannot satisfy: ambiguous_date_column:bill_period|stmt_dt|due_dt|paid_dt|activation_dt|churn_dt"
+   ],
+   "latency_ms": 216.2,
+   "error": null
+  },
+  {
+   "id": "TC05",
+   "db": "telecom@monthly_bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Average recurring charge per bill for each plan, by plan name.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_plan_cd.plan_name AS plan_name, COUNT(*) AS row_count FROM \"monthly_bills\" LEFT JOIN plans AS j_plan_cd ON j_plan_cd.plan_cd = monthly_bills.plan_cd GROUP BY j_plan_cd.plan_name ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Prepaid 10",
+     370
+    ],
+    [
+     "Unlimited Standard",
+     245
+    ],
+    [
+     "Unlimited Max",
+     219
+    ],
+    [
+     "Basic 5GB",
+     154
+    ],
+    [
+     "Basic 2GB",
+     144
+    ],
+    [
+     "Family Share (4 lines)",
+     123
+    ]
+   ],
+   "n_rows": 6,
+   "expected": [
+    [
+     "Basic 2GB",
+     25.0
+    ],
+    [
+     "Basic 5GB",
+     35.0
+    ],
+    [
+     "Family Share (4 lines)",
+     139.810325203252
+    ],
+    [
+     "Prepaid 10",
+     29.908459459459458
+    ],
+    [
+     "Unlimited Max",
+     85.0
+    ],
+    [
+     "Unlimited Standard",
+     64.57208163265307
+    ]
+   ],
+   "reason": "I don't know how 'recurring', 'charge' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=breakdown"
+   ],
+   "latency_ms": 229.8,
+   "error": null
+  },
+  {
+   "id": "TC06",
+   "db": "telecom@monthly_bills",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills were on plans with a data allowance of 5 GB or less?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"monthly_bills\"",
+   "rows": [
+    [
+     1255
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     298
+    ]
+   ],
+   "reason": "the question contains the number(s) 5 but the generated query does not use them, so a threshold or quantity would be ignored",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 227.6,
+   "error": null
+  },
+  {
+   "id": "TC07",
+   "db": "telecom@monthly_bills",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "sum of roam chgs for POSTPAID subs, Q2 bill periods",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"monthly_bills\".\"roam_amt\") AS sum_roam_amt FROM \"monthly_bills\" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE \"monthly_bills\".\"bill_period\" >= '2025-04-01' AND \"monthly_bills\".\"bill_period\" < '2025-07-01' AND j_sub_id.acct_type = 'POSTPAID'",
+   "rows": [
+    [
+     973.89
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     1770.19
+    ]
+   ],
+   "reason": "I don't know how 'chgs' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "vocabulary: 'bill periods' read as 'bill period' (column name)",
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 275.3,
+   "error": null
+  },
+  {
+   "id": "TC08",
+   "db": "telecom@monthly_bills",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Total tax billed to subscribers outside the NORTH region.",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"monthly_bills\".\"tax_amt\") AS sum_tax_amt FROM \"monthly_bills\" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE (j_sub_id.region IS NULL OR j_sub_id.region NOT IN ('NORTH')) AND \"monthly_bills\".\"bill_period\" IS NOT NULL",
+   "rows": [
+    [
+     5156.79
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     5156.79
+    ]
+   ],
+   "reason": "answer rests on: relationship inferred from names and values, not declared: monthly_bills.sub_id->subscribers.sub_id",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 286.7,
+   "error": null
+  },
+  {
+   "id": "TC09",
+   "db": "telecom@monthly_bills",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills went over the data allowance?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"monthly_bills\"",
+   "rows": [
+    [
+     1255
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     244
+    ]
+   ],
+   "reason": "I don't know how 'allowance' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 242.2,
+   "error": null
+  },
+  {
+   "id": "TC10",
+   "db": "telecom@monthly_bills",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many bills haven't been paid yet?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"monthly_bills\" WHERE \"monthly_bills\".\"paid_dt\" IS NULL",
+   "rows": [
+    [
+     116
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     116
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 242.3,
+   "error": null
+  },
+  {
+   "id": "TC11",
+   "db": "telecom@monthly_bills",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many unique subscribers were billed for March 2025 usage?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT \"monthly_bills\".\"sub_id\") AS distinct_sub_id FROM \"monthly_bills\" WHERE \"monthly_bills\".\"bill_period\" >= '2025-03-01' AND \"monthly_bills\".\"bill_period\" < '2025-04-01'",
+   "rows": [
+    [
+     211
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     214
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 242.4,
+   "error": null
+  },
+  {
+   "id": "TC12",
+   "db": "telecom@monthly_bills",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total recurring charge on bills that got at least one outage credit?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     4734.67
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 188.9,
+   "error": null
+  },
+  {
+   "id": "TC13",
+   "db": "telecom@monthly_bills",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Add up the adjustment amounts posted against Unlimited Max bills.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     -679.21
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 177.8,
+   "error": null
+  },
+  {
+   "id": "TC14",
+   "db": "telecom@monthly_bills",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Compare overage revenue in Q1 vs Q2 2025 by usage month.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT '2025-02' AS period, COUNT(*) AS row_count FROM \"monthly_bills\" WHERE \"bill_period\" >= '2025-02-01' AND \"bill_period\" < '2025-03-01' UNION ALL SELECT '2025-05' AS period, COUNT(*) AS row_count FROM \"monthly_bills\" WHERE \"bill_period\" >= '2025-05-01' AND \"bill_period\" < '2025-06-01' ORDER BY period",
+   "rows": [
+    [
+     "2025-02",
+     214
+    ],
+    [
+     "2025-05",
+     201
+    ]
+   ],
+   "n_rows": 2,
+   "expected": [
+    [
+     "Q1",
+     3330.0
+    ],
+    [
+     "Q2",
+     3500.0
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:usage, ambiguous_date_column:bill_period|stmt_dt|due_dt|paid_dt|activation_dt|churn_dt",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.8,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=comparison",
+    "plan_issues=unbindable:Dataset 'telecom@monthly_bills' cannot satisfy: dimension:usage; unbindable:Dataset 'telecom@monthly_bills' cannot satisfy: ambiguous_date_column:bill_period|stmt_dt|due_dt|paid_dt|activation_dt|churn_dt"
+   ],
+   "latency_ms": 218.5,
+   "error": null
+  },
+  {
+   "id": "TC15",
+   "db": "telecom@monthly_bills",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "Of the bills that have been paid, what percentage were paid after the due date?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     23.353819139596137
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 179.5,
+   "error": null
+  },
+  {
+   "id": "TC16",
+   "db": "telecom@monthly_bills",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What percentage of total recurring revenue does each plan make up?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "Basic 2GB",
+     5.0217637661889105
+    ],
+    [
+     "Basic 5GB",
+     7.518696305488397
+    ],
+    [
+     "Family Share (4 lines)",
+     23.988226195863287
+    ],
+    [
+     "Prepaid 10",
+     15.436525184982246
+    ],
+    [
+     "Unlimited Max",
+     25.96670347433516
+    ],
+    [
+     "Unlimited Standard",
+     22.068085073141987
+    ]
+   ],
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 267.3,
+   "error": null
+  },
+  {
+   "id": "TC17",
+   "db": "telecom@monthly_bills",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How much recurring revenue did the Legacy Talk & Text plan bring in?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 195.9,
+   "error": null
+  },
+  {
+   "id": "TC18",
+   "db": "telecom@monthly_bills",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "avg voice mins per bill for PREPAID accts?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     766.4297297297297
+    ]
+   ],
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 218.8,
+   "error": null
+  },
+  {
+   "id": "TC19",
+   "db": "telecom@monthly_bills",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many bills did we have in March 2025?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"monthly_bills\" WHERE \"monthly_bills\".\"bill_period\" >= '2025-03-01' AND \"monthly_bills\".\"bill_period\" < '2025-04-01'",
+   "rows": [
+    [
+     211
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 256.7,
+   "error": null
+  },
+  {
+   "id": "TC20",
+   "db": "telecom@monthly_bills",
+   "category": "ratio",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's our ARPU?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 192.9,
+   "error": null
+  },
+  {
+   "id": "TC21",
+   "db": "telecom@monthly_bills",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Which region is performing best?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_sub_id.region AS region, COUNT(*) AS row_count FROM \"monthly_bills\" LEFT JOIN subscribers AS j_sub_id ON j_sub_id.sub_id = monthly_bills.sub_id WHERE j_sub_id.region IS NOT NULL GROUP BY j_sub_id.region ORDER BY row_count DESC LIMIT 1",
+   "rows": [
+    [
+     "EAST",
+     329
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "I don't know how 'performing' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=top_n"
+   ],
+   "latency_ms": 288.5,
+   "error": null
+  },
+  {
+   "id": "TC22",
+   "db": "telecom@monthly_bills",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What's the average bill amount by adjustment reason?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 228.7,
+   "error": null
+  },
+  {
+   "id": "TC23",
+   "db": "telecom@monthly_bills",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How much revenue did we have for May 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('telecom@monthly_bills'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 202.5,
+   "error": null
+  },
+  {
+   "id": "TC24",
+   "db": "telecom@monthly_bills",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Break down total recurring charges by add-on.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 313.4,
+   "error": null
+  },
+  {
+   "id": "TC25",
+   "db": "telecom@monthly_bills",
+   "category": "many_to_many",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's the average monthly data usage for each add-on?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 222.6,
+   "error": null
+  },
+  {
+   "id": "TC26",
+   "db": "telecom@monthly_bills",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which plans don't have any bills?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT j_plan_cd.plan_name AS plan_name, COUNT(*) AS row_count FROM \"monthly_bills\" LEFT JOIN plans AS j_plan_cd ON j_plan_cd.plan_cd = monthly_bills.plan_cd GROUP BY j_plan_cd.plan_name ORDER BY row_count DESC",
+   "rows": [
+    [
+     "Prepaid 10",
+     370
+    ],
+    [
+     "Unlimited Standard",
+     245
+    ],
+    [
+     "Unlimited Max",
+     219
+    ],
+    [
+     "Basic 5GB",
+     154
+    ],
+    [
+     "Basic 2GB",
+     144
+    ],
+    [
+     "Family Share (4 lines)",
+     123
+    ]
+   ],
+   "n_rows": 6,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: unsupported_negative_existence:don't",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=telecom_monthly_bills table=monthly_bills",
+    "plan_kind=breakdown",
+    "plan_issues=unbindable:Dataset 'telecom@monthly_bills' cannot satisfy: unsupported_negative_existence:don't"
+   ],
+   "latency_ms": 222.2,
+   "error": null
+  },
+  {
+   "id": "TC27",
+   "db": "telecom@monthly_bills",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What's each subscriber's probability of churning next quarter?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?')."
+   ],
+   "latency_ms": 9.2,
+   "error": null
+  },
+  {
+   "id": "WH01",
+   "db": "warehouse@inv_moves",
+   "category": "direct_kpi",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many units did we receive in total in the first half of 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     27614
+    ]
+   ],
+   "reason": "This question can be read more than one way and the answer depends on it: by move_ts -> 63987; by posted_dt -> 63397; by hire_dt -> 4697. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by move_ts -> 63987; by posted_dt -> 63397; by hire_dt -> 4697. Which did you mean?"
+   ],
+   "latency_ms": 1725.6,
+   "error": null
+  },
+  {
+   "id": "WH02",
+   "db": "warehouse@inv_moves",
+   "category": "breakdown",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Total units moved by product category, with uncategorized items shown as a separate group.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_sku_cd.category AS category, j_sku_cd.item_desc AS item_desc, SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE \"inv_moves\".\"move_ts\" IS NULL GROUP BY j_sku_cd.category, j_sku_cd.item_desc ORDER BY units_sold DESC",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     null,
+     8088
+    ],
+    [
+     "CLEANING",
+     12810
+    ],
+    [
+     "ELECTRICAL",
+     13642
+    ],
+    [
+     "HARDWARE",
+     16477
+    ],
+    [
+     "PACKAGING",
+     12970
+    ]
+   ],
+   "reason": "the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.85,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "vocabulary: 'product' read as 'item' (business synonym)",
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=breakdown",
+    "result_issues=warning:query executed but returned no rows"
+   ],
+   "latency_ms": 1080.7,
+   "error": null
+  },
+  {
+   "id": "WH03",
+   "db": "warehouse@inv_moves",
+   "category": "top_n",
+   "answerability": "answerable",
+   "kind": "ordered",
+   "question": "Top 5 products by units picked.",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT j_sku_cd.item_desc AS item_desc, SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE j_sku_cd.item_desc IS NOT NULL GROUP BY j_sku_cd.item_desc ORDER BY units_sold DESC LIMIT 5",
+   "rows": [
+    [
+     "Pallet 1200x1000",
+     2615
+    ],
+    [
+     "Hard Hat",
+     2487
+    ],
+    [
+     "Promo Display",
+     2352
+    ],
+    [
+     "Smoke Alarm",
+     2129
+    ],
+    [
+     "Sponge 10pk",
+     2085
+    ]
+   ],
+   "n_rows": 5,
+   "expected": [
+    [
+     "Smoke Alarm",
+     370
+    ],
+    [
+     "Ladder 6ft",
+     322
+    ],
+    [
+     "Misc Spare Part B",
+     283
+    ],
+    [
+     "Hand Saw",
+     271
+    ],
+    [
+     "Toolbox Steel",
+     262
+    ]
+   ],
+   "reason": "the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "vocabulary: 'products' read as 'items' (business synonym)",
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=top_n"
+   ],
+   "latency_ms": 1006.9,
+   "error": null
+  },
+  {
+   "id": "WH04",
+   "db": "warehouse@inv_moves",
+   "category": "trend",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many inventory movements happened each month, by movement timestamp?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT \"inv_moves\".\"move_type\" AS move_type, COUNT(*) AS row_count FROM \"inv_moves\" GROUP BY \"inv_moves\".\"move_type\" ORDER BY row_count DESC",
+   "rows": [
+    [
+     "PICK",
+     472
+    ],
+    [
+     "RCPT",
+     270
+    ],
+    [
+     "PUTAWAY",
+     250
+    ],
+    [
+     "XFER",
+     195
+    ],
+    [
+     "ADJ",
+     115
+    ],
+    [
+     "RTN",
+     98
+    ]
+   ],
+   "n_rows": 6,
+   "expected": [
+    [
+     "2025-01",
+     219
+    ],
+    [
+     "2025-02",
+     215
+    ],
+    [
+     "2025-03",
+     252
+    ],
+    [
+     "2025-04",
+     221
+    ],
+    [
+     "2025-05",
+     246
+    ],
+    [
+     "2025-06",
+     247
+    ]
+   ],
+   "reason": "I don't know how 'timestamp' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 1.0,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=breakdown"
+   ],
+   "latency_ms": 999.3,
+   "error": null
+  },
+  {
+   "id": "WH05",
+   "db": "warehouse@inv_moves",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "How many units were received into each receiving location (where the receipts landed)?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\"",
+   "rows": [
+    [
+     63987
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     "Receiving Dock 1",
+     14304
+    ],
+    [
+     "Receiving Dock 2",
+     13310
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:receiving",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi",
+    "plan_issues=unbindable:Dataset 'warehouse@inv_moves' cannot satisfy: dimension:receiving"
+   ],
+   "latency_ms": 864.7,
+   "error": null
+  },
+  {
+   "id": "WH06",
+   "db": "warehouse@inv_moves",
+   "category": "fk_inference",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Units picked out of each storage location.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\"",
+   "rows": [
+    [
+     63987
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     "Aisle A Bay 1",
+     1349
+    ],
+    [
+     "Aisle A Bay 2",
+     1301
+    ],
+    [
+     "Aisle B Bay 1",
+     1048
+    ],
+    [
+     "Aisle B Bay 2",
+     1355
+    ],
+    [
+     "Aisle C Bay 1",
+     1128
+    ],
+    [
+     "Overflow (Yard)",
+     1225
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:storage",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi",
+    "plan_issues=unbindable:Dataset 'warehouse@inv_moves' cannot satisfy: dimension:storage"
+   ],
+   "latency_ms": 773.3,
+   "error": null
+  },
+  {
+   "id": "WH07",
+   "db": "warehouse@inv_moves",
+   "category": "related_numeric_threshold",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many moves involved items heavier than 10 kg per unit?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"inv_moves\"",
+   "rows": [
+    [
+     1400
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     768
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: dimension:unit",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=ratio",
+    "plan_issues=unbindable:Dataset 'warehouse@inv_moves' cannot satisfy: dimension:unit"
+   ],
+   "latency_ms": 800.4,
+   "error": null
+  },
+  {
+   "id": "WH08",
+   "db": "warehouse@inv_moves",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total value (quantity times unit cost) of moves handled by night-shift operators?",
+   "action": "WARN",
+   "confidence": 0.979,
+   "sql": "SELECT SUM(\"inv_moves\".\"unit_cost\") AS sum_unit_cost, SUM(\"inv_moves\".\"qty\") AS sum_qty FROM \"inv_moves\" LEFT JOIN operators AS j_operator_id ON j_operator_id.operator_id = inv_moves.operator_id WHERE j_operator_id.shift = 'NIGHT'",
+   "rows": [
+    [
+     19436.23,
+     18265
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     888646.76
+    ]
+   ],
+   "reason": "answer rests on: 'handled' was not mapped to any column or value and was not applied",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 1129.8,
+   "error": null
+  },
+  {
+   "id": "WH09",
+   "db": "warehouse@inv_moves",
+   "category": "abbreviation",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "total qty of XFERs for HARDWARE cat",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS sum_qty FROM \"inv_moves\" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE j_sku_cd.category = 'HARDWARE'",
+   "rows": [
+    [
+     16477
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     2211
+    ]
+   ],
+   "reason": "plan requires items not in the dataset: value:unrecognised=xfers",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi",
+    "plan_issues=unbindable:Dataset 'warehouse@inv_moves' cannot satisfy: value:unrecognised=xfers"
+   ],
+   "latency_ms": 817.0,
+   "error": null
+  },
+  {
+   "id": "WH10",
+   "db": "warehouse@inv_moves",
+   "category": "negation_exclusion",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many moves were not cycle-count corrections?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"inv_moves\"",
+   "rows": [
+    [
+     1400
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     1349
+    ]
+   ],
+   "reason": "I don't know how 'cycle', 'corrections' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 898.8,
+   "error": null
+  },
+  {
+   "id": "WH11",
+   "db": "warehouse@inv_moves",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many moves had a failed barcode scan?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT COUNT(*) AS row_count FROM \"inv_moves\" WHERE \"inv_moves\".\"scan_ok\" = 0",
+   "rows": [
+    [
+     82
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     82
+    ]
+   ],
+   "reason": "I don't know how 'barcode' maps to this data, so the answer could ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 1001.8,
+   "error": null
+  },
+  {
+   "id": "WH12",
+   "db": "warehouse@inv_moves",
+   "category": "boolean_flag",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many damaged units came in on receipts?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" WHERE \"inv_moves\".\"is_damaged\" = 1",
+   "rows": [
+    [
+     1051
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     595
+    ]
+   ],
+   "reason": "the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 955.4,
+   "error": null
+  },
+  {
+   "id": "WH13",
+   "db": "warehouse@inv_moves",
+   "category": "null_condition",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many movements have no operator recorded against them?",
+   "action": "ANSWER",
+   "confidence": 0.979,
+   "sql": "SELECT COUNT(DISTINCT \"inv_moves\".\"move_type\") AS null_operator_id FROM \"inv_moves\" WHERE \"inv_moves\".\"operator_id\" IS NULL",
+   "rows": [
+    [
+     1
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     55
+    ]
+   ],
+   "reason": "confidence 0.98 \u2265 0.70",
+   "semantic_findings": [],
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "verification_violations": 0.0,
+    "sensitivity_flags": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=null_count"
+   ],
+   "latency_ms": 1072.0,
+   "error": null
+  },
+  {
+   "id": "WH14",
+   "db": "warehouse@inv_moves",
+   "category": "distinct_count",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "How many distinct SKUs were picked in May 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     44
+    ]
+   ],
+   "reason": "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 330.0,
+   "error": null
+  },
+  {
+   "id": "WH15",
+   "db": "warehouse@inv_moves",
+   "category": "join_fanout",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What's the total quantity on moves that logged at least one exception?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS sum_qty FROM \"inv_moves\"",
+   "rows": [
+    [
+     63987
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     6766
+    ]
+   ],
+   "reason": "the question is about 'exception', but the query's base table is 'inv_moves' and does not involve them, so it would answer at the wrong grain",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 1024.7,
+   "error": null
+  },
+  {
+   "id": "WH16",
+   "db": "warehouse@inv_moves",
+   "category": "period_comparison",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "Units picked in April vs May 2025, by move date.",
+   "action": "CLARIFY",
+   "confidence": 0.8,
+   "sql": "SELECT '2025-04' AS period, SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" WHERE \"move_ts\" >= '2025-04-01' AND \"move_ts\" < '2025-05-01' UNION ALL SELECT '2025-05' AS period, SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" WHERE \"move_ts\" >= '2025-05-01' AND \"move_ts\" < '2025-06-01' ORDER BY period",
+   "rows": [
+    [
+     "2025-04",
+     9893
+    ],
+    [
+     "2025-05",
+     11065
+    ]
+   ],
+   "n_rows": 2,
+   "expected": [
+    [
+     "2025-04",
+     1434
+    ],
+    [
+     "2025-05",
+     1447
+    ]
+   ],
+   "reason": "plan \u2192 SQL fidelity check failed: the generated SQL does not fully implement the analytical plan",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.8,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.75
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=comparison",
+    "fidelity_failed=group_by_present:SQL contains GROUP BY when the plan has dims; dim_referenced:move_type:dim 'move_type' present in SQL"
+   ],
+   "latency_ms": 873.8,
+   "error": null
+  },
+  {
+   "id": "WH17",
+   "db": "warehouse@inv_moves",
+   "category": "ratio",
+   "answerability": "answerable",
+   "kind": "scalar",
+   "question": "What percentage of received units were damaged?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" WHERE \"inv_moves\".\"is_damaged\" = 1",
+   "rows": [
+    [
+     1051
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     2.1547041355834
+    ]
+   ],
+   "reason": "the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 899.6,
+   "error": null
+  },
+  {
+   "id": "WH18",
+   "db": "warehouse@inv_moves",
+   "category": "share_of_total",
+   "answerability": "answerable",
+   "kind": "rowset",
+   "question": "What share of picked units did each operator shift handle, in percent?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": [
+    [
+     "DAY",
+     44.77450715635971
+    ],
+    [
+     "NIGHT",
+     29.74615176883608
+    ],
+    [
+     "SWING",
+     25.479341074804214
+    ]
+   ],
+   "reason": "this is computed as 100 x (total picked units did each operator shift handle, for percent) / (total picked units did each operator shift handle,), but a part could not be answered safely ('What is the total picked units did each operator shift handle, for percent?': Could not compile a SQL query for this plan.; 'What is the total picked units did each operator shift handle,?': the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question)",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0
+   },
+   "notes": [
+    "composite=share: 100 x (total picked units did each operator shift handle, for percent) / (total picked units did each operator shift handle,)",
+    "composite_part_a=What is the total picked units did each operator shift handle, for percent?",
+    "composite_part_b=What is the total picked units did each operator shift handle,?",
+    "part_a:Could not compile a SQL query for this plan.",
+    "part_b:active_dataset=warehouse_inv_moves table=inv_moves",
+    "part_b:plan_kind=breakdown"
+   ],
+   "latency_ms": 2001.0,
+   "error": null
+  },
+  {
+   "id": "WH19",
+   "db": "warehouse@inv_moves",
+   "category": "multi_table_join",
+   "answerability": "answerable",
+   "kind": "empty_ok",
+   "question": "How many units of Pallet Wrap (Blue) were moved in 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.3,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\" LEFT JOIN items AS j_sku_cd ON j_sku_cd.sku_cd = inv_moves.sku_cd WHERE \"inv_moves\".\"move_ts\" >= '2025-01-01' AND \"inv_moves\".\"move_ts\" < '2026-01-01' AND j_sku_cd.item_desc = 'Pallet Wrap (Blue)'",
+   "rows": [
+    [
+     null
+    ]
+   ],
+   "n_rows": 1,
+   "expected": [
+    [
+     null
+    ]
+   ],
+   "reason": "the question mentions column(s) 'units (unit_cost)', 'units (unit_wt_kg)' that the generated query does not use, so it would ignore part of your question",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 1.0,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 1.0,
+    "mention_coverage": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi"
+   ],
+   "latency_ms": 932.7,
+   "error": null
+  },
+  {
+   "id": "WH20",
+   "db": "warehouse@inv_moves",
+   "category": "date_role_ambiguity",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "How many units did we receive in March 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question can be read more than one way and the answer depends on it: by move_ts -> 12102; by posted_dt -> 11555; by hire_dt -> None. Which did you mean?",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question can be read more than one way and the answer depends on it: by move_ts -> 12102; by posted_dt -> 11555; by hire_dt -> None. Which did you mean?"
+   ],
+   "latency_ms": 1733.0,
+   "error": null
+  },
+  {
+   "id": "WH21",
+   "db": "warehouse@inv_moves",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Total units by location.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"inv_moves\".\"qty\") AS units_sold FROM \"inv_moves\"",
+   "rows": [
+    [
+     63987
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: dimension:location",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=direct_kpi",
+    "plan_issues=unbindable:Dataset 'warehouse@inv_moves' cannot satisfy: dimension:location"
+   ],
+   "latency_ms": 921.4,
+   "error": null
+  },
+  {
+   "id": "WH22",
+   "db": "warehouse@inv_moves",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Who's our most productive operator?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 296.6,
+   "error": null
+  },
+  {
+   "id": "WH23",
+   "db": "warehouse@inv_moves",
+   "category": "join_fanout",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "Break down units moved by exception code.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Could not compile a SQL query for this plan.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Could not compile a SQL query for this plan."
+   ],
+   "latency_ms": 727.5,
+   "error": null
+  },
+  {
+   "id": "WH24",
+   "db": "warehouse@inv_moves",
+   "category": "ambiguous",
+   "answerability": "clarify",
+   "kind": "clarify",
+   "question": "What was the value of stock moved per zone in Q2 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 322.4,
+   "error": null
+  },
+  {
+   "id": "WH25",
+   "db": "warehouse@inv_moves",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Predict which SKUs will stock out next month.",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?')."
+   ],
+   "latency_ms": 8.3,
+   "error": null
+  },
+  {
+   "id": "WH26",
+   "db": "warehouse@inv_moves",
+   "category": "anti_join",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "Which SKUs haven't moved at all in 2025?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "",
+   "rows": [],
+   "n_rows": 0,
+   "expected": null,
+   "reason": "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison.",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 0.0,
+    "schema_match": 0.0,
+    "kpi_match": 0.0,
+    "context_consistency": 0.1,
+    "data_completeness": 0.0,
+    "evidence_strength": 0.0,
+    "result_consistency": 0.3,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "Question is too vague or off-scope for the loaded dataset ('warehouse@inv_moves'). Try asking about a specific measure in the dataset \u2014 optionally with a breakdown, time window, or comparison."
+   ],
+   "latency_ms": 307.7,
+   "error": null
+  },
+  {
+   "id": "WH27",
+   "db": "warehouse@inv_moves",
+   "category": "unsupported_metric",
+   "answerability": "unsupported",
+   "kind": "clarify",
+   "question": "What was the inbound freight cost per receipt?",
+   "action": "CLARIFY",
+   "confidence": 0.05,
+   "sql": "SELECT SUM(\"inv_moves\".\"unit_cost\") AS total_cost FROM \"inv_moves\"",
+   "rows": [
+    [
+     70488.03
+    ]
+   ],
+   "n_rows": 1,
+   "expected": null,
+   "reason": "plan requires items not in the dataset: dimension:receipt",
+   "semantic_findings": null,
+   "signals": {
+    "sql_validity": 1.0,
+    "schema_match": 1.0,
+    "kpi_match": 1.0,
+    "context_consistency": 0.3,
+    "data_completeness": 1.0,
+    "evidence_strength": 0.7,
+    "result_consistency": 1.0,
+    "intent_coverage": 1.0,
+    "plan_fidelity": 0.0
+   },
+   "notes": [
+    "active_dataset=warehouse_inv_moves table=inv_moves",
+    "plan_kind=ratio",
+    "plan_issues=unbindable:Dataset 'warehouse@inv_moves' cannot satisfy: dimension:receipt"
+   ],
+   "latency_ms": 894.8,
+   "error": null
+  }
+ ]
+}
