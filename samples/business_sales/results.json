@@ -1,0 +1,1521 @@
+[
+ {
+  "section": "Totals",
+  "question": "How many orders are there?",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    12000
+   ]
+  ],
+  "expected": [
+   [
+    12000
+   ]
+  ]
+ },
+ {
+  "section": "Totals",
+  "question": "What is the total revenue?",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    10141284.12
+   ]
+  ],
+  "expected": [
+   [
+    10141284.12
+   ]
+  ]
+ },
+ {
+  "section": "Totals",
+  "question": "Total cost",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"cost\") AS \"sum_cost\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    6738121
+   ]
+  ],
+  "expected": [
+   [
+    6738121
+   ]
+  ]
+ },
+ {
+  "section": "Totals",
+  "question": "Total discount amount",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"discount_amount\") AS \"sum_discount_amount\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    784199.1
+   ]
+  ],
+  "expected": [
+   [
+    784199.1
+   ]
+  ]
+ },
+ {
+  "section": "Totals",
+  "question": "Total quantity sold",
+  "action": "CLARIFY",
+  "status": "asks",
+  "reason": "I need a clarification: words not grounded: sold",
+  "sql": "",
+  "rows": [],
+  "expected": [
+   [
+    38693
+   ]
+  ]
+ },
+ {
+  "section": "Totals",
+  "question": "Total quantity",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"quantity\") AS \"sum_quantity\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    38693
+   ]
+  ],
+  "expected": [
+   [
+    38693
+   ]
+  ]
+ },
+ {
+  "section": "Totals",
+  "question": "Total shipping fee",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"shipping_fee\") AS \"sum_shipping_fee\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    105250.36
+   ]
+  ],
+  "expected": [
+   [
+    105250.36
+   ]
+  ]
+ },
+ {
+  "section": "Averages and extremes",
+  "question": "Average revenue",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT AVG(t0.\"revenue\") AS \"avg_revenue\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    845.10701
+   ]
+  ],
+  "expected": [
+   [
+    845.10701
+   ]
+  ]
+ },
+ {
+  "section": "Averages and extremes",
+  "question": "Average customer rating",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT AVG(t0.\"customer_rating\") AS \"avg_customer_rating\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    3.6026879928912585
+   ]
+  ],
+  "expected": [
+   [
+    3.6026879928912585
+   ]
+  ]
+ },
+ {
+  "section": "Averages and extremes",
+  "question": "Highest revenue",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT MAX(t0.\"revenue\") AS \"max_revenue\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    13229.01
+   ]
+  ],
+  "expected": [
+   [
+    13229.01
+   ]
+  ]
+ },
+ {
+  "section": "Averages and extremes",
+  "question": "Lowest unit price",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT MIN(t0.\"unit_price\") AS \"min_unit_price\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    12
+   ]
+  ],
+  "expected": [
+   [
+    12
+   ]
+  ]
+ },
+ {
+  "section": "Averages and extremes",
+  "question": "Average discount amount for Enterprise customers",
+  "action": "CLARIFY",
+  "status": "asks",
+  "reason": "I need a clarification: words not grounded: customers",
+  "sql": "",
+  "rows": [],
+  "expected": [
+   [
+    65.08200049825611
+   ]
+  ]
+ },
+ {
+  "section": "Averages and extremes",
+  "question": "Average discount amount for Enterprise",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT AVG(t0.\"discount_amount\") AS \"avg_discount_amount\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"customer_segment\" IN ('Enterprise'))",
+  "rows": [
+   [
+    65.08200049825611
+   ]
+  ],
+  "expected": [
+   [
+    65.08200049825611
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Total revenue by region",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"region\" AS \"region\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"region\"",
+  "rows": [
+   [
+    "East",
+    2468462.75
+   ],
+   [
+    "North",
+    2633261.79
+   ],
+   [
+    "South",
+    2320044.42
+   ],
+   [
+    "West",
+    2719515.16
+   ]
+  ],
+  "expected": [
+   [
+    "East",
+    2468462.75
+   ],
+   [
+    "North",
+    2633261.79
+   ],
+   [
+    "South",
+    2320044.42
+   ],
+   [
+    "West",
+    2719515.16
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Revenue by product category",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT t0.\"product_category\" AS \"product_category\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"product_category\"",
+  "rows": [
+   [
+    "Appliances",
+    980441.57
+   ],
+   [
+    "Electronics",
+    6076440.67
+   ],
+   [
+    "Furniture",
+    2859005.61
+   ],
+   [
+    "Office Supplies",
+    225396.27
+   ]
+  ],
+  "expected": [
+   [
+    "Appliances",
+    980441.57
+   ],
+   [
+    "Electronics",
+    6076440.67
+   ],
+   [
+    "Furniture",
+    2859005.61
+   ],
+   [
+    "Office Supplies",
+    225396.27
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Number of orders by sales channel",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"sales_channel\" AS \"sales_channel\", COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"sales_channel\"",
+  "rows": [
+   [
+    "Marketplace",
+    2987
+   ],
+   [
+    "Online",
+    3101
+   ],
+   [
+    "Phone",
+    2989
+   ],
+   [
+    "Retail Store",
+    2923
+   ]
+  ],
+  "expected": [
+   [
+    "Marketplace",
+    2987
+   ],
+   [
+    "Online",
+    3101
+   ],
+   [
+    "Phone",
+    2989
+   ],
+   [
+    "Retail Store",
+    2923
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Total revenue by customer segment",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"customer_segment\" AS \"customer_segment\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"customer_segment\"",
+  "rows": [
+   [
+    "Consumer",
+    3429032.5
+   ],
+   [
+    "Enterprise",
+    3474282.53
+   ],
+   [
+    "Small Business",
+    3237969.09
+   ]
+  ],
+  "expected": [
+   [
+    "Consumer",
+    3429032.5
+   ],
+   [
+    "Enterprise",
+    3474282.53
+   ],
+   [
+    "Small Business",
+    3237969.09
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Total revenue by sales rep",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"sales_rep\" AS \"sales_rep\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"sales_rep\"",
+  "rows": [
+   [
+    "Alice Moreno",
+    1268659.62
+   ],
+   [
+    "Ben Okafor",
+    1355452.03
+   ],
+   [
+    "Chen Wei",
+    1157382.63
+   ],
+   [
+    "Dana Fischer",
+    1305044.3
+   ],
+   [
+    "Elif Kaya",
+    1339894.56
+   ],
+   [
+    "Farah Haddad",
+    1300820.33
+   ],
+   [
+    "Gus Lindqvist",
+    1198063.99
+   ],
+   [
+    "Hana Sato",
+    1215966.66
+   ]
+  ],
+  "expected": [
+   [
+    "Alice Moreno",
+    1268659.62
+   ],
+   [
+    "Ben Okafor",
+    1355452.03
+   ],
+   [
+    "Chen Wei",
+    1157382.63
+   ],
+   [
+    "Dana Fischer",
+    1305044.3
+   ],
+   [
+    "Elif Kaya",
+    1339894.56
+   ],
+   [
+    "Farah Haddad",
+    1300820.33
+   ],
+   [
+    "Gus Lindqvist",
+    1198063.99
+   ],
+   [
+    "Hana Sato",
+    1215966.66
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Average customer rating by product category",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"product_category\" AS \"product_category\", AVG(t0.\"customer_rating\") AS \"avg_customer_rating\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"product_category\"",
+  "rows": [
+   [
+    "Appliances",
+    3.6553333333333335
+   ],
+   [
+    "Electronics",
+    3.554268696227664
+   ],
+   [
+    "Furniture",
+    3.614247311827957
+   ],
+   [
+    "Office Supplies",
+    3.6211649622054245
+   ]
+  ],
+  "expected": [
+   [
+    "Appliances",
+    3.6553333333333335
+   ],
+   [
+    "Electronics",
+    3.554268696227664
+   ],
+   [
+    "Furniture",
+    3.614247311827957
+   ],
+   [
+    "Office Supplies",
+    3.6211649622054245
+   ]
+  ]
+ },
+ {
+  "section": "Breakdowns",
+  "question": "Total quantity by product name",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"product_name\" AS \"product_name\", SUM(t0.\"quantity\") AS \"sum_quantity\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"product_name\"",
+  "rows": [
+   [
+    "4K Monitor",
+    3361
+   ],
+   [
+    "Air Purifier",
+    3271
+   ],
+   [
+    "Bookshelf",
+    3252
+   ],
+   [
+    "Coffee Maker",
+    3360
+   ],
+   [
+    "Desk Organizer",
+    3197
+   ],
+   [
+    "Gel Pens (12)",
+    3203
+   ],
+   [
+    "Laptop Pro 14",
+    3290
+   ],
+   [
+    "Noise-Cancel Headphones",
+    3247
+   ],
+   [
+    "Office Chair",
+    3128
+   ],
+   [
+    "Printer Paper (box)",
+    3241
+   ],
+   [
+    "Standing Desk",
+    3120
+   ],
+   [
+    "Wireless Mouse",
+    3023
+   ]
+  ],
+  "expected": [
+   [
+    "4K Monitor",
+    3361
+   ],
+   [
+    "Air Purifier",
+    3271
+   ],
+   [
+    "Bookshelf",
+    3252
+   ],
+   [
+    "Coffee Maker",
+    3360
+   ],
+   [
+    "Desk Organizer",
+    3197
+   ],
+   [
+    "Gel Pens (12)",
+    3203
+   ],
+   [
+    "Laptop Pro 14",
+    3290
+   ],
+   [
+    "Noise-Cancel Headphones",
+    3247
+   ],
+   [
+    "Office Chair",
+    3128
+   ],
+   [
+    "Printer Paper (box)",
+    3241
+   ],
+   [
+    "Standing Desk",
+    3120
+   ],
+   [
+    "Wireless Mouse",
+    3023
+   ]
+  ]
+ },
+ {
+  "section": "Ranking",
+  "question": "Top 5 products by revenue",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT t0.\"product_name\" AS \"product_name\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"product_name\" ORDER BY \"sum_revenue\" DESC, \"product_name\" LIMIT 5",
+  "rows": [
+   [
+    "Laptop Pro 14",
+    3991970.22
+   ],
+   [
+    "Standing Desk",
+    1592222.04
+   ],
+   [
+    "4K Monitor",
+    1251112.35
+   ],
+   [
+    "Office Chair",
+    845025.95
+   ],
+   [
+    "Noise-Cancel Headphones",
+    751200.93
+   ]
+  ],
+  "expected": [
+   [
+    "Laptop Pro 14",
+    3991970.22
+   ],
+   [
+    "Standing Desk",
+    1592222.04
+   ],
+   [
+    "4K Monitor",
+    1251112.35
+   ],
+   [
+    "Office Chair",
+    845025.95
+   ],
+   [
+    "Noise-Cancel Headphones",
+    751200.93
+   ]
+  ]
+ },
+ {
+  "section": "Ranking",
+  "question": "Top 3 sales reps by revenue",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT t0.\"sales_rep\" AS \"sales_rep\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"sales_rep\" ORDER BY \"sum_revenue\" DESC, \"sales_rep\" LIMIT 3",
+  "rows": [
+   [
+    "Ben Okafor",
+    1355452.03
+   ],
+   [
+    "Elif Kaya",
+    1339894.56
+   ],
+   [
+    "Dana Fischer",
+    1305044.3
+   ]
+  ],
+  "expected": [
+   [
+    "Ben Okafor",
+    1355452.03
+   ],
+   [
+    "Elif Kaya",
+    1339894.56
+   ],
+   [
+    "Dana Fischer",
+    1305044.3
+   ]
+  ]
+ },
+ {
+  "section": "Ranking",
+  "question": "Bottom 3 products by quantity",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: quantity is summed (no aggregation word was given)",
+  "sql": "SELECT t0.\"product_name\" AS \"product_name\", SUM(t0.\"quantity\") AS \"sum_quantity\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"product_name\" ORDER BY \"sum_quantity\" ASC, \"product_name\" LIMIT 3",
+  "rows": [
+   [
+    "Wireless Mouse",
+    3023
+   ],
+   [
+    "Standing Desk",
+    3120
+   ],
+   [
+    "Office Chair",
+    3128
+   ]
+  ],
+  "expected": [
+   [
+    "Wireless Mouse",
+    3023
+   ],
+   [
+    "Standing Desk",
+    3120
+   ],
+   [
+    "Office Chair",
+    3128
+   ]
+  ]
+ },
+ {
+  "section": "Ranking",
+  "question": "Which region has the highest revenue?",
+  "action": "CLARIFY",
+  "status": "asks",
+  "reason": "I need a clarification: words not grounded: region",
+  "sql": "",
+  "rows": [],
+  "expected": [
+   [
+    "West",
+    2719515.16
+   ]
+  ]
+ },
+ {
+  "section": "Ranking",
+  "question": "Top 1 region by revenue",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT t0.\"region\" AS \"region\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"region\" ORDER BY \"sum_revenue\" DESC, \"region\" LIMIT 1",
+  "rows": [
+   [
+    "West",
+    2719515.16
+   ]
+  ],
+  "expected": [
+   [
+    "West",
+    2719515.16
+   ]
+  ]
+ },
+ {
+  "section": "Filters",
+  "question": "Total revenue for Electronics",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"product_category\" IN ('Electronics'))",
+  "rows": [
+   [
+    6076440.67
+   ]
+  ],
+  "expected": [
+   [
+    6076440.67
+   ]
+  ]
+ },
+ {
+  "section": "Filters",
+  "question": "Total revenue in the West region",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"region\" IN ('West'))",
+  "rows": [
+   [
+    2719515.16
+   ]
+  ],
+  "expected": [
+   [
+    2719515.16
+   ]
+  ]
+ },
+ {
+  "section": "Filters",
+  "question": "Total revenue for Online orders in the North",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"sales_channel\" IN ('Online')) AND (t0.\"region\" IN ('North'))",
+  "rows": [
+   [
+    702952.1
+   ]
+  ],
+  "expected": [
+   [
+    702952.1
+   ]
+  ]
+ },
+ {
+  "section": "Filters",
+  "question": "Number of orders with quantity of 5 or more",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"quantity\" >= 5)",
+  "rows": [
+   [
+    2674
+   ]
+  ],
+  "expected": [
+   [
+    2674
+   ]
+  ]
+ },
+ {
+  "section": "Filters",
+  "question": "Number of orders with revenue over 1000",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"revenue\" > 1000)",
+  "rows": [
+   [
+    2954
+   ]
+  ],
+  "expected": [
+   [
+    2954
+   ]
+  ]
+ },
+ {
+  "section": "Filters",
+  "question": "Total revenue for Furniture by region",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT t0.\"region\" AS \"region\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"product_category\" IN ('Furniture')) GROUP BY t0.\"region\"",
+  "rows": [
+   [
+    "East",
+    771949.45
+   ],
+   [
+    "North",
+    670441.67
+   ],
+   [
+    "South",
+    663258.3
+   ],
+   [
+    "West",
+    753356.1900000001
+   ]
+  ],
+  "expected": [
+   [
+    "East",
+    771949.45
+   ],
+   [
+    "North",
+    670441.67
+   ],
+   [
+    "South",
+    663258.3
+   ],
+   [
+    "West",
+    753356.1900000001
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "How many orders were returned?",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"is_returned\" = 1)",
+  "rows": [
+   [
+    777
+   ]
+  ],
+  "expected": [
+   [
+    777
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "Total revenue of orders that were not returned",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"is_returned\" = 0)",
+  "rows": [
+   [
+    9483566.49
+   ]
+  ],
+  "expected": [
+   [
+    9483566.49
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "How many priority orders?",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"is_priority\" = 1)",
+  "rows": [
+   [
+    1843
+   ]
+  ],
+  "expected": [
+   [
+    1843
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "How many orders have not shipped?",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"ship_date\" IS NULL)",
+  "rows": [
+   [
+    712
+   ]
+  ],
+  "expected": [
+   [
+    712
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "How many orders have no customer rating?",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"dataset_orders\" AS t0 WHERE (t0.\"customer_rating\" IS NULL)",
+  "rows": [
+   [
+    2997
+   ]
+  ],
+  "expected": [
+   [
+    2997
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "Total revenue excluding Marketplace",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: rows with no sales_channel are kept when excluding Marketplace",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE ((t0.\"sales_channel\" IS NULL OR t0.\"sales_channel\" NOT IN ('Marketplace')))",
+  "rows": [
+   [
+    7583576.51
+   ]
+  ],
+  "expected": [
+   [
+    7583576.51
+   ]
+  ]
+ },
+ {
+  "section": "Negation, flags and missing values",
+  "question": "Total revenue excluding Electronics and Furniture",
+  "action": "WARN",
+  "status": "WRONG",
+  "reason": "answer rests on: rows with no product_category are kept when excluding Electronics",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE ((t0.\"product_category\" IS NULL OR t0.\"product_category\" NOT IN ('Electronics'))) AND (t0.\"product_category\" IN ('Furniture'))",
+  "rows": [
+   [
+    2859005.61
+   ]
+  ],
+  "expected": [
+   [
+    1205837.84
+   ]
+  ]
+ },
+ {
+  "section": "Percentages and shares",
+  "question": "Percentage of orders that were returned",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: counting dataset_orders rows",
+  "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_returned\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    6.4750000000000005
+   ]
+  ],
+  "expected": [
+   [
+    6.475
+   ]
+  ]
+ },
+ {
+  "section": "Percentages and shares",
+  "question": "Share of revenue by region",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT t0.\"region\" AS \"region\", (SUM(t0.\"revenue\")) * 100.0 / NULLIF(SUM(SUM(t0.\"revenue\")) OVER (), 0) AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"region\"",
+  "rows": [
+   [
+    "East",
+    24.340731615356813
+   ],
+   [
+    "North",
+    25.965762903800783
+   ],
+   [
+    "South",
+    22.87722533504958
+   ],
+   [
+    "West",
+    26.816280145792817
+   ]
+  ],
+  "expected": [
+   [
+    "East",
+    24.340731615356816
+   ],
+   [
+    "North",
+    25.965762903800787
+   ],
+   [
+    "South",
+    22.877225335049584
+   ],
+   [
+    "West",
+    26.81628014579282
+   ]
+  ]
+ },
+ {
+  "section": "Percentages and shares",
+  "question": "Share of orders by sales channel",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: counting dataset_orders rows",
+  "sql": "SELECT t0.\"sales_channel\" AS \"sales_channel\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"dataset_orders\" AS t0 GROUP BY t0.\"sales_channel\"",
+  "rows": [
+   [
+    "Marketplace",
+    24.891666666666666
+   ],
+   [
+    "Online",
+    25.841666666666665
+   ],
+   [
+    "Phone",
+    24.908333333333335
+   ],
+   [
+    "Retail Store",
+    24.358333333333334
+   ]
+  ],
+  "expected": [
+   [
+    "Marketplace",
+    24.891666666666666
+   ],
+   [
+    "Online",
+    25.841666666666665
+   ],
+   [
+    "Phone",
+    24.908333333333335
+   ],
+   [
+    "Retail Store",
+    24.358333333333334
+   ]
+  ]
+ },
+ {
+  "section": "Formulas",
+  "question": "Total revenue minus cost",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT ((SUM(t0.\"revenue\")) - (SUM(t0.\"cost\"))) AS \"revenue_minus_cost\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    3403163.119999999
+   ]
+  ],
+  "expected": [
+   [
+    3403163.119999999
+   ]
+  ]
+ },
+ {
+  "section": "Formulas",
+  "question": "Total quantity times unit price",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(((t0.\"quantity\") * (t0.\"unit_price\"))) AS \"sum_quantity_x_unit_price\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    10872151
+   ]
+  ],
+  "expected": [
+   [
+    10872151
+   ]
+  ]
+ },
+ {
+  "section": "Formulas",
+  "question": "Revenue divided by quantity",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT ((SUM(t0.\"revenue\")) * 1.0 / NULLIF((SUM(t0.\"quantity\")), 0)) AS \"revenue_per_quantity\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    262.096092833329
+   ]
+  ],
+  "expected": [
+   [
+    262.096092833329
+   ]
+  ]
+ },
+ {
+  "section": "Formulas",
+  "question": "Total discount amount divided by revenue",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT ((SUM(t0.\"discount_amount\")) * 1.0 / NULLIF((SUM(t0.\"revenue\")), 0)) AS \"discount_amount_per_revenue\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    0.07732739668080614
+   ]
+  ],
+  "expected": [
+   [
+    0.07732739668080614
+   ]
+  ]
+ },
+ {
+  "section": "Time",
+  "question": "Monthly revenue by order date",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT substr(t0.\"order_date\",1,7) AS \"month\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY substr(t0.\"order_date\",1,7) ORDER BY \"month\"",
+  "rows": [
+   [
+    "2024-01",
+    379161.6
+   ],
+   [
+    "2024-02",
+    404697.59
+   ],
+   [
+    "2024-03",
+    480111.32
+   ],
+   [
+    "2024-04",
+    355638.96
+   ],
+   [
+    "2024-05",
+    393225.01
+   ],
+   [
+    "2024-06",
+    482214.52
+   ],
+   [
+    "2024-07",
+    431595.25
+   ],
+   [
+    "2024-08",
+    456509.5
+   ],
+   [
+    "2024-09",
+    407760.12
+   ],
+   [
+    "2024-10",
+    447902.43
+   ],
+   [
+    "2024-11",
+    458527.66
+   ],
+   [
+    "2024-12",
+    386396.37
+   ]
+  ],
+  "expected": [
+   [
+    "2024-01",
+    379161.6
+   ],
+   [
+    "2024-02",
+    404697.59
+   ],
+   [
+    "2024-03",
+    480111.32
+   ],
+   [
+    "2024-04",
+    355638.96
+   ],
+   [
+    "2024-05",
+    393225.01
+   ],
+   [
+    "2024-06",
+    482214.52
+   ],
+   [
+    "2024-07",
+    431595.25
+   ],
+   [
+    "2024-08",
+    456509.5
+   ],
+   [
+    "2024-09",
+    407760.12
+   ],
+   [
+    "2024-10",
+    447902.43
+   ],
+   [
+    "2024-11",
+    458527.66
+   ],
+   [
+    "2024-12",
+    386396.37
+   ]
+  ]
+ },
+ {
+  "section": "Time",
+  "question": "Total revenue by order date quarter",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: words not grounded: quarter, order date",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Time",
+  "question": "Number of orders ordered in March 2025",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: the question gives a period but not which date: order_date, ship_date. The readings give different results \u2014 order_date: 484.00; ship_date: 458.00. Which did you mean?",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Time",
+  "question": "Total revenue for order date in 2024",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 WHERE ((t0.\"order_date\" >= '2024-01-01' AND t0.\"order_date\" < '2025-01-01'))",
+  "rows": [
+   [
+    5083740.33
+   ]
+  ],
+  "expected": [
+   [
+    5083740.33
+   ]
+  ]
+ },
+ {
+  "section": "Time",
+  "question": "Yearly revenue by order date",
+  "action": "WARN",
+  "status": "correct",
+  "reason": "answer rests on: revenue is summed (no aggregation word was given)",
+  "sql": "SELECT substr(t0.\"order_date\",1,4) AS \"year\", SUM(t0.\"revenue\") AS \"sum_revenue\" FROM \"dataset_orders\" AS t0 GROUP BY substr(t0.\"order_date\",1,4) ORDER BY \"year\"",
+  "rows": [
+   [
+    "2024",
+    5083740.33
+   ],
+   [
+    "2025",
+    5057543.79
+   ]
+  ],
+  "expected": [
+   [
+    "2024",
+    5083740.33
+   ],
+   [
+    "2025",
+    5057543.79
+   ]
+  ]
+ },
+ {
+  "section": "Distinct counts",
+  "question": "Number of distinct products",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(DISTINCT t0.\"product_name\") AS \"distinct_product_name\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    12
+   ]
+  ],
+  "expected": [
+   [
+    12
+   ]
+  ]
+ },
+ {
+  "section": "Distinct counts",
+  "question": "Number of distinct sales reps",
+  "action": "ANSWER",
+  "status": "correct",
+  "reason": "every word was grounded, the plan passed verification and the query executed",
+  "sql": "SELECT COUNT(DISTINCT t0.\"sales_rep\") AS \"distinct_sales_rep\" FROM \"dataset_orders\" AS t0",
+  "rows": [
+   [
+    8
+   ]
+  ],
+  "expected": [
+   [
+    8
+   ]
+  ]
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Monthly revenue",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: 'monthly' does not say which date: order_date, ship_date. The readings give different results \u2014 order_date: 24 rows; ship_date: 26 rows. Which did you mean?",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Total revenue in 2025",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: the question gives a period but not which date: order_date, ship_date. The readings give different results \u2014 order_date: 5,057,543.79; ship_date: 4,765,694.20. Which did you mean?",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "What is our profit margin?",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: no measure could be grounded; words not grounded: profit, margin",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Which customers are most loyal?",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: no measure could be grounded; words not grounded: customers, loyal",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Total revenue in the last 30 days",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I can't answer this safely: relative dates (last/this/next period) are not resolved against a reference date",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Forecast next month's revenue",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "This question asks for a forecast or prediction. Forecasting is not implemented in this build \u2014 I will not substitute a historical total for a future estimate. Try asking about an observed period (e.g. 'What was revenue in September 2026?').",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Total revenue in May",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: 'May' has no year; which year is meant?",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Should ask (clarify)",
+  "question": "Revenue per order",
+  "action": "CLARIFY",
+  "status": "asks (as it should)",
+  "reason": "I need a clarification: 'per order' would give one value per dataset_orders row; did you mean the average per order, or the overall total?",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ },
+ {
+  "section": "Safety (refused)",
+  "question": "Delete all orders",
+  "action": "ABSTAIN",
+  "status": "asks (as it should)",
+  "reason": "This request looks like a destructive data operation (delete / modify / truncate). InsightFlow AI is read-only and will not execute, nor will it reinterpret the request as an unrelated read-only query.",
+  "sql": "",
+  "rows": [],
+  "expected": []
+ }
+]
