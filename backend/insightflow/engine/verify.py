@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List
 
 from .ir import Agg, Arith, BoolOp, Cmp, Col, Exists, InSet, IsNull, Lit, Not, Query
-from .schema_model import SchemaModel
+from .schema_model import SchemaModel, ordinal
 
 AGG_KINDS = {"sum": {"measure"}, "avg": {"measure"}, "min": {"measure", "date"}, "max": {"measure", "date"},
              "count_distinct": {"id", "category", "text", "measure", "date", "boolean"}, "count": {"id", "category", "text", "measure", "date", "boolean"}}
@@ -68,7 +68,7 @@ def verify(q: Query, m: SchemaModel) -> List[str]:
         pred(f)
     for g in q.group_by:
         expr(g)
-        if kind(g) in ("measure",):
+        if kind(g) == "measure" and not ordinal(m.col(g.table, g.column)):
             v.append(f"grouping by the numeric column {g.column}")
     if q.time_bucket and kind(q.time_bucket[0]) != "date":
         v.append(f"time series over the non-date column {q.time_bucket[0].column}")

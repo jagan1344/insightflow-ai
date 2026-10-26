@@ -92,5 +92,7 @@ def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0) ->
         r.status, r.message = "unsupported", f"cannot compile safely: {e}"
     except sqlite3.Error as e:
         r.status, r.message = "error", f"execution failed: {e}"
+    except Exception as e:                       # never answer from a half-built plan
+        r.status, r.message = "error", f"internal error while planning: {type(e).__name__}: {e}"
     r.ms = round((time.perf_counter() - t0) * 1000, 1)
     return r

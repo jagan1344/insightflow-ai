@@ -9,14 +9,16 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from . import lexicon as L
 from .ir import Agg, Arith, BoolOp, Cmp, Col, Evidence, Exists, InSet, IsNull, Lit, Measure, Not, Query
-from .schema_model import Path, SchemaModel
-from .words import FUNCTION, canon
+from .schema_model import Path, SchemaModel, ordinal
+from .words import FUNCTION, UNITS, canon, participle
 
 # ------------------------------------------------------------------ vocabulary of operations (language only)
+HEADLESS = {canon(w) for w in ("result", "record", "entry", "log", "detail", "info", "fact", "event", "history")}
 LIGHT = {canon(w) for w in """
 have has had get got make made do did take took come came go went happen occur show see give record recorded
 log logged list tell want need know look find book put use using used involve involved handle handled process
-processed actually currently still ever already overall altogether across all entire whole our us we company
+processed place placed create created submit submitted include included contain contained
+actually currently still ever already overall altogether across all entire whole our us we company
 business data dataset table record records entry entries row rows item items thing things kind kinds type types last
 """.split()} - {canon("item"), canon("items"), canon("type"), canon("types"), canon("kind")}
 FILLER = {"please", "also", "just", "i", "e", "eg", "ie", "etc", "currently", "actually", "ever", "so", "far"}
@@ -51,8 +53,8 @@ BUCKET_CUES = [(r"\bmonthly\b|\bmonth[\s-]+by[\s-]+month\b|\b(?:by|per|each|ever
                (r"\bdaily\b|\b(?:by|per|each|every|a)\s+day\b", "day")]
 COMPARE = r"\b(?:vs\.?|versus|compared?\s+(?:to|with)|compare|minus|difference|change[ds]?|more|fewer|less)\b"
 NUMWORD = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
-POLARITY = {"ok", "good", "valid", "success", "successful", "pass", "passed", "active", "standing", "complet", "clean"}
-ANTONYM = r"\b(?:faulty|failed|failing|failure|broken|bad|invalid|incomplete|problem|problems|issue|issues|declined|rejected|unsuccessful|errors?)\b"
+POLARITY = {"ok", "good", "valid", "success", "successful", "pass", "passed", "active", "standing", "complet", "clean", "met"}
+ANTONYM = r"\b(?:faulty|failed|failing|failure|broken|bad|invalid|incomplete|problem|problems|issue|issues|declined|rejected|unsuccessful|errors?|missed|miss|misses|breached)\b"
 POSITIVE = r"\b(?:ok|okay|good|valid|successful|success|passed|working|clean|complete)\b"
 
 MONTHS = {m: i for i, m in enumerate(["january", "february", "march", "april", "may", "june", "july", "august",
@@ -111,7 +113,8 @@ class Grounder:
 
     # ------------------------------------------------------------------ helpers
     def _tok(self, q: str) -> List[Tok]:
-        return [Tok(m.group(0), m.group(0).lower(), canon(m.group(0)), m.start(), m.end())
+        return [Tok(m.group(0), m.group(0).lower(), m.group(0).lower() if m.group(0).lower() in FUNCTION else canon(m.group(0)),
+                    m.start(), m.end())
                 for m in re.finditer(r"[A-Za-z0-9]+(?:\.[0-9]+)?", q)]
 
     def _span(self, s: int, e: int) -> Tuple[int, int]:
@@ -143,6 +146,8 @@ class Grounder:
         self.q, self.ql = q, q.lower()
         self.t = self._tok(q)
         self.used: Dict[int, str] = {}
+        self.ctx: Set[int] = set()
+        self.extra: list = []
         self.Q = Query()
         self.G = Grounding(self.Q)
         self._values()
@@ -167,6 +172,14 @@ class Grounder:
                 i0, i1 = self._span(m.start(), m.end())
                 if i0 < 0 or not self._free(i0, i1):
                     continue
+                if any(re.fullmatch(rx, lo) for rx, _u in BUCKET_CUES):
+                    own = {w for e in ents for w in self.m.col(e.table, e.column).words} | \
+                          {w for e in ents for w in (canon(x) for x in e.table.split("_"))}
+                    if not (i1 < len(self.t) and self.t[i1].can in own):
+                        self.Q.ambiguities.append(f"'{orig}' could mean a {lo} time series or the stored value "
+                                                  f"{ents[0].table}.{ents[0].column} = '{ents[0].text}'")
+                        self._use(i0, i1, "value")
+                        continue
                 self._use(i0, i1, "value")
                 found.append(Mention(i0, i1, "value", ents, orig))
         self.G.mentions += found
@@ -286,7 +299,12 @@ class Grounder:
         cands = []
         for e in self.lex.cols:
             allowed = set(e.words) | set(e.role_words)
-            req = set(e.core) - POLARITY if self.m.col(e.table, e.column).kind == "boolean" and set(e.core) - POLARITY else set(e.core)
+            kind = self.m.col(e.table, e.column).kind
+            req = set(e.core)
+            if kind == "boolean" and req - POLARITY - LIGHT:
+                req = req - POLARITY - LIGHT          # helmet_used: "helmet"; sla_met: "SLA"
+            elif kind == "measure" and req - UNITS:
+                req = req - UNITS                     # score_pct: "score"; dur_min: "duration"
             for i in range(len(self.t)):
                 if i in self.used or not (self.t[i].can in allowed or any(
                         3 <= len(w) <= 4 and len(self.t[i].low) > len(w) and self.t[i].low.startswith(w) for w in allowed)):
@@ -298,7 +316,10 @@ class Grounder:
                     cands.append((end - i, len(got) + rolehit, i, end, "col", e))
         for te in self.lex.tables:
             allowed = set(te.words) | set(te.role_words)
-            req = set(te.words[-1:]) | (set(te.role_words) if te.role_words else set())
+            req = set(te.words[-1:])
+            if len(te.words) > 1 and te.words[-1] in HEADLESS and not any(
+                    o.table != te.table and set(te.words[:-1]) & set(o.words) for o in self.lex.tables):
+                req = set(te.words[:-1])              # exam_results: "exams"
             for i in range(len(self.t)):
                 if self.t[i].can not in allowed or i in self.used:
                     continue
@@ -322,6 +343,20 @@ class Grounder:
             taken[key] = mm
             self._use(i, end, kind)
         self.G.mentions += list(taken.values())
+        # unit words: "duration in minutes" (the unit of the column just named), "fare per kilometre" (a column named by
+        # its unit, when exactly one numeric column has that unit)
+        for i, t in enumerate(self.t):
+            if i in self.used or i == 0 or t.can not in UNITS or self.t[i - 1].low not in ("in", "per"):
+                continue
+            ucols = [c for c in self.lex.cols if self.m.col(c.table, c.column).kind == "measure" and self.m.col(c.table, c.column).unit
+                     and canon(self.m.col(c.table, c.column).unit) == t.can and not (c.path is not None and c.path.fans_out)]
+            prev = [x for x in taken.values() if x.i1 == i - 1 and x.kind == "col"]
+            if self.t[i - 1].low == "in" and prev and any(c in prev[0].cands for c in ucols):
+                self._use(i - 1, i + 1, "unit")
+            elif self.t[i - 1].low == "per" and len(ucols) == 1:
+                mm = Mention(i, i + 1, "col", [ucols[0]], t.text); mm.score = 1
+                self.G.mentions.append(mm)
+                self._use(i, i + 1, "col")
         self.G.mentions.sort(key=lambda x: x.i0)
 
     # ------------------------------------------------------------------ assembly
@@ -358,9 +393,11 @@ class Grounder:
         if best[0][0] > 0 and (len(best) == 1 or best[0][0] > best[1][0]):
             w = best[0][1]
             for j in range(max(0, i0 - 3), min(len(self.t), i1 + 3)):
-                if j not in self.used and self.t[j].can in (set(L._role_words(w.path, w.table)) if w.path else set()) | \
-                        set(self.m.col(w.table, w.column).words if hasattr(w, "column") else []) | {canon(x) for x in w.table.split("_")}:
-                    self.used[j] = "context"
+                if self.t[j].can in (set(L._role_words(w.path, w.table)) if w.path else set()) | \
+                        set(self.m.col(w.table, w.column).words if hasattr(w, "column") and w.column else []) | {canon(x) for x in w.table.split("_")}:
+                    self.ctx.add(j)
+                    if j not in self.used:
+                        self.used[j] = "context"
             return w, None
         return None, [f"{getattr(e, 'table', '')}.{getattr(e, 'column', '')}" + (f" via {e.path.role}" if e.path is not None and e.path.role else "") for e in ents]
 
@@ -390,6 +427,9 @@ class Grounder:
             if e is None:
                 Q.ambiguities.append(f"'{vm.text}' could be " + " or ".join(amb))
                 continue
+            for cm in self.G.mentions:
+                if cm.kind == "col" and cm.i0 == vm.i1 and any((c.table, c.column) == (e.table, e.column) for c in cm.cands):
+                    cm.ctx = True
             neg = self._neg_before(vm.i0)
             if neg:
                 self._use(*neg, "negation")
@@ -411,6 +451,8 @@ class Grounder:
         # columns: classify by kind and context
         measures_c, dims_c, dates_c, bools_c, ids_c = [], [], [], [], []
         for cm in cols_m:
+            if getattr(cm, "ctx", False):
+                continue
             e, amb = self._choose_path(cm.cands, cm.i0, cm.i1)
             if e is None:
                 # several columns share these words; a measure context may still decide later
@@ -436,7 +478,8 @@ class Grounder:
             v = 1
             ant = self._near(ANTONYM, bm.i0, bm.i1, before=3) or (re.search(ANTONYM, ql[self.t[bm.i1 - 1].e:self.t[min(len(self.t), bm.i1 + 2) - 1].e]) if bm.i1 < len(self.t) else None)
             if pol:
-                has_word = bool(words & POLARITY & {self.t[j].can for j in range(bm.i0, bm.i1)})
+                has_word = bool(words & POLARITY & {self.t[j].can for j in range(bm.i0, bm.i1)}) or \
+                    any(participle(self.t[j].low) and self.t[j].can in words for j in range(bm.i0, bm.i1))
                 posw = self._near(POSITIVE, bm.i0, bm.i1, before=3)
                 if ant:
                     v = 0
@@ -511,6 +554,61 @@ class Grounder:
                 conds.append((tm.i0, p)); tm.null = True
                 self._ev(tm.i0, tm.i1, f"{m.anchor}.{fk.child_col} IS {'NOT ' if p.negated else ''}NULL", "no linked " + te.table)
 
+        timed = bool(self.G.periods) or any(re.search(rx, ql) for rx, _u in BUCKET_CUES)
+        # existence of related rows on a one-to-many table ("had an issue", "with no tags", "were returned")
+        for tm in tabs_m:
+            tes = [te for te in tm.cands if te.path is not None and te.path.fans_out]
+            if not tes or len({te.table for te in tes}) > 1 or getattr(tm, "null", False):
+                continue
+            te = tes[0]
+            pre = ql[self.t[max(0, tm.i0 - 3)].s:self.t[tm.i0].s]
+            cue = re.search(r"\b(?:with|had|has|have|having|without|no|any|an?|least\s+one|one\s+or\s+more|some)\s+(?:any\s+|an?\s+)?$", pre)
+            verb = participle(self.t[tm.i0].low)
+            if not (cue or verb):
+                continue
+            if any(isinstance(p, Exists) and p.path == te.path for _pos, p in conds):
+                tm.cond = True                         # a condition on that table already says it
+                continue
+            neg = self._neg_before(tm.i0, 4)
+            if neg:
+                self._use(*neg, "negation")
+            conds.append((tm.i0, Exists(te.path, None, negated=bool(neg))))
+            tm.cond = True
+            self._ev(tm.i0, tm.i1, f"{'NOT ' if neg else ''}EXISTS {te.table}", "related rows (one-to-many)")
+        # verb forms of date columns without a period: 'not shipped' -> ship date IS NULL
+        for cm in [c for c in dates_c if getattr(c, "e", None) is not None]:
+            e = cm.e
+            if timed or not any(participle(self.t[j].low) for j in range(cm.i0, cm.i1)):
+                continue
+            if e.path is not None and (e.path.fans_out or e.path.steps[-1][0].nullable):
+                continue
+            col = m.col(e.table, e.column)
+            neg = self._neg_before(cm.i0, 4)
+            nullable = col.n_null > 0 or not col.not_null
+            if neg and nullable:
+                self._use(*neg, "negation")
+                conds.append((cm.i0, IsNull(self._col(e), False))); cm.cond = True
+                self._ev(cm.i0, cm.i1, f"{e.table}.{e.column} IS NULL", "event has not happened (no date)")
+            elif not neg and nullable:
+                conds.append((cm.i0, IsNull(self._col(e), True))); cm.cond = True
+                self._ev(cm.i0, cm.i1, f"{e.table}.{e.column} IS NOT NULL", "event has happened (date present)")
+            elif not neg:
+                cm.cond = True                         # every row has this date: descriptive only
+                self._ev(cm.i0, cm.i1, f"{e.table}.{e.column}: no condition", "every row has this date")
+        # verb forms of count columns: 'never reopened' -> reopen_cnt = 0
+        for cm in [c for c in measures_c if getattr(c, "e", None) is not None]:
+            e = cm.e
+            col = m.col(e.table, e.column)
+            if canon("count") not in col.words or not any(participle(self.t[j].low) for j in range(cm.i0, cm.i1)):
+                continue
+            if e.path is not None and e.path.fans_out:
+                continue
+            neg = self._neg_before(cm.i0, 4)
+            if neg:
+                self._use(*neg, "negation")
+            conds.append((cm.i0, Cmp(self._col(e), "=" if neg else ">", Lit(0)))); cm.cond = True
+            self._ev(cm.i0, cm.i1, f"{e.table}.{e.column} {'=' if neg else '>'} 0", "verb form of a count column")
+
         # numeric comparisons -> nearest numeric column (measure) by position, or by unit
         for n in self.nums:
             if not n["explicit"]:
@@ -523,6 +621,9 @@ class Grounder:
                 if best is None or d < best[0]:
                     best = (d, cm)
             unit_tok = self.t[n["num_i"] + 1].can if n["num_i"] + 1 < len(self.t) else ""
+            if unit_tok in UNITS and (n["num_i"] + 1) not in self.used and not (best and best[1].e is not None and
+                    m.col(best[1].e.table, best[1].e.column).unit and canon(m.col(best[1].e.table, best[1].e.column).unit) == unit_tok):
+                best = None                            # '30 minutes' names its column by unit, whatever is nearer
             if best is None or best[0] > 4:
                 ucols = [c for c in self.lex.cols if m.col(c.table, c.column).kind == "measure" and m.col(c.table, c.column).unit
                          and canon(m.col(c.table, c.column).unit) == unit_tok]
@@ -565,6 +666,11 @@ class Grounder:
                 role_col = Col(m.anchor, hits[0][0].name, None)
                 for _c, j in hits:
                     self.used[j] = "date role"
+        role_default = None
+        if role_col is None and not named and len(anchor_dates) > 1:
+            req = [c for c in anchor_dates if c.not_null]
+            if len(req) == 1:
+                role_col = role_default = Col(m.anchor, req[0].name, None)
         periods = self.G.periods
         comparing = len(periods) >= 2 and re.search(COMPARE, ql)
 
@@ -577,7 +683,7 @@ class Grounder:
                     aggs.append((i0, i1, fn))
         aggs.sort()
         distinct = re.search(DISTINCT_CUE, ql)
-        pct = re.search(PCT_CUE, ql)
+        pct = next((mt for mt in re.finditer(PCT_CUE, ql) if self._free(*self._span(mt.start(), mt.end()))), None)
 
         def take(i0, i1, why):
             self._use(i0, i1, why)
@@ -588,15 +694,21 @@ class Grounder:
             return c.kind == "measure" and not (ws & {canon(x) for x in ("rating", "rate", "score", "percent", "pct", "ratio",
                                                                          "temperature", "avg", "average", "age", "price", "lat", "lon")})
 
-        meas_free = [cm for cm in measures_c if not getattr(cm, "cmp", False)]
+        gtargets = self._group_targets()
+        meas_free = [cm for cm in measures_c if not (getattr(cm, "cmp", False) or getattr(cm, "null", False)
+                                                     or getattr(cm, "cond", False) or id(cm) in gtargets)]
         # explicit products / ratios between measure mentions
         expr_pairs = []
         for a, b in zip(meas_free, meas_free[1:]):
             mid = ql[self.t[a.i1 - 1].e:self.t[b.i0].s]
             if re.fullmatch(r"\s*(?:times|multiplied\s+by|x|\*)\s*(?:the\s+)?", mid):
                 expr_pairs.append(("*", a, b, mid))
-            elif re.fullmatch(r"\s*(?:divided\s+by|over|/)\s*(?:the\s+)?(?:total\s+)?", mid):
+            elif re.fullmatch(r"\s*(?:divided\s+by|over|/|per)\s*(?:the\s+)?(?:total\s+)?", mid):
                 expr_pairs.append(("/", a, b, mid))
+            elif re.fullmatch(r"\s*(?:minus|less|-)\s*(?:the\s+)?(?:total\s+)?", mid):
+                expr_pairs.append(("-", a, b, mid))
+            elif re.fullmatch(r"\s*(?:plus|\+)\s*(?:the\s+)?(?:total\s+)?", mid):
+                expr_pairs.append(("+", a, b, mid))
 
         def ent(cm):
             if getattr(cm, "e", None) is not None:
@@ -627,9 +739,18 @@ class Grounder:
                     elif fn == "avg":
                         measure = Measure(f"avg_{ea.column}_x_{eb.column}", Agg("avg", Arith("*", ca, cb)))
                     self._ev(a.i0, b.i1, f"SUM({ea.column} * {eb.column})", "product computed per row, then aggregated")
-                else:
+                elif op == "/":
                     measure = Measure(f"{ea.column}_per_{eb.column}", Arith("/", Agg("sum", ca), Agg("sum", cb)))
                     self._ev(a.i0, b.i1, f"SUM({ea.column}) / SUM({eb.column})", "ratio of totals as stated")
+                else:
+                    if fn not in (None, "sum"):
+                        Q.unsupported.append(f"{fn} of a sum or difference")
+                    else:
+                        word = "minus" if op == "-" else "plus"
+                        measure = Measure(f"{ea.column}_{word}_{eb.column}", Arith(op, Agg("sum", ca), Agg("sum", cb)))
+                        self._ev(a.i0, b.i1, f"SUM({ea.column}) {op} SUM({eb.column})", "totals combined as stated")
+                        if any(m.col(x.table, x.column).n_null for x in (ea, eb)):
+                            Q.assumptions.append("missing values count as nothing in each total")
                 if cue:
                     take(cue[0], cue[1], "aggregation")
                 for x in (a, b):
@@ -645,6 +766,8 @@ class Grounder:
                 cm = meas_free[0]
             elif len(meas_free) > 1:
                 cm = meas_free[0]
+            if cm is not None and cue and cue[2] == "count" and any(cue[1] <= x.i0 < cm.i0 for x in tabs_m):
+                cm = None                              # "how many tickets have ... <measure>": rows are counted
             if cm is not None and ent(cm) is None and cue:
                 # ambiguous measure words; still ambiguous
                 Q.ambiguities.append(f"'{cm.text}' could be " + " or ".join(cm.amb))
@@ -654,6 +777,9 @@ class Grounder:
                 e = ent(cm)
                 if e.path is not None and e.path.fans_out:
                     Q.unsupported.append(f"a measure on the one-to-many table {e.table} (needs that table as the base)")
+                elif e.path is not None and fn in ("sum", "avg", None, "count"):
+                    Q.ambiguities.append(f"{e.column} describes {e.table}; aggregate it over {e.table} itself, or once per "
+                                         f"{m.anchor} row (weighted by {m.anchor})?")
                 else:
                     c = self._col(e)
                     if fn in ("max", "min", "avg", "sum"):
@@ -679,7 +805,8 @@ class Grounder:
         # counts of rows or entities
         if measure is None and (cue and cue[2] == "count" or (distinct and not meas_free)):
             target = None
-            after_t = [x for x in tabs_m if (cue is None or x.i0 >= cue[1]) and not getattr(x, "null", False)]
+            after_t = [x for x in tabs_m if (cue is None or x.i0 >= cue[1]) and not getattr(x, "null", False)
+                       and not getattr(x, "cond", False)]
             after_c = [x for x in dims_c + ids_c if (cue is None or x.i0 >= cue[1]) and getattr(x, "e", None) is not None
                        and not getattr(x, "null", False)]
             if distinct and (after_c or after_t):
@@ -723,7 +850,7 @@ class Grounder:
                 self._ev(cue[0] if cue else 0, cue[1] if cue else 0, measure.expr.func.upper(), "count")
         if measure is None and not Q.unsupported and not Q.ambiguities:
             # a bare anchor noun with a percentage / grouping and no measure ("share of orders by city")
-            if pct or any(re.search(GROUP_CUES, ql) for _ in [0]):
+            if pct or re.search(GROUP_CUES, ql) or any(re.search(rx, ql) for rx, _u in BUCKET_CUES):
                 if any(x.cands[0].path is None for x in tabs_m):
                     measure = Measure("row_count", Agg("count"))
                     Q.assumptions.append(f"counting {m.anchor} rows")
@@ -789,7 +916,9 @@ class Grounder:
                 self._ev(periods[0].i0, periods[-1].i1, f"{role_col.column} in [{lo}, {hi})", "period on the chosen date column")
         if measure is not None:
             Q.measures = [measure]
-        Q.filters = filters
+        Q.filters = filters + self.extra
+        if role_default is not None and (periods or any(re.search(rx, ql) for rx, _u in BUCKET_CUES)):
+            Q.assumptions.append(f"dates refer to {role_default.column}, the only date every {m.anchor} row has")
 
         # ---------------- grouping, time buckets, ranking
         Q.group_by = grouping
@@ -824,6 +953,25 @@ class Grounder:
                 take(a, b, "ranking")
         Q.shape = "ranked" if Q.limit else "series" if Q.time_bucket else "grouped" if Q.group_by else "scalar"
 
+    def _group_targets(self) -> Set[int]:
+        """Small-range integer columns named right after a grouping cue ('by grade level') when something else is
+        being measured: they label groups and are not the measure."""
+        out = set()
+        has_cue = any(re.search(rx, self.ql) for rx, fn in AGG_CUES if fn == "count")
+        for mt in re.finditer(GROUP_CUES, self.ql):
+            a, b = self._span(mt.start(), mt.end())
+            if a < 0 or not self._free(a, b):
+                continue
+            nxt = [x for x in self.G.mentions if b <= x.i0 <= b + 3 and x.kind in ("col", "table")]
+            if not nxt or nxt[0].kind != "col" or getattr(nxt[0], "e", None) is None:
+                continue
+            x = nxt[0]
+            others = [y for y in self.G.mentions if y is not x and y.kind == "col" and getattr(y, "e", None) is not None
+                      and self.m.col(y.e.table, y.e.column).kind == "measure"]
+            if ordinal(self.m.col(x.e.table, x.e.column)) and (has_cue or others):
+                out.add(id(x))
+        return out
+
     def _pct_pivot(self, pct_tok: int) -> int:
         """Token index after the subject of 'percentage of <subject> <verb> ...'."""
         for j in range(pct_tok, len(self.t)):
@@ -835,31 +983,44 @@ class Grounder:
     def _grouping(self, dims_c, tabs_m, ids_c) -> List[Col]:
         out = []
         ql = self.ql
+        spans = []
         for mt in re.finditer(GROUP_CUES, ql):
             a, b = self._span(mt.start(), mt.end())
-            if a < 0 or not self._free(a, b):
+            if a >= 0 and self._free(a, b):
+                spans.append((a, b, 3))
+        for _n, a, b, _txt in self.limits:      # "top 3 start stations": the ranked entity is the group
+            spans.append((a, b, 0))
+        for a, b, reach in spans:
+            if not self._free(a, b) and reach:
                 continue
-            cands = [x for x in self.G.mentions if x.i0 >= b and x.i0 <= b + 3 and x.kind in ("col", "table")
+            cands = [x for x in self.G.mentions if x.i0 >= b and x.i0 <= b + reach and x.kind in ("col", "table")
+                     and not getattr(x, "ctx", False)
                      and not getattr(x, "used_as_measure", False) and not getattr(x, "null", False)]
             if not cands:
                 continue
             x = cands[0]
+            if x.kind == "table" and len(cands) > 1 and cands[1].kind == "col" and cands[1].i0 == x.i1 and \
+                    getattr(cands[1], "e", None) is not None and cands[1].e.table in {t.table for t in x.cands}:
+                x.ctx = True                           # "customer segment": the entity noun qualifies its column
+                x = cands[1]
             if x.kind == "col":
                 e = getattr(x, "e", None)
                 if e is None:
                     self.Q.ambiguities.append(f"'{x.text}' could be " + " or ".join(x.amb)); continue
                 k = self.m.col(e.table, e.column).kind
-                if k in ("measure", "date"):
+                if k == "date" or (k == "measure" and id(x) not in self._group_targets()):
                     continue
                 if k == "id" and e.path is None:
                     tgt = [te for te in self.lex.tables if te.path is not None and te.path.role == e.column and not te.path.fans_out]
                     if tgt and tgt[0].display:
-                        out.append(Col(tgt[0].table, tgt[0].display, tgt[0].path))
+                        out.append(Col(tgt[0].table, tgt[0].display, tgt[0].path)); x.grouped = True
                         self._use(a, b, "group"); self._ev(x.i0, x.i1, f"group by {tgt[0].table}.{tgt[0].display}", "entity label"); continue
+                    if not tgt:
+                        self.Q.unresolved.append(f"{e.column} has no lookup table that names its values"); continue
                 if e.path is not None and e.path.fans_out:
                     self.Q.unsupported.append(f"grouping by {e.table}.{e.column} (one-to-many) would count rows more than once")
                     continue
-                out.append(self._col(e))
+                out.append(self._col(e)); x.grouped = True
                 self._use(a, b, "group"); self._ev(x.i0, x.i1, f"group by {e.table}.{e.column}", "grouping")
             else:
                 tes = x.cands
@@ -868,6 +1029,13 @@ class Grounder:
                     if w is None:
                         self.Q.ambiguities.append(f"'{x.text}' is reached in more than one way: " + " or ".join(amb)); continue
                     te = next(t for t in tes if t.path is w.path)
+                    rw = set(L._role_words(te.path, te.table))
+                    near = range(max(0, x.i0 - 3), min(len(self.t), x.i1 + 3))
+                    if any(self.t[j].can in rw and participle(self.t[j].low) for j in near) and len(te.path.steps) == 1:
+                        fk = te.path.steps[0][0]
+                        if fk.nullable:
+                            self.extra.append(IsNull(Col(self.m.anchor, fk.child_col, None), True))
+                            self._ev(x.i0, x.i1, f"{self.m.anchor}.{fk.child_col} IS NOT NULL", "the verb says the link exists")
                 else:
                     te = tes[0]
                 if te.path is None:
@@ -878,7 +1046,7 @@ class Grounder:
                 if not te.display:
                     self.Q.unresolved.append(f"{te.table} has no name column to label groups")
                     continue
-                out.append(Col(te.table, te.display, te.path))
+                out.append(Col(te.table, te.display, te.path)); x.grouped = True
                 self._use(a, b, "group"); self._ev(x.i0, x.i1, f"group by {te.table}.{te.display}", "entity label")
         return list(dict.fromkeys(out))
 
@@ -907,9 +1075,14 @@ class Grounder:
             left.append(x.text)
         if left:
             self.Q.unresolved.append("words not grounded: " + ", ".join(dict.fromkeys(left)))
+        dangling = [t.text for i, t in enumerate(self.t) if i not in self.used and t.low in ("not", "no", "never", "without", "non", "nor")]
+        if dangling:
+            self.Q.unresolved.append(f"'{dangling[0]}' is not attached to any condition")
 
     def _mention_used(self, x) -> bool:
-        if getattr(x, "used_as_measure", False) or getattr(x, "null", False) or getattr(x, "cmp", False):
+        if any(getattr(x, f, False) for f in ("used_as_measure", "null", "cmp", "cond", "grouped", "ctx")):
+            return True
+        if all(i in self.ctx for i in range(x.i0, x.i1)):
             return True
         if x.kind == "table" and x.cands[0].path is None:
             return True

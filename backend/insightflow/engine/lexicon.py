@@ -7,10 +7,11 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 from .schema_model import Column, Path, SchemaModel
-from .words import canon, col_words, table_words
+from .words import FUNCTION, canon, col_words, table_words
 
 GENERIC = {"amount", "value", "total", "count", "number", "code", "id", "date", "timestamp", "time", "flag",
            "is", "has", "nam", "nm", "per", "of", "ind", "indicator", "key"}
+GENERIC |= {canon(w) for w in GENERIC}          # names are compared in canonical form (date -> dat)
 
 
 @dataclass
@@ -68,7 +69,7 @@ def _role_words(path: Optional[Path], parent: str) -> List[str]:
     """Words of the anchor FK column that differ from the parent table's own words ('pickup' in pickup_zone_cd)."""
     if path is None or not path.role:
         return []
-    ws = [w for w in col_words(path.role) if w not in GENERIC]
+    ws = [w for w in col_words(path.role) if w not in GENERIC and w not in FUNCTION]
     tw = set(table_words(parent))
     return [w for w in ws if w not in tw and w + "s" not in tw]
 
@@ -91,10 +92,16 @@ def _schema_abbrev(m: SchemaModel):
     for t, cols in m.tables.items():
         for c in cols:
             for tok in _re.split(r"[^a-z0-9]+", c.lower()):
-                if 2 <= len(tok) <= 4 and tok not in _AB and tok not in vocab and not set(tok[1:]) & set("aeiouy"):
+                if tok in _AB or tok in vocab or tok in FUNCTION or tok in GENERIC:
+                    continue
+                if 2 <= len(tok) <= 4 and not set(tok[1:]) & set("aeiouy"):
                     hits = [w for w in vocab if w[0] == tok[0] and _subseq(tok, w) and len(w) > len(tok)]
-                    if len(hits) == 1:
-                        out[tok] = _st(hits[0])
+                elif 3 <= len(tok) <= 5:          # truncation of a longer schema word: stu -> student, accom -> accommodation
+                    hits = [w for w in vocab if w.startswith(tok) and len(w) > len(tok) + 1]
+                else:
+                    hits = []
+                if len(hits) == 1:
+                    out[tok] = _st(hits[0])
     return out
 
 
@@ -124,13 +131,18 @@ def build(m: SchemaModel) -> Lexicon:
         tables.append(TableEntry(t, p, tw, disp, rw))
         fkp = {e.child_col: e.parent for e in m.edges if e.child == t}
         for c in tcols.values():
-            core = [w for w in c.words if w not in GENERIC] or [w for w in c.words if w not in ("is", "has")] or c.words
+            core = [w for w in c.words if w not in GENERIC and w not in FUNCTION] or [w for w in c.words if w not in ("is", "has")] or c.words
             if c.values and c.kind in ("category", "text"):
                 for v in c.values:
                     lo = str(v).strip().lower()
                     if len(lo) >= 2 and not re.fullmatch(r"[\d\W_]+", lo):
                         values.setdefault(lo, []).append(ValueEntry(str(v), t, c.name, p))
+            if set(core) <= set(tw) and len(c.words) > len(core):
+                core = [w for w in c.words if w not in FUNCTION and w not in ("is", "has")]   # order_dt needs "order date"
             if c.kind == "id":
+                if p is None and c.name not in fkp and not c.pk:
+                    cols.append(ColEntry(t, c.name, p, c.words, core, c.kind, rw))   # proctor_id: no lookup
+                    continue
                 if not (p is None and c.name in fkp):
                     continue
                 if set(core) <= set(table_words(fkp[c.name])):

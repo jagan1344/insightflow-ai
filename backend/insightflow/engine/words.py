@@ -26,6 +26,8 @@ ABBREV = {
     "subs": "subscriber", "sub": "subscriber", "usr": "user", "msg": "message", "txn": "transaction",
     "trx": "transaction", "inst": "install", "mtd": "method", "rtg": "rating", "lvl": "level",
     "stmt": "statement", "mrc": "recurring", "chg": "charge", "fee": "fee", "sq": "square",
+    "pts": "point", "pt": "point", "km": "kilometer", "kms": "kilometer", "kilometre": "kilometer",
+    "kilometres": "kilometer", "metre": "meter", "metres": "meter",
 }
 
 IRREGULAR = {
@@ -94,6 +96,19 @@ def col_words(name: str) -> List[str]:
 def table_words(name: str) -> List[str]:
     ws = [canon(t) for t in tokens(name)]
     return ws
+
+
+# unit words: a column may be named without its unit ("score" for score_pct, "duration" for dur_min)
+UNITS = {canon(w) for w in ("minute", "min", "mins", "hour", "hrs", "hr", "second", "secs", "day", "days", "km", "mi",
+                            "mile", "kg", "lb", "percent", "pct", "usd", "eur", "gbp", "dollar", "kwh", "gb", "mb",
+                            "ft", "sqft", "cents", "cent")}
+
+
+def participle(w: str) -> bool:
+    """Past-participle / adjectival verb form ('shipped', 'graded', 'paid')."""
+    w = w.lower()
+    return (w.endswith("ed") and len(w) > 4) or w in {"paid", "sent", "done", "made", "shown", "given", "taken", "built",
+                                                      "sold", "won", "lost", "kept", "held", "spent", "met", "seen"}
 
 
 def content(word: str) -> bool:

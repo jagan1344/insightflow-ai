@@ -1,0 +1,6768 @@
+{
+ "summary": {
+  "abbr": {
+   "n": 107,
+   "answerable": 87,
+   "correct": 81,
+   "wrong": 0,
+   "abstain": 6,
+   "unanswerable": 15,
+   "unanswerable_abstained": 15,
+   "either": 5,
+   "either_correct": 0,
+   "either_wrong": 0,
+   "answered": 81,
+   "wrong_among_answered": 0,
+   "counts": {
+    "correct": 81,
+    "abstain": 6,
+    "abstain_ok": 20
+   },
+   "median_ms": 1.1
+  },
+  "full": {
+   "n": 107,
+   "answerable": 87,
+   "correct": 79,
+   "wrong": 0,
+   "abstain": 8,
+   "unanswerable": 15,
+   "unanswerable_abstained": 15,
+   "either": 5,
+   "either_correct": 0,
+   "either_wrong": 0,
+   "answered": 79,
+   "wrong_among_answered": 0,
+   "counts": {
+    "correct": 79,
+    "abstain": 8,
+    "abstain_ok": 20
+   },
+   "median_ms": 1.0
+  },
+  "metamorphic_agreement": "105/107"
+ },
+ "records": {
+  "abbr": [
+   {
+    "id": "BK01",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals were there?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      900
+     ]
+    ],
+    "ms": 29.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK02",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      8063.35
+     ]
+    ],
+    "ms": 2.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK03",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Average ride duration in minutes by bike type",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: ride",
+    "sql": "",
+    "rows": [],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK04",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare by start station",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"stn_nm\" AS \"stn_nm\", SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"start_stn_id\" GROUP BY j1.\"stn_nm\"",
+    "rows": [
+     [
+      "Elm Park",
+      1713.35
+     ],
+     [
+      "Harbor Point",
+      1508.0
+     ],
+     [
+      "Old Mill Sq",
+      1701.75
+     ],
+     [
+      "Rail Yard (East)",
+      1652.25
+     ],
+     [
+      "Union & 5th",
+      1488.0
+     ]
+    ],
+    "ms": 1.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK05",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Number of rentals by end station",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"stn_nm\" AS \"stn_nm\", COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"end_stn_id\" GROUP BY j1.\"stn_nm\"",
+    "rows": [
+     [
+      null,
+      50
+     ],
+     [
+      "Elm Park",
+      174
+     ],
+     [
+      "Harbor Point",
+      170
+     ],
+     [
+      "Old Mill Sq",
+      163
+     ],
+     [
+      "Rail Yard (East)",
+      160
+     ],
+     [
+      "Union & 5th",
+      183
+     ]
+    ],
+    "ms": 1.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK06",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals did not use a helmet?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"helmet_used\" = 0)",
+    "rows": [
+     [
+      398
+     ]
+    ],
+    "ms": 2.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK07",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals have no end station?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"end_stn_id\" IS NULL)",
+    "rows": [
+     [
+      50
+     ]
+    ],
+    "ms": 1.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK08",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals had no rider?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"rdr_id\" IS NULL)",
+    "rows": [
+     [
+      100
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK09",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total distance in km for electric bikes",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"dist_km\") AS \"sum_dist_km\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" WHERE (j1.\"bike_type\" IN ('electric'))",
+    "rows": [
+     [
+      2972.13
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK10",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Monthly rentals in 2025",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "'Monthly' could mean a monthly time series or the stored value riders.plan_type = 'monthly'",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK11",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Top 3 start stations by number of rentals",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"stn_nm\" AS \"stn_nm\", COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"start_stn_id\" GROUP BY j1.\"stn_nm\" ORDER BY \"row_count\" DESC, \"stn_nm\" LIMIT 3",
+    "rows": [
+     [
+      "Elm Park",
+      186
+     ],
+     [
+      "Old Mill Sq",
+      183
+     ],
+     [
+      "Rail Yard (East)",
+      180
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK12",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals had at least one issue?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\"))",
+    "rows": [
+     [
+      390
+     ]
+    ],
+    "ms": 13.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK13",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals had no issues?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\"))",
+    "rows": [
+     [
+      510
+     ]
+    ],
+    "ms": 12.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK14",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "How many rentals had a brake issue?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\" AND x0_0.\"issue_type\" IN ('brake')))",
+    "rows": [
+     [
+      127
+     ]
+    ],
+    "ms": 14.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK15",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total of duration times per minute rate",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(((t0.\"dur_min\") * (t0.\"per_min_rate\"))) AS \"sum_dur_min_x_per_min_rate\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      7163.35
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK16",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Percentage of rentals with a helmet used",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"helmet_used\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      55.77777777777778
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK17",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Share of rentals by bike type",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"bike_type\" AS \"bike_type\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" GROUP BY j1.\"bike_type\"",
+    "rows": [
+     [
+      "cargo",
+      24.333333333333332
+     ],
+     [
+      "classic",
+      40.111111111111114
+     ],
+     [
+      "electric",
+      35.55555555555556
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK18",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Average fare for rentals longer than 30 minutes",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"fare_amt\") AS \"avg_fare_amt\" FROM \"rentals\" AS t0 WHERE (t0.\"dur_min\" > 30)",
+    "rows": [
+     [
+      11.650620567375887
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK19",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Number of distinct riders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"rdr_id\") AS \"distinct_rdr_id\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      149
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK20",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare by rider plan type",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"plan_type\" AS \"plan_type\", SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"rentals\" AS t0 LEFT JOIN \"riders\" AS j1 ON j1.\"rdr_id\" = t0.\"rdr_id\" GROUP BY j1.\"plan_type\"",
+    "rows": [
+     [
+      null,
+      2158.65
+     ],
+     [
+      "annual",
+      2511.2
+     ],
+     [
+      "monthly",
+      1927.25
+     ],
+     [
+      "pay-as-you-go",
+      1466.25
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK21",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare per kilometre",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"fare_amt\")) * 1.0 / NULLIF((SUM(t0.\"dist_km\")), 0)) AS \"fare_amt_per_dist_km\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      1.003282331525438
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK22",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare by station",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'station' is reached in more than one way: stations.stn_nm via start_stn_id or stations.stn_nm via end_stn_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK23",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Rentals by district",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'district' could be stations.district via start_stn_id or stations.district via end_stn_id; 'district' could be stations.district via start_stn_id or stations.district via end_stn_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK24",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Which riders are most loyal?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: loyal, riders",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK25",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Predict next month's rentals",
+    "expect": "unsupported",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK26",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare in the last 7 days",
+    "expect": "unsupported",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK27",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Total fare for rentals ending at Harbor Point",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"fare_amt\") AS \"sum_fare_amt\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"end_stn_id\" WHERE (j1.\"stn_nm\" IN ('Harbor Point'))",
+    "rows": [
+     [
+      1517.8
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK28",
+    "domain": "bikes",
+    "scheme": "abbr",
+    "question": "Average dock capacity",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'dock capacity' could be stations.dock_cap via start_stn_id or stations.dock_cap via end_stn_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC01",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many exam results are there?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      1100
+     ]
+    ],
+    "ms": 22.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC02",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score percent by course",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"crs_title\" AS \"crs_title\", AVG(t0.\"score_pct\") AS \"avg_score_pct\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" GROUP BY j1.\"crs_title\"",
+    "rows": [
+     [
+      "Algebra I",
+      64.73888888888888
+     ],
+     [
+      "Biology",
+      65.15308056872037
+     ],
+     [
+      "Chemistry",
+      65.19705882352942
+     ],
+     [
+      "English Composition",
+      62.78628318584071
+     ],
+     [
+      "Geometry",
+      64.30981308411215
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC03",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score by department",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"dept\" AS \"dept\", AVG(t0.\"score_pct\") AS \"avg_score_pct\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" GROUP BY j1.\"dept\"",
+    "rows": [
+     [
+      "English",
+      62.78628318584071
+     ],
+     [
+      "Math",
+      64.51601941747572
+     ],
+     [
+      "Science",
+      65.17469879518072
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC04",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many students were absent?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"student_id\") AS \"distinct_student_id\" FROM \"exam_results\" AS t0 WHERE (t0.\"absent\" = 1)",
+    "rows": [
+     [
+      43
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC05",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many exams were retakes?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (t0.\"is_retake\" = 1)",
+    "rows": [
+     [
+      136
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC06",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many exams have not been graded?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (t0.\"graded_dt\" IS NULL)",
+    "rows": [
+     [
+      124
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC07",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many exams had no proctor?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (t0.\"proctor_id\" IS NULL)",
+    "rows": [
+     [
+      109
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC08",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Total points earned divided by total points possible",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"pts_earned\")) * 1.0 / NULLIF((SUM(t0.\"pts_possible\")), 0)) AS \"pts_earned_per_pts_possible\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      0.6162327005511329
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC09",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score for grade 10 students",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: grade, students",
+    "sql": "",
+    "rows": [],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC10",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Number of exams by grade level",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"grade_lvl\" AS \"grade_lvl\", COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"students\" AS j1 ON j1.\"student_id\" = t0.\"student_id\" GROUP BY j1.\"grade_lvl\"",
+    "rows": [
+     [
+      9,
+      324
+     ],
+     [
+      10,
+      191
+     ],
+     [
+      11,
+      232
+     ],
+     [
+      12,
+      353
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC11",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many exams had an accommodation?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\"))",
+    "rows": [
+     [
+      185
+     ]
+    ],
+    "ms": 8.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC12",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "How many exams had extra time?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\" AND x0_0.\"accom_type\" IN ('extra time')))",
+    "rows": [
+     [
+      101
+     ]
+    ],
+    "ms": 10.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC13",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score for exams without any accommodation",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"score_pct\") AS \"avg_score_pct\" FROM \"exam_results\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\"))",
+    "rows": [
+     [
+      64.45649202733486
+     ]
+    ],
+    "ms": 9.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC14",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Monthly average score",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"exam_dt\",1,7) AS \"month\", AVG(t0.\"score_pct\") AS \"avg_score_pct\" FROM \"exam_results\" AS t0 GROUP BY substr(t0.\"exam_dt\",1,7) ORDER BY \"month\"",
+    "rows": [
+     [
+      "2024-10",
+      64.10909090909091
+     ],
+     [
+      "2024-11",
+      62.6734375
+     ],
+     [
+      "2024-12",
+      62.11379310344827
+     ],
+     [
+      "2025-01",
+      62.600787401574806
+     ],
+     [
+      "2025-02",
+      62.190140845070424
+     ],
+     [
+      "2025-03",
+      67.81632653061224
+     ],
+     [
+      "2025-05",
+      68.14642857142857
+     ],
+     [
+      "2025-06",
+      64.77024793388429
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC15",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score in Geometry",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"score_pct\") AS \"avg_score_pct\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" WHERE (j1.\"crs_title\" IN ('Geometry'))",
+    "rows": [
+     [
+      64.30981308411215
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC16",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Highest score percent",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT MAX(t0.\"score_pct\") AS \"max_score_pct\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      100.0
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC17",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Percentage of exams that were retakes",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_retake\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      12.363636363636363
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC18",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score for English language learners",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: language, learners",
+    "sql": "",
+    "rows": [],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC19",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Number of exams by homeroom",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"homeroom\" AS \"homeroom\", COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"students\" AS j1 ON j1.\"student_id\" = t0.\"student_id\" GROUP BY j1.\"homeroom\"",
+    "rows": [
+     [
+      null,
+      269
+     ],
+     [
+      "A-1",
+      261
+     ],
+     [
+      "B-2",
+      323
+     ],
+     [
+      "C-3",
+      247
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC20",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Top 2 courses by average score",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"crs_title\" AS \"crs_title\", AVG(t0.\"score_pct\") AS \"avg_score_pct\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"crs_cd\" = t0.\"crs_cd\" GROUP BY j1.\"crs_title\" ORDER BY \"avg_score_pct\" DESC, \"crs_title\" LIMIT 2",
+    "rows": [
+     [
+      "Chemistry",
+      65.19705882352942
+     ],
+     [
+      "Biology",
+      65.15308056872037
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC21",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score by grader",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "grader_id has no lookup table that names its values",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC22",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average score for exams graded by Mr. Chen",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "words not grounded: Mr, Chen",
+    "sql": "",
+    "rows": [],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC23",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Which students are struggling?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: struggling, students",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC24",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Will scores improve next term?",
+    "expect": "unsupported",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no aggregation was stated for score_pct, which is not additive; no measure could be grounded; words not grounded: improve, next, term",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 3,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC25",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Number of exams in the first quarter of 2025",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE ((t0.\"exam_dt\" >= '2025-01-01' AND t0.\"exam_dt\" < '2025-04-01'))",
+    "rows": [
+     [
+      438
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC26",
+    "domain": "school",
+    "scheme": "abbr",
+    "question": "Average credit hours",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "credit_hrs describes courses; aggregate it over courses itself, or once per exam_results row (weighted by exam_results)?",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH01",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "How many orders were placed?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      1000
+     ]
+    ],
+    "ms": 24.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH02",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total gross amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      308995.13
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH03",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total discount amount by region",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"region\" AS \"region\", SUM(t0.\"disc_amt\") AS \"sum_disc_amt\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"region\"",
+    "rows": [
+     [
+      null,
+      6654.84
+     ],
+     [
+      "Central",
+      7166.32
+     ],
+     [
+      "East",
+      4884.4
+     ],
+     [
+      "West",
+      5864.9
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH04",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "How many orders have not shipped?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"ship_dt\" IS NULL)",
+    "rows": [
+     [
+      77
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH05",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "How many orders used no promo code?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"promo_cd\" IS NULL)",
+    "rows": [
+     [
+      601
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH06",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total gross amount for gift orders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0 WHERE (t0.\"is_gift\" = 1)",
+    "rows": [
+     [
+      31001.5
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH07",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "How many orders were not paid?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"paid_ok\" = 0)",
+    "rows": [
+     [
+      39
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH08",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Gross amount minus discount amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"gross_amt\")) - (SUM(t0.\"disc_amt\"))) AS \"gross_amt_minus_disc_amt\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      284424.67
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH09",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Orders by ship mode",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"ship_mode\" AS \"ship_mode\", COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 GROUP BY t0.\"ship_mode\"",
+    "rows": [
+     [
+      "Express",
+      345
+     ],
+     [
+      "Pickup",
+      347
+     ],
+     [
+      "Standard",
+      308
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH10",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total shipping fee by customer segment",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"segment\" AS \"segment\", SUM(t0.\"ship_fee\") AS \"sum_ship_fee\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"segment\"",
+    "rows": [
+     [
+      "Consumer",
+      1493.06
+     ],
+     [
+      "Enterprise",
+      2227.03
+     ],
+     [
+      "Small Business",
+      1318.1200000000001
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH11",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "How many orders were returned?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"returns\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\"))",
+    "rows": [
+     [
+      78
+     ]
+    ],
+    "ms": 3.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH12",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "How many orders included Electronics?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"order_lines\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"product_cat\" IN ('Electronics')))",
+    "rows": [
+     [
+      504
+     ]
+    ],
+    "ms": 59.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH13",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Gross amount of orders that were never returned",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"returns\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\"))",
+    "rows": [
+     [
+      286413.1
+     ]
+    ],
+    "ms": 3.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH14",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Monthly gross amount",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"order_dt\",1,7) AS \"month\", SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0 GROUP BY substr(t0.\"order_dt\",1,7) ORDER BY \"month\"",
+    "rows": [
+     [
+      "2025-01",
+      25498.28
+     ],
+     [
+      "2025-02",
+      25504.06
+     ],
+     [
+      "2025-03",
+      26490.47
+     ],
+     [
+      "2025-04",
+      24385.25
+     ],
+     [
+      "2025-05",
+      31157.65
+     ],
+     [
+      "2025-06",
+      22271.96
+     ],
+     [
+      "2025-07",
+      27293.66
+     ],
+     [
+      "2025-08",
+      28798.22
+     ],
+     [
+      "2025-09",
+      28297.29
+     ],
+     [
+      "2025-10",
+      26591.08
+     ],
+     [
+      "2025-11",
+      23266.18
+     ],
+     [
+      "2025-12",
+      19441.03
+     ]
+    ],
+    "ms": 1.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH15",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Top 5 customers by gross amount",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"cust_nm\" AS \"cust_nm\", SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"cust_nm\" ORDER BY \"sum_gross_amt\" DESC, \"cust_nm\" LIMIT 5",
+    "rows": [
+     [
+      "Customer 087",
+      4897.67
+     ],
+     [
+      "Customer 023",
+      4856.17
+     ],
+     [
+      "Customer 098",
+      4764.48
+     ],
+     [
+      "Customer 085",
+      4392.22
+     ],
+     [
+      "Customer 021",
+      4196.05
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH16",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total gross amount for D'Angelo & Sons",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" WHERE (j1.\"cust_nm\" IN ('D''Angelo & Sons'))",
+    "rows": [
+     [
+      993.78
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH17",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Number of orders with promo code VIP20",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"promo_cd\" IN ('VIP20'))",
+    "rows": [
+     [
+      200
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH18",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Percentage of orders that are gifts",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_gift\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      9.6
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH19",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Average gross amount for Express orders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"gross_amt\") AS \"avg_gross_amt\" FROM \"orders\" AS t0 WHERE (t0.\"ship_mode\" IN ('Express'))",
+    "rows": [
+     [
+      311.59359420289854
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH20",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total gross amount in the second half of 2025",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amt\") AS \"sum_gross_amt\" FROM \"orders\" AS t0 WHERE ((t0.\"order_dt\" >= '2025-07-01' AND t0.\"order_dt\" < '2026-01-01'))",
+    "rows": [
+     [
+      153687.46
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH21",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Number of orders over 500 in gross amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"gross_amt\" > 500)",
+    "rows": [
+     [
+      180
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH22",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total quantity",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "unsupported",
+    "message": "a measure on the one-to-many table order_lines (needs that table as the base)",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH23",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total revenue",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: revenue",
+    "sql": "",
+    "rows": [],
+    "ms": 0.3,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH24",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Which customers are at risk of churn?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: risk, churn, customers",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH25",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Total amount",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: amount",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH26",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Share of gross amount by ship mode",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"ship_mode\" AS \"ship_mode\", (SUM(t0.\"gross_amt\")) * 100.0 / NULLIF(SUM(SUM(t0.\"gross_amt\")) OVER (), 0) AS \"sum_gross_amt\" FROM \"orders\" AS t0 GROUP BY t0.\"ship_mode\"",
+    "rows": [
+     [
+      "Express",
+      34.79012436215419
+     ],
+     [
+      "Pickup",
+      34.15068709982581
+     ],
+     [
+      "Standard",
+      31.05918853802
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH27",
+    "domain": "shop",
+    "scheme": "abbr",
+    "question": "Number of customers who placed orders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"cust_id\") AS \"distinct_cust_id\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      120
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU01",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets were opened?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0",
+    "rows": [
+     [
+      800
+     ]
+    ],
+    "ms": 11.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU02",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Tickets by priority",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"priority\" AS \"priority\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 GROUP BY t0.\"priority\"",
+    "rows": [
+     [
+      "P1",
+      197
+     ],
+     [
+      "P2",
+      180
+     ],
+     [
+      "P3",
+      224
+     ],
+     [
+      "P4",
+      199
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU03",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Average csat score by channel",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"channel\" AS \"channel\", AVG(t0.\"csat_score\") AS \"avg_csat_score\" FROM \"tickets\" AS t0 GROUP BY t0.\"channel\"",
+    "rows": [
+     [
+      "chat",
+      3.138121546961326
+     ],
+     [
+      "email",
+      3.006060606060606
+     ],
+     [
+      "phone",
+      2.887323943661972
+     ]
+    ],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU04",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets are still open?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: open",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU05",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets missed the SLA?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"sla_met\" = 0)",
+    "rows": [
+     [
+      169
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU06",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of tickets resolved by each agent",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"agent_nm\" AS \"agent_nm\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"resolved_by_agent_id\" WHERE (t0.\"resolved_by_agent_id\" IS NOT NULL) GROUP BY j1.\"agent_nm\"",
+    "rows": [
+     [
+      "Ava Moss",
+      125
+     ],
+     [
+      "Ben Ruiz",
+      138
+     ],
+     [
+      "Cho Lee",
+      146
+     ],
+     [
+      "Dee Park",
+      151
+     ],
+     [
+      "Eli Stone",
+      132
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU07",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of tickets opened by Ava Moss",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"opened_by_agent_id\" WHERE (j1.\"agent_nm\" IN ('Ava Moss'))",
+    "rows": [
+     [
+      154
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU08",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Tickets by agent",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'agent' is reached in more than one way: agents.agent_nm via opened_by_agent_id or agents.agent_nm via resolved_by_agent_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU09",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets were tagged billing?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"ticket_tags\" AS x0_0 WHERE x0_0.\"ticket_id\" = t0.\"ticket_id\" AND x0_0.\"tag\" IN ('billing')))",
+    "rows": [
+     [
+      148
+     ]
+    ],
+    "ms": 17.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU10",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets have no tags?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"ticket_tags\" AS x0_0 WHERE x0_0.\"ticket_id\" = t0.\"ticket_id\"))",
+    "rows": [
+     [
+      223
+     ]
+    ],
+    "ms": 16.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU11",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Total reopen count by account tier",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"tier\" AS \"tier\", SUM(t0.\"reopen_cnt\") AS \"sum_reopen_cnt\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" GROUP BY j1.\"tier\"",
+    "rows": [
+     [
+      "Bronze",
+      185
+     ],
+     [
+      "Gold",
+      155
+     ],
+     [
+      "Silver",
+      155
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU12",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets have no csat score?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"csat_score\" IS NULL)",
+    "rows": [
+     [
+      312
+     ]
+    ],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU13",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Monthly tickets opened",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"opened_ts\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 GROUP BY substr(t0.\"opened_ts\",1,7) ORDER BY \"month\"",
+    "rows": [
+     [
+      "2025-01",
+      73
+     ],
+     [
+      "2025-02",
+      70
+     ],
+     [
+      "2025-03",
+      58
+     ],
+     [
+      "2025-04",
+      83
+     ],
+     [
+      "2025-05",
+      69
+     ],
+     [
+      "2025-06",
+      69
+     ],
+     [
+      "2025-07",
+      60
+     ],
+     [
+      "2025-08",
+      75
+     ],
+     [
+      "2025-09",
+      64
+     ],
+     [
+      "2025-10",
+      63
+     ],
+     [
+      "2025-11",
+      60
+     ],
+     [
+      "2025-12",
+      56
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU14",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Percentage of tickets that met the SLA",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"sla_met\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"tickets\" AS t0",
+    "rows": [
+     [
+      78.875
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU15",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Top 3 accounts by number of tickets",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"acct_nm\" AS \"acct_nm\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" GROUP BY j1.\"acct_nm\" ORDER BY \"row_count\" DESC, \"acct_nm\" LIMIT 3",
+    "rows": [
+     [
+      "Acct 21",
+      36
+     ],
+     [
+      "Acct 28",
+      30
+     ],
+     [
+      "Acct 31",
+      29
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU16",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Average csat for Gold accounts",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, csat",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU17",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of P1 tickets by channel",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"channel\" AS \"channel\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"priority\" IN ('P1')) GROUP BY t0.\"channel\"",
+    "rows": [
+     [
+      "chat",
+      61
+     ],
+     [
+      "email",
+      69
+     ],
+     [
+      "phone",
+      67
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU18",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "How many tickets were never reopened?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"reopen_cnt\" = 0)",
+    "rows": [
+     [
+      470
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU19",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of tickets for Blue Sky (EU)",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" WHERE (j1.\"acct_nm\" IN ('Blue Sky (EU)'))",
+    "rows": [
+     [
+      17
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU20",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Tickets resolved by the Escalations team",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"resolved_by_agent_id\" WHERE (j1.\"team\" IN ('Escalations'))",
+    "rows": [
+     [
+      132
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU21",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of tickets by team",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id; 'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU22",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Average resolution time",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, resolution",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU23",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Which agents are the best?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: best, agents",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU24",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of tickets opened in March 2025",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE ((t0.\"opened_ts\" >= '2025-03-01' AND t0.\"opened_ts\" < '2025-04-01'))",
+    "rows": [
+     [
+      58
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU25",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Number of accounts with tickets",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"acct_id\") AS \"distinct_acct_id\" FROM \"tickets\" AS t0",
+    "rows": [
+     [
+      40
+     ]
+    ],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU26",
+    "domain": "support",
+    "scheme": "abbr",
+    "question": "Average annual revenue",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, annual, revenue",
+    "sql": "",
+    "rows": [],
+    "ms": 0.3,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  ],
+  "full": [
+   {
+    "id": "BK01",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals were there?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      900
+     ]
+    ],
+    "ms": 27.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK02",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"fare_amount\") AS \"sum_fare_amount\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      8063.35
+     ]
+    ],
+    "ms": 1.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK03",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Average ride duration in minutes by bike type",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: ride",
+    "sql": "",
+    "rows": [],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK04",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare by start station",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"station_name\" AS \"station_name\", SUM(t0.\"fare_amount\") AS \"sum_fare_amount\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"start_station_id\" GROUP BY j1.\"station_name\"",
+    "rows": [
+     [
+      "Elm Park",
+      1713.35
+     ],
+     [
+      "Harbor Point",
+      1508.0
+     ],
+     [
+      "Old Mill Sq",
+      1701.75
+     ],
+     [
+      "Rail Yard (East)",
+      1652.25
+     ],
+     [
+      "Union & 5th",
+      1488.0
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK05",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Number of rentals by end station",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"station_name\" AS \"station_name\", COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"end_station_id\" GROUP BY j1.\"station_name\"",
+    "rows": [
+     [
+      null,
+      50
+     ],
+     [
+      "Elm Park",
+      174
+     ],
+     [
+      "Harbor Point",
+      170
+     ],
+     [
+      "Old Mill Sq",
+      163
+     ],
+     [
+      "Rail Yard (East)",
+      160
+     ],
+     [
+      "Union & 5th",
+      183
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK06",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals did not use a helmet?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"helmet_used\" = 0)",
+    "rows": [
+     [
+      398
+     ]
+    ],
+    "ms": 1.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK07",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals have no end station?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"end_station_id\" IS NULL)",
+    "rows": [
+     [
+      50
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK08",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals had no rider?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (t0.\"rider_id\" IS NULL)",
+    "rows": [
+     [
+      100
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK09",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total distance in km for electric bikes",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"distance_km\") AS \"sum_distance_km\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" WHERE (j1.\"bike_type\" IN ('electric'))",
+    "rows": [
+     [
+      2972.13
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK10",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Monthly rentals in 2025",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "'Monthly' could mean a monthly time series or the stored value riders.plan_type = 'monthly'",
+    "sql": "",
+    "rows": [],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK11",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Top 3 start stations by number of rentals",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"station_name\" AS \"station_name\", COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"start_station_id\" GROUP BY j1.\"station_name\" ORDER BY \"row_count\" DESC, \"station_name\" LIMIT 3",
+    "rows": [
+     [
+      "Elm Park",
+      186
+     ],
+     [
+      "Old Mill Sq",
+      183
+     ],
+     [
+      "Rail Yard (East)",
+      180
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK12",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals had at least one issue?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\"))",
+    "rows": [
+     [
+      390
+     ]
+    ],
+    "ms": 15.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK13",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals had no issues?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\"))",
+    "rows": [
+     [
+      510
+     ]
+    ],
+    "ms": 13.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK14",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "How many rentals had a brake issue?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"rentals\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"rental_issues\" AS x0_0 WHERE x0_0.\"rental_id\" = t0.\"rental_id\" AND x0_0.\"issue_type\" IN ('brake')))",
+    "rows": [
+     [
+      127
+     ]
+    ],
+    "ms": 17.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK15",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total of duration times per minute rate",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(((t0.\"duration_minutes\") * (t0.\"per_minute_rate\"))) AS \"sum_duration_minutes_x_per_minute_rate\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      7163.35
+     ]
+    ],
+    "ms": 1.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK16",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Percentage of rentals with a helmet used",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"helmet_used\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      55.77777777777778
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK17",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Share of rentals by bike type",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"bike_type\" AS \"bike_type\", (COUNT(*)) * 100.0 / NULLIF(SUM(COUNT(*)) OVER (), 0) AS \"row_count\" FROM \"rentals\" AS t0 LEFT JOIN \"bikes\" AS j1 ON j1.\"bike_id\" = t0.\"bike_id\" GROUP BY j1.\"bike_type\"",
+    "rows": [
+     [
+      "cargo",
+      24.333333333333332
+     ],
+     [
+      "classic",
+      40.111111111111114
+     ],
+     [
+      "electric",
+      35.55555555555556
+     ]
+    ],
+    "ms": 1.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK18",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Average fare for rentals longer than 30 minutes",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"fare_amount\") AS \"avg_fare_amount\" FROM \"rentals\" AS t0 WHERE (t0.\"duration_minutes\" > 30)",
+    "rows": [
+     [
+      11.650620567375887
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK19",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Number of distinct riders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"rider_id\") AS \"distinct_rider_id\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      149
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK20",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare by rider plan type",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"plan_type\" AS \"plan_type\", SUM(t0.\"fare_amount\") AS \"sum_fare_amount\" FROM \"rentals\" AS t0 LEFT JOIN \"riders\" AS j1 ON j1.\"rider_id\" = t0.\"rider_id\" GROUP BY j1.\"plan_type\"",
+    "rows": [
+     [
+      null,
+      2158.65
+     ],
+     [
+      "annual",
+      2511.2
+     ],
+     [
+      "monthly",
+      1927.25
+     ],
+     [
+      "pay-as-you-go",
+      1466.25
+     ]
+    ],
+    "ms": 1.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK21",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare per kilometre",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"fare_amount\")) * 1.0 / NULLIF((SUM(t0.\"distance_km\")), 0)) AS \"fare_amount_per_distance_km\" FROM \"rentals\" AS t0",
+    "rows": [
+     [
+      1.003282331525438
+     ]
+    ],
+    "ms": 1.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK22",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare by station",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'station' is reached in more than one way: stations.station_name via start_station_id or stations.station_name via end_station_id",
+    "sql": "",
+    "rows": [],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK23",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Rentals by district",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'district' could be stations.district via start_station_id or stations.district via end_station_id; 'district' could be stations.district via start_station_id or stations.district via end_station_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK24",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Which riders are most loyal?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: loyal, riders",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK25",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Predict next month's rentals",
+    "expect": "unsupported",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK26",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare in the last 7 days",
+    "expect": "unsupported",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "unsupported",
+    "message": "relative dates (last/this/next period) are not resolved against a reference date",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK27",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Total fare for rentals ending at Harbor Point",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"fare_amount\") AS \"sum_fare_amount\" FROM \"rentals\" AS t0 LEFT JOIN \"stations\" AS j1 ON j1.\"station_id\" = t0.\"end_station_id\" WHERE (j1.\"station_name\" IN ('Harbor Point'))",
+    "rows": [
+     [
+      1517.8
+     ]
+    ],
+    "ms": 1.5,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "BK28",
+    "domain": "bikes",
+    "scheme": "full",
+    "question": "Average dock capacity",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'dock capacity' could be stations.dock_capacity via start_station_id or stations.dock_capacity via end_station_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC01",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many exam results are there?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      1100
+     ]
+    ],
+    "ms": 28.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC02",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score percent by course",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"course_title\" AS \"course_title\", AVG(t0.\"score_percent\") AS \"avg_score_percent\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"course_code\" = t0.\"course_code\" GROUP BY j1.\"course_title\"",
+    "rows": [
+     [
+      "Algebra I",
+      64.73888888888888
+     ],
+     [
+      "Biology",
+      65.15308056872037
+     ],
+     [
+      "Chemistry",
+      65.19705882352942
+     ],
+     [
+      "English Composition",
+      62.78628318584071
+     ],
+     [
+      "Geometry",
+      64.30981308411215
+     ]
+    ],
+    "ms": 1.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC03",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score by department",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"dept\" AS \"dept\", AVG(t0.\"score_percent\") AS \"avg_score_percent\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"course_code\" = t0.\"course_code\" GROUP BY j1.\"dept\"",
+    "rows": [
+     [
+      "English",
+      62.78628318584071
+     ],
+     [
+      "Math",
+      64.51601941747572
+     ],
+     [
+      "Science",
+      65.17469879518072
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC04",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many students were absent?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"student_id\") AS \"distinct_student_id\" FROM \"exam_results\" AS t0 WHERE (t0.\"absent\" = 1)",
+    "rows": [
+     [
+      43
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC05",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many exams were retakes?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (t0.\"is_retake\" = 1)",
+    "rows": [
+     [
+      136
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC06",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many exams have not been graded?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (t0.\"graded_dt\" IS NULL)",
+    "rows": [
+     [
+      124
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC07",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many exams had no proctor?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (t0.\"proctor_id\" IS NULL)",
+    "rows": [
+     [
+      109
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC08",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Total points earned divided by total points possible",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"points_earned\")) * 1.0 / NULLIF((SUM(t0.\"points_possible\")), 0)) AS \"points_earned_per_points_possible\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      0.6162327005511329
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC09",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score for grade 10 students",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: grade, students",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC10",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Number of exams by grade level",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"grade_lvl\" AS \"grade_lvl\", COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"students\" AS j1 ON j1.\"student_id\" = t0.\"student_id\" GROUP BY j1.\"grade_lvl\"",
+    "rows": [
+     [
+      9,
+      324
+     ],
+     [
+      10,
+      191
+     ],
+     [
+      11,
+      232
+     ],
+     [
+      12,
+      353
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC11",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many exams had an accommodation?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\"))",
+    "rows": [
+     [
+      185
+     ]
+    ],
+    "ms": 9.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC12",
+    "domain": "school",
+    "scheme": "full",
+    "question": "How many exams had extra time?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\" AND x0_0.\"accom_type\" IN ('extra time')))",
+    "rows": [
+     [
+      101
+     ]
+    ],
+    "ms": 8.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC13",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score for exams without any accommodation",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"score_percent\") AS \"avg_score_percent\" FROM \"exam_results\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"accommodations\" AS x0_0 WHERE x0_0.\"result_id\" = t0.\"result_id\"))",
+    "rows": [
+     [
+      64.45649202733486
+     ]
+    ],
+    "ms": 8.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC14",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Monthly average score",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"exam_dt\",1,7) AS \"month\", AVG(t0.\"score_percent\") AS \"avg_score_percent\" FROM \"exam_results\" AS t0 GROUP BY substr(t0.\"exam_dt\",1,7) ORDER BY \"month\"",
+    "rows": [
+     [
+      "2024-10",
+      64.10909090909091
+     ],
+     [
+      "2024-11",
+      62.6734375
+     ],
+     [
+      "2024-12",
+      62.11379310344827
+     ],
+     [
+      "2025-01",
+      62.600787401574806
+     ],
+     [
+      "2025-02",
+      62.190140845070424
+     ],
+     [
+      "2025-03",
+      67.81632653061224
+     ],
+     [
+      "2025-05",
+      68.14642857142857
+     ],
+     [
+      "2025-06",
+      64.77024793388429
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC15",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score in Geometry",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"score_percent\") AS \"avg_score_percent\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"course_code\" = t0.\"course_code\" WHERE (j1.\"course_title\" IN ('Geometry'))",
+    "rows": [
+     [
+      64.30981308411215
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC16",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Highest score percent",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT MAX(t0.\"score_percent\") AS \"max_score_percent\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      100.0
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC17",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Percentage of exams that were retakes",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_retake\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"exam_results\" AS t0",
+    "rows": [
+     [
+      12.363636363636363
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC18",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score for English language learners",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: language, learners",
+    "sql": "",
+    "rows": [],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC19",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Number of exams by homeroom",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"homeroom\" AS \"homeroom\", COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 LEFT JOIN \"students\" AS j1 ON j1.\"student_id\" = t0.\"student_id\" GROUP BY j1.\"homeroom\"",
+    "rows": [
+     [
+      null,
+      269
+     ],
+     [
+      "A-1",
+      261
+     ],
+     [
+      "B-2",
+      323
+     ],
+     [
+      "C-3",
+      247
+     ]
+    ],
+    "ms": 1.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC20",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Top 2 courses by average score",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"course_title\" AS \"course_title\", AVG(t0.\"score_percent\") AS \"avg_score_percent\" FROM \"exam_results\" AS t0 LEFT JOIN \"courses\" AS j1 ON j1.\"course_code\" = t0.\"course_code\" GROUP BY j1.\"course_title\" ORDER BY \"avg_score_percent\" DESC, \"course_title\" LIMIT 2",
+    "rows": [
+     [
+      "Chemistry",
+      65.19705882352942
+     ],
+     [
+      "Biology",
+      65.15308056872037
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC21",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score by grader",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "grader_id has no lookup table that names its values",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC22",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average score for exams graded by Mr. Chen",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "words not grounded: Mr, Chen",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC23",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Which students are struggling?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: struggling, students",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC24",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Will scores improve next term?",
+    "expect": "unsupported",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no aggregation was stated for score_percent, which is not additive; no measure could be grounded; words not grounded: improve, next, term",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 3,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC25",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Number of exams in the first quarter of 2025",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"exam_results\" AS t0 WHERE ((t0.\"exam_dt\" >= '2025-01-01' AND t0.\"exam_dt\" < '2025-04-01'))",
+    "rows": [
+     [
+      438
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SC26",
+    "domain": "school",
+    "scheme": "full",
+    "question": "Average credit hours",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "credit_hours describes courses; aggregate it over courses itself, or once per exam_results row (weighted by exam_results)?",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH01",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "How many orders were placed?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      1000
+     ]
+    ],
+    "ms": 25.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH02",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total gross amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      308995.13
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH03",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total discount amount by region",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"region\" AS \"region\", SUM(t0.\"discount_amount\") AS \"sum_discount_amount\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"region\"",
+    "rows": [
+     [
+      null,
+      6654.84
+     ],
+     [
+      "Central",
+      7166.32
+     ],
+     [
+      "East",
+      4884.4
+     ],
+     [
+      "West",
+      5864.9
+     ]
+    ],
+    "ms": 1.2,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH04",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "How many orders have not shipped?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"ship_date\" IS NULL)",
+    "rows": [
+     [
+      77
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH05",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "How many orders used no promo code?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"promo_cd\" IS NULL)",
+    "rows": [
+     [
+      601
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH06",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total gross amount for gift orders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0 WHERE (t0.\"is_gift\" = 1)",
+    "rows": [
+     [
+      31001.5
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH07",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "How many orders were not paid?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"paid_ok\" = 0)",
+    "rows": [
+     [
+      39
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH08",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Gross amount minus discount amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((SUM(t0.\"gross_amount\")) - (SUM(t0.\"discount_amount\"))) AS \"gross_amount_minus_discount_amount\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      284424.67
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH09",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Orders by ship mode",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"ship_mode\" AS \"ship_mode\", COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 GROUP BY t0.\"ship_mode\"",
+    "rows": [
+     [
+      "Express",
+      345
+     ],
+     [
+      "Pickup",
+      347
+     ],
+     [
+      "Standard",
+      308
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH10",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total shipping fee by customer segment",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"segment\" AS \"segment\", SUM(t0.\"shipping_fee\") AS \"sum_shipping_fee\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"segment\"",
+    "rows": [
+     [
+      "Consumer",
+      1493.06
+     ],
+     [
+      "Enterprise",
+      2227.03
+     ],
+     [
+      "Small Business",
+      1318.1200000000001
+     ]
+    ],
+    "ms": 1.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH11",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "How many orders were returned?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"returns\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\"))",
+    "rows": [
+     [
+      78
+     ]
+    ],
+    "ms": 3.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH12",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "How many orders included Electronics?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"order_lines\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\" AND x0_0.\"product_cat\" IN ('Electronics')))",
+    "rows": [
+     [
+      504
+     ]
+    ],
+    "ms": 62.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH13",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Gross amount of orders that were never returned",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"returns\" AS x0_0 WHERE x0_0.\"order_id\" = t0.\"order_id\"))",
+    "rows": [
+     [
+      286413.1
+     ]
+    ],
+    "ms": 3.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH14",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Monthly gross amount",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"order_date\",1,7) AS \"month\", SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0 GROUP BY substr(t0.\"order_date\",1,7) ORDER BY \"month\"",
+    "rows": [
+     [
+      "2025-01",
+      25498.28
+     ],
+     [
+      "2025-02",
+      25504.06
+     ],
+     [
+      "2025-03",
+      26490.47
+     ],
+     [
+      "2025-04",
+      24385.25
+     ],
+     [
+      "2025-05",
+      31157.65
+     ],
+     [
+      "2025-06",
+      22271.96
+     ],
+     [
+      "2025-07",
+      27293.66
+     ],
+     [
+      "2025-08",
+      28798.22
+     ],
+     [
+      "2025-09",
+      28297.29
+     ],
+     [
+      "2025-10",
+      26591.08
+     ],
+     [
+      "2025-11",
+      23266.18
+     ],
+     [
+      "2025-12",
+      19441.03
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 2,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH15",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Top 5 customers by gross amount",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"customer_name\" AS \"customer_name\", SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" GROUP BY j1.\"customer_name\" ORDER BY \"sum_gross_amount\" DESC, \"customer_name\" LIMIT 5",
+    "rows": [
+     [
+      "Customer 087",
+      4897.67
+     ],
+     [
+      "Customer 023",
+      4856.17
+     ],
+     [
+      "Customer 098",
+      4764.48
+     ],
+     [
+      "Customer 085",
+      4392.22
+     ],
+     [
+      "Customer 021",
+      4196.05
+     ]
+    ],
+    "ms": 1.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH16",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total gross amount for D'Angelo & Sons",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0 LEFT JOIN \"customers\" AS j1 ON j1.\"cust_id\" = t0.\"cust_id\" WHERE (j1.\"customer_name\" IN ('D''Angelo & Sons'))",
+    "rows": [
+     [
+      993.78
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH17",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Number of orders with promo code VIP20",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"promo_cd\" IN ('VIP20'))",
+    "rows": [
+     [
+      200
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH18",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Percentage of orders that are gifts",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"is_gift\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      9.6
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH19",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Average gross amount for Express orders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT AVG(t0.\"gross_amount\") AS \"avg_gross_amount\" FROM \"orders\" AS t0 WHERE (t0.\"ship_mode\" IN ('Express'))",
+    "rows": [
+     [
+      311.59359420289854
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH20",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total gross amount in the second half of 2025",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT SUM(t0.\"gross_amount\") AS \"sum_gross_amount\" FROM \"orders\" AS t0 WHERE ((t0.\"order_date\" >= '2025-07-01' AND t0.\"order_date\" < '2026-01-01'))",
+    "rows": [
+     [
+      153687.46
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH21",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Number of orders over 500 in gross amount",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"orders\" AS t0 WHERE (t0.\"gross_amount\" > 500)",
+    "rows": [
+     [
+      180
+     ]
+    ],
+    "ms": 0.8,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH22",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total quantity",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "unsupported",
+    "message": "a measure on the one-to-many table order_lines (needs that table as the base)",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH23",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total revenue",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: revenue",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH24",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Which customers are at risk of churn?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: risk, churn, customers",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH25",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Total amount",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: amount",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH26",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Share of gross amount by ship mode",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"ship_mode\" AS \"ship_mode\", (SUM(t0.\"gross_amount\")) * 100.0 / NULLIF(SUM(SUM(t0.\"gross_amount\")) OVER (), 0) AS \"sum_gross_amount\" FROM \"orders\" AS t0 GROUP BY t0.\"ship_mode\"",
+    "rows": [
+     [
+      "Express",
+      34.79012436215419
+     ],
+     [
+      "Pickup",
+      34.15068709982581
+     ],
+     [
+      "Standard",
+      31.05918853802
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SH27",
+    "domain": "shop",
+    "scheme": "full",
+    "question": "Number of customers who placed orders",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"cust_id\") AS \"distinct_cust_id\" FROM \"orders\" AS t0",
+    "rows": [
+     [
+      120
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU01",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets were opened?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0",
+    "rows": [
+     [
+      800
+     ]
+    ],
+    "ms": 15.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU02",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Tickets by priority",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"priority\" AS \"priority\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 GROUP BY t0.\"priority\"",
+    "rows": [
+     [
+      "P1",
+      197
+     ],
+     [
+      "P2",
+      180
+     ],
+     [
+      "P3",
+      224
+     ],
+     [
+      "P4",
+      199
+     ]
+    ],
+    "ms": 2.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU03",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Average csat score by channel",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, csat, score",
+    "sql": "",
+    "rows": [],
+    "ms": 0.5,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU04",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets are still open?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: open",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU05",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets missed the SLA?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"sla_met\" = 0)",
+    "rows": [
+     [
+      169
+     ]
+    ],
+    "ms": 1.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU06",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of tickets resolved by each agent",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"agent_name\" AS \"agent_name\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"resolved_by_agent_id\" WHERE (t0.\"resolved_by_agent_id\" IS NOT NULL) GROUP BY j1.\"agent_name\"",
+    "rows": [
+     [
+      "Ava Moss",
+      125
+     ],
+     [
+      "Ben Ruiz",
+      138
+     ],
+     [
+      "Cho Lee",
+      146
+     ],
+     [
+      "Dee Park",
+      151
+     ],
+     [
+      "Eli Stone",
+      132
+     ]
+    ],
+    "ms": 1.1,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU07",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of tickets opened by Ava Moss",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"opened_by_agent_id\" WHERE (j1.\"agent_name\" IN ('Ava Moss'))",
+    "rows": [
+     [
+      154
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU08",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Tickets by agent",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'agent' is reached in more than one way: agents.agent_name via opened_by_agent_id or agents.agent_name via resolved_by_agent_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU09",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets were tagged billing?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (EXISTS (SELECT 1 FROM \"ticket_tags\" AS x0_0 WHERE x0_0.\"ticket_id\" = t0.\"ticket_id\" AND x0_0.\"tag\" IN ('billing')))",
+    "rows": [
+     [
+      148
+     ]
+    ],
+    "ms": 22.4,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU10",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets have no tags?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (NOT EXISTS (SELECT 1 FROM \"ticket_tags\" AS x0_0 WHERE x0_0.\"ticket_id\" = t0.\"ticket_id\"))",
+    "rows": [
+     [
+      223
+     ]
+    ],
+    "ms": 13.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU11",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Total reopen count by account tier",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"tier\" AS \"tier\", SUM(t0.\"reopen_count\") AS \"sum_reopen_count\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" GROUP BY j1.\"tier\"",
+    "rows": [
+     [
+      "Bronze",
+      185
+     ],
+     [
+      "Gold",
+      155
+     ],
+     [
+      "Silver",
+      155
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU12",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets have no csat score?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "words not grounded: csat, score; 'no' is not attached to any condition",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU13",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Monthly tickets opened",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT substr(t0.\"opened_at\",1,7) AS \"month\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 GROUP BY substr(t0.\"opened_at\",1,7) ORDER BY \"month\"",
+    "rows": [
+     [
+      "2025-01",
+      73
+     ],
+     [
+      "2025-02",
+      70
+     ],
+     [
+      "2025-03",
+      58
+     ],
+     [
+      "2025-04",
+      83
+     ],
+     [
+      "2025-05",
+      69
+     ],
+     [
+      "2025-06",
+      69
+     ],
+     [
+      "2025-07",
+      60
+     ],
+     [
+      "2025-08",
+      75
+     ],
+     [
+      "2025-09",
+      64
+     ],
+     [
+      "2025-10",
+      63
+     ],
+     [
+      "2025-11",
+      60
+     ],
+     [
+      "2025-12",
+      56
+     ]
+    ],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU14",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Percentage of tickets that met the SLA",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT ((100.0) * (((COUNT(CASE WHEN t0.\"sla_met\" = 1 THEN 1 END)) * 1.0 / NULLIF((COUNT(*)), 0)))) AS \"percent\" FROM \"tickets\" AS t0",
+    "rows": [
+     [
+      78.875
+     ]
+    ],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU15",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Top 3 accounts by number of tickets",
+    "expect": "answer",
+    "kind": "ordered",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT j1.\"account_name\" AS \"account_name\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" GROUP BY j1.\"account_name\" ORDER BY \"row_count\" DESC, \"account_name\" LIMIT 3",
+    "rows": [
+     [
+      "Acct 21",
+      36
+     ],
+     [
+      "Acct 28",
+      30
+     ],
+     [
+      "Acct 31",
+      29
+     ]
+    ],
+    "ms": 1.0,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU16",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Average csat for Gold accounts",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "abstain",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, csat",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU17",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of P1 tickets by channel",
+    "expect": "answer",
+    "kind": "rowset",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT t0.\"channel\" AS \"channel\", COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"priority\" IN ('P1')) GROUP BY t0.\"channel\"",
+    "rows": [
+     [
+      "chat",
+      61
+     ],
+     [
+      "email",
+      69
+     ],
+     [
+      "phone",
+      67
+     ]
+    ],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU18",
+    "domain": "support",
+    "scheme": "full",
+    "question": "How many tickets were never reopened?",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE (t0.\"reopen_count\" = 0)",
+    "rows": [
+     [
+      470
+     ]
+    ],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU19",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of tickets for Blue Sky (EU)",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"accounts\" AS j1 ON j1.\"acct_id\" = t0.\"acct_id\" WHERE (j1.\"account_name\" IN ('Blue Sky (EU)'))",
+    "rows": [
+     [
+      17
+     ]
+    ],
+    "ms": 0.7,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU20",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Tickets resolved by the Escalations team",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 LEFT JOIN \"agents\" AS j1 ON j1.\"agent_id\" = t0.\"resolved_by_agent_id\" WHERE (j1.\"team\" IN ('Escalations'))",
+    "rows": [
+     [
+      132
+     ]
+    ],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": true,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU21",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of tickets by team",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id; 'team' could be agents.team via opened_by_agent_id or agents.team via resolved_by_agent_id",
+    "sql": "",
+    "rows": [],
+    "ms": 0.9,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 2,
+     "unresolved": 1,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU22",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Average resolution time",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: Average, resolution",
+    "sql": "",
+    "rows": [],
+    "ms": 0.4,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU23",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Which agents are the best?",
+    "expect": "clarify",
+    "kind": null,
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "no measure could be grounded; words not grounded: best, agents",
+    "sql": "",
+    "rows": [],
+    "ms": 0.3,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 0,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU24",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of tickets opened in March 2025",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(*) AS \"row_count\" FROM \"tickets\" AS t0 WHERE ((t0.\"opened_at\" >= '2025-03-01' AND t0.\"opened_at\" < '2025-04-01'))",
+    "rows": [
+     [
+      58
+     ]
+    ],
+    "ms": 3.3,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU25",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Number of accounts with tickets",
+    "expect": "answer",
+    "kind": "scalar",
+    "outcome": "correct",
+    "status": "answer",
+    "message": "",
+    "sql": "SELECT COUNT(DISTINCT t0.\"acct_id\") AS \"distinct_acct_id\" FROM \"tickets\" AS t0",
+    "rows": [
+     [
+      40
+     ]
+    ],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "complete",
+     "ambiguities": 0,
+     "unresolved": 0,
+     "plan_violations": 0,
+     "executed": true,
+     "empty_result": false,
+     "assumptions": 1,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   },
+   {
+    "id": "SU26",
+    "domain": "support",
+    "scheme": "full",
+    "question": "Average annual revenue",
+    "expect": "either",
+    "kind": "scalar",
+    "outcome": "abstain_ok",
+    "status": "clarify",
+    "message": "annual_revenue_usd describes accounts; aggregate it over accounts itself, or once per tickets row (weighted by tickets)?",
+    "sql": "",
+    "rows": [],
+    "ms": 0.6,
+    "reliability": {
+     "grounding": "incomplete",
+     "ambiguities": 1,
+     "unresolved": 2,
+     "plan_violations": 0,
+     "executed": false,
+     "empty_result": false,
+     "assumptions": 0,
+     "inferred_joins": false,
+     "note": "component indicators, not a calibrated probability"
+    }
+   }
+  ]
+ }
+}

@@ -126,6 +126,11 @@ def _affinity(t: str) -> str:
     return "TEXT" if not t else "NUMERIC"
 
 
+def ordinal(c: "Column") -> bool:
+    """A small-range integer measure (grade level, model year) that can also label groups."""
+    return c.kind == "measure" and "INT" in (c.sql_type or "").upper() and not c.money and 0 < c.n_distinct <= 30
+
+
 def _id_like(name: str) -> bool:
     toks = [x for x in re.split(r"[^a-z0-9]+", name.lower()) if x]
     return bool(toks) and toks[-1] in _ID_SUFFIX
@@ -140,9 +145,9 @@ def _classify(con, table: str, c: Column, fk_cols: Set[str]) -> None:
     sample = [r[0] for r in con.execute(f"SELECT DISTINCT {qc} FROM {q} WHERE {qc} IS NOT NULL LIMIT 400")]
     toks = [x for x in re.split(r"[^a-z0-9]+", c.name.lower()) if x]
     c.words = col_words(c.name)
-    for t in toks:
-        u = UNIT_WORDS.get(t) or UNIT_WORDS.get(stem(t))
-        if u:
+    for i, t in enumerate(toks):
+        u = UNIT_WORDS.get(t) or UNIT_WORDS.get(stem(t)) or (UNIT_WORDS.get(t[:-1]) if t.endswith("s") else None)
+        if u and not (i and toks[i - 1] == "per"):     # per_min_rate is a rate, not a quantity in minutes
             c.unit = u
     if c.pk or c.name in fk_cols:
         c.kind = "id"
@@ -191,7 +196,16 @@ def _name_evidence(child_col: str, parent: str, parent_col: str) -> bool:
     tw = set(table_words(parent))
     if core and (core[-1] in tw or any(len(c) >= 3 and any(w.startswith(c) for w in tw) for c in core[-1:])):
         return True
+    c = core[-1] if core else ""
+    if 2 <= len(c) <= 4 and not set(c[1:]) & set("aeiouy"):     # vowel-less abbreviation: stn -> station
+        if any(w[0] == c[0] and len(w) > len(c) and _subseq(c, w) for w in tw):
+            return True
     return False
+
+
+def _subseq(a: str, b: str) -> bool:
+    it = iter(b)
+    return all(ch in it for ch in a)
 
 
 def build(db_path: str, anchor: str) -> SchemaModel:
