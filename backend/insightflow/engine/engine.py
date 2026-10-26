@@ -87,12 +87,12 @@ def _readings(question, m, q, db_path, timeout_s, max_rows):
         g = Grounder(m, _lexicon(m), prefer=dict(zip(keys, combo))).ground(question)
         q2 = g.query
         if q2.unsupported or q2.ambiguities or q2.unresolved or verify(q2, m):
-            return None
+            continue                                  # not a consistent reading of the question
         sql, params = Compiler(m).compile(q2)
         cols, rows = _execute(db_path, sql, params, timeout_s, max_rows)
         label = ", ".join(f"{c[i]}" for (_k, c), i in zip(q.choices, combo))
         out.append((label, q2, sql, params, cols, rows))
-    return out
+    return out, len(combos)
 
 
 def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, max_rows: int = 10000) -> EngineResult:
@@ -106,10 +106,11 @@ def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, ma
         rd = None
         if not q.unsupported and q.ambiguities and q.choices and not q.unresolved and \
                 not any(_UNSTRUCTURED.search(a) for a in q.ambiguities):
-            rd = _readings(question, m, q, db_path, timeout_s, max_rows)
+            got = _readings(question, m, q, db_path, timeout_s, max_rows)
+            rd, n_all = got if got else (None, 0)
         if q.unsupported:
             r.status, r.message = "unsupported", "; ".join(q.unsupported)
-        elif rd and all(_same(rd[0][5], x[5]) for x in rd[1:]):
+        elif rd and len(rd) == n_all and len(rd) > 1 and all(_same(rd[0][5], x[5]) for x in rd[1:]):
             label, q2, r.sql, r.params, r.columns, rows = rd[0]
             r.query = q = q2
             r.rows = rows[:max_rows]
@@ -122,7 +123,9 @@ def answer(question: str, db_path: str, anchor: str, timeout_s: float = 10.0, ma
                 return f"{x[0]}: {rows[0][0]:,.2f}" if len(rows) == 1 and len(rows[0]) == 1 and isinstance(rows[0][0], (int, float)) \
                     else f"{x[0]}: {len(rows)} rows"
             r.status = "clarify"
-            r.message = "; ".join(q.ambiguities) + ". The readings give different results — " + \
+            same = all(_same(rd[0][5], x[5]) for x in rd[1:])
+            r.message = "; ".join(q.ambiguities) + (". The readings give different results — " if not same else
+                                                    ". Readings I could evaluate — ") + \
                 "; ".join(show(x) for x in rd) + ". Which did you mean?"
         elif q.ambiguities:
             r.status, r.message = "clarify", "; ".join(q.ambiguities)

@@ -221,3 +221,20 @@ def test_ambiguity_that_changes_the_result_shows_each_reading(dbs):
     a = ref(dbs, "bikes", "SELECT SUM(fare_amt) FROM rentals WHERE start_ts >= '2025-01-01' AND start_ts < '2026-01-01'")[0][0]
     b = ref(dbs, "bikes", "SELECT SUM(fare_amt) FROM rentals WHERE end_ts >= '2025-01-01' AND end_ts < '2026-01-01'")[0][0]
     assert a != b and f"{a:,.2f}" in r.message and f"{b:,.2f}" in r.message
+
+
+# ---------------------------------------------------------------- silent-wrong families found on the legacy fixtures
+@pytest.mark.parametrize("dom,q", [
+    ("shop", "Total gross amount for orders over 2000"),          # a year-like number is not the year 2000
+    ("shop", "Total gross amount for orders placed in May"),      # month without a year ('may' is not a modal here)
+    ("shop", "How many customers are there?"),                    # all customers, or those that ordered?
+    ("shop", "Total gross amount per order"),                     # one value per base row
+    ("support", "How many tickets report to Ava Moss?"),          # 'report' is content, not a function word
+])
+def test_never_drops_words_that_change_the_answer(dbs, dom, q):
+    assert ask(dbs, dom, q).status != "answer"
+
+
+def test_customers_who_ordered_is_a_distinct_count(dbs):
+    r = ask(dbs, "shop", "Number of customers who placed orders")
+    assert r.status == "answer" and r.rows[0][0] == ref(dbs, "shop", "SELECT COUNT(DISTINCT cust_id) FROM orders")[0][0]

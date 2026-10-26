@@ -46,7 +46,7 @@ is are was were be been being am do does did done doing have has had having can 
 shall may might must i we us our ours you your they them their it its this that these those there here
 what which who whom whose when where why how much many more most less least fewer few other others
 such own same so too very just only even still yet ever please show give list tell me find get let
-see display want need know report provide total overall altogether whole entire across both either
+see display want need know provide total overall altogether whole entire across both either
 one ones s t d ll ve re m don didn doesn haven hasn wasn weren isn aren couldn shouldn wouldn won
 time times
 """.split())

@@ -175,6 +175,15 @@ class Grounder:
                 i0, i1 = self._span(m.start(), m.end())
                 if i0 < 0 or not self._free(i0, i1):
                     continue
+                if orig.islower() and ents[0].text[:1].isupper() and " " not in lo and participle(orig):
+                    key = f"val:{i0}"
+                    if key not in self.prefer:
+                        self.Q.ambiguities.append(f"'{orig}' could be the stored value {ents[0].table}.{ents[0].column} = "
+                                                  f"'{ents[0].text}' or just a verb")
+                        self.Q.choices.append((key, (f"{ents[0].column} = '{ents[0].text}'", f"'{orig}' as a verb")))
+                    elif self.prefer[key] == 1:
+                        self._use(i0, i1, "verb")
+                        continue
                 if any(re.fullmatch(rx, lo) for rx, _u in BUCKET_CUES):
                     own = {w for e in ents for w in self.m.col(e.table, e.column).words} | \
                           {w for e in ents for w in (canon(x) for x in e.table.split("_"))}
@@ -241,8 +250,15 @@ class Grounder:
                 else (f"{y:04d}-01-01", "9999-12-31") if w == "since" else ("0001-01-01", f"{y + 1:04d}-01-01")
             self._add_period(m.start(), m.end(), lo, hi, m.group(0))
         for m in re.finditer(rf"(?<![\d-]){YEAR}(?![\d-])", ql):
+            if re.search(r"\b(?:over|above|under|below|than|exceeding|least|most|of|to|minimum|maximum|=)\s*$", ql[:m.start()]):
+                continue                            # "enrollments over 2000": a number, not the year 2000
             y = int(m.group(1))
             self._add_period(m.start(), m.end(), f"{y:04d}-01-01", f"{y + 1:04d}-01-01", m.group(0))
+        for m in re.finditer(rf"\b(?:in|during|of|for|since|until|before|after)\s+{MON}\b(?!\s*\.?\s*(?:19|20)\d\d)", ql):
+            a, b = self._span(m.start(1), m.end(1))
+            if a >= 0 and self._free(a, b):
+                self._use(a, b, "date")
+                self.Q.unresolved.append(f"'{self.t[a].text}' has no year; which year is meant?")
         self.G.periods.sort(key=lambda p: p.i0)
         if re.search(r"\b(?:last|this|next|previous|past|current)\s+(?:\d+\s+)?(?:year|quarter|month|week|day)s?\b|\byesterday\b|\btoday\b|\bytd\b", ql):
             self.Q.unsupported.append("relative dates (last/this/next period) are not resolved against a reference date")
@@ -604,6 +620,10 @@ class Grounder:
             e = cm.e
             if timed or not any(participle(self.t[j].low) for j in range(cm.i0, cm.i1)):
                 continue
+            if any(self.t[j].text[:1].isupper() and j > 0 for j in range(cm.i0, cm.i1)):
+                Q.unresolved.append(f"'{cm.text}' looks like part of a name, not a statement about {cm.e.column}")
+                cm.cond = True
+                continue
             if e.path is not None and (e.path.fans_out or e.path.steps[-1][0].nullable):
                 continue
             col = m.col(e.table, e.column)
@@ -656,6 +676,9 @@ class Grounder:
                     cm = Mention(n["num_i"], n["num_i"] + 1, "col", [e], self._text(n["num_i"], n["num_i"] + 2)); cm.e = e
                     best = (0, cm)
                     self.used.setdefault(n["num_i"] + 1, "unit")
+            if best is not None and best[0] > 1 and not any(m.col(best[1].e.table, best[1].e.column).unit and
+                                                            canon(m.col(best[1].e.table, best[1].e.column).unit) == unit_tok for _ in [0]):
+                best = None                            # "enrollments over 2000": over 2000 of what?
             if best is None or best[0] > 4:
                 Q.unresolved.append(f"the number {n['value']:g} is not attached to a numeric column")
                 continue
@@ -691,8 +714,18 @@ class Grounder:
                 for _c, j in hits:
                     self.used[j] = "date role"
         role_default = None     # several date columns: never pick one silently (see GROUNDING_DESIGN.md, date roles)
-        if role_col is None and "date" in self.prefer and len(anchor_dates) > 1 and self.prefer["date"] < len(anchor_dates):
-            role_col = Col(m.anchor, anchor_dates[self.prefer["date"]].name, None)   # one reading of a date ambiguity
+        cands = [Col(m.anchor, c.name, None) for c in anchor_dates]
+        if self.G.periods and not named:
+            p0 = self.G.periods[0].i0
+            for tm in tabs_m:
+                te = tm.cands[0]
+                if te.path is not None and not te.path.fans_out and 0 <= p0 - tm.i1 <= 2:
+                    cands += [Col(te.table, c.name, te.path) for c in m.tables[te.table].values() if c.kind == "date"]
+        if len(cands) > len(anchor_dates) and role_col is not None and not named:
+            role_col = None                         # "events held in March": the event's date is a candidate too
+        if role_col is None and "date" in self.prefer and self.prefer["date"] < len(cands):
+            role_col = cands[self.prefer["date"]]   # one reading of a date ambiguity
+        date_labels = tuple(f"{c.table}.{c.column}" if c.path is not None else c.column for c in cands)
         periods = self.G.periods
         bucketed = any(re.search(rx, ql) for rx, _u in BUCKET_CUES)
         comparing = len(periods) >= 2 and re.search(COMPARE, ql) and not bucketed   # "2023 vs 2024, each year": a series
@@ -858,6 +891,9 @@ class Grounder:
                 te = after_t[0].cands[0]
                 if te.path is None:
                     measure = Measure("row_count", Agg("count"))
+                elif not te.path.fans_out and len(te.path.steps) == 1 and not self._linked(after_t[0]) and not conds:
+                    Q.ambiguities.append(f"'{after_t[0].text}': all {te.table} in the data, or only those that appear in "
+                                         f"{m.anchor}?")
                 elif not te.path.fans_out and len(te.path.steps) == 1:
                     fk = te.path.steps[0][0]
                     measure = Measure(f"distinct_{fk.child_col}", Agg("count_distinct", Col(m.anchor, fk.child_col, None)))
@@ -912,9 +948,9 @@ class Grounder:
         filters = [p for _pos, p in conds]
         if periods:
             if role_col is None:
-                if len(anchor_dates) > 1:
-                    Q.ambiguities.append("the question gives a period but not which date: " + ", ".join(c.name for c in anchor_dates))
-                    Q.choices.append(("date", tuple(c.name for c in anchor_dates)))
+                if len(cands) > 1:
+                    Q.ambiguities.append("the question gives a period but not which date: " + ", ".join(date_labels))
+                    Q.choices.append(("date", date_labels))
                 elif not anchor_dates:
                     Q.unsupported.append("no date column on the base table")
             elif comparing and measure is not None and isinstance(measure.expr, Agg) and measure.expr.where is None:
@@ -960,10 +996,10 @@ class Grounder:
                 a, b = self._span(mt.start(), mt.end())
                 if a >= 0 and self._free(a, b):
                     if role_col is None:
-                        if len(anchor_dates) > 1:
-                            Q.ambiguities.append(f"'{mt.group(0)}' does not say which date: " + ", ".join(c.name for c in anchor_dates))
-                            if ("date", tuple(c.name for c in anchor_dates)) not in Q.choices:
-                                Q.choices.append(("date", tuple(c.name for c in anchor_dates)))
+                        if len(cands) > 1:
+                            Q.ambiguities.append(f"'{mt.group(0)}' does not say which date: " + ", ".join(date_labels))
+                            if ("date", date_labels) not in Q.choices:
+                                Q.choices.append(("date", date_labels))
                         else:
                             Q.unsupported.append("no date column for a time series")
                     else:
@@ -992,6 +1028,17 @@ class Grounder:
                     Q.limit = 1
                 take(a, b, "ranking")
         Q.shape = "ranked" if Q.limit else "series" if Q.time_bucket else "grouped" if Q.group_by else "scalar"
+
+    def _avg_cue(self) -> bool:
+        return bool(re.search(r"\baverage\b|\bavg\b|\bmean\b|\btypical\b", self.ql))
+
+    def _linked(self, x) -> bool:
+        """Words after an entity noun that tie it to the base rows: 'customers who placed orders', 'members that
+        borrowed', 'riders with rentals', or the base table's own noun anywhere in the question."""
+        if any(y.kind == "table" and y.cands[0].path is None for y in self.G.mentions):
+            return True
+        nxt = [t.low for t in self.t[x.i1:x.i1 + 2]]
+        return bool(nxt) and (nxt[0] in ("who", "that", "which", "with", "having") or participle(nxt[0]))
 
     def _agentive(self, a: int, b: int) -> bool:
         """'taken by students', 'opened by Ava': a participle before a bare 'by' names who did it, not a grouping."""
@@ -1086,6 +1133,13 @@ class Grounder:
                 else:
                     te = tes[0]
                 if te.path is None:
+                    cue_w = self.t[a].low if a >= 0 else ""
+                    between = self.ql[self.t[b].s:self.t[x.i0].s] if b < x.i0 else ""
+                    if reach and cue_w in ("per", "each", "every", "for", "by") and not re.search(
+                            r"\b(?:number|count|total|sum|amount|average|share|percentage)\b", between) and not any(
+                            isinstance(mm.expr, Agg) and mm.expr.func == "avg" for mm in self.Q.measures) and not self._avg_cue():
+                        self.Q.unresolved.append(f"'{self._text(a, x.i1)}' would give one value per {self.m.anchor} row; "
+                                                 f"did you mean the average per {x.text}, or the overall total?")
                     continue
                 if not te.path.fans_out and len(te.path.steps) == 1 and te.path.steps[0][0].nullable and len(tes) == 1 \
                         and a > 0 and participle(self.t[a - 1].low):
@@ -1118,6 +1172,8 @@ class Grounder:
             if i in self.used:
                 continue
             if t.low in FUNCTION or t.can in FUNCTION or t.can in LIGHT or t.low in FILLER or t.low.isdigit():
+                continue
+            if i == 0 and t.low in ("report", "show", "list", "give", "tell", "display", "find", "get", "compute", "calculate"):
                 continue
             if any(x.i0 <= i < x.i1 for x in self.G.mentions):
                 continue
